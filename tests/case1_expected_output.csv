@@ -1,0 +1,7 @@
+reference,stratum,period,target_variable,f_matched_pair,match_pair_count
+1,101,202401,237,False,0.0
+1,101,202402,281,True,2.0
+1,101,202403,,False,1.0
+2,101,202401,270,False,0.0
+2,101,202402,250,True,2.0
+2,101,202403,255,True,1.0
