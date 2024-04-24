@@ -1,0 +1,4 @@
+identifier,stratum,period,target_variable,auxiliary_variable,flag_construction_matches
+1,101,202401,237,7,False
+2,101,202401,281,42,True
+3,101,202401,,42,True

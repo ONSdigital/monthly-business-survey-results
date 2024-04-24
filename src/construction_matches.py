@@ -1,15 +1,22 @@
 import pandas as pd
 
-def find_construction_matches(dataframe, period):
+def flag_construction_matches(dataframe, auxiliary_variable, period):
     """
-    Find matched records based on the contributor's auxiliary information for a
-    given period of time
+    Find matched records based on the contributor's auxiliary information and
+    period of time
 
     Parameters
     ----------
     dataframe : pandas.DataFrame
-        records
+    auxiliary_variable : string
+        name of column containing auxiliary information
     period : string
-        time in format YYYYMM
+        name of column containing time period
+
+    Returns
+    -------
+    pandas.DataFrame
+        dataframe with flag column
     """
+
     return dataframe
