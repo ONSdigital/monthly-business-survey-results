@@ -2,7 +2,7 @@ coverage
 detect-secrets==1.0.3
 myst-parser
 pre-commit
-pytest
+pytest==7.0.1
 Sphinx
 toml
 black
