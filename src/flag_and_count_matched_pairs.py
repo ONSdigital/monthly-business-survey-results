@@ -115,7 +115,8 @@ def count_matched_pair(df,matched_col_name):
     -------
     pd.DataFrame
         dataframe with column added for count of forward matched pairs
-    """    
-    df["match_pair_count"] = df.groupby(["stratum", "period"])[matched_col_name].transform("sum")
+    """   
+    count_col_name = matched_col_name.split('_')[0]+'_matched_pair_count'
+    df[count_col_name] = df.groupby(["stratum", "period"])[matched_col_name].transform("sum")
     return df
 
