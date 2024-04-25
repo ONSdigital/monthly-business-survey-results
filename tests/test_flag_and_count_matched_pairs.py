@@ -49,3 +49,18 @@ def test_count_matched_pair_backward(test_input_file,expected_output_file):
     # df_output.drop(['predictive_target_variable','predictive_period'],axis=1,inplace=True)
     assert df_output.equals(df_expected_output)
 
+@pytest.mark.parametrize("test_input_file , expected_output_file",file_name_cases)
+def test_flag_matched_pair_shift_forward(test_input_file,expected_output_file):
+    df_expected_output = pd.read_csv(expected_output_file).drop(['f_matched_pair_count','b_matched_pair','b_matched_pair_count'],axis = 1)
+    df_input = pd.read_csv(test_input_file)
+    df_output = flag_matched_pair_shift(df_input,'f')
+    df_output.drop(['predictive_target_variable','predictive_period'],axis=1,inplace=True)
+    assert df_output.equals(df_expected_output)
+
+@pytest.mark.parametrize("test_input_file , expected_output_file",file_name_cases)
+def test_flag_matched_pair_shift_backward(test_input_file,expected_output_file):
+    df_expected_output = pd.read_csv(expected_output_file).drop(['f_matched_pair_count','f_matched_pair','b_matched_pair_count'],axis = 1)
+    df_input = pd.read_csv(test_input_file)
+    df_output = flag_matched_pair_shift(df_input,'b')
+    df_output.drop(['predictive_target_variable','predictive_period'],axis=1,inplace=True)
+    assert df_output.equals(df_expected_output)

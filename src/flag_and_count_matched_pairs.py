@@ -60,6 +60,49 @@ def flag_matched_pair_merge(df, forward_or_backward, time_difference=1):
     return df
 
 
+def flag_matched_pair_shift(df,forward_or_backward, shift=1):
+    """
+    function to flag matched pairs using the shift method
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        pandas dataframe of original data
+    shift : _type_
+        number of rows to shift up or down:
+            How would we cope if we needed to shift more than one timestep?
+
+    Returns
+    -------
+    _type_
+        pandas dataframe with column added flagging forward matched pairs
+    """    
+    
+    if forward_or_backward == 'f':
+        shift = shift
+    elif forward_or_backward == 'b':
+        shift = -shift
+
+    df.sort_values(["reference","period"], inplace=True)
+    df[["predictive_target_variable", "predictive_period"]] = df.groupby(["reference","stratum"]).shift(shift)[["target_variable", "period"]]
+
+    df["validate_date"] = np.where(df["period"] - df["predictive_period"] == shift, True, False)
+    matched_col_name = forward_or_backward + '_matched_pair'
+
+    df[matched_col_name] = np.where(
+    df[['target_variable','predictive_target_variable']].isnull().any(axis=1) | (df["validate_date"] != True),
+    False, 
+    True)
+    
+    # df[matched_col_name] = np.where(
+    # pd.concat([df[['target_variable','predictive_target_variable']].isnull(),~df["validate_date"]],axis=1).any(axis=1),
+    # False, 
+    # True)
+    df.drop('validate_date',axis = 1, inplace=True)
+
+    return df
+ 
+
 def count_matched_pair(df,matched_col_name):
     """
     function to count the number of forward matched pair per period
