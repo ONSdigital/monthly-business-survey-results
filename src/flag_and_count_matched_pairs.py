@@ -5,7 +5,7 @@ import numpy as np
 # Col names as parameters - pass as list
 #,ref_col,period_col,target_col,stratum_col):
 
-def flag_matched_pair_merge(df, forward_or_backward, time_difference=1):
+def flag_matched_pair_merge(df, forward_or_backward,target, period, reference, stratum, time_difference=1):
     """
     function to add flag to df if data forms a matched pair
     i.e. data is given for both period and predictive period
@@ -15,11 +15,16 @@ def flag_matched_pair_merge(df, forward_or_backward, time_difference=1):
         pandas dataframe of original data
     forward_or_backward: str
         either f or b for forward or backward method
+    target : str
+        column name containing target variable
+    period : str
+        column name containing time period
+    reference : str
+        column name containing business reference id
+    stratum : str
+        column name containing statum information (sic)
     time_difference : int
-        time difference between predictive and target period
-        Further refinement on name and details - 
-        default of 1, what does this mean, 1 day, month, hour??
-        Should this be a more meaningful name? can work forwards or backwards
+        time difference between predictive and target period in months
 
 
     Returns
@@ -33,30 +38,27 @@ def flag_matched_pair_merge(df, forward_or_backward, time_difference=1):
     elif forward_or_backward == 'b':
         time_difference =  -time_difference
 
-    df_with_predictive_column = df[["reference", "stratum", "target_variable"]]
-    df_with_predictive_column["predictive_period"] = df["period"] + pd.DateOffset(months=time_difference) # Shifting period for forward or backward
-    df_with_predictive_column.rename(columns={'target_variable' : 'predictive_target_variable'},inplace = True)
+    # Creating new DF, shifting period for forward or backward
+    df_with_predictive_column = df[[reference, stratum, target]]
+    df_with_predictive_column["predictive_period"] = df[period] + pd.DateOffset(months=time_difference) 
+    df_with_predictive_column.rename(columns={target : 'predictive_'+target},inplace = True)
 
     
     df = df.merge(df_with_predictive_column,
-                  left_on=["reference", "period", "stratum"],
-                  right_on=["reference", "predictive_period", "stratum"],
+                  left_on=[reference, period, stratum],
+                  right_on=[reference, "predictive_period", stratum],
                   how="left")
-    
-    # df['predictive_period'] -= pd.DateOffset(month = time_difference) #returning predictive period to correct value after join
-    # Can drop after join, only keeping for easy debugging
 
-    # input should be datetime and not str, this implementation will break
     matched_col_name = forward_or_backward + '_matched_pair'
 
     df[matched_col_name] = np.where(
-        df[['target_variable','predictive_target_variable']].isnull().any(axis=1),
+        df[[target,'predictive_'+target]].isnull().any(axis=1),
         False, 
         True)
     
     # Dropping predictive columns for now, these are needed for link calculation.
     # If not dropped we get issues if running both forward and backwards count without dropping
-    df.drop(['predictive_target_variable','predictive_period'],axis = 1, inplace=True)
+    df.drop(['predictive_'+target,'predictive_period'],axis = 1, inplace=True)
     return df
 
 
