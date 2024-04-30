@@ -86,7 +86,7 @@ def flag_matched_pair_shift(df,forward_or_backward, shift=1):
     df.sort_values(["reference","period"], inplace=True)
     df[["predictive_target_variable", "predictive_period"]] = df.groupby(["reference","stratum"]).shift(shift)[["target_variable", "period"]]
 
-    df["validate_date"] = np.where(df["period"] - df["predictive_period"] == shift, True, False)
+    df["validate_date"] = np.where(df["period"].dt.month - df["predictive_period"].dt.month == shift, True, False)
     matched_col_name = forward_or_backward + '_matched_pair'
 
     df[matched_col_name] = np.where(
@@ -94,10 +94,6 @@ def flag_matched_pair_shift(df,forward_or_backward, shift=1):
     False, 
     True)
     
-    # df[matched_col_name] = np.where(
-    # pd.concat([df[['target_variable','predictive_target_variable']].isnull(),~df["validate_date"]],axis=1).any(axis=1),
-    # False, 
-    # True)
     df.drop('validate_date',axis = 1, inplace=True)
 
     return df
