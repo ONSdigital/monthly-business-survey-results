@@ -62,7 +62,7 @@ def flag_matched_pair_merge(df, forward_or_backward,target, period, reference, s
     return df
 
 
-def flag_matched_pair_shift(df,forward_or_backward, shift=1):
+def flag_matched_pair_shift(df,forward_or_backward,target, period, reference, stratum, shift=1):
     """
     function to flag matched pairs using the shift method
 
@@ -70,9 +70,16 @@ def flag_matched_pair_shift(df,forward_or_backward, shift=1):
     ----------
     df : pd.DataFrame
         pandas dataframe of original data
-    shift : _type_
-        number of rows to shift up or down:
-            How would we cope if we needed to shift more than one timestep?
+    shift : int
+        number of rows to shift up or down
+    target : str
+        column name containing target variable
+    period : str
+        column name containing time period
+    reference : str
+        column name containing business reference id
+    stratum : str
+        column name containing statum information (sic)
 
     Returns
     -------
@@ -85,17 +92,17 @@ def flag_matched_pair_shift(df,forward_or_backward, shift=1):
     elif forward_or_backward == 'b':
         shift = -shift
 
-    df.sort_values(["reference","period"], inplace=True)
-    df[["predictive_target_variable", "predictive_period"]] = df.groupby(["reference","stratum"]).shift(shift)[["target_variable", "period"]]
+    df.sort_values([reference,period], inplace=True)
+    df[["predictive_"+target, "predictive_period"]] = df.groupby([reference, stratum]).shift(shift)[[target, period]]
 
-    df["validate_date"] = np.where(df["period"].dt.month - df["predictive_period"].dt.month == shift, True, False)
+    df["validate_date"] = np.where(df[period].dt.month - df["predictive_period"].dt.month == shift, True, False)
     matched_col_name = forward_or_backward + '_matched_pair'
 
     df[matched_col_name] = np.where(
-    df[['target_variable','predictive_target_variable']].isnull().any(axis=1) | (df["validate_date"] != True),
+    df[[target,'predictive_target_variable']].isnull().any(axis=1) | (df["validate_date"] != True),
     False, 
     True)
-    
+
     df.drop('validate_date',axis = 1, inplace=True)
 
     return df
