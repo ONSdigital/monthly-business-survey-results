@@ -1,9 +1,9 @@
 reference,stratum,period,target_variable,f_matched_pair,f_matched_pair_count,b_matched_pair,b_matched_pair_count
-1,101,202401,237,False,0.0,True,2.0
-1,101,202402,281,True,2.0,False,1.0
-1,101,202403,,False,1.0,False,0.0
-2,101,202401,270,False,0.0,True,2.0
-2,101,202402,250,True,2.0,True,1.0
-2,101,202403,255,True,1.0,False,0.0
-2,102,202404,260,False,0.0,True,1.0
-2,102,202405,272,True,1.0,False,0.0
+1,101,202401,237,False,0,True,2
+1,101,202402,281,True,2,False,1
+1,101,202403,,False,1,False,0
+2,101,202401,270,False,0,True,2
+2,101,202402,250,True,2,True,1
+2,101,202403,255,True,1,False,0
+2,102,202404,260,False,0,True,1
+2,102,202405,272,True,1,False,0
