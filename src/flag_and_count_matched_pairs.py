@@ -34,7 +34,7 @@ def flag_matched_pair_merge(df, forward_or_backward, time_difference=1):
         time_difference =  -time_difference
 
     df_with_predictive_column = df[["reference", "stratum", "target_variable"]]
-    df_with_predictive_column["predictive_period"] = df["period"] + time_difference # Shifting period for forward or backward
+    df_with_predictive_column["predictive_period"] = df["period"] + pd.DateOffset(months=time_difference) # Shifting period for forward or backward
     df_with_predictive_column.rename(columns={'target_variable' : 'predictive_target_variable'},inplace = True)
 
     
@@ -43,7 +43,7 @@ def flag_matched_pair_merge(df, forward_or_backward, time_difference=1):
                   right_on=["reference", "predictive_period", "stratum"],
                   how="left")
     
-    df['predictive_period'] -= time_difference #returning predictive period to correct value after join
+    # df['predictive_period'] -= pd.DateOffset(month = time_difference) #returning predictive period to correct value after join
     # Can drop after join, only keeping for easy debugging
 
     # input should be datetime and not str, this implementation will break
