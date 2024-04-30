@@ -27,6 +27,7 @@ class TestClass:
         df_expected_output.drop(['f_matched_pair_count','b_matched_pair','b_matched_pair_count'],axis = 1,inplace=True)
         df_input = load_and_format(test_input_file)
         df_output = flag_matched_pair_merge(df_input, 'f', 'target_variable', 'period', 'reference', 'stratum')
+        df_output.drop(['predictive_target_variable'],axis = 1, inplace=True)
         assert_frame_equal(df_output, df_expected_output)
 
     def test_flag_matched_pair_merge_backward(self, test_input_file, expected_output_file):
@@ -34,6 +35,7 @@ class TestClass:
         df_expected_output.drop(['f_matched_pair_count', 'f_matched_pair', 'b_matched_pair_count'], axis = 1, inplace=True)
         df_input = load_and_format(test_input_file)
         df_output = flag_matched_pair_merge(df_input, 'b', 'target_variable', 'period', 'reference', 'stratum')
+        df_output.drop(['predictive_target_variable'],axis = 1, inplace=True)
         assert_frame_equal(df_output, df_expected_output)
 
     def test_count_matched_pair_forward(self, test_input_file, expected_output_file):
@@ -42,6 +44,7 @@ class TestClass:
         df_input = load_and_format(test_input_file)
         df_output = flag_matched_pair_merge(df_input,'f','target_variable','period', 'reference', 'stratum')
         df_output = count_matched_pair(df_output,'f_matched_pair')
+        df_output.drop(['predictive_target_variable'],axis = 1, inplace=True)
         assert_frame_equal(df_output, df_expected_output)
 
     def test_count_matched_pair_backward(self, test_input_file, expected_output_file):
@@ -49,6 +52,7 @@ class TestClass:
         df_expected_output.drop(['f_matched_pair','f_matched_pair_count'],axis = 1,inplace=True)
         df_input = load_and_format(test_input_file)
         df_output = flag_matched_pair_merge(df_input,'b','target_variable','period', 'reference', 'stratum')
+        df_output.drop(['predictive_target_variable'],axis = 1, inplace=True)
         df_output = count_matched_pair(df_output,'b_matched_pair')
         assert_frame_equal(df_output, df_expected_output)
 
@@ -57,7 +61,7 @@ class TestClass:
         df_expected_output.drop(['f_matched_pair_count','b_matched_pair','b_matched_pair_count'],axis = 1,inplace=True)
         df_input = load_and_format(test_input_file)
         df_output = flag_matched_pair_shift(df_input,'f','target_variable','period', 'reference', 'stratum')
-        df_output.drop(['predictive_target_variable','predictive_period'],axis=1,inplace=True)
+        df_output.drop(['predictive_target_variable'],axis=1,inplace=True)
         assert_frame_equal(df_output, df_expected_output)
 
     def test_flag_matched_pair_shift_backward(self, test_input_file, expected_output_file):
@@ -65,5 +69,5 @@ class TestClass:
         df_expected_output.drop(['f_matched_pair_count','f_matched_pair','b_matched_pair_count'],axis = 1,inplace=True)
         df_input = load_and_format(test_input_file)
         df_output = flag_matched_pair_shift(df_input,'b','target_variable','period', 'reference', 'stratum')
-        df_output.drop(['predictive_target_variable','predictive_period'],axis=1,inplace=True)
+        df_output.drop(['predictive_target_variable'],axis=1,inplace=True)
         assert_frame_equal(df_output, df_expected_output)

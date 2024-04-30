@@ -30,7 +30,8 @@ def flag_matched_pair_merge(df, forward_or_backward,target, period, reference, s
     Returns
     -------
     pd.DataFrame
-        dataframe with column added flagging forward matched paris
+        dataframe with column added flagging forward matched paris and 
+        predictive target variable data column
     """    
 
     if forward_or_backward == 'f':
@@ -56,9 +57,7 @@ def flag_matched_pair_merge(df, forward_or_backward,target, period, reference, s
         False, 
         True)
     
-    # Dropping predictive columns for now, these are needed for link calculation.
-    # If not dropped we get issues if running both forward and backwards count without dropping
-    df.drop(['predictive_'+target,'predictive_period'],axis = 1, inplace=True)
+    df.drop(['predictive_period'],axis = 1, inplace=True)
     return df
 
 
@@ -84,7 +83,8 @@ def flag_matched_pair_shift(df,forward_or_backward,target, period, reference, st
     Returns
     -------
     _type_
-        pandas dataframe with column added flagging forward matched pairs
+        pandas dataframe with column added flagging forward matched pairs and 
+        predictive target variable data column
     """    
     
     if forward_or_backward == 'f':
@@ -103,7 +103,7 @@ def flag_matched_pair_shift(df,forward_or_backward,target, period, reference, st
     False, 
     True)
 
-    df.drop('validate_date',axis = 1, inplace=True)
+    df.drop(['validate_date','predictive_period'],axis = 1, inplace=True)
 
     return df
  
