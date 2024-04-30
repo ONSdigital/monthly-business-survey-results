@@ -19,56 +19,51 @@ def load_and_format(filename):
     df_loaded['period'] = pd.to_datetime(df_loaded['period'], format='%Y%m')
     return df_loaded
 
+pytestmark = pytest.mark.parametrize("test_input_file , expected_output_file",file_name_cases)
 
-@pytest.mark.parametrize("test_input_file , expected_output_file",file_name_cases)
-def test_flag_matched_pair_merge_forward(test_input_file,expected_output_file):
-    df_expected_output = load_and_format(expected_output_file)
-    df_expected_output.drop(['f_matched_pair_count','b_matched_pair','b_matched_pair_count'],axis = 1,inplace=True)
-    df_input = load_and_format(test_input_file)
-    df_output = flag_matched_pair_merge(df_input,'f','target_variable','period', 'reference', 'stratum')
-    assert_frame_equal(df_output, df_expected_output)
+class TestClass:
+    def test_flag_matched_pair_merge_forward(self, test_input_file, expected_output_file):
+        df_expected_output = load_and_format(expected_output_file)
+        df_expected_output.drop(['f_matched_pair_count','b_matched_pair','b_matched_pair_count'],axis = 1,inplace=True)
+        df_input = load_and_format(test_input_file)
+        df_output = flag_matched_pair_merge(df_input, 'f', 'target_variable', 'period', 'reference', 'stratum')
+        assert_frame_equal(df_output, df_expected_output)
 
-@pytest.mark.parametrize("test_input_file , expected_output_file",file_name_cases)
-def test_flag_matched_pair_merge_backward(test_input_file,expected_output_file):
-    df_expected_output = load_and_format(expected_output_file)
-    df_expected_output.drop(['f_matched_pair_count','f_matched_pair','b_matched_pair_count'],axis = 1,inplace=True)
-    df_input = load_and_format(test_input_file)
-    df_output = flag_matched_pair_merge(df_input,'b','target_variable','period', 'reference', 'stratum')
-    assert_frame_equal(df_output, df_expected_output)
+    def test_flag_matched_pair_merge_backward(self, test_input_file, expected_output_file):
+        df_expected_output = load_and_format(expected_output_file)
+        df_expected_output.drop(['f_matched_pair_count', 'f_matched_pair', 'b_matched_pair_count'], axis = 1, inplace=True)
+        df_input = load_and_format(test_input_file)
+        df_output = flag_matched_pair_merge(df_input, 'b', 'target_variable', 'period', 'reference', 'stratum')
+        assert_frame_equal(df_output, df_expected_output)
 
-@pytest.mark.parametrize("test_input_file , expected_output_file",file_name_cases)
-def test_count_matched_pair_forward(test_input_file,expected_output_file):
-    df_expected_output = load_and_format(expected_output_file)
-    df_expected_output.drop(['b_matched_pair','b_matched_pair_count'],axis = 1,inplace=True)
-    df_input = load_and_format(test_input_file)
-    df_output = flag_matched_pair_merge(df_input,'f','target_variable','period', 'reference', 'stratum')
-    df_output = count_matched_pair(df_output,'f_matched_pair')
-    assert_frame_equal(df_output, df_expected_output)
+    def test_count_matched_pair_forward(self, test_input_file, expected_output_file):
+        df_expected_output = load_and_format(expected_output_file)
+        df_expected_output.drop(['b_matched_pair','b_matched_pair_count'],axis = 1,inplace=True)
+        df_input = load_and_format(test_input_file)
+        df_output = flag_matched_pair_merge(df_input,'f','target_variable','period', 'reference', 'stratum')
+        df_output = count_matched_pair(df_output,'f_matched_pair')
+        assert_frame_equal(df_output, df_expected_output)
 
+    def test_count_matched_pair_backward(self, test_input_file, expected_output_file):
+        df_expected_output = load_and_format(expected_output_file)
+        df_expected_output.drop(['f_matched_pair','f_matched_pair_count'],axis = 1,inplace=True)
+        df_input = load_and_format(test_input_file)
+        df_output = flag_matched_pair_merge(df_input,'b','target_variable','period', 'reference', 'stratum')
+        df_output = count_matched_pair(df_output,'b_matched_pair')
+        assert_frame_equal(df_output, df_expected_output)
 
-@pytest.mark.parametrize("test_input_file , expected_output_file",file_name_cases)
-def test_count_matched_pair_backward(test_input_file,expected_output_file):
-    df_expected_output = load_and_format(expected_output_file)
-    df_expected_output.drop(['f_matched_pair','f_matched_pair_count'],axis = 1,inplace=True)
-    df_input = load_and_format(test_input_file)
-    df_output = flag_matched_pair_merge(df_input,'b','target_variable','period', 'reference', 'stratum')
-    df_output = count_matched_pair(df_output,'b_matched_pair')
-    assert_frame_equal(df_output, df_expected_output)
+    def test_flag_matched_pair_shift_forward(self, test_input_file, expected_output_file):
+        df_expected_output = load_and_format(expected_output_file)
+        df_expected_output.drop(['f_matched_pair_count','b_matched_pair','b_matched_pair_count'],axis = 1,inplace=True)
+        df_input = load_and_format(test_input_file)
+        df_output = flag_matched_pair_shift(df_input,'f','target_variable','period', 'reference', 'stratum')
+        df_output.drop(['predictive_target_variable','predictive_period'],axis=1,inplace=True)
+        assert_frame_equal(df_output, df_expected_output)
 
-@pytest.mark.parametrize("test_input_file , expected_output_file",file_name_cases)
-def test_flag_matched_pair_shift_forward(test_input_file,expected_output_file):
-    df_expected_output = load_and_format(expected_output_file)
-    df_expected_output.drop(['f_matched_pair_count','b_matched_pair','b_matched_pair_count'],axis = 1,inplace=True)
-    df_input = load_and_format(test_input_file)
-    df_output = flag_matched_pair_shift(df_input,'f','target_variable','period', 'reference', 'stratum')
-    df_output.drop(['predictive_target_variable','predictive_period'],axis=1,inplace=True)
-    assert_frame_equal(df_output, df_expected_output)
-
-@pytest.mark.parametrize("test_input_file , expected_output_file",file_name_cases)
-def test_flag_matched_pair_shift_backward(test_input_file,expected_output_file):
-    df_expected_output = load_and_format(expected_output_file)
-    df_expected_output.drop(['f_matched_pair_count','f_matched_pair','b_matched_pair_count'],axis = 1,inplace=True)
-    df_input = load_and_format(test_input_file)
-    df_output = flag_matched_pair_shift(df_input,'b','target_variable','period', 'reference', 'stratum')
-    df_output.drop(['predictive_target_variable','predictive_period'],axis=1,inplace=True)
-    assert_frame_equal(df_output, df_expected_output)
+    def test_flag_matched_pair_shift_backward(self, test_input_file, expected_output_file):
+        df_expected_output = load_and_format(expected_output_file)
+        df_expected_output.drop(['f_matched_pair_count','f_matched_pair','b_matched_pair_count'],axis = 1,inplace=True)
+        df_input = load_and_format(test_input_file)
+        df_output = flag_matched_pair_shift(df_input,'b','target_variable','period', 'reference', 'stratum')
+        df_output.drop(['predictive_target_variable','predictive_period'],axis=1,inplace=True)
+        assert_frame_equal(df_output, df_expected_output)
