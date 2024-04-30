@@ -115,6 +115,9 @@ def count_matched_pair(df,matched_col_name):
     ----------
     df : pd.DataFrame
         pandas dataframe of original data
+    
+    matched_col_name : str
+        name of column containing flags if a matched pair is formed
 
     Returns
     -------
