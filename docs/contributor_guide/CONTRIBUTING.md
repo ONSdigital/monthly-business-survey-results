@@ -1,6 +1,7 @@
 # Contributing
 
 #TODO: update stance on internal/external contribution
+
 We love contributions! We've compiled this documentation to help you understand our
 contributing guidelines. [If you still have questions, please contact us][email] and
 we'd be happy to help!
@@ -35,10 +36,7 @@ documentation][docs-pre-commit-hooks].
 
 ## Code conventions
 
-Code written for this project should follow [PEP 8 coding conventions](pep8)
-and the [guidance on quality assurance of code for analysis and research](duck-book)
-(also known as the Duck Book).
-#TODO: add link to naming convention docs
+Code written for this project should follow [PEP 8 coding conventions](pep8), [project naming conventions](docs-naming) and the guidance on [quality assurance of code for analysis and research](duck-book) (also known as the Duck Book).
 
 ### Git and GitHub
 
@@ -63,9 +61,7 @@ We open a pull request to `main` once we have working code that meets a user
 need, for example meets the definition of done on the Jira ticket. Pull
 requests must be reviewed by at least one member of the team before merging.
 Reviews should follow the [pull request template](pr-template). If we want review on code that does not yet meet the definition of done, we open a draft
-pull request. Once a branch has been reviewed and merged, the person who
-merged it then deletes the branch.
-#TODO: do we have a preference between squash and non-squash merges?
+pull request. Once a branch has been reviewed, it can be merged. We prefer to use squash merges, in order to simplify the `main` branch commit history. After merging the feature branch should be deleted.
 
 ### Markdown
 
@@ -128,7 +124,8 @@ build the documentation into an accessible, searchable website.
 [docs-updating-gitignore]: ./updating_gitignore.md
 [docs-write-accessible-documentation]: ./writing_accessible_documentation.md
 [docs-write-sphinx-documentation]: ./writing_sphinx_documentation.md
-[pr-template]: ../.github/pull_request_template.md
+[docs-naming]: ../user_guide/naming_conventions.md
+[pr-template]: ../../.github/pull_request_template.md
 [gds-way]: https://gds-way.cloudapps.digital/
 [gds-way-git]: https://gds-way.cloudapps.digital/standards/source-code.html
 [gds-way-python]: https://gds-way.cloudapps.digital/manuals/programming-languages/python/python.html#python-style-guide
