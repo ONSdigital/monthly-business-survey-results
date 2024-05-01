@@ -43,7 +43,7 @@ class TestClass:
         df_expected_output.drop(['b_matched_pair','b_matched_pair_count'],axis = 1,inplace=True)
         df_input = load_and_format(test_input_file)
         df_output = flag_matched_pair_merge(df_input,'f','target_variable','period', 'reference', 'strata')
-        df_output = count_matched_pair(df_output,'f_matched_pair')
+        df_output = count_matched_pair(df_output,'f_matched_pair','period','strata')
         df_output.drop(['predictive_target_variable'],axis = 1, inplace=True)
         assert_frame_equal(df_output, df_expected_output)
 
@@ -53,7 +53,7 @@ class TestClass:
         df_input = load_and_format(test_input_file)
         df_output = flag_matched_pair_merge(df_input,'b','target_variable','period', 'reference', 'strata')
         df_output.drop(['predictive_target_variable'],axis = 1, inplace=True)
-        df_output = count_matched_pair(df_output,'b_matched_pair')
+        df_output = count_matched_pair(df_output,'b_matched_pair','period','strata')
         assert_frame_equal(df_output, df_expected_output)
 
     def test_flag_matched_pair_shift_forward(self, test_input_file, expected_output_file):
