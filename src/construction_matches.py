@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 
 def flag_construction_matches(dataframe, target, period, auxiliary):
     """
