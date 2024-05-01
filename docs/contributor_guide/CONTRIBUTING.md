@@ -1,5 +1,6 @@
 # Contributing
 
+#TODO: update stance on internal/external contribution
 We love contributions! We've compiled this documentation to help you understand our
 contributing guidelines. [If you still have questions, please contact us][email] and
 we'd be happy to help!
@@ -34,25 +35,37 @@ documentation][docs-pre-commit-hooks].
 
 ## Code conventions
 
-[We mainly follow the GDS Way in our code conventions][gds-way].
+Code written for this project should follow [PEP 8 coding conventions](pep8)
+and the [guidance on quality assurance of code for analysis and research](duck-book)
+(also known as the Duck Book).
+#TODO: add link to naming convention docs
 
 ### Git and GitHub
 
-We use Git to version control the source code. [Please read the GDS Way for details on
-Git best practice][gds-way-git]. This includes how to write good commit messages, use
-`git rebase` for local branches and `git merge --no-ff` for merges, as well as using
-`git push --force-with-lease` instead of `git push -f`.
+We use Git to version control the source code and out source code is stored on
+GitHub.
 
-[If you want to modify the `.gitignore` files, see the template
-documentation][docs-updating-gitignore] for further details.
+We follow the [GitHub flow](github-flow) workflow. This means that we create
+feature branches of the `main` branch and merge them back to `main` once they
+meet the definition of done. We give our branches short but informative names,
+in lowercase and separated with hypens. Where applicable, we start branch names
+with the respective Jira ticket number. For example,
+`318-forward-matched-pairs`.
 
-Our source code is stored on GitHub. Pull requests into `main` require at least one
-approved review.
+We commit regularly, with distinct chunks of work where possible. We write
+short but informative commit messages, starting with a capitalised
+present-tense verb, for example `Add`, `Fix`. When pair-programming, we
+[add co-authors to the commit](git-coauthor). We add
+[longer commit messages](long-commit) for larger or more complex commits, for
+example (squash) merge commits.
 
-### Python
-
-For Python code, [we follow the GDS Way Python style guide][gds-way-python] with a line
-length of 88; the flake8 pre-commit hook should help with this!
+We open a pull request to `main` once we have working code that meets a user
+need, for example meets the definition of done on the Jira ticket. Pull
+requests must be reviewed by at least one member of the team before merging.
+Reviews should follow the [pull request template](pr-template). If we want review on code that does not yet meet the definition of done, we open a draft
+pull request. Once a branch has been reviewed and merged, the person who
+merged it then deletes the branch.
+#TODO: do we have a preference between squash and non-squash merges?
 
 ### Markdown
 
@@ -115,6 +128,7 @@ build the documentation into an accessible, searchable website.
 [docs-updating-gitignore]: ./updating_gitignore.md
 [docs-write-accessible-documentation]: ./writing_accessible_documentation.md
 [docs-write-sphinx-documentation]: ./writing_sphinx_documentation.md
+[pr-template]: ../.github/pull_request_template.md
 [gds-way]: https://gds-way.cloudapps.digital/
 [gds-way-git]: https://gds-way.cloudapps.digital/standards/source-code.html
 [gds-way-python]: https://gds-way.cloudapps.digital/manuals/programming-languages/python/python.html#python-style-guide
@@ -123,3 +137,8 @@ build the documentation into an accessible, searchable website.
 [pytest]: https://docs.pytest.org/
 [gov-uk]: https://www.gov.uk/
 [email]: mailto:organisation@email.address
+[pep8]: https://peps.python.org/pep-0008/
+[duck-book]: https://best-practice-and-impact.github.io/qa-of-code-guidance/intro.html
+[github-flow]: https://docs.github.com/en/get-started/using-github/github-flow
+[git-coauthor]: https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors
+[long-commit]: https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html

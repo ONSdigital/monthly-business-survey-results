@@ -1,12 +1,12 @@
 # Code of conduct for `monthly-business-survey-results`
 
 Contributors to this repository hosted by `ONSdigital` are expected to follow the
-Contributor Covenant Code of Conduct, and those working within Her Majesty's Government
+Contributor Covenant Code of Conduct, and those working within His Majesty's Government
 are also expected to follow the Civil Service Code.
 
 ## Civil Service Code
 
-Contributors working within Her Majesty's Government must review the [Civil Service
+Contributors working within His Majesty's Government must review the [Civil Service
 Code][civil-service-code], and are expected to follow it in their contributions.
 
 ## Contributor Covenant Code of Conduct
