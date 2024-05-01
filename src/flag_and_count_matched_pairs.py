@@ -1,11 +1,7 @@
 import pandas as pd
 import numpy as np 
 
-#df['id','stratum','question']
-# Col names as parameters - pass as list
-#,ref_col,period_col,target_col,stratum_col):
-
-def flag_matched_pair_merge(df, forward_or_backward,target, period, reference, stratum, time_difference=1):
+def flag_matched_pair_merge(df, forward_or_backward,target, period, reference, strata, time_difference=1):
     """
     function to add flag to df if data forms a matched pair
     i.e. data is given for both period and predictive period
@@ -21,8 +17,8 @@ def flag_matched_pair_merge(df, forward_or_backward,target, period, reference, s
         column name containing time period
     reference : str
         column name containing business reference id
-    stratum : str
-        column name containing statum information (sic)
+    strata : str
+        column name containing strata information (sic)
     time_difference : int
         time difference between predictive and target period in months
 
@@ -40,14 +36,14 @@ def flag_matched_pair_merge(df, forward_or_backward,target, period, reference, s
         time_difference =  -time_difference
 
     # Creating new DF, shifting period for forward or backward
-    df_with_predictive_column = df[[reference, stratum, target]]
+    df_with_predictive_column = df[[reference, strata, target]]
     df_with_predictive_column["predictive_period"] = df[period] + pd.DateOffset(months=time_difference) 
     df_with_predictive_column.rename(columns={target : 'predictive_'+target},inplace = True)
 
     
     df = df.merge(df_with_predictive_column,
-                  left_on=[reference, period, stratum],
-                  right_on=[reference, "predictive_period", stratum],
+                  left_on=[reference, period, strata],
+                  right_on=[reference, "predictive_period", strata],
                   how="left")
 
     matched_col_name = forward_or_backward + '_matched_pair'
@@ -61,7 +57,7 @@ def flag_matched_pair_merge(df, forward_or_backward,target, period, reference, s
     return df
 
 
-def flag_matched_pair_shift(df,forward_or_backward,target, period, reference, stratum, shift=1):
+def flag_matched_pair_shift(df,forward_or_backward,target, period, reference, strata, shift=1):
     """
     function to flag matched pairs using the shift method
 
@@ -77,8 +73,8 @@ def flag_matched_pair_shift(df,forward_or_backward,target, period, reference, st
         column name containing time period
     reference : str
         column name containing business reference id
-    stratum : str
-        column name containing statum information (sic)
+    strata : str
+        column name containing strata information (sic)
 
     Returns
     -------
@@ -93,7 +89,7 @@ def flag_matched_pair_shift(df,forward_or_backward,target, period, reference, st
         shift = -shift
 
     df.sort_values([reference,period], inplace=True)
-    df[["predictive_"+target, "predictive_period"]] = df.groupby([reference, stratum]).shift(shift)[[target, period]]
+    df[["predictive_"+target, "predictive_period"]] = df.groupby([reference, strata]).shift(shift)[[target, period]]
 
     df["validate_date"] = np.where(df[period].dt.month - df["predictive_period"].dt.month == shift, True, False)
     matched_col_name = forward_or_backward + '_matched_pair'
