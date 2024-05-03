@@ -1,0 +1,7 @@
+reference,strata,period,target_variable,f_matched_pair,f_matched_pair_count,b_matched_pair,b_matched_pair_count
+1,101,202401,237,False,0,True,2
+1,101,202402,281,True,2,False,0
+1,101,202403,,False,0,False,0
+2,101,202401,270,False,0,True,2
+2,101,202402,250,True,2,False,0
+2,101,202404,255,False,0,False,0
