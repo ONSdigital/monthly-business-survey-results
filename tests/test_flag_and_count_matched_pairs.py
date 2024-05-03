@@ -9,9 +9,9 @@ from pandas.testing import assert_frame_equal
 
 
 file_name_cases = [
-    ('case1_data.csv','case1_expected_output.csv'),
-    ('case2_data.csv','case2_expected_output.csv'),
-    ('case3_data.csv','case3_expected_output.csv')
+    ('tests/case1_data.csv','tests/case1_expected_output.csv'),
+    ('tests/case2_data.csv','tests/case2_expected_output.csv'),
+    ('tests/case3_data.csv','tests/case3_expected_output.csv')
     ]
 
 def load_and_format(filename):
