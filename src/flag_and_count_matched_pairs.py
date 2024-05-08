@@ -104,15 +104,16 @@ def flag_matched_pair_shift(df,forward_or_backward,target, period, reference, st
     return df
  
 
-def count_matched_pair(df, flag_column_name, period, strata, count_column_name=None):
+def count_matches(df, flag_column_name, period, strata, count_column_name=None):
     """
-    function to count the number of forward matched pair per period
+    Function to count the number of records with matches per period and stratum
+    
     Parameters
     ----------
     df : pd.DataFrame
         pandas dataframe of original data
     flag_column_name : str
-        name of column containing flags if a matched pair is formed
+        name of column containing flags if a match exists
     period : str
         column name containing time period
     strata : str
@@ -124,7 +125,7 @@ def count_matched_pair(df, flag_column_name, period, strata, count_column_name=N
     Returns
     -------
     pd.DataFrame
-        dataframe with column added for count of forward matched pairs
+        dataframe with column added for count of records with matches
     """   
     if count_column_name is None:
         count_column_name = flag_column_name.split('_')[0]+'_matched_pair_count'

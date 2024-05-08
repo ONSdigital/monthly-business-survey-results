@@ -1,17 +1,15 @@
 import pytest
-import pandas as pd
 
 from pathlib import Path
 from pandas.testing import assert_frame_equal
 
 from src.construction_matches import flag_construction_matches
-from src.flag_and_count_matched_pairs import count_matched_pair
+from src.flag_and_count_matched_pairs import count_matches
+from helper_functions import load_and_format
 
 @pytest.fixture(scope="class")
 def construction_test_data():
-    dataframe = pd.read_csv(Path("tests")/"construction_matches.csv")
-    dataframe["period"] = pd.to_datetime(dataframe["period"], format="%Y%m")
-    return dataframe
+    return load_and_format(Path("tests")/"construction_matches.csv")
 
 class TestConstructionMatches:
     def test_construction_matches_flag(self, construction_test_data):
@@ -36,7 +34,7 @@ class TestConstructionMatches:
         ]]
 
         input_data = expected_output.drop(columns=["count_construction_matches"])
-        actual_output = count_matched_pair(
+        actual_output = count_matches(
             input_data,
             "flag_construction_matches",
             "period",
