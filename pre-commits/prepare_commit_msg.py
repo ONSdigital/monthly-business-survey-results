@@ -8,15 +8,13 @@ import re
 import sys
 from subprocess import check_output
 
-
 commit_msg_filepath = sys.argv[1]
 branch = (
-    check_output(["git", "symbolic-ref", "--short", "HEAD"])
-    .decode("utf-8").strip()
+    check_output(["git", "symbolic-ref", "--short", "HEAD"]).decode("utf-8").strip()
 )
 
 # If branch name contains /'s we only want the final part of the branch name
-branch_end = branch.split('/')[-1]
+branch_end = branch.split("/")[-1]
 
 # Regex pattern for matching to Jira issues
 regex = r"[Jj]\d+"
@@ -36,10 +34,10 @@ if re.search(regex, branch_end):
 else:
     # If branch does not contain a jira issue number, reject the commit
     print(
-        f'''
+        f"""
         prepare-commit-msg: Error!
         Branch name is {branch}
         Does not match branch name strategy \'*/jxxx\'
-        '''
+        """
     )
     sys.exit(1)
