@@ -2,31 +2,28 @@
 """Pre commit hook to ensure all EOL characters are the same."""
 import argparse
 import collections
-from typing import Dict
-from typing import Optional
-from typing import Sequence
+from typing import Dict, Optional, Sequence
 
-
-CRLF = b'\r\n'
-LF = b'\n'
-CR = b'\r'
+CRLF = b"\r\n"
+LF = b"\n"
+CR = b"\r"
 # Prefer LF to CRLF to CR, but detect CRLF before LF
 ALL_ENDINGS = (CR, CRLF, LF)
-FIX_TO_LINE_ENDING = {'cr': CR, 'crlf': CRLF, 'lf': LF}
+FIX_TO_LINE_ENDING = {"cr": CR, "crlf": CRLF, "lf": LF}
 
 
 def _fix(filename: str, contents: bytes, ending: bytes) -> None:
     """Private function."""
-    new_contents = b''.join(
-        line.rstrip(b'\r\n') + ending for line in contents.splitlines(True)
+    new_contents = b"".join(
+        line.rstrip(b"\r\n") + ending for line in contents.splitlines(True)
     )
-    with open(filename, 'wb') as f:
+    with open(filename, "wb") as f:
         f.write(new_contents)
 
 
 def fix_filename(filename: str, fix: str) -> int:
     """Private function."""
-    with open(filename, 'rb') as f:
+    with open(filename, "rb") as f:
         contents = f.read()
 
     counts: Dict[bytes, int] = collections.defaultdict(int)
@@ -40,10 +37,10 @@ def fix_filename(filename: str, fix: str) -> int:
     # Some amount of mixed line endings
     mixed = sum(bool(x) for x in counts.values()) > 1
 
-    if fix == 'no' or (fix == 'auto' and not mixed):
+    if fix == "no" or (fix == "auto" and not mixed):
         return mixed
 
-    if fix == 'auto':
+    if fix == "auto":
         max_ending = LF
         max_lines = 0
         # ordering is important here such that lf > crlf > cr
@@ -70,24 +67,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     """Entry function for script."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        '-f', '--fix',
-        choices=('auto', 'no') + tuple(FIX_TO_LINE_ENDING),
-        default='auto',
+        "-f",
+        "--fix",
+        choices=("auto", "no") + tuple(FIX_TO_LINE_ENDING),
+        default="auto",
         help='Replace line ending with the specified. Default is "auto"',
     )
-    parser.add_argument('filenames', nargs='*', help='Filenames to fix')
+    parser.add_argument("filenames", nargs="*", help="Filenames to fix")
     args = parser.parse_args(argv)
 
     retv = 0
     for filename in args.filenames:
         if fix_filename(filename, args.fix):
-            if args.fix == 'no':
-                print(f'{filename}: mixed line endings')
+            if args.fix == "no":
+                print(f"{filename}: mixed line endings")
             else:
-                print(f'{filename}: fixed mixed line endings')
+                print(f"{filename}: fixed mixed line endings")
             retv = 1
     return retv
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     exit(main())
