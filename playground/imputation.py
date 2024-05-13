@@ -64,6 +64,8 @@ df = df.drop("prev_p", axis=1).merge(df[["reference", "prev_p", "return"]],
 
 df.rename(columns={"return_x":"return", "return_y":"prev_return"}, inplace=True)
 
+df["prev_p"] = df["period"] - delta
+
 df["f_matched_pair"] = np.where(
     df["return"].isnull() | df["prev_return"].isnull(),
     False, 
@@ -85,22 +87,23 @@ df["f_imputation_link"] = df["f_imputation_link_num"] / df["f_imputation_link_de
 
 df["f_imp_flag"] = df.groupby(["group","reference"])["return"].ffill() - df["return"].fillna(0)
 df["f_imp_flag"].replace(0, np.nan, inplace=True)
-df["f_imp_flag"] = (df["f_imp_flag"] / df["f_imp_flag"]).replace(1, "FIR")
+df["f_imp_flag"] = (df["f_imp_flag"] / df["f_imp_flag"]).replace(1, True)
 
 # backward fill - same assumption as shift() approach
 
 df["b_imp_flag"] = df.groupby(["group","reference"])["return"].bfill() - df["return"].fillna(0)
 df["b_imp_flag"].replace(0, np.nan, inplace=True)
-df["b_imp_flag"] = (df["b_imp_flag"] / df["b_imp_flag"]).replace(1, "BIR")
-
-# would finding the min date with return help? or define a grouping that has a return then missing values
-df["period_with_return"] = df["period"][df["return"].notnull()]
-df["earliest_return"] = df.groupby(["group", "reference"])["period_with_return"].transform("min")
+df["b_imp_flag"] = (df["b_imp_flag"] / df["b_imp_flag"]).replace(1, True)
 
 ## want to create an imputation link column for multiple consecutive imputation
-# this can be done with a cumulative sum
+# this can be done with a cumulative product on imputation groups
+df["missing_value"] = np.where(df["return"].isnull(), True, False)
+df['imp_group'] = (df["missing_value"].diff(1) != 0).astype('int').cumsum()
+df["f_imp_links"] = df.groupby("imputation_group")["f_imputation_link"].cumprod()
 
-df[["reference", "f_imputation_link"]]
-df.groupby("reference").apply(lambda x: x["f_imputation_link"].cumsum())
+# backwards would look like this, but I haven't done b_imputation_link in this script
+#df["b_imp_links"] = df[::-1].groupby("imputation_group")["b_imputation_link"].cumprod()[::-1]
 
-df.groupby("reference").apply(lambda x: np.where(x["return"].isnull(), x["f_imputation_link"].cumsum(), np.nan))
+
+df[['reference', 'period','return','f_imputation_link' ,'imp_group_fill',
+       'imputation_group', 'f_imp_links']]

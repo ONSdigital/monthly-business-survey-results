@@ -17,4 +17,4 @@ contributors = pd.DataFrame(data["contributors"])
 responses = pd.DataFrame(data["responses"])
 
 contributors.T
-responses.T
+responses
