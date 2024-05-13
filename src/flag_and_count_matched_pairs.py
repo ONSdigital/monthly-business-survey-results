@@ -43,8 +43,9 @@ def flag_matched_pair_merge(
     df_with_predictive_column["predictive_period"] = df[period] + pd.DateOffset(
         months=time_difference
     )
+    predictive_col_name = forward_or_backward + "_predictive_" + target
     df_with_predictive_column.rename(
-        columns={target: "predictive_" + target}, inplace=True
+        columns={target: predictive_col_name}, inplace=True
     )
 
     df = df.merge(
@@ -57,7 +58,7 @@ def flag_matched_pair_merge(
     matched_col_name = forward_or_backward + "_matched_pair"
 
     df[matched_col_name] = np.where(
-        df[[target, "predictive_" + target]].isnull().any(axis=1), False, True
+        df[[target, predictive_col_name]].isnull().any(axis=1), False, True
     )
 
     df.drop(["predictive_period"], axis=1, inplace=True)
@@ -98,7 +99,8 @@ def flag_matched_pair_shift(
         shift = -shift
 
     df = df.sort_values(by=[reference, period])
-    df[["predictive_" + target, "predictive_period"]] = df.groupby(
+    predictive_col_name = forward_or_backward + "_predictive_" + target
+    df[[predictive_col_name, "predictive_period"]] = df.groupby(
         [reference, strata]
     ).shift(shift)[[target, period]]
 
@@ -108,8 +110,7 @@ def flag_matched_pair_shift(
     matched_col_name = forward_or_backward + "_matched_pair"
 
     df[matched_col_name] = np.where(
-        df[[target, "predictive_target_variable"]].isnull().any(axis=1)
-        | (~df["validate_date"]),
+        df[[target, predictive_col_name]].isnull().any(axis=1) | (~df["validate_date"]),
         False,
         True,
     )
