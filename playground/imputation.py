@@ -19,14 +19,15 @@ def get_shift_mask(df, shift = 1):
 
 mask = get_shift_mask(df, shift = 1)
 
+"""
+This method is deprecated for highest version available in this environment
 df["prev_return"] = df.loc[mask, "return"] 
 
 df["f_matched_pair"] = np.where(df["return"].notnull() & df["prev_return"].notnull(), True, 
     False)
 
 df["match_pair_count"] = df.groupby(["group", "period"])["f_matched_pair"].transform("sum")
-
-
+"""
 
 #method 1 - using shift()
 
@@ -99,11 +100,16 @@ df["b_imp_flag"] = (df["b_imp_flag"] / df["b_imp_flag"]).replace(1, True)
 # this can be done with a cumulative product on imputation groups
 df["missing_value"] = np.where(df["return"].isnull(), True, False)
 df['imp_group'] = (df["missing_value"].diff(1) != 0).astype('int').cumsum()
-df["f_imp_links"] = df.groupby("imputation_group")["f_imputation_link"].cumprod()
+df["f_imp_links"] = df.groupby("imp_group")["f_imputation_link"].cumprod()
 
 # backwards would look like this, but I haven't done b_imputation_link in this script
 #df["b_imp_links"] = df[::-1].groupby("imputation_group")["b_imputation_link"].cumprod()[::-1]
 
 
-df[['reference', 'period','return','f_imputation_link' ,'imp_group_fill',
-       'imputation_group', 'f_imp_links']]
+df[['reference', 'period','return','f_imputation_link' ,
+       'imp_group', 'f_imp_links']]
+
+
+# it might be useful to create an imputation class variable
+df.sort_values(["group", "reference", "period"], inplace=True)
+df['imputation_class'] = ((df["group"].diff(1) != 0) | (df["period"].diff(1) != 1)).astype('int').cumsum()
