@@ -28,11 +28,9 @@ pytestmark = pytest.mark.parametrize("expected_output_file", file_name_cases)
 class TestMatchedPair:
     def test_flag_matched_pair_merge_forward(self, expected_output_file):
         df_expected_output = load_and_format(expected_output_file)
-        df_expected_output.drop(
-            ["f_matched_pair_count", "b_matched_pair", "b_matched_pair_count"],
-            axis=1,
-            inplace=True,
-        )
+        df_expected_output = df_expected_output[
+            ["reference", "strata", "period", "target_variable", "f_matched_pair"]
+        ]
         df_input = df_expected_output[
             ["reference", "strata", "period", "target_variable"]
         ]
@@ -44,11 +42,9 @@ class TestMatchedPair:
 
     def test_flag_matched_pair_merge_backward(self, expected_output_file):
         df_expected_output = load_and_format(expected_output_file)
-        df_expected_output.drop(
-            ["f_matched_pair_count", "f_matched_pair", "b_matched_pair_count"],
-            axis=1,
-            inplace=True,
-        )
+        df_expected_output = df_expected_output[
+            ["reference", "strata", "period", "target_variable", "b_matched_pair"]
+        ]
         df_input = df_expected_output[
             ["reference", "strata", "period", "target_variable"]
         ]
@@ -60,9 +56,16 @@ class TestMatchedPair:
 
     def test_count_matched_pair_forward(self, expected_output_file):
         df_expected_output = load_and_format(expected_output_file)
-        df_expected_output.drop(
-            ["b_matched_pair", "b_matched_pair_count"], axis=1, inplace=True
-        )
+        df_expected_output = df_expected_output[
+            [
+                "reference",
+                "strata",
+                "period",
+                "target_variable",
+                "f_matched_pair",
+                "f_matched_pair_count",
+            ]
+        ]
         df_input = df_expected_output[
             ["reference", "strata", "period", "target_variable", "f_matched_pair"]
         ]
@@ -71,9 +74,16 @@ class TestMatchedPair:
 
     def test_count_matches_backward(self, expected_output_file):
         df_expected_output = load_and_format(expected_output_file)
-        df_expected_output.drop(
-            ["f_matched_pair", "f_matched_pair_count"], axis=1, inplace=True
-        )
+        df_expected_output = df_expected_output[
+            [
+                "reference",
+                "strata",
+                "period",
+                "target_variable",
+                "b_matched_pair",
+                "b_matched_pair_count",
+            ]
+        ]
         df_input = df_expected_output[
             ["reference", "strata", "period", "target_variable", "b_matched_pair"]
         ]
@@ -82,11 +92,9 @@ class TestMatchedPair:
 
     def test_flag_matched_pair_shift_forward(self, expected_output_file):
         df_expected_output = load_and_format(expected_output_file)
-        df_expected_output.drop(
-            ["f_matched_pair_count", "b_matched_pair", "b_matched_pair_count"],
-            axis=1,
-            inplace=True,
-        )
+        df_expected_output = df_expected_output[
+            ["reference", "strata", "period", "target_variable", "f_matched_pair"]
+        ]
         df_input = df_expected_output[
             ["reference", "strata", "period", "target_variable"]
         ]
@@ -98,11 +106,9 @@ class TestMatchedPair:
 
     def test_flag_matched_pair_shift_backward(self, expected_output_file):
         df_expected_output = load_and_format(expected_output_file)
-        df_expected_output.drop(
-            ["f_matched_pair_count", "f_matched_pair", "b_matched_pair_count"],
-            axis=1,
-            inplace=True,
-        )
+        df_expected_output = df_expected_output[
+            ["reference", "strata", "period", "target_variable", "b_matched_pair"]
+        ]
         df_input = df_expected_output[
             ["reference", "strata", "period", "target_variable"]
         ]
