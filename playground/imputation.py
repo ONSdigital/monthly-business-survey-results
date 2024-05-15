@@ -98,6 +98,7 @@ df["b_imp_flag"] = (df["b_imp_flag"] / df["b_imp_flag"]).replace(1, True)
 
 ## want to create an imputation link column for multiple consecutive imputation
 # this can be done with a cumulative product on imputation groups
+df.sort_values(["group", "reference", "period"], inplace=True)
 df["missing_value"] = np.where(df["return"].isnull(), True, False)
 df['imp_group'] = (df["missing_value"].diff(1) != 0).astype('int').cumsum()
 df["f_imp_links"] = df.groupby("imp_group")["f_imputation_link"].cumprod()
@@ -105,7 +106,11 @@ df["f_imp_links"] = df.groupby("imp_group")["f_imputation_link"].cumprod()
 # backwards would look like this, but I haven't done b_imputation_link in this script
 #df["b_imp_links"] = df[::-1].groupby("imputation_group")["b_imputation_link"].cumprod()[::-1]
 
+"""
+one function for the cumprod() so you can do forward and back in one function
+then wrapper to add the sorting and variable name
 
+"""
 df[['reference', 'period','return','f_imputation_link' ,
        'imp_group', 'f_imp_links']]
 
