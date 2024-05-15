@@ -31,6 +31,15 @@ repos:
         stages: [commit]
 
 #works
+-     repo: local
+      hooks:
+      - id: mixed-line-endings
+        entry: pre-commits/mixed_line_endings.py
+        name: Check for consistent end of line type LF to CRLF to CR (auto-fixes)
+        language: script
+        stages: [commit]
+
+#works
 #if using on different file types, it will need a seperate hook per file type
 -   repo: local
     hooks:
@@ -76,18 +85,17 @@ repos:
         stages: [commit]
 
 
-# #needs to remove the password in hello_world.py
-# -   repo: local
-#     hooks:
-#       - id: detect-secrets
-#         entry: detect-secrets
-#         name: detect-secrets - Detect secrets in staged code
-#         #args: [ "--baseline", ".secrets.baseline" ]
-#         args: [scan, audit]
-#         language: system
-#         types: [python]
-#         stages: [commit]
-#         exclude: .*/tests/.*|^\.cruft\.json$
+# works in testing
+-   repo: local
+    hooks:
+      - id: detect-secrets
+        entry: detect-secrets-hook
+        name: detect-secrets - Detect secrets in staged code
+        args: [ "--baseline", ".secrets.baseline" ]
+        #args: [scan, audit]
+        language: system
+        types: [python]
+        stages: [commit]
 
 
 

@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def flag_construction_matches(dataframe, target, period, auxiliary):
     """
     Add flag to indicate whether the record has non-null target, period and
@@ -22,6 +23,8 @@ def flag_construction_matches(dataframe, target, period, auxiliary):
         dataframe with additional flag_construction_matches column
     """
 
-    dataframe["flag_construction_matches"] = pd.notna(dataframe[[target, period, auxiliary]]).all(axis="columns")
+    dataframe["flag_construction_matches"] = pd.notna(
+        dataframe[[target, period, auxiliary]]
+    ).all(axis="columns")
 
     return dataframe
