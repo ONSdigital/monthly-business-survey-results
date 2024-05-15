@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
-from pandas.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal, assert_series_equal
 
-from src.forward_link import zerofy_values
+from src.forward_link import get_link, zerofy_values
 
 
 class TestFilters:
@@ -142,3 +142,197 @@ class TestFilters:
         zerofy_values(df_copy, "question", link_filter)
 
         assert_frame_equal(df_copy, expected)
+
+
+class TestLink:
+
+    # from scenario 33_multi_variable_C_BI_R
+    # We could parametrise this with more scenarios if needed
+    df = pd.DataFrame(
+        data={
+            "identifier": [
+                10001,
+                10001,
+                10001,
+                10002,
+                10002,
+                10002,
+                10001,
+                10001,
+                10001,
+                10002,
+                10002,
+                10002,
+                10005,
+                10005,
+                10005,
+            ],
+            "date": [
+                202001,
+                202002,
+                202003,
+                202001,
+                202002,
+                202003,
+                202001,
+                202002,
+                202003,
+                202001,
+                202002,
+                202003,
+                202001,
+                202002,
+                202003,
+            ],
+            "group": [1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2],
+            "question": [
+                547.0,
+                362.0,
+                895.0,
+                381.0,
+                573.0,
+                214.0,
+                961.0,
+                267.0,
+                314.0,
+                555.0,
+                628.0,
+                736.0,
+                np.nan,
+                np.nan,
+                100.0,
+            ],
+            "f_predictive_question": [
+                np.nan,
+                547.0,
+                362.0,
+                np.nan,
+                381.0,
+                573.0,
+                np.nan,
+                961.0,
+                267.0,
+                np.nan,
+                555.0,
+                628.0,
+                np.nan,
+                np.nan,
+                np.nan,
+            ],
+            "b_predictive_question": [
+                362.0,
+                895.0,
+                np.nan,
+                573.0,
+                214.0,
+                np.nan,
+                267.0,
+                314.0,
+                np.nan,
+                628.0,
+                736.0,
+                np.nan,
+                np.nan,
+                100.0,
+                np.nan,
+            ],
+            "f_matched_pair": [
+                False,
+                True,
+                True,
+                False,
+                True,
+                True,
+                False,
+                True,
+                True,
+                False,
+                True,
+                True,
+                False,
+                False,
+                False,
+            ],
+            "b_matched_pair": [
+                True,
+                True,
+                False,
+                True,
+                True,
+                False,
+                True,
+                True,
+                False,
+                True,
+                True,
+                False,
+                False,
+                False,
+                False,
+            ],
+        }
+    )
+
+    def test_forward_link(self):
+
+        expected_f_link = pd.Series(
+            [
+                1.0,
+                1.0075431034482758,
+                1.186096256684492,
+                1.0,
+                1.0075431034482758,
+                1.186096256684492,
+                1.0,
+                0.5903693931398417,
+                1.1731843575418994,
+                1.0,
+                0.5903693931398417,
+                1.1731843575418994,
+                1.0,
+                0.5903693931398417,
+                1.1731843575418994,
+            ]
+        )
+
+        f_link = get_link(
+            self.df,
+            ["group", "date"],
+            "f_matched_pair",
+            "question",
+            "f_predictive_question",
+        )
+
+        assert_series_equal(f_link, expected_f_link)
+
+    def test_backward_link(self):
+
+        expected_b_link = pd.Series(
+            [
+                0.9925133689839573,
+                0.8431018935978359,
+                1.0,
+                0.9925133689839573,
+                0.8431018935978359,
+                1.0,
+                1.693854748603352,
+                0.8523809523809524,
+                1.0,
+                1.693854748603352,
+                0.8523809523809524,
+                1.0,
+                0.9925133689839573,
+                0.8523809523809524,
+                1.0,
+            ]
+        )
+
+        b_link = get_link(
+            self.df,
+            ["group", "date"],
+            "b_matched_pair",
+            "question",
+            "b_predictive_question",
+        )
+
+        assert_series_equal(b_link, expected_b_link)
