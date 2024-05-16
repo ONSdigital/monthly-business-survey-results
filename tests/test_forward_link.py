@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 
-from src.forward_link import get_link, mask_values
+from src.forward_link import calculate_imputation_link, mask_values
 
 
 class TestFilters:
@@ -295,7 +295,7 @@ class TestLink:
             ]
         )
 
-        f_link = get_link(
+        f_link = calculate_imputation_link(
             self.df,
             ["group", "date"],
             "f_matched_pair",
@@ -327,7 +327,7 @@ class TestLink:
             ]
         )
 
-        b_link = get_link(
+        b_link = calculate_imputation_link(
             self.df,
             ["group", "date"],
             "b_matched_pair",

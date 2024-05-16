@@ -42,7 +42,7 @@ def mask_values(
 PandasObject.mask_values = mask_values
 
 
-def get_link(
+def calculate_imputation_link(
     df: pd.DataFrame,
     groups: List[str] or str,
     match_col: str,
