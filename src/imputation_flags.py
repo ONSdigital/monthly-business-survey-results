@@ -81,3 +81,23 @@ def create_impute_flags(df, target, reference, strata, auxiliary):
     )
 
     return df
+
+
+def generate_imputation_flag_string(df):
+    imputation_flag_conditions = [
+        df["r_flag"],
+        ~df["r_flag"] & df["fir_flag"],
+        ~df["r_flag"] & ~df["fir_flag"] & df["bir_flag"],
+        ~df["r_flag"] & ~df["fir_flag"] & ~df["bir_flag"] & df["fic_flag"],
+        ~df["r_flag"]
+        & ~df["fir_flag"]
+        & ~df["bir_flag"]
+        & ~df["fic_flag"]
+        & df["c_flag"],
+    ]
+    flags = ["r", "fir", "bir", "fic", "c"]
+    df["imputation_flag"] = np.select(
+        imputation_flag_conditions, flags, default="error"
+    )
+
+    return df
