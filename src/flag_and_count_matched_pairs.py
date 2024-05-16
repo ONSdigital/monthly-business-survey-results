@@ -55,7 +55,7 @@ def flag_matched_pair_merge(
         how="left",
     )
 
-    matched_col_name = forward_or_backward + "_matched_pair"
+    matched_col_name = forward_or_backward + "_matched_pair_" + target
 
     df[matched_col_name] = np.where(
         df[[target, predictive_col_name]].isnull().any(axis=1), False, True
@@ -107,7 +107,7 @@ def flag_matched_pair_shift(
     df["validate_date"] = np.where(
         df[period].dt.month - df["predictive_period"].dt.month == shift, True, False
     )
-    matched_col_name = forward_or_backward + "_matched_pair"
+    matched_col_name = forward_or_backward + "_matched_pair_" + target
 
     df[matched_col_name] = np.where(
         df[[target, predictive_col_name]].isnull().any(axis=1) | (~df["validate_date"]),
