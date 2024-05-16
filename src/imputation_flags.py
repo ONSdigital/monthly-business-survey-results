@@ -1,5 +1,7 @@
 import numpy as np
 
+from src.flag_and_count_matched_pairs import flag_matched_pair_merge
+
 
 def create_impute_flags(df, target, reference, strata, auxiliary):
     """
@@ -48,8 +50,32 @@ def create_impute_flags(df, target, reference, strata, auxiliary):
 
     construction_conditions = df[target].isna() & df[auxiliary].notna()
     df["c_flag"] = np.where(construction_conditions, True, False)
+
+    df = flag_matched_pair_merge(
+        df=df,
+        forward_or_backward="f",
+        target="auxiliary",
+        period="period",
+        reference="reference",
+        strata="strata",
+    )
+
+    df["f_predictive_" + auxiliary + "_roll"] = df.groupby([reference, strata])[
+        "f_predictive_" + auxiliary
+    ].ffill()
+    fic_conditions = (
+        df[target].isna() & df["f_predictive_" + auxiliary + "_roll"].notna()
+    )
+    df["fic_flag"] = np.where(fic_conditions, True, False)
+
     df.drop(
-        ["f_predictive_target_variable_roll", "b_predictive_target_variable_roll"],
+        [
+            "f_predictive_" + target + "_roll",
+            "b_predictive_" + target + "_roll",
+            "f_predictive_" + auxiliary,
+            "f_predictive_" + auxiliary + "_roll",
+            "f_matched_pair_" + auxiliary,
+        ],
         axis=1,
         inplace=True,
     )
