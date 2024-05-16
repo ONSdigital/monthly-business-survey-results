@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 
 def get_cumulative_links(dataframe, forward_or_backward, time_difference, strata, reference, target, period, imputation_link):
@@ -29,17 +30,14 @@ def get_cumulative_links(dataframe, forward_or_backward, time_difference, strata
         dataframe with additional missing_value, imputation group and 
         cumulative_imputation_link column
     """
-
-    if forward_or_backward == "f":
-        pass
-    elif forward_or_backward == "b":
-        time_difference = -time_difference
-        
-    dataframe.sort_values([strata, reference, period], inplace=True)
-    dataframe["missing_value"] = np.where(df[target].isnull(), True, False)
+    
+    dataframe.sort_values([strata, reference, period], inplace=True)    
+    dataframe["missing_value"] = np.where(dataframe[target].isnull(), True, False)
     
     dataframe["imputation_group"] = (
-        (dataframe["missing_value"].diff(time_difference) != 0)
+        ((dataframe["missing_value"].diff(time_difference) != 0) |
+        (dataframe[strata].diff(time_difference) != 0) |
+        (dataframe[reference].diff(time_difference) != 0))
     .astype("int")
     .cumsum()
     )
@@ -51,8 +49,10 @@ def get_cumulative_links(dataframe, forward_or_backward, time_difference, strata
         )
     elif forward_or_backward == "b":
         dataframe["cumulative_"+imputation_link] = (
-            dataframe.groupby("imputation_group")[imputation_link][::-1]
+            dataframe[::-1].groupby("imputation_group")[imputation_link]
             .cumprod()[::-1]
         )        
     
-    return dataframe
+    return dataframe[["imputation_group", "cumulative_"+imputation_link]]
+
+
