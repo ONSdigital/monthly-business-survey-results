@@ -15,7 +15,8 @@ def imputation_flag_test_data():
 class TestImputationFlags:
     def test_create_impute_flags(self, imputation_flag_test_data):
         df_expected_output = imputation_flag_test_data
-        df_input = df_expected_output[
+        df_input = df_expected_output.copy()
+        df_input = df_input[
             [
                 "reference",
                 "strata",
