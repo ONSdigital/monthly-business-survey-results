@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from pandas.testing import assert_frame_equal, assert_series_equal
 
-from src.forward_link import get_link, zerofy_values
+from src.forward_link import get_link, mask_values
 
 
 class TestFilters:
@@ -43,7 +43,7 @@ class TestFilters:
 
         df_copy = self.df.copy()
 
-        zerofy_values(df_copy, "question", link_filter)
+        mask_values(df_copy, "question", link_filter)
 
         assert_frame_equal(df_copy, expected)
 
@@ -73,7 +73,7 @@ class TestFilters:
 
         df_copy = self.df.copy()
 
-        zerofy_values(df_copy, ["question", "other"], link_filter)
+        mask_values(df_copy, ["question", "other"], link_filter)
 
         assert_frame_equal(df_copy, expected)
 
@@ -106,7 +106,7 @@ class TestFilters:
 
         df_copy = self.df.copy()
 
-        zerofy_values(df_copy, "question", link_filter)
+        mask_values(df_copy, "question", link_filter)
 
         assert_frame_equal(df_copy, expected)
 
@@ -139,7 +139,7 @@ class TestFilters:
 
         df_copy = self.df.copy()
 
-        zerofy_values(df_copy, "question", link_filter)
+        mask_values(df_copy, "question", link_filter)
 
         assert_frame_equal(df_copy, expected)
 

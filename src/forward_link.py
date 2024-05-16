@@ -2,9 +2,10 @@ from typing import List
 
 import numpy as np
 import pandas as pd
+from pandas.core.base import PandasObject
 
 
-def zerofy_values(
+def mask_values(
     df: pd.DataFrame, target_variable: List[str] or str, expr: str
 ) -> pd.DataFrame:
     """Convert values in a dataframe column to 0 based on a python expression
@@ -36,6 +37,9 @@ def zerofy_values(
         https://pandas.pydata.org/pandas-docs/version/1.5/reference/api/pandas.eval.html
         """
         )
+
+
+PandasObject.mask_values = mask_values
 
 
 def get_link(
@@ -80,9 +84,7 @@ def get_link(
     # If condition supplied exclude filtered values from links
     if filter_cond is not None:
 
-        df_intermediate.zerofy_values(
-            [target_variable, predictive_variable], filter_cond
-        )
+        df_intermediate.mask_values([target_variable, predictive_variable], filter_cond)
 
     df_intermediate[target_variable] = (
         df_intermediate[target_variable] * df_intermediate[match_col]
