@@ -39,10 +39,8 @@ def create_impute_flags(df, target, reference, strata, auxiliary):
             df["{}_predictive_{}".format(direction, target)]
         except KeyError:
             raise KeyError(
-                "Dataframe needs column '{}_predictive_{}',\
-                      run flag_matched_pair function first".format(
-                    direction, target
-                )
+                "Dataframe needs column '{}_predictive_{}',".format(direction, target)
+                + " run flag_matched_pair function first"
             )
 
     df["f_predictive_" + target + "_roll"] = df.groupby([reference, strata])[
