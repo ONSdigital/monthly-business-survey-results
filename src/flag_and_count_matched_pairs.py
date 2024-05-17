@@ -1,7 +1,51 @@
 import pandas as pd
 import numpy as np 
 
-def flag_matched_pair_merge(df, forward_or_backward,target, period, reference, strata, time_difference=1):
+def flag_matched_pair(df, forward_or_backward, target, period, reference, strata, time_difference=1):
+  """
+  function to add flag to df if data forms a matched pair
+  ----------
+  df : pd.DataFrame
+      pandas dataframe of original data
+  forward_or_backward: str
+      either f or b for forward or backward method
+  target : str
+      column name containing target variable
+  period : str
+      column name containing time period. Must be in %Y%m date format
+  reference : str
+      column name containing business reference id
+  strata : str
+      column name containing strata information (sic)
+  time_difference : int
+      time difference between predictive and target period in months
+      
+  Returns
+  -------
+  pd.DataFrame
+      dataframe with column added flagging forward matched paris and 
+      predictive target variable data column
+  """
+        
+  if forward_or_backward == "f":
+    time_difference = -time_difference    
+    
+  time_difference = pd.DateOffset(months = time_difference)
+
+  df.set_index([reference, period], inplace=True, drop=False)   
+  df[forward_or_backward+"_"+target] = [df.loc[(r, p), target] if (r, p) in df.index else None 
+                                        for r, p in zip(df[reference], df[period]+time_difference)]
+  df.reset_index(drop=True, inplace=True)
+
+  df[forward_or_backward+"_matched_pair"] = np.where(df[target].notnull() & df[forward_or_backward+"_"+target].notnull(), True, 
+      False)
+
+  df[forward_or_backward+"_match_pair_count"] = df.groupby([strata, period])[forward_or_backward+"_matched_pair"].transform("sum")
+
+  return df
+
+
+def flag_matched_pair_merge(df, forward_or_backward, target, period, reference, strata, time_difference=1):
     """
     function to add flag to df if data forms a matched pair
     i.e. data is given for both period and predictive period

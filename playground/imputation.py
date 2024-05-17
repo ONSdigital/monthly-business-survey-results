@@ -7,27 +7,47 @@ file_path = data_folder + "dummy_imputation_data.csv"
 # method 0 - masking
 
 df = pd.read_csv(file_path)
+df["period"] = pd.to_datetime(df["period"], format = "%Y%m")
 
-df.set_index(["period", "reference"], inplace=True, drop=False)
+def flag_matched_pair(df, forward_or_backward, target, period, reference, strata, time_difference=1):
+  """
+  function to add flag to df if data forms a matched pair
+  ----------
+  df : pd.DataFrame
+      pandas dataframe of original data
+  forward_or_backward: str
+      either f or b for forward or backward method
+  target : str
+      column name containing target variable
+  period : str
+      column name containing time period
+  reference : str
+      column name containing business reference id
+  strata : str
+      column name containing strata information (sic)
+  time_difference : int
+      time difference between predictive and target period in months
+  """
+        
+  if forward_or_backward == "f":
+    time_difference = -time_difference    
+    
+  time_difference = pd.DateOffset(months = time_difference)
 
-def get_shift_mask(df, shift = 1):
-    """
-    later
-    """
+  df.set_index([reference, period], inplace=True, drop=False)   
+  df[forward_or_backward+"_"+target] = [df.loc[(r, p), target] if (r, p) in df.index else None 
+                                        for r, p in zip(df[reference], df[period]+time_difference)]
+  df.reset_index(drop=True, inplace=True)
 
-    return list(zip(df["period"] + shift, df["reference"]))
+  df[forward_or_backward+"_matched_pair"] = np.where(df[target].notnull() & df[forward_or_backward+"_"+target].notnull(), True, 
+      False)
 
-mask = get_shift_mask(df, shift = 1)
+  df[forward_or_backward+"_match_pair_count"] = df.groupby([strata, period])[forward_or_backward+"_matched_pair"].transform("sum")
 
-"""
-This method is deprecated for highest version available in this environment
-df["prev_return"] = df.loc[mask, "return"] 
+  return df
 
-df["f_matched_pair"] = np.where(df["return"].notnull() & df["prev_return"].notnull(), True, 
-    False)
+x = flag_matched_pair(df, "f", "return", "period", "reference", "group")
 
-df["match_pair_count"] = df.groupby(["group", "period"])["f_matched_pair"].transform("sum")
-"""
 
 #method 1 - using shift()
 
