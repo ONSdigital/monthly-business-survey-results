@@ -2,12 +2,9 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-from pandas.core.base import PandasObject
 
 
-def mask_values(
-    df: pd.DataFrame, target_variable: List[str] or str, expr: str
-) -> pd.DataFrame:
+def mask_values(df: pd.DataFrame, target_variable: str, expr: str) -> pd.Series:
     """Convert values in a dataframe column to 0 based on a python expression
 
     Parameters
@@ -22,13 +19,14 @@ def mask_values(
 
     Returns
     -------
-    df : pd.Dataframe
+    df : pd.Series
 
 
     """
+    masked_column = df[target_variable].copy()
 
     try:
-        df.loc[~(df.eval(expr)), target_variable] = 0
+        masked_column.loc[~(df.eval(expr))] = np.nan
 
     except ValueError:
         print(
@@ -38,8 +36,7 @@ def mask_values(
         """
         )
 
-
-PandasObject.mask_values = mask_values
+    return masked_column
 
 
 def calculate_imputation_link(
