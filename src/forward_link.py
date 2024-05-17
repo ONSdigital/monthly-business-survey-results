@@ -45,13 +45,11 @@ def calculate_imputation_link(
     match_col: str,
     target_variable: str,
     predictive_variable: str,
-    filter_cond: str = None,
-) -> pd.DataFrame:
+) -> pd.Series:
     """
     Calculate link between target_variable and predictive_variable by given groups,
     a match_col must be supplied which indicates if target_variable and
-    predictive_variable can be linked. If an optional filter_cond is given
-    it excludes them when calculating the links.
+    predictive_variable can be linked.
 
     Parameters
     ----------
@@ -66,9 +64,6 @@ def calculate_imputation_link(
         Column name of the targeted variable.
     predictive_variable : str
         Column name of the predicted target variable.
-    filter_cond : str, optional
-        Expression to exclude specific values from the links.
-        The default is None.
 
     Returns
     -------
@@ -77,11 +72,6 @@ def calculate_imputation_link(
     """
 
     df_intermediate = df.copy()
-
-    # If condition supplied exclude filtered values from links
-    if filter_cond is not None:
-
-        df_intermediate.mask_values([target_variable, predictive_variable], filter_cond)
 
     df_intermediate[target_variable] = (
         df_intermediate[target_variable] * df_intermediate[match_col]
@@ -98,7 +88,5 @@ def calculate_imputation_link(
     denominator.replace(0, np.nan, inplace=True)  # cover division with 0
 
     link = numerator / denominator
-
-    link.replace(np.nan, 1, inplace=True)  # set defaults
 
     return link
