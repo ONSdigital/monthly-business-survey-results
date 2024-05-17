@@ -6,7 +6,10 @@ from src.flag_and_count_matched_pairs import flag_matched_pair_merge
 def create_impute_flags(df, target, reference, strata, auxiliary):
     """
     function to create logical columns for each type of imputation
-    Will feed into creating a column for imputation method
+    output columns are needed to create the string flag column for
+    imputation methods.
+    Function requires f_predictive and b_predictive columns produced
+    by `flag_matched_pair` function
 
     Parameters
     ----------
@@ -31,6 +34,17 @@ def create_impute_flags(df, target, reference, strata, auxiliary):
         is a return (r_flag) can be imputed by forward imputation (fir_flag),
         backward imputation (bir_flag) or can be constructed (c_flag)
     """
+    for direction in ["f", "b"]:
+        try:
+            df["{}_predictive_{}".format(direction, target)]
+        except KeyError:
+            raise KeyError(
+                "Dataframe needs column '{}_predictive_{}',\
+                      run flag_matched_pair function first".format(
+                    direction, target
+                )
+            )
+
     df["f_predictive_" + target + "_roll"] = df.groupby([reference, strata])[
         "f_predictive_" + target
     ].ffill()
