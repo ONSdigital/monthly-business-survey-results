@@ -39,7 +39,7 @@ def flag_matched_pair_merge(
         time_difference = -time_difference
 
     # Creating new DF, shifting period for forward or backward
-    df_with_predictive_column = df[[reference, strata, target]]
+    df_with_predictive_column = df.copy()[[reference, strata, target]]
     df_with_predictive_column["predictive_period"] = df[period] + pd.DateOffset(
         months=time_difference
     )
