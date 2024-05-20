@@ -9,7 +9,7 @@ file_path = data_folder + "dummy_imputation_data.csv"
 df = pd.read_csv(file_path)
 df["period"] = pd.to_datetime(df["period"], format = "%Y%m")
 
-def flag_matched_pair(df, forward_or_backward, target, period, reference, strata, time_difference=1):
+def flag_matched_pair(df, forward_or_backward, target, period, reference, strata, time_difference=1, chain_impute_periods=2):
   """
   function to add flag to df if data forms a matched pair
   ----------
@@ -34,9 +34,16 @@ def flag_matched_pair(df, forward_or_backward, target, period, reference, strata
     
   time_difference = pd.DateOffset(months = time_difference)
 
+  def chain_match(r, p, ):
+    initial_p = p
+    for i in range(chain_impute_periods):
+      p += time_difference
+      if (r, p) in df.index:
+        if not np.isnan(df.loc[(r,p), "return"]):
+          return df.loc[(r,p), "return"]
+    
   df.set_index([reference, period], inplace=True, drop=False)   
-  df[forward_or_backward+"_"+target] = [df.loc[(r, p), target] if (r, p) in df.index else None 
-                                        for r, p in zip(df[reference], df[period]+time_difference)]
+  df[forward_or_backward+"_"+target] = [chain_match(r, p) for r, p in zip(df["reference"], df["period"])]
   df.reset_index(drop=True, inplace=True)
 
   df[forward_or_backward+"_matched_pair"] = np.where(df[target].notnull() & df[forward_or_backward+"_"+target].notnull(), True, 
@@ -46,7 +53,74 @@ def flag_matched_pair(df, forward_or_backward, target, period, reference, strata
 
   return df
 
-x = flag_matched_pair(df, "f", "return", "period", "reference", "group")
+now = datetime.datetime.now()
+x = flag_matched_pair(df, "b", "return", "period", "reference", "group", chain_impute_periods=4)
+now2 = datetime.datetime.now()
+print((now2-now)*1000)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def flag_matched_pair(df,forward_or_backward,target, period, reference, strata, time_difference=1):
+    """
+    function to flag matched pairs using the shift method
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+    
+        pandas dataframe of original data
+    shift : int
+        number of rows to shift up or down
+    target : str
+        column name containing target variable
+    period : str
+        column name containing time period
+    reference : str
+        column name containing business reference id
+    strata : str
+        column name containing strata information (sic)
+
+    Returns
+    -------
+    _type_
+        pandas dataframe with column added flagging forward matched pairs and 
+        predictive target variable data column
+    """    
+    
+    df = df.sort_values(by = [reference, period])
+
+    if forward_or_backward == 'b':
+        time_difference = -time_difference
+        
+    df[["predictive_"+target, "predictive_period"]] = df.groupby([reference, strata]).shift(time_difference)[[target, period]]
+    df[forward_or_backward+"_match"] = df.groupby(["group","reference"]).shift(1)["return"].isnull().mul(df["return"].isnull())
+    
+    match_counts = df.groupby([strata, period])[forward_or_backward+"_match"].agg("sum").reset_index()
+    
+    return df, match_counts
+
+  
+now = datetime.datetime.now()
+x, y = flag_matched_pair_shift(df, "f", "return", "period", "reference", "group")
+now2 = datetime.datetime.now()
+print((now2-now)*1000)
+
+
+
+
+
+
 
 
 #method 1 - using shift()
