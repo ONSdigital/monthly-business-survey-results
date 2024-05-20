@@ -4,12 +4,12 @@ import numpy as np
 def get_cumulative_links(
     dataframe,
     forward_or_backward,
-    time_difference,
     strata,
     reference,
     target,
     period,
     imputation_link,
+    time_difference=1,
 ):
     """
     Create cumulative imputation links for multiple consecutive periods
@@ -20,8 +20,7 @@ def get_cumulative_links(
     dataframe : pandas.DataFrame
     forward_or_backward: str
         either f or b for forward or backward method
-    time_difference : int
-        time difference between predictive and target period in months
+
     strata : str
         column name containing strata information (sic)
     reference : str
@@ -32,6 +31,8 @@ def get_cumulative_links(
         column name containing time period
     imputation_link : string
         column name containing imputation links
+    time_difference : int
+        time difference between predictive and target period in months
 
     Returns
     -------
@@ -61,5 +62,11 @@ def get_cumulative_links(
         dataframe["cumulative_" + imputation_link] = (
             dataframe[::-1].groupby("imputation_group")[imputation_link].cumprod()[::-1]
         )
+
+    dataframe["cumulative_" + imputation_link] = np.where(
+        ~dataframe[target].isnull(),
+        np.nan,
+        dataframe["cumulative_" + imputation_link],
+    )
 
     return dataframe[["imputation_group", "cumulative_" + imputation_link]]

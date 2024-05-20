@@ -28,12 +28,12 @@ class TestComulativeLinks:
         actual_output = get_cumulative_links(
             input_data,
             "f",
-            1,
             "strata",
             "reference",
             "target",
             "period",
             "forward_imputation_link",
+            1,
         )
 
         assert_frame_equal(actual_output, expected_output)
@@ -53,12 +53,12 @@ class TestComulativeLinks:
         actual_output = get_cumulative_links(
             input_data,
             "b",
-            1,
             "strata",
             "reference",
             "target",
             "period",
             "backward_imputation_link",
+            1,
         )
 
         assert_frame_equal(actual_output, expected_output)
