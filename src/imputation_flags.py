@@ -43,22 +43,26 @@ def create_impute_flags(df, target, reference, strata, auxiliary):
                 "Dataframe needs column '{}_predictive_{}',".format(direction, target)
                 + " run flag_matched_pair function first"
             )
+    forward_target_roll = "f_predictive_" + target + "_roll"
+    backward_target_roll = "b_predictive_" + target + "_roll"
+    forward_aux_roll = "f_predictive_" + auxiliary + "_roll"
 
-    df["f_predictive_" + target + "_roll"] = df.groupby([reference, strata])[
+    df[forward_target_roll] = df.groupby([reference, strata])[
         "f_predictive_" + target
     ].ffill()
-    df["b_predictive_" + target + "_roll"] = df.groupby([reference, strata])[
+
+    df[backward_target_roll] = df.groupby([reference, strata])[
         "b_predictive_" + target
     ].bfill()
 
     df["r_flag"] = df[target].notna()
 
     df["fir_flag"] = np.where(
-        df["f_predictive_" + target + "_roll"].notna() & df[target].isna(), True, False
+        df[forward_target_roll].notna() & df[target].isna(), True, False
     )
 
     df["bir_flag"] = np.where(
-        df["b_predictive_" + target + "_roll"].notna() & df[target].isna(), True, False
+        df[backward_target_roll].notna() & df[target].isna(), True, False
     )
 
     construction_conditions = df[target].isna() & df[auxiliary].notna()
@@ -73,7 +77,7 @@ def create_impute_flags(df, target, reference, strata, auxiliary):
         strata="strata",
     )
 
-    df["f_predictive_" + auxiliary + "_roll"] = df.groupby([reference, strata])[
+    df[forward_aux_roll] = df.groupby([reference, strata])[
         "f_predictive_" + auxiliary
     ].ffill()
     fic_conditions = (
@@ -83,10 +87,10 @@ def create_impute_flags(df, target, reference, strata, auxiliary):
 
     df.drop(
         [
-            "f_predictive_" + target + "_roll",
-            "b_predictive_" + target + "_roll",
+            forward_target_roll,
+            backward_target_roll,
             "f_predictive_" + auxiliary,
-            "f_predictive_" + auxiliary + "_roll",
+            forward_aux_roll,
             "f_matched_pair_" + auxiliary,
         ],
         axis=1,
