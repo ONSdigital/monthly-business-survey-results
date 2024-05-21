@@ -18,7 +18,8 @@ class TestLinks:
 
         link_to_test = calculate_imputation_link(
             df_input,
-            ["group", "period"],
+            "period",
+            "group",
             "f_matched_pair",
             "question",
             "f_predictive_question",
@@ -35,7 +36,8 @@ class TestLinks:
 
         link_to_test = calculate_imputation_link(
             df_input,
-            ["group", "period"],
+            "period",
+            "group",
             "b_matched_pair",
             "question",
             "b_predictive_question",
