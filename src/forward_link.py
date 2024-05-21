@@ -9,7 +9,7 @@ def calculate_imputation_link(
     match_col: str,
     target_variable: str,
     predictive_variable: str,
-) -> pd.Series:
+) -> pd.DataFrame:
     """
     Calculate link between target_variable and predictive_variable by strata,
     a match_col must be supplied which indicates if target_variable
@@ -32,11 +32,26 @@ def calculate_imputation_link(
 
     Returns
     -------
-    link : pd.Series
-        A pandas series with the links.
+    df : pd.DataFrame
+        A pandas DataFrame with a new column containing either f_link or b_link
+        based on the input parameters.
     """
 
     df_intermediate = df.copy()
+
+    if match_col == "f_matched_pair" and predictive_variable == "f_predictive_question":
+        link_col_name = "f_link"
+
+    elif (
+        match_col == "b_matched_pair" and predictive_variable == "b_predictive_question"
+    ):
+        link_col_name = "b_link"
+
+    else:
+        raise ValueError(
+            f"""
+        {match_col} and {predictive_variable} do not have same wildcard."""
+        )
 
     df_intermediate[target_variable] = (
         df_intermediate[target_variable] * df_intermediate[match_col]
@@ -56,6 +71,6 @@ def calculate_imputation_link(
 
     denominator.replace(0, np.nan, inplace=True)  # cover division with 0
 
-    link = numerator / denominator
+    df[link_col_name] = numerator / denominator
 
-    return link
+    return df
