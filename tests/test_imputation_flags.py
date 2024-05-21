@@ -15,7 +15,7 @@ def imputation_flag_test_data():
 class TestImputationFlags:
     def test_create_impute_flags(self, imputation_flag_test_data):
         df_expected_output = imputation_flag_test_data.copy()
-        df_expected_output.drop(["imputation_flag"], axis=1, inplace=True)
+        df_expected_output.drop(["imputation_marker"], axis=1, inplace=True)
         df_input = df_expected_output.copy()
         df_input = df_input[
             [
@@ -40,6 +40,6 @@ class TestImputationFlags:
     def test_imputation_marker(self, imputation_flag_test_data):
         df_expected_output = imputation_flag_test_data.copy()
         df_input = imputation_flag_test_data.copy()
-        df_input.drop("imputation_flag", axis=1, inplace=True)
+        df_input.drop("imputation_marker", axis=1, inplace=True)
         df_output = generate_imputation_marker(df_input)
         assert_frame_equal(df_output, df_expected_output)

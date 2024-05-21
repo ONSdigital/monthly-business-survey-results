@@ -1,4 +1,4 @@
-reference,strata,period,target_variable,auxiliary,f_predictive_target_variable,b_predictive_target_variable,r_flag,fir_flag,bir_flag,c_flag,fic_flag,imputation_flag
+reference,strata,period,target_variable,auxiliary,f_predictive_target_variable,b_predictive_target_variable,r_flag,fir_flag,bir_flag,c_flag,fic_flag,imputation_marker
 1,100,202001,8444,51,,,TRUE,FALSE,FALSE,FALSE,FALSE,r
 1,100,202002,,51,8444,2003,FALSE,TRUE,TRUE,TRUE,TRUE,fir
 1,100,202003,2003,51,,1003,TRUE,FALSE,FALSE,FALSE,FALSE,r
