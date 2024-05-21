@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from src.flag_and_count_matched_pairs import flag_matched_pair_merge
 
@@ -95,7 +96,25 @@ def create_impute_flags(df, target, reference, strata, auxiliary):
     return df
 
 
-def generate_imputation_flag_string(df):
+def generate_imputation_marker(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Function to add column containing the a string indicating the method of
+    imputation to use following the hierarchy in specifications
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing logical columns produced by `create_imputation_flags`
+        (r_flag, fir_flag, bir_flag, fic_flag and c_flag)
+
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataframe with additional column containing imputation marker
+        i.e. the type of imputation method that should be used to fill
+        missing returns.
+    """
     imputation_flag_conditions = [
         df["r_flag"],
         ~df["r_flag"] & df["fir_flag"],
@@ -108,7 +127,7 @@ def generate_imputation_flag_string(df):
         & df["c_flag"],
     ]
     flags = ["r", "fir", "bir", "fic", "c"]
-    df["imputation_flag"] = np.select(
+    df["imputation_marker"] = np.select(
         imputation_flag_conditions, flags, default="error"
     )
 

@@ -4,7 +4,7 @@ import pytest
 from helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
-from src.imputation_flags import create_impute_flags, generate_imputation_flag_string
+from src.imputation_flags import create_impute_flags, generate_imputation_marker
 
 
 @pytest.fixture(scope="class")
@@ -37,9 +37,9 @@ class TestImputationFlags:
         )
         assert_frame_equal(df_output, df_expected_output)
 
-    def test_imputation_flag_strings(self, imputation_flag_test_data):
+    def test_imputation_marker(self, imputation_flag_test_data):
         df_expected_output = imputation_flag_test_data.copy()
         df_input = imputation_flag_test_data.copy()
         df_input.drop("imputation_flag", axis=1, inplace=True)
-        df_output = generate_imputation_flag_string(df_input)
+        df_output = generate_imputation_marker(df_input)
         assert_frame_equal(df_output, df_expected_output)
