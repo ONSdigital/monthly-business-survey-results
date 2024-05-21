@@ -115,20 +115,30 @@ def generate_imputation_marker(df: pd.DataFrame) -> pd.DataFrame:
         i.e. the type of imputation method that should be used to fill
         missing returns.
     """
-    imputation_flag_conditions = [
-        df["r_flag"],
-        ~df["r_flag"] & df["fir_flag"],
-        ~df["r_flag"] & ~df["fir_flag"] & df["bir_flag"],
-        ~df["r_flag"] & ~df["fir_flag"] & ~df["bir_flag"] & df["fic_flag"],
-        ~df["r_flag"]
+
+    imputation_markers_and_conditions = {
+        "r": df["r_flag"],
+        "fir": ~df["r_flag"] & df["fir_flag"],
+        "bir": ~df["r_flag"] & ~df["fir_flag"] & df["bir_flag"],
+        "fic": ~df["r_flag"] & ~df["fir_flag"] & ~df["bir_flag"] & df["fic_flag"],
+        "c": ~df["r_flag"]
         & ~df["fir_flag"]
         & ~df["bir_flag"]
         & ~df["fic_flag"]
         & df["c_flag"],
-    ]
-    flags = ["r", "fir", "bir", "fic", "c"]
+    }
+
     df["imputation_marker"] = np.select(
-        imputation_flag_conditions, flags, default="error"
+        imputation_markers_and_conditions.values(),
+        imputation_markers_and_conditions.keys(),
+        default="error",
     )
 
     return df
+
+
+if __name__ == "__main__":
+    df1 = pd.read_csv("./tests/imputation_flag_data.csv")
+    df1.drop(["imputation_flag"], axis=1, inplace=True)
+    df_output = generate_imputation_marker(df1)
+    print(df_output.head())
