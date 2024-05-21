@@ -63,6 +63,10 @@ requests must be reviewed by at least one member of the team before merging.
 Reviews should follow the [pull request template](pr-template). If we want review on code that does not yet meet the definition of done, we open a draft
 pull request. Once a branch has been reviewed, it can be merged. We prefer to use squash merges, in order to simplify the `main` branch commit history. After merging the feature branch should be deleted.
 
+### Functions
+
+We prefer writing functions over classes to make it easier for beginners to understand the code. [Type hints](https://docs.python.org/3/library/typing.html) should be used when writing functions. We prefer functions to return `pandas.DataFrame` rather than `pandas.Series`. 
+
 ### Markdown
 
 Local links can be written as normal, but external links should be referenced at the
@@ -83,6 +87,10 @@ tests, enter the following command in your terminal:
 ```shell
 pytest
 ```
+Our testing approach is:
+- use `.csv` files containing simple minimal input and output data for a function to be tested
+- individual test cases should be separated into different `.csv` files and grouped into folders
+- the name of the test data `.csv` files should reflect the test case and the folder name should be the same as the module/function  
 
 ### Code coverage
 
