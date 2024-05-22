@@ -86,9 +86,8 @@ def create_impute_flags(
         [
             forward_target_roll,
             backward_target_roll,
-            predictive_auxiliary,
             forward_aux_roll,
-            "f_matched_pair_" + auxiliary,
+            predictive_auxiliary,
         ],
         axis=1,
         inplace=True,

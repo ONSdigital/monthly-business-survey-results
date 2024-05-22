@@ -26,6 +26,7 @@ class TestImputationFlags:
                 "auxiliary",
                 "f_predictive_target_variable",
                 "b_predictive_target_variable",
+                "f_predictive_auxiliary",
             ]
         ]
         df_output = create_impute_flags(
@@ -36,6 +37,9 @@ class TestImputationFlags:
             auxiliary="auxiliary",
             predictive_auxiliary="f_predictive_auxiliary",
         )
+
+        df_expected_output.drop(["f_predictive_auxiliary"], axis=1, inplace=True)
+
         assert_frame_equal(df_output, df_expected_output)
 
     def test_imputation_marker(self, imputation_flag_test_data):
