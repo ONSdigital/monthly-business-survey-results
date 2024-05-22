@@ -1,16 +1,22 @@
 import numpy as np
 import pandas as pd
 
-from src.flag_and_count_matched_pairs import flag_matched_pair_merge
 
+def create_impute_flags(
+    df: pd.DataFrame,
+    target: str,
+    reference: str,
+    strata: str,
+    auxiliary: str,
+    predictive_auxiliary: str,
+):
 
-def create_impute_flags(df, target, reference, strata, auxiliary):
     """
     function to create logical columns for each type of imputation
     output columns are needed to create the string flag column for
     imputation methods.
     Function requires f_predictive and b_predictive columns produced
-    by `flag_matched_pair` function
+    by `flag_matched_pair` function.
 
     Parameters
     ----------
@@ -20,13 +26,16 @@ def create_impute_flags(df, target, reference, strata, auxiliary):
         and backwards)
 
     target : str
-        column name containing target variable
+        Column name containing target variable.
     reference : str
-        column name containing business reference id
+        Column name containing business reference id.
     strata : str
-        column name containing strata information (sic)
+        Column name containing strata information (sic).
     auxiliary : str
-        column name containing auxiliary data
+        Column name containing auxiliary data.
+    predictive_auxiliary: str
+        Column name containing predictive auxiliary data, this is created,
+        by flag_matched_pair_merge function.
 
     Returns
     -------
@@ -68,28 +77,16 @@ def create_impute_flags(df, target, reference, strata, auxiliary):
     construction_conditions = df[target].isna() & df[auxiliary].notna()
     df["c_flag"] = np.where(construction_conditions, True, False)
 
-    df = flag_matched_pair_merge(
-        df=df,
-        forward_or_backward="f",
-        target="auxiliary",
-        period="period",
-        reference="reference",
-        strata="strata",
-    )
+    df[forward_aux_roll] = df.groupby([reference, strata])[predictive_auxiliary].ffill()
 
-    df[forward_aux_roll] = df.groupby([reference, strata])[
-        "f_predictive_" + auxiliary
-    ].ffill()
-    fic_conditions = (
-        df[target].isna() & df["f_predictive_" + auxiliary + "_roll"].notna()
-    )
+    fic_conditions = df[target].isna() & df[forward_aux_roll].notna()
     df["fic_flag"] = np.where(fic_conditions, True, False)
 
     df.drop(
         [
             forward_target_roll,
             backward_target_roll,
-            "f_predictive_" + auxiliary,
+            predictive_auxiliary,
             forward_aux_roll,
             "f_matched_pair_" + auxiliary,
         ],
@@ -139,10 +136,3 @@ def generate_imputation_marker(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     return df
-
-
-if __name__ == "__main__":
-    df1 = pd.read_csv("./tests/imputation_flag_data.csv")
-    df1.drop(["imputation_flag"], axis=1, inplace=True)
-    df_output = generate_imputation_marker(df1)
-    print(df_output.head())

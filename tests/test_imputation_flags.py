@@ -34,6 +34,7 @@ class TestImputationFlags:
             reference="reference",
             strata="strata",
             auxiliary="auxiliary",
+            predictive_auxiliary="f_predictive_auxiliary",
         )
         assert_frame_equal(df_output, df_expected_output)
 
