@@ -1,12 +1,16 @@
-import pandas as pd
-
-df = pd.read_csv(
-    "monthly-business-survey-results/tests/apply_imputation_link.csv"
-).drop(columns="imputed_value")
-
-
 def create_and_merge_imputation_values(
-    df, imputation_class, reference, period, marker, combined_imputation
+    df,
+    imputation_class,
+    reference,
+    period,
+    marker,
+    combined_imputation,
+    target,
+    cumulative_forward_link,
+    cumulative_backward_link,
+    auxiliary,
+    construction_link,
+    imputation_types=("c", "fir", "bir", "fic"),
 ):
     """
     Loop through different imputation types and merge the results according
@@ -15,7 +19,7 @@ def create_and_merge_imputation_values(
     Parameters
     ----------
     df : pandas.DataFrame
-    imputation_class: str
+    imputation_class : str
         column name for the variable that defines the imputation class
     reference : str
         column name for the reference
@@ -25,43 +29,62 @@ def create_and_merge_imputation_values(
         column name containing a marker to indicate the type of imputation required
     combined_imputation : str
         column name for the combined imputation types according to the imputation marker
+    target : str
+        column name for the target variable for imputation
+    cumulative_forward_link : str
+        column name for the cumulative forward imputation link
+    cumulative_backward_link : str
+        column name for the cumulative backward imputation link
+    auxiliary : str
+        column name for auxiliary variable
+    construction_link : str
+        column name for contruction link
+    imputation_types : tup
+        types of imputation to run and add to combined_imputation column stored in a
+        tuple. If 'fic' is selected 'c' must also be selected and proceed 'fic'.
+        For 'fic' to produce the correct result, the C marker must be in the first
+        period for a given reference.
 
     Returns
     -------
     pandas.DataFrame
         dataframe with imputation values defined by the imputation marker
     """
+
     # constructed has to come first to use the result for forward impute from contructed
     imputation_config = {
         "c": {
             "intermediate_column": "constructed",
             "marker": "C",
-            "fill_column": "auxiliary_variable",
             # doesn't actually apply a fill so can be forward or back
+            "fill_column": auxiliary,
             "fill_method": "ffill",
-            "link_column": "construction_link",
+            "link_column": construction_link,
         },
         "fir": {
             "intermediate_column": "fir",
             "marker": "FIR",
-            "fill_column": "target",
+            "fill_column": target,
             "fill_method": "ffill",
-            "link_column": "cumulative_forward_imputation_link",
+            "link_column": cumulative_forward_link,
         },
         "bir": {
             "intermediate_column": "bir",
             "marker": "BIR",
-            "fill_column": "target",
+            "fill_column": target,
             "fill_method": "bfill",
-            "link_column": "cumulative_backward_imputation_link",
+            "link_column": cumulative_backward_link,
         },
         "fic": {
+            # FIC only works if the C is in the first period of the business being
+            # sampled. This is fine for automatic imputation, but should be careful
+            # if manual construction imputation is done
             "intermediate_column": "fic",
             "marker": "FIC",
             # this has to have the same name as the intermediate column for constructed
             "fill_column": "constructed",
             "fill_method": "ffill",
-            "link_column": "cumulative_forward_imputation_link",
+            "link_column": cumulative_forward_link,
         },
     }
 
@@ -69,7 +92,7 @@ def create_and_merge_imputation_values(
 
     intermediate_columns = []
 
-    for imp_type in imputation_config:
+    for imp_type in imputation_types:
         df = create_impute(
             df, [imputation_class, reference], imputation_config[imp_type]
         )
@@ -136,13 +159,3 @@ def merge_imputation_type(df, imputation_spec, marker, combined_imputation):
 
     df.loc[df[marker] == imputation_marker, combined_imputation] = df[imputation_column]
     return df
-
-
-marker = "imputation_marker"
-combined_imputation = "imputed_value"
-reference = "reference"
-period = "period"
-imputation_class = "strata"
-df_new = create_and_merge_imputation_values(
-    df, imputation_class, reference, period, marker, combined_imputation
-)
