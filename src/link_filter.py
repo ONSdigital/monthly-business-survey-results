@@ -44,6 +44,6 @@ def flag_rows_to_ignore(
     df = df.reset_index()
 
     # TODO: Consider what should be logged and reroute print to logs
-    print("These values were flagged:\n", df.loc[df["ignore_from_link"] is True])
+    print("These values were flagged:\n", df.loc[df["ignore_from_link"]])
 
     return df
