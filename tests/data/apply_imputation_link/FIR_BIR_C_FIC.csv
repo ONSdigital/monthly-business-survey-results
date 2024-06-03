@@ -1,0 +1,10 @@
+imputation_class,reference,target,period,forward_imputation_link,backward_imputation_link,auxiliary_variable,construction_link,cumulative_forward_link,cumulative_backward_link,imputation_marker,imputed_value
+100,100000,200,202402,1,2,,,,,R,
+100,100000,,202403,2,0.6,,,2,0.6,FIR,400
+100,100000,,202404,3,1,,,6,1,FIR,1200
+200,100001,,202402,1,4,,,1,2,BIR,600
+200,100001,,202403,3,0.5,,,3,0.5,BIR,150
+200,100001,300,202404,0.5,1,,,,,R,
+300,100002,,202402,1,4,1000,0.1,,2,C,100
+300,100002,,202403,3,0.5,,,3,0.5,FIC,300
+300,100002,,202404,0.5,1,,,1.5,,FIC,150

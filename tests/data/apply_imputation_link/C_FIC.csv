@@ -1,0 +1,4 @@
+imputation_class,reference,target,period,forward_imputation_link,cumulative_forward_imputation_link,construction_link,auxiliary_variable,imputation_marker,imputed_value
+300,100002,,202402,1,,0.1,1000,C,100
+300,100002,,202403,3,3,,,FIC,300
+300,100002,,202404,0.5,1.5,,,FIC,150
