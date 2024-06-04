@@ -36,14 +36,14 @@ documentation][docs-pre-commit-hooks].
 
 ## Code conventions
 
-Code written for this project should follow [PEP 8 coding conventions](pep8), [project naming conventions](docs-naming) and the guidance on [quality assurance of code for analysis and research](duck-book) (also known as the Duck Book).
+Code written for this project should follow [PEP 8 coding conventions][pep8], [project naming conventions][docs-naming] and the guidance on [quality assurance of code for analysis and research][duck-book] (also known as the Duck Book).
 
 ### Git and GitHub
 
 We use Git to version control the source code and out source code is stored on
 GitHub.
 
-We follow the [GitHub flow](github-flow) workflow. This means that we create
+We follow the [GitHub flow][github-flow] workflow. This means that we create
 feature branches of the `main` branch and merge them back to `main` once they
 meet the definition of done. We give our branches short but informative names,
 in lowercase and separated with hypens. Where applicable, we start branch names
@@ -53,19 +53,19 @@ with the respective Jira ticket number. For example,
 We commit regularly, with distinct chunks of work where possible. We write
 short but informative commit messages, starting with a capitalised
 present-tense verb, for example `Add`, `Fix`. When pair-programming, we
-[add co-authors to the commit](git-coauthor). We add
-[longer commit messages](long-commit) for larger or more complex commits, for
+[add co-authors to the commit][git-coauthor]. We add
+[longer commit messages][long-commit] for larger or more complex commits, for
 example (squash) merge commits.
 
 We open a pull request to `main` once we have working code that meets a user
 need, for example meets the definition of done on the Jira ticket. Pull
 requests must be reviewed by at least one member of the team before merging.
-Reviews should follow the [pull request template](pr-template). If we want review on code that does not yet meet the definition of done, we open a draft
+Reviews should follow the [pull request template][pr-template]. If we want review on code that does not yet meet the definition of done, we open a draft
 pull request. Once a branch has been reviewed, it can be merged. We prefer to use squash merges, in order to simplify the `main` branch commit history. After merging the feature branch should be deleted.
 
 ### Functions
 
-We prefer writing functions over classes to make it easier for beginners to understand the code. [Type hints](https://docs.python.org/3/library/typing.html) should be used when writing functions. We prefer functions to return `pandas.DataFrame` rather than `pandas.Series`. 
+We prefer writing functions over classes to make it easier for beginners to understand the code. [Type hints][typing] should be used when writing functions. We prefer functions to return `pandas.DataFrame` rather than `pandas.Series`, for example when deriving new (temporary) variables.
 
 ### Markdown
 
@@ -90,7 +90,7 @@ pytest
 Our testing approach is:
 - use `.csv` files containing simple minimal input and output data for a function to be tested
 - individual test cases should be separated into different `.csv` files and grouped into folders
-- the name of the test data `.csv` files should reflect the test case and the folder name should be the same as the module/function  
+- the name of the test data `.csv` files should reflect the test case and the folder name should be the same as the module/function
 
 ### Code coverage
 
@@ -147,3 +147,4 @@ build the documentation into an accessible, searchable website.
 [github-flow]: https://docs.github.com/en/get-started/using-github/github-flow
 [git-coauthor]: https://docs.github.com/en/pull-requests/committing-changes-to-your-project/creating-and-editing-commits/creating-a-commit-with-multiple-authors
 [long-commit]: https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html
+[typing]: https://docs.python.org/3/library/typing.html
