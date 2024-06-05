@@ -24,7 +24,7 @@ def calculate_construction_link(
         name of column in dataframe containing period variable
     """
     group_sums = (
-        dataframe[dataframe[match_flag] is True]
+        dataframe[dataframe[match_flag]]  # select valid matches
         .groupby([strata, period])
         .sum()
         .reset_index()
@@ -36,5 +36,7 @@ def calculate_construction_link(
     construction_link_df = group_sums[[strata, period, "construction_link"]]
 
     dataframe = dataframe.merge(construction_link_df, how="left", on=[strata, period])
+
+    dataframe = dataframe.fillna({"construction_link": 1.0})
 
     return dataframe
