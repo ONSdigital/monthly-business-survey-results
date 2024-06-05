@@ -4,9 +4,9 @@ import pytest
 from helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
+from src.construction_link import calculate_construction_link
 from src.construction_matches import flag_construction_matches
 from src.flag_and_count_matched_pairs import count_matches
-from src.construction_link import calculate_construction_link
 
 
 @pytest.fixture(scope="class")
@@ -60,6 +60,7 @@ class TestConstructionImputation:
                 "auxiliary",
                 "flag_construction_matches",
                 "strata",
+                "period",
                 "construction_link",
             ]
         ]
@@ -71,6 +72,7 @@ class TestConstructionImputation:
             "auxiliary",
             "flag_construction_matches",
             "strata",
+            "period",
         )
 
         assert_frame_equal(actual_output, expected_output)

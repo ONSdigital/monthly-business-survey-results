@@ -1,8 +1,11 @@
-import pandas as pd
-
 def calculate_construction_link(
-        dataframe, target, auxiliary, match_flag, strata,
-    ):
+    dataframe,
+    target,
+    auxiliary,
+    match_flag,
+    strata,
+    period,
+):
     """_summary_
 
     Parameters
@@ -17,17 +20,21 @@ def calculate_construction_link(
         name of column in dataframe containing flag for valid construction matches
     strata : str
         name of column in dataframe containing strata variable
+    period : str
+        name of column in dataframe containing period variable
     """
-    grouped_data = (
-        dataframe[dataframe[match_flag] == True]
-        .groupby(strata)
+    group_sums = (
+        dataframe[dataframe[match_flag] is True]
+        .groupby([strata, period])
+        .sum()
+        .reset_index()
     )
 
-    grouped_data["return_sum"] = grouped_data.sum(target)
-    grouped_data["auxiliary_sum"] = grouped_data.sum(auxiliary)
-    grouped_data["construction_link"] = grouped_data[["return_sum"]]/grouped_data["construction_link"]
+    group_sums["construction_link"] = group_sums[target] / group_sums[auxiliary]
+    # TODO: dividing by zero?
 
-    grouped_data = grouped_data[[strata, "construction_link"]]
-    dataframe = dataframe.merge(grouped_data, how="left", on=strata)
+    construction_link_df = group_sums[[strata, period, "construction_link"]]
+
+    dataframe = dataframe.merge(construction_link_df, how="left", on=[strata, period])
 
     return dataframe
