@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def calculate_construction_link(
     dataframe,
     target,
@@ -30,8 +33,9 @@ def calculate_construction_link(
         .reset_index()
     )
 
+    group_sums[auxiliary] = group_sums[auxiliary].replace(0, np.nan)
+
     group_sums["construction_link"] = group_sums[target] / group_sums[auxiliary]
-    # TODO: dividing by zero?
 
     construction_link_df = group_sums[[strata, period, "construction_link"]]
 

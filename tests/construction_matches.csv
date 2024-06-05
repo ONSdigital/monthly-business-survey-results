@@ -8,3 +8,5 @@ period,strata,auxiliary,target,flag_construction_matches,count_construction_matc
 202404,12340,100,14,True,1,0.14
 202404,56789,200,16,True,1,0.08
 202405,56789,,10,False,0,1.0
+202406,56789,0,9,True,2,1.0
+202406,56789,0,11,True,2,1.0
