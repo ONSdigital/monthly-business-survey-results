@@ -6,3 +6,4 @@ period,strata,calibration_group,sampled,auxiliary,design_weight,calibration_fact
 202401,102,A,1,200,1.5,1.2
 202401,103,B,1,300,1.0,1.0
 202402,101,A,1,400,1.0,1.0
+202402,103,B,0,500,,

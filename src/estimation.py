@@ -35,7 +35,6 @@ def calculate_design_weight(
 
     Notes
     -----
-    Assumes all strata are sampled - is this a valid assumption?
     #TODO: Add link to specification
     """
     population_counts = dataframe.groupby([period, group]).size()
