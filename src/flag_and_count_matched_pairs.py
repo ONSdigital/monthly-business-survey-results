@@ -9,7 +9,7 @@ def flag_matched_pair(df, forward_or_backward, target, period, reference, strata
     ----------
     df : pd.DataFrame
         pandas dataframe of original data
-    forward_or_backward : int
+    forward_or_backward : str
         number of rows to shift up or down
     target : str
         column name containing target variable
@@ -26,8 +26,7 @@ def flag_matched_pair(df, forward_or_backward, target, period, reference, strata
     -------
     _type_
         two pandas dataframes: the main dataframe with column added flagging forward matched pairs and 
-        predictive target variable data column and a second with QA information on the number of matches for each 
-        time period, for each group.
+        predictive target variable data column
     """    
     
     df = df.sort_values(by = [reference, period])
@@ -40,16 +39,16 @@ def flag_matched_pair(df, forward_or_backward, target, period, reference, strata
     return df
   
   
-def count_matches(df, forward_or_backward, target, period, reference, strata):
+def count_matches(df, flag, target, period, reference, strata):
     """
     function to flag matched pairs using the shift method
 
     Parameters
     ----------
     df : pd.DataFrame
-        pandas dataframe of original data with matched pair flags - see flag_matched_pair
-    forward_or_backward : int
-        number of rows to shift up or down
+        pandas dataframe of original data with imputation flags
+    flag : str/list
+        the imputation flag column/s. Single string if one column, list of strings for multiple columns.
     target : str
         column name containing target variable
     period : str
@@ -58,18 +57,14 @@ def count_matches(df, forward_or_backward, target, period, reference, strata):
         column name containing business reference id
     strata : str
         column name containing strata information (sic)
-    time_difference: int
-        lookup distance for matched pairs
 
     Returns
     -------
     _type_
-        two pandas dataframes: the main dataframe with column added flagging forward matched pairs and 
-        predictive target variable data column and a second with QA information on the number of matches for each 
-        time period, for each group.
+        pandas dataframe: match counts for each flag column.
     """    
     
-    return df.groupby([strata, period])[forward_or_backward+"_match"].agg("sum").reset_index()
+    return df.groupby([strata, period])[flag].agg("sum").reset_index()
   
   
   
