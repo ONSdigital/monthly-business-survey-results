@@ -19,6 +19,7 @@ class TestEstimation:
         input_data = expected_output.drop(columns=["a_weight"])
         actual_output = calculate_a_weight(
             input_data,
+            "period",
             "strata",
             "sampled",
         )
