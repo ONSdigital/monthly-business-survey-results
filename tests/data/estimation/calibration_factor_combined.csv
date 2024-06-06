@@ -1,4 +1,4 @@
-period,strata,calibration_group,sampled,auxiliary,a_weight,calibration_factor
+period,strata,calibration_group,sampled,auxiliary,design_weight,calibration_factor
 202401,101,A,0,300,2.0,1.2
 202401,101,A,1,100,2.0,1.2
 202401,102,A,1,100,1.5,1.2

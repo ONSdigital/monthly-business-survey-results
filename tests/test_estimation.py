@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal, assert_series_equal
 
-from src.estimation import calculate_a_weight, calculate_calibration_factor
+from src.estimation import calculate_calibration_factor, calculate_design_weight
 
 
 @pytest.fixture(scope="class")
@@ -13,11 +13,11 @@ def filepath():
 
 
 class TestEstimation:
-    def test_calculate_a_weights(self, filepath):
-        expected_output = pd.read_csv(filepath / "a_weights.csv")
+    def test_calculate_design_weights(self, filepath):
+        expected_output = pd.read_csv(filepath / "design_weights.csv")
 
-        input_data = expected_output.drop(columns=["a_weight"])
-        actual_output = calculate_a_weight(
+        input_data = expected_output.drop(columns=["design_weight"])
+        actual_output = calculate_design_weight(
             input_data,
             "period",
             "strata",
@@ -46,4 +46,6 @@ class TestEstimation:
         )
 
         assert_frame_equal(actual_output, expected_output)
-        assert_series_equal(expected_output["a_weight"], actual_output["a_weight"])
+        assert_series_equal(
+            expected_output["design_weight"], actual_output["design_weight"]
+        )
