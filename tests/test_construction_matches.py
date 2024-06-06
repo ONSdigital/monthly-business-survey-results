@@ -11,6 +11,8 @@ from helper_functions import load_and_format
 def construction_test_data():
     return load_and_format(Path("tests")/"construction_matches.csv")
 
+count_matches(df, forward_or_backward, target, period, reference, strata)
+  
 class TestConstructionMatches:
     def test_construction_matches_flag(self, construction_test_data):
         expected_output = construction_test_data[[
