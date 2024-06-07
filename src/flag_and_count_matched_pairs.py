@@ -39,7 +39,7 @@ def flag_matched_pair(df, forward_or_backward, target, period, reference, strata
     return df
   
   
-def count_matches(df, flag, target, period, reference, strata):
+def count_matches(df, flag, period, strata):
     """
     function to flag matched pairs using the shift method
 
@@ -49,12 +49,8 @@ def count_matches(df, flag, target, period, reference, strata):
         pandas dataframe of original data with imputation flags
     flag : str/list
         the imputation flag column/s. Single string if one column, list of strings for multiple columns.
-    target : str
-        column name containing target variable
     period : str
         column name containing time period
-    reference : str
-        column name containing business reference id
     strata : str
         column name containing strata information (sic)
 

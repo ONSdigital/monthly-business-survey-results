@@ -4,25 +4,35 @@ import pytest
 from pandas.testing import assert_frame_equal
 from pathlib import Path
 
-from src.flag_and_count_matched_pairs import flag_matched_pair
+from src.flag_and_count_matched_pairs import flag_matched_pair, count_matches
 from helper_functions import load_and_format
-
-filepath = Path('tests')/'test_data_matched_pair/expected_output.csv'
 
 @pytest.fixture(scope="class")
 def match_test_data():
-    return load_and_format(Path('tests')/'test_data_matched_pair/expected_output.csv')
+  return load_and_format(Path('tests')/'test_data_matched_pair/flag_pairs_expected_output.csv')
 
+@pytest.fixture(scope="class")
+def count_test_data():
+  return load_and_format(Path('tests')/'test_data_matched_pair/count_matches_input.csv')
+  
+@pytest.fixture(scope="class")
+def count_expected_output():
+  return load_and_format(Path('tests')/'test_data_matched_pair/count_matches_expected_output.csv')
 
 class TestMatchedPair:
-    def test_flag_matched_pair_forward(self, match_test_data):
-        expected_output = match_test_data.drop(['b_match'],axis = 1)
-        df_input = match_test_data[['reference', 'strata', 'period', 'target_variable']]
-        df_output = flag_matched_pair(df_input,'f','target_variable','period', 'reference', 'strata')
-        assert_frame_equal(df_output, expected_output)
+  def test_flag_matched_pair_forward(self, match_test_data):
+    expected_output = match_test_data.drop(['b_match'],axis = 1)
+    df_input = match_test_data[['reference', 'strata', 'period', 'target_variable']]
+    df_output = flag_matched_pair(df_input,'f','target_variable','period', 'reference', 'strata')
+    assert_frame_equal(df_output, expected_output)
 
-    def test_flag_matched_pair_backward(self, match_test_data):
-        expected_output = match_test_data.drop(['f_match'],axis = 1)
-        df_input = match_test_data[['reference', 'strata', 'period', 'target_variable']]
-        df_output = flag_matched_pair(df_input,'b','target_variable','period', 'reference', 'strata')
-        assert_frame_equal(df_output, expected_output)
+  def test_flag_matched_pair_backward(self, match_test_data):
+    expected_output = match_test_data.drop(['f_match'],axis = 1)
+    df_input = match_test_data[['reference', 'strata', 'period', 'target_variable']]
+    df_output = flag_matched_pair(df_input,'b','target_variable','period', 'reference', 'strata')
+    assert_frame_equal(df_output, expected_output)
+      
+class TestCountMatches:
+  def test_count_matches(self, count_test_data, count_expected_output):
+    output = count_matches(count_test_data, ["flag_1", "flag_2"], "period", "group")
+    assert_frame_equal(output, count_expected_output)
