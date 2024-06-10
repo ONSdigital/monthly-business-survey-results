@@ -1,0 +1,4 @@
+imputation_class,reference,target,period,backward_imputation_link,cumulative_backward_imputation_link,imputation_marker,imputed_value
+200,100001,,202402,4,2,BIR,600
+200,100001,,202403,0.5,0.5,BIR,150
+200,100001,300,202404,1,,R,
