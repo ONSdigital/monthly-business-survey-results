@@ -1,7 +1,10 @@
-import pandas as pd
-import numpy as np 
+import numpy as np  # noqa F401
+import pandas as pd  # noqa F401
 
-def flag_matched_pair(df, forward_or_backward, target, period, reference, strata, time_difference=1):
+
+def flag_matched_pair(
+    df, forward_or_backward, target, period, reference, strata, time_difference=1
+):
     """
     function to flag matched pairs using the shift method
 
@@ -25,20 +28,26 @@ def flag_matched_pair(df, forward_or_backward, target, period, reference, strata
     Returns
     -------
     _type_
-        two pandas dataframes: the main dataframe with column added flagging forward matched pairs and 
+        two pandas dataframes: the main dataframe with column added flagging
+        forward matched pairs and
         predictive target variable data column
-    """    
-    
-    df = df.sort_values(by = [reference, period])
+    """
 
-    if forward_or_backward == 'b':
+    df = df.sort_values(by=[reference, period])
+
+    if forward_or_backward == "b":
         time_difference = -time_difference
-        
-    df[forward_or_backward+"_match"] = df.groupby([strata, reference]).shift(time_difference)[target].notnull().mul(df[target].notnull())
-        
+
+    df[forward_or_backward + "_match"] = (
+        df.groupby([strata, reference])
+        .shift(time_difference)[target]
+        .notnull()
+        .mul(df[target].notnull())
+    )
+
     return df
-  
-  
+
+
 def count_matches(df, flag, period, strata):
     """
     function to flag matched pairs using the shift method
@@ -48,7 +57,8 @@ def count_matches(df, flag, period, strata):
     df : pd.DataFrame
         pandas dataframe of original data with imputation flags
     flag : str/list
-        the imputation flag column/s. Single string if one column, list of strings for multiple columns.
+        the imputation flag column/s. Single string if one column, list of
+        strings for multiple columns.
     period : str
         column name containing time period
     strata : str
@@ -58,9 +68,6 @@ def count_matches(df, flag, period, strata):
     -------
     _type_
         pandas dataframe: match counts for each flag column.
-    """    
-    
+    """
+
     return df.groupby([strata, period])[flag].agg("sum").reset_index()
-  
-  
-  
