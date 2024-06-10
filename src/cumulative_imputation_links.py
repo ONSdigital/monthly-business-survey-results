@@ -46,7 +46,12 @@ def get_cumulative_links(
 
     dataframe["imputation_group"] = (
         (
-            (dataframe["missing_value"].diff(time_difference) != 0)
+            (
+                dataframe["imputation_marker"]
+                .ne(dataframe["imputation_marker"].shift().bfill())
+                .astype(int)
+                != 0
+            )
             | (dataframe[strata].diff(time_difference) != 0)
             | (dataframe[reference].diff(time_difference) != 0)
         )
