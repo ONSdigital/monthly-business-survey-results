@@ -6,6 +6,7 @@ repos:
 -   repo: local
     hooks:
       - id: check-added-large-files
+        exclude: ^playground/
         entry: pre-commits/check_added_large_files.py
         name: Check for files larger than 5 MB
         language: script
@@ -16,6 +17,7 @@ repos:
 -    repo: local
      hooks:
       - id: end-of-line-fixer
+        exclude: ^playground/
         entry: pre-commits/end_of_line_fixer.py
         name: Check for a blank line at the end of scripts (auto-fixes)
         language: script
@@ -25,6 +27,7 @@ repos:
 -     repo: local
       hooks:
       - id: trailing-whitespace
+        exclude: ^playground/
         entry: pre-commits/remove_whitespace.py
         name: Check for trailing whitespaces (auto-fixes)
         language: script
@@ -34,6 +37,7 @@ repos:
 -     repo: local
       hooks:
       - id: mixed-line-endings
+        exclude: ^playground/
         entry: pre-commits/mixed_line_endings.py
         name: Check for consistent end of line type LF to CRLF to CR (auto-fixes)
         language: script
@@ -44,6 +48,7 @@ repos:
 -   repo: local
     hooks:
       - id: isort
+        exclude: ^playground/
         entry: isort
         name: isort - Sort Python imports (auto-fixes)
         language: system
@@ -55,6 +60,7 @@ repos:
 -   repo: local
     hooks:
       - id: nbstripout
+        exclude: ^playground/
         entry: nbstripout
         name: nbstripout - Strip outputs from notebooks (auto-fixes)
         language: system
@@ -67,6 +73,7 @@ repos:
 -   repo: local
     hooks:
       - id: black
+        exclude: ^playground/
         entry: black
         name: black - consistent Python code formatting (auto-fixes)
         language: system
@@ -78,6 +85,7 @@ repos:
 -   repo: local
     hooks:
       - id: flake8
+        exclude: ^playground/
         entry: flake8
         name: flake8 - Python linting
         language: system
@@ -89,6 +97,7 @@ repos:
 -   repo: local
     hooks:
       - id: detect-secrets
+        exclude: ^playground/
         entry: detect-secrets-hook
         name: detect-secrets - Detect secrets in staged code
         args: [ "--baseline", ".secrets.baseline" ]
