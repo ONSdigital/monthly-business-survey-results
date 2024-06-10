@@ -60,7 +60,18 @@ def get_cumulative_links(
     reference_diff_con = dataframe[reference].diff(time_difference) != 0
 
     dataframe["imputation_group"] = (
-        (marker_diff_con | strat_diff_con | reference_diff_con).astype("int").cumsum()
+        (
+            (
+                dataframe["imputation_marker"]
+                .ne(dataframe["imputation_marker"].shift().bfill())
+                .astype(int)
+                != 0
+            )
+            | (dataframe[strata].diff(time_difference) != 0)
+            | (dataframe[reference].diff(time_difference) != 0)
+        )
+        .astype("int")
+        .cumsum()
     )
 
     if forward_or_backward == "f":
