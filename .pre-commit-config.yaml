@@ -73,6 +73,7 @@ repos:
         types: [python]
         stages: [commit]
         args: ["--verbose"]
+        exclude: ^playground/
 
 #works
 -   repo: local
