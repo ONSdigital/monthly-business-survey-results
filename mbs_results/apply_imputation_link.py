@@ -58,7 +58,7 @@ def create_and_merge_imputation_values(
     imputation_config = {
         "c": {
             "intermediate_column": "constructed",
-            "marker": "C",
+            "marker": "c",
             # doesn't actually apply a fill so can be forward or back
             "fill_column": auxiliary,
             "fill_method": "ffill",
@@ -80,9 +80,8 @@ def create_and_merge_imputation_values(
         },
         "fic": {
             "intermediate_column": "fic",
-            "marker": "firc",
-            # this has to have the same name as the intermediate column for constructed
-            "fill_column": "constructed",
+            "marker": "fic",
+            "fill_column": "imputed_value",
             "fill_method": "ffill",
             "link_column": cumulative_forward_link,
         },
