@@ -3,6 +3,7 @@ from typing import Dict
 import pandas as pd
 
 from construction_matches import flag_construction_matches
+from cumulative_imputation_links import get_cumulative_links
 from flag_and_count_matched_pairs import count_matches, flag_matched_pair_merge
 from forward_link import calculate_imputation_link
 
@@ -132,5 +133,43 @@ def calculate_all_links(
 
     for args in link_arguments:
         df = calculate_imputation_link(df, **args)
+
+    return df
+
+
+def calculate_all_cum_links(
+    df: pd.DataFrame, **default_columns: Dict[str, str]
+) -> pd.DataFrame:
+    """
+    Creates 2 new numeric columns with the cumulative product link, forward
+    uses ffill and backward bffill.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    **default_columns : Dict[str, str]
+        The column names kwargs which were passed to ratio of means function.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Original dataframe with 2 new numeric columns.
+    """
+
+    cum_links_arguments = (
+        dict(
+            **default_columns,
+            **{"forward_or_backward": "f", "imputation_link": "f_link_question"}
+        ),
+        dict(
+            **default_columns,
+            **{"forward_or_backward": "b", "imputation_link": "b_link_question"}
+        ),
+    )
+
+    for args in cum_links_arguments:
+
+        df = get_cumulative_links(df, **args)
 
     return df
