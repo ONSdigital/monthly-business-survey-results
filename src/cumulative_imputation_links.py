@@ -74,4 +74,4 @@ def get_cumulative_links(
         dataframe["cumulative_" + imputation_link],
     )
 
-    return dataframe[["imputation_group", "cumulative_" + imputation_link]]
+    return dataframe
