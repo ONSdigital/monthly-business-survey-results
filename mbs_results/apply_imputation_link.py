@@ -58,7 +58,7 @@ def create_and_merge_imputation_values(
     imputation_config = {
         "c": {
             "intermediate_column": "constructed",
-            "marker": "c",
+            "marker": "C",
             # doesn't actually apply a fill so can be forward or back
             "fill_column": auxiliary,
             "fill_method": "ffill",
@@ -79,12 +79,10 @@ def create_and_merge_imputation_values(
             "link_column": cumulative_backward_link,
         },
         "fic": {
-            # FIC only works if the C is in the first period of the business being
-            # sampled. This is fine for automatic imputation, but should be careful
-            # if manual construction imputation is done
             "intermediate_column": "fic",
-            "marker": "fic",
-            "fill_column": "imputed_value",
+            "marker": "firc",
+            # this has to have the same name as the intermediate column for constructed
+            "fill_column": "constructed",
             "fill_method": "ffill",
             "link_column": cumulative_forward_link,
         },
