@@ -10,6 +10,7 @@ isort
 nbstripout
 nbqa
 pre_commit_hooks
+pydoop>=2.0.0
 flake8
 pandas==1.1.5
 numpy
