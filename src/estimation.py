@@ -4,7 +4,7 @@ import pandas as pd
 def calculate_design_weight(
     dataframe: pd.DataFrame,
     period: str,
-    group: str,
+    strata: str,
     sampled: str,
 ) -> pd.DataFrame:
     """
@@ -16,9 +16,8 @@ def calculate_design_weight(
         data to be estimated
     period : str
         name of column in dataframe containing period variable
-    group : str
-        name of column in dataframe containing group variable
-        this should usually be the strata variable
+    strata : str
+        name of column in dataframe containing strata variable
     sampled : str
         name of column in dataframe containing sample flag with values 0 or 1
 
@@ -29,19 +28,19 @@ def calculate_design_weight(
 
     Notes
     -----
-    #TODO: Add link to specification
+    #TODO: Add link to specification once added to repository
     """
-    population_counts = dataframe.groupby([period, group]).size()
+    population_counts = dataframe.groupby([period, strata]).size()
 
     sample = dataframe[dataframe[sampled] == 1]
-    sample_counts = sample.groupby([period, group]).size()
+    sample_counts = sample.groupby([period, strata]).size()
 
     design_weights = population_counts / sample_counts
 
     design_weights.name = "design_weight"
     design_weights = design_weights.reset_index()
 
-    dataframe = dataframe.merge(design_weights, how="left", on=[period, group])
+    dataframe = dataframe.merge(design_weights, how="left", on=[period, strata])
 
     return dataframe
 
