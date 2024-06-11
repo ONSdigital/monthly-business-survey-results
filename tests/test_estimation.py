@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-from pandas.testing import assert_frame_equal, assert_series_equal
+from pandas.testing import assert_frame_equal
 
 from src.estimation import calculate_calibration_factor, calculate_design_weight
 
@@ -38,14 +38,7 @@ class TestEstimation:
 
         input_data = expected_output.drop(columns=["calibration_factor"])
         actual_output = calculate_calibration_factor(
-            input_data,
-            "period",
-            group,
-            "sampled",
-            "auxiliary",
+            input_data, "period", group, "sampled", "auxiliary", "design_weight"
         )
 
         assert_frame_equal(actual_output, expected_output)
-        assert_series_equal(
-            expected_output["design_weight"], actual_output["design_weight"]
-        )

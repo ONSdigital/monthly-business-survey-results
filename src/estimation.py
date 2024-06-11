@@ -1,5 +1,3 @@
-from typing import Optional
-
 import pandas as pd
 
 
@@ -8,7 +6,6 @@ def calculate_design_weight(
     period: str,
     group: str,
     sampled: str,
-    design_weight: Optional[str] = "design_weight",
 ) -> pd.DataFrame:
     """
     Add column to dataframe containing design weights based on sampled flag
@@ -24,14 +21,11 @@ def calculate_design_weight(
         this should usually be the strata variable
     sampled : str
         name of column in dataframe containing sample flag with values 0 or 1
-    design_weight : str
-        name to be given to new column containing design_weights
-        defaults to `design_weights`
 
     Returns
     -------
     pd.DataFrame
-        dataframe with new column containing design_weights
+        dataframe with new column design_weight
 
     Notes
     -----
@@ -44,7 +38,7 @@ def calculate_design_weight(
 
     design_weights = population_counts / sample_counts
 
-    design_weights.name = design_weight
+    design_weights.name = "design_weight"
     design_weights = design_weights.reset_index()
 
     dataframe = dataframe.merge(design_weights, how="left", on=[period, group])
@@ -58,6 +52,7 @@ def calculate_calibration_factor(
     group: str,
     sampled: str,
     auxiliary: str,
+    design_weight: str,
 ) -> pd.DataFrame:
     """
      Add column to dataframe to calculate calibration factor
@@ -84,19 +79,13 @@ def calculate_calibration_factor(
      pd.DataFrame
          dataframe with new column `calibration_factor`
     """
-    # design weights used in calibration factor calculation should be based on
-    # group (not necessarily strata) and should not overwrite existing weights
-    dataframe_copy = dataframe.copy()
-    dataframe_copy = calculate_design_weight(
-        dataframe_copy, period, group, sampled, "group_design_weight"
-    )
 
-    population_sums = dataframe_copy.groupby([period, group])[auxiliary].sum()
+    population_sums = dataframe.groupby([period, group])[auxiliary].sum()
 
-    # copy again to avoid SettingWithCopy warning
+    # copy to avoid SettingWithCopy warning
     # (not required with later versions of pandas)
-    sample = dataframe_copy.copy()[dataframe_copy[sampled] == 1]
-    sample["weighted_auxiliary"] = sample[auxiliary] * sample["group_design_weight"]
+    sample = dataframe.copy()[dataframe[sampled] == 1]
+    sample["weighted_auxiliary"] = sample[auxiliary] * sample[design_weight]
     weighted_sample_sums = sample.groupby([period, group])["weighted_auxiliary"].sum()
 
     calibration_factor = population_sums / weighted_sample_sums
