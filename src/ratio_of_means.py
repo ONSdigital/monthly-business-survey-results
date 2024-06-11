@@ -1,11 +1,13 @@
 from typing import Dict
 
 import pandas as pd
+from impute import create_and_merge_imputation_values
 
 from construction_matches import flag_construction_matches
 from cumulative_imputation_links import get_cumulative_links
 from flag_and_count_matched_pairs import count_matches, flag_matched_pair_merge
 from forward_link import calculate_imputation_link
+from imputation_flags import create_impute_flags, generate_imputation_marker
 
 
 def flag_all_match_pairs(
@@ -171,5 +173,100 @@ def calculate_all_cum_links(
     for args in cum_links_arguments:
 
         df = get_cumulative_links(df, **args)
+
+    return df
+
+
+def ratio_of_means(
+    df: pd.DataFrame,
+    target: str,
+    period: str,
+    reference: str,
+    strata: str,
+    auxiliary: str,
+) -> pd.DataFrame:
+    """
+    Imputes for each non-responding contributor a single numeric target
+    variable within the dataset for multiple periods simultaneously. It uses
+    the relationship between the target variable of interest and a predictive
+    value and/or auxiliary variable to inform the imputed value. The method
+    can apply forward, backward, construction or forward from construction
+    imputation. The type of imputation used will vary for each non-respondent
+    in each period depending on whether data is available in the predictive
+    period
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+         Original dataframe.
+    target : str
+        Column name of values to be imputed.
+    period : str
+        Column name containing datetime information.
+    reference : str
+        Column name of unique Identifier.
+    strata : str
+        Column name containing strata information (sic).
+    auxiliary : str
+        Column name containing auxiliary information (sic).
+
+    Returns
+    -------
+    pd.DataFrame
+        Original dataframe with imputed values in the target column, and with
+        intermediate columns which were used for the imputation method.
+    """
+
+    # Saving args to dict, so we can pass same attributes to multiple functions
+
+    default_columns = locals()
+
+    del default_columns["df"]
+
+    # TODO: Is datetime needed? If so here is a good place to convert to datetime
+
+    df = (
+        df.pipe(flag_all_match_pairs, **default_columns)
+        .pipe(count_all_matches, **default_columns)
+        .pipe(calculate_all_links, **default_columns)
+        .pipe(
+            create_impute_flags,
+            **default_columns,
+            predictive_auxiliary="f_predictive_other"
+        )
+        .pipe(generate_imputation_marker)
+        .pipe(calculate_all_cum_links, **default_columns)
+        .pipe(
+            create_and_merge_imputation_values,
+            **default_columns,
+            imputation_class="group",
+            marker="imputation_marker",
+            combined_imputation="imputed_value",
+            cumulative_forward_link="cumulative_f_link_question",
+            cumulative_backward_link="cumulative_b_link_question",
+            construction_link="construction_link",
+            imputation_types=("c", "fir", "bir", "fic")
+        )
+    )
+
+    df = df.drop(
+        columns=[
+            "f_matched_pair_question",
+            "b_matched_pair_question",
+            "f_matched_pair_other",
+            "flag_construction_matches",
+            "r_flag",
+            "fir_flag",
+            "bir_flag",
+            "c_flag",
+            "fic_flag",
+            "missing_value",
+            "imputation_group",
+            "cumulative_f_link_question",
+            "cumulative_b_link_question",
+        ]
+    )
+
+    # TODO: Missing extra columns, default values and if filter was applied, all bool
 
     return df
