@@ -7,12 +7,15 @@ from pandas.testing import assert_frame_equal
 
 from src.flag_and_count_matched_pairs import count_matches, flag_matched_pair
 
-
-@pytest.fixture(scope="class")
-def match_test_data():
-    return load_and_format(
-        Path("tests") / "test_data_matched_pair/flag_pairs_expected_output.csv"
-    )
+match_inputs = [
+    load_and_format(
+        Path("tests") / "test_data_matched_pair/flag_pairs_2_groups_expected_output.csv"
+    ),
+    load_and_format(
+        Path("tests")
+        / "test_data_matched_pair/flag_pairs_missing_rows_expected_output.csv"
+    ),
+]
 
 
 @pytest.fixture(scope="class")
@@ -29,10 +32,15 @@ def count_expected_output():
     )
 
 
+@pytest.mark.parametrize("match_test_data", match_inputs)
 class TestMatchedPair:
     def test_flag_matched_pair_forward(self, match_test_data):
         expected_output = match_test_data.drop(["b_match"], axis=1)
-        df_input = match_test_data[["reference", "strata", "period", "target_variable"]]
+        df_input = (
+            match_test_data[["reference", "strata", "period", "target_variable"]]
+            .sample(frac=1)
+            .reset_index(drop=True)
+        )
         df_output = flag_matched_pair(
             df_input, "f", "target_variable", "period", "reference", "strata"
         )
