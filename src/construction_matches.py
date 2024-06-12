@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def flag_construction_matches(dataframe, target, period, auxiliary):
+def flag_construction_matches(dataframe, target, period, auxiliary, **kwargs):
     """
     Add flag to indicate whether the record has non-null target, period and
     auxiliary variables, and is therefore valid to use when calculating

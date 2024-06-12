@@ -2,8 +2,9 @@ import numpy as np  # noqa F401
 import pandas as pd  # noqa F401
 
 
-def flag_matched_pair(
-    df, forward_or_backward, target, period, reference, strata, time_difference=1
+
+def flag_matched_pair_merge(
+    df, forward_or_backward, target, period, reference, strata, time_difference=1, **kwargs
 ):
     """
     function to flag matched pairs using the shift method
@@ -54,7 +55,7 @@ def flag_matched_pair(
     return df
 
 
-def count_matches(df, flag, period, strata):
+def count_matches(df, flag_column_name, period, strata, count_column_name=None, **kwargs):
     """
     function to flag matched pairs using the shift method
 
