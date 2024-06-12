@@ -10,6 +10,7 @@ def calculate_imputation_link(
     target_variable: str,
     predictive_variable: str,
     link_col: str,
+     **kwargs
 ) -> pd.DataFrame:
     """
     Calculate link between target_variable and predictive_variable by strata,

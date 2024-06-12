@@ -11,6 +11,7 @@ def create_and_merge_imputation_values(
     auxiliary,
     construction_link,
     imputation_types=("c", "fir", "bir", "fic"),
+     **kwargs
 ):
     """
     Loop through different imputation types and merge the results according
