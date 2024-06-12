@@ -7,10 +7,7 @@ from pandas.testing import assert_frame_equal
 from src.ratio_of_means import ratio_of_means
 
 
-@pytest.fixture(scope="class")
-def filepath():
-    return Path("tests") / "data" / "ratio_of_means"
-
+scenario_path_prefix = Path("tests", "data", "ratio_of_means")
 
 scenarios = [
     "01_C",
@@ -57,8 +54,8 @@ pytestmark = pytest.mark.parametrize("base_file_name", scenarios)
 class TestRatioOfMeans:
     def test_ratio_of_means(self, base_file_name):
 
-        input_data = pd.read_csv(Path(filepath, base_file_name + "_input.csv"))
-        expected_output = pd.read_csv(Path(filepath, base_file_name + "_output.csv"))
+        input_data = pd.read_csv(Path(scenario_path_prefix,base_file_name + "_input.csv"))
+        expected_output = pd.read_csv(Path(scenario_path_prefix,base_file_name + "_output.csv"))
 
         # not yet implemented remove this when defaults are ready
         expected_output = expected_output.drop(
