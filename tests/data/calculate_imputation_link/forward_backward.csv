@@ -1,4 +1,4 @@
-,identifier,period,group,question,f_predictive_question,b_predictive_question,f_matched_pair,b_matched_pair,f_link,b_link
+,identifier,period,group,target,f_predictive_question,b_predictive_question,f_matched_pair,b_matched_pair,f_link,b_link
 0,10001,202001,1,547.0,,362.0,False,True,,0.9925133689839573
 1,10001,202002,1,362.0,547.0,895.0,True,True,1.0075431034482758,0.8431018935978359
 2,10001,202003,1,895.0,362.0,,True,False,1.186096256684492,
