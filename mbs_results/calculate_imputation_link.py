@@ -33,8 +33,12 @@ def calculate_imputation_link(
         Column name of the predicted target variable.
     link_col : str
         Name to use for the new column containing imputation link
+<<<<<<< HEAD:mbs_results/calculate_imputation_link.py
     kwargs : mapping, optional
         A dictionary of keyword arguments passed into func.
+=======
+
+>>>>>>> a1f8bd1 (391 refactor imputation link (#30)):src/calculate_imputation_link.py
     Returns
     -------
     df : pd.DataFrame
