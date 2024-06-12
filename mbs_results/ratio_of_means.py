@@ -6,7 +6,7 @@ from src.apply_imputation_link import create_and_merge_imputation_values
 from src.construction_matches import flag_construction_matches
 from src.cumulative_imputation_links import get_cumulative_links
 from src.flag_and_count_matched_pairs import count_matches, flag_matched_pair_merge
-from src.forward_link import calculate_imputation_link
+from src.calculate_imputation_link import calculate_imputation_link
 from src.imputation_flags import create_impute_flags, generate_imputation_marker
 
 
@@ -115,6 +115,7 @@ def calculate_all_links(
             **{
                 "match_col": "f_matched_pair_question",
                 "predictive_variable": "f_predictive_question",
+                "link_col" : "f_link_question"
             }
         ),
         dict(
@@ -122,6 +123,7 @@ def calculate_all_links(
             **{
                 "match_col": "b_matched_pair_question",
                 "predictive_variable": "b_predictive_question",
+                 "link_col" : "b_link_question"
             }
         ),
         {
@@ -129,7 +131,7 @@ def calculate_all_links(
             "strata": "group",
             "match_col": "flag_construction_matches",
             "target": "question",
-            "predictive_variable": "other",
+            "predictive_variable": "construction_link",
         },
     )
 
