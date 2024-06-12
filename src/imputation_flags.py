@@ -9,7 +9,7 @@ def create_impute_flags(
     strata: str,
     auxiliary: str,
     predictive_auxiliary: str,
-     **kwargs
+    **kwargs
 ):
 
     """

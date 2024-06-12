@@ -3,7 +3,14 @@ import pandas as pd
 
 
 def flag_matched_pair_merge(
-    df, forward_or_backward, target, period, reference, strata, time_difference=1,**kwargs
+    df,
+    forward_or_backward,
+    target,
+    period,
+    reference,
+    strata,
+    time_difference=1,
+    **kwargs
 ):
     """
     function to add flag to df if data forms a matched pair
@@ -120,7 +127,9 @@ def flag_matched_pair_shift(
     return df
 
 
-def count_matches(df, flag_column_name, period, strata, count_column_name=None, **kwargs):
+def count_matches(
+    df, flag_column_name, period, strata, count_column_name=None, **kwargs
+):
     """
     Function to count the number of records with matches per period and stratum
 
