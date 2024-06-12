@@ -10,7 +10,7 @@ def get_cumulative_links(
     period,
     imputation_link,
     time_difference=1,
-     **kwargs
+    **kwargs
 ):
     """
     Create cumulative imputation links for multiple consecutive periods
