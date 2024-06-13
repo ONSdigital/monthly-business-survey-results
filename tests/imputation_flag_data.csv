@@ -30,4 +30,3 @@ reference,strata,period,target_variable,auxiliary,f_predictive_target_variable,b
 8,100,202002,,66,789,,FALSE,TRUE,FALSE,TRUE,TRUE,55,fir
 8,100,202004,,77,,987,FALSE,FALSE,TRUE,TRUE,FALSE,,bir
 8,100,202005,987,88,,,TRUE,FALSE,FALSE,FALSE,FALSE,77,r
-
