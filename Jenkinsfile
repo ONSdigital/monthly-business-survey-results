@@ -1,6 +1,6 @@
 #!groovy
 
-// Global scope required for multi-stage persistence
+// Global scope required for multi-stage persistence.
 def artServer = Artifactory.server "art-p-01"
 def buildInfo = Artifactory.newBuildInfo()
 def agentPython3Version = 'python_3.6.1'
