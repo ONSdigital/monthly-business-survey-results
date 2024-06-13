@@ -44,19 +44,20 @@ def get_cumulative_links(
     dataframe.sort_values([strata, reference, period], inplace=True)
     dataframe["missing_value"] = np.where(dataframe[target].isnull(), True, False)
 
+    # TODO: These conditions are similar with the ones at flags, consider a fun for this
+    marker_diff_con = (
+        dataframe["imputation_marker"]
+        .ne(dataframe["imputation_marker"].shift().bfill())
+        .astype(int)
+        != 0
+    )
+
+    strat_diff_con = dataframe[strata].diff(time_difference) != 0
+
+    reference_diff_con = dataframe[reference].diff(time_difference) != 0
+
     dataframe["imputation_group"] = (
-        (
-            (
-                dataframe["imputation_marker"]
-                .ne(dataframe["imputation_marker"].shift().bfill())
-                .astype(int)
-                != 0
-            )
-            | (dataframe[strata].diff(time_difference) != 0)
-            | (dataframe[reference].diff(time_difference) != 0)
-        )
-        .astype("int")
-        .cumsum()
+        (marker_diff_con | strat_diff_con | reference_diff_con).astype("int").cumsum()
     )
 
     if forward_or_backward == "f":
