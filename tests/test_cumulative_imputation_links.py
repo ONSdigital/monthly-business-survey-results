@@ -12,7 +12,7 @@ def cumulative_links_test_data():
     return load_and_format(Path("tests") / "cumulative_links.csv")
 
 
-class TestComulativeLinks:
+class TestCumulativeLinks:
     def test_get_cumulative_links_forward(self, cumulative_links_test_data):
         input_data = cumulative_links_test_data.drop(
             columns=[
@@ -53,17 +53,17 @@ class TestComulativeLinks:
         )
 
         expected_output = cumulative_links_test_data.drop(
-            columns=["imputation_group", "cumulative_backward_imputation_link"]
+            columns=["imputation_group", "cumulative_forward_imputation_link"]
         )
 
         actual_output = get_cumulative_links(
             input_data,
-            "f",
+            "b",
             "strata",
             "reference",
             "target",
             "period",
-            "forward_imputation_link",
+            "backward_imputation_link",
             1,
         )
 
