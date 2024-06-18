@@ -4,13 +4,14 @@
     "target" : "return",
     "period" : "period",
     "strata" : "group",
+    "reference" : "reference",
     "responses_keep_cols" : ["reference",
                 "period",
-                "response"]
+                "response"],
     "contributors_keep_cols" : ["reference",
                 "period",
                 "frozensic",
                 "frozenemployees",
-               "frozenturnover",
-               "cellnumber"]
+                "frozenturnover",
+                "cellnumber"]
 }
