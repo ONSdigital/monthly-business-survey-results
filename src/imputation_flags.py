@@ -61,6 +61,8 @@ def create_impute_flags(
     backward_target_roll = "b_predictive_" + target + "_roll"
     forward_aux_roll = "f_predictive_" + auxiliary + "_roll"
 
+    df.sort_values([reference, strata, period], inplace=True)
+
     # TODO : similar conditions at cum imputation links
     df["fill_group"] = (
         (
