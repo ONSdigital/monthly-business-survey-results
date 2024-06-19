@@ -4,7 +4,7 @@ import pytest
 from helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
-from src.construction_matches import flag_construction_matches
+from mbs_results.construction_matches import flag_construction_matches
 
 
 @pytest.fixture(scope="class")
