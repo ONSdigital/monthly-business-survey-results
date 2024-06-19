@@ -1,14 +1,15 @@
 import pandas as pd
 
+
 def shift_by_strata_period(
-        df: pd.DataFrame,
-        target: str,
-        period: str,
-        strata: str,
-        reference: str,
-        time_difference: int,
-        new_col: str,
-        **kwargs
+    df: pd.DataFrame,
+    target: str,
+    period: str,
+    strata: str,
+    reference: str,
+    time_difference: int,
+    new_col: str,
+    **kwargs
 ) -> pd.DataFrame:
     """
     It will perform the usual shift by desired time_difference for each value
@@ -40,19 +41,15 @@ def shift_by_strata_period(
         Pandas dataframe of original data with a new column containing the
         shifted values.
     """
-    
-    df.sort_values([reference,strata, period], inplace=True)
 
-    df[new_col] = (
-      df.groupby((
-             (
-                 df[period] - pd.DateOffset(months=1)
-                 != df.shift(1)[period]
-             )
-             | (df[strata].diff(1) != 0)
-             | (df[reference].diff(1) != 0)
-         )
-         .cumsum())
-      .shift(time_difference)[target])
-    
+    df.sort_values([reference, strata, period], inplace=True)
+
+    df[new_col] = df.groupby(
+        (
+            (df[period] - pd.DateOffset(months=1) != df.shift(1)[period])
+            | (df[strata].diff(1) != 0)
+            | (df[reference].diff(1) != 0)
+        ).cumsum()
+    ).shift(time_difference)[target]
+
     return df
