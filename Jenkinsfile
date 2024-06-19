@@ -1,27 +1,10 @@
 #!groovy
 
-// Global scope required for multi-stage persistence.
+// Global scope required for multi-stage persistence
 def artServer = Artifactory.server "art-p-01"
 def buildInfo = Artifactory.newBuildInfo()
 def agentPython3Version = 'python_3.6.1'
 
-def updateGitHubStatus(String description, String state) {
-    // State must be pending, success or failure
-    withCredentials([string(credentialsId: env.GITHUB_TOKEN_NAME, variable: 'GITHUB_TOKEN')]) {            
-        println("Updating GitHub pipeline status")
-        long_sha = sh(returnStdout: true, script: "git rev-parse HEAD").trim()
-        
-        sh "curl \
-            -X POST \
-            -x $PROXY \
-            -H \"Accept: application/vnd.github.v3+json\" \
-            -H \"Authorization: token ${GITHUB_TOKEN}\" \
-            \"https://api.github.com/repos/${GITHUB_ORGANISATION}/${GITHUB_PROJECT_NAME}/statuses/${long_sha}\" \
-            -d \'{\"state\": \"${state}\", \"context\": \"Jenkins\", \"description\": \"${description}\", \"target_url\": \"https://jen-m.ons.statistics.gov.uk/blue/organizations/jenkins/${JENKINS_AREA}%2F${JENKINS_PROJECT_NAME}/detail/${BRANCH_NAME}/${BUILD_NUMBER}/pipeline\"}\'"      
-            // Ugly classic Jenkins console
-            //-d \'{\"state\": \"${state}\", \"context\": \"Jenkins\", \"description\": \"${description}\", \"target_url\": \"https://jen-m.ons.statistics.gov.uk/job/${JENKINS_VIEW}/job/${JENKINS_PROJECT_NAME}/job/${BRANCH_NAME}/${BUILD_NUMBER}/console\"}\'"       
-    }
-}
 
 def pushToPyPiArtifactoryRepo(String projectName, String sourceDist = 'dist/*', String artifactoryHost = 'art-p-01') {
     withCredentials([usernamePassword(credentialsId: env.ARTIFACTORY_CREDS, usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]){
@@ -37,17 +20,12 @@ pipeline {
 
     // Define environment variables
     environment {
-        GITHUB_PROJECT_NAME = ""
+        PROJECT_NAME = "monthly-business-survey-results"
         MAIN_BRANCH = "main"
-        GITHUB_ORGANISATION = ""
-        GITHUB_TOKEN_NAME = ""  // GitHUB PAT, set in Jenkins Credentials
-        JENKINS_VIEW = ""
-        JENKINS_PROJECT_NAME = ""
         PROXY = credentials("PROXY")  // Http proxy address, set in Jenkins Credentials
-        STATUS_DESCRIPTION = ""  // Label shown on GitHub status
         // Only need these if you're deploying code to Artifactory
-        ARTIFACTORY_CREDS = ""
-        ARTIFACTORY_PYPI_REPO = ""
+        ARTIFACTORY_CREDS = credentials("ARTIFACTORY_CREDENTIALS")
+        ARTIFACTORY_PYPI_REPO = "LR_mbs_results"
     }
 
     // Don't use default checkout process, as we define it as a stage below
@@ -67,8 +45,6 @@ pipeline {
             steps {
                 colourText("info", "Checking out code from source control.")
                 checkout scm
-                // Need to have the repo checked out to get Git commit SHA
-                updateGitHubStatus(env.STATUS_DESCRIPTION, 'pending')
                 // Stash the files that have been checked out, for use in subsequent stages
                 stash name: "Checkout", useDefaultExcludes: false
             }
@@ -104,16 +80,4 @@ pipeline {
             }
         }
     }
-    post {
-        // Update commit status with success of failure of pipeline
-        success {
-            unstash name: 'Checkout'
-            updateGitHubStatus(env.STATUS_DESCRIPTION, 'success')
-        }
-        failure {
-            unstash name: 'Checkout'
-            updateGitHubStatus(env.STATUS_DESCRIPTION, 'failure')
-        }
-    }
-
 }
