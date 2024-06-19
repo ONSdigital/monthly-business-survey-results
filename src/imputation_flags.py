@@ -10,7 +10,7 @@ def create_impute_flags(
     strata: str,
     auxiliary: str,
     predictive_auxiliary: str,
-    time_difference=1,
+    **kwargs
 ):
     """
     function to create logical columns for each type of imputation
@@ -38,9 +38,8 @@ def create_impute_flags(
     predictive_auxiliary: str
         Column name containing predictive auxiliary data, this is created,
         by flag_matched_pair_merge function.
-     time_difference: int
-        Lookup distance for matched pairs.
-
+     kwargs : mapping, optional
+        A dictionary of keyword arguments passed into func.
 
     Returns
     -------
@@ -65,17 +64,10 @@ def create_impute_flags(
 
     # TODO : similar conditions at cum imputation links
     df["fill_group"] = (
-        (
-            (
-                df[period] - pd.DateOffset(months=time_difference)
-                != df.shift(time_difference)[period]
-            )
-            | (df[strata].diff(time_difference) != 0)
-            | (df[reference].diff(time_difference) != 0)
-        )
-        .astype("int")
-        .cumsum()
-    )
+        (df[period] - pd.DateOffset(months=1) != df.shift(1)[period])
+        | (df[strata].diff(1) != 0)
+        | (df[reference].diff(1) != 0)
+    ).cumsum()
 
     df[forward_target_roll] = df.groupby([reference, strata, "fill_group"])[
         "f_predictive_" + target
