@@ -7,7 +7,7 @@ with open("requirements.txt") as f:
 
 setup(
     name="monthly-business-survey-results",
-    version=0.0.1",
+    version="0.0.1",
     description="Public Sector local Python downloads and preprocessing package",
     url="https://github.com/ONSdigital/monthly-business-survey-results",
     packages=find_packages(),
