@@ -76,6 +76,7 @@ pipeline {
             when {
                 anyOf{
                     branch BUILD_BRANCH
+                    branch "364-create-jenkinsfile"
                     tag BUILD_TAG
                 }
                 beforeAgent true
