@@ -2,6 +2,7 @@ import numpy as np  # noqa F401
 import pandas as pd  # noqa F401
 
 
+<<<<<<< HEAD
 
 def flag_matched_pair_merge(
     df,
@@ -75,7 +76,6 @@ def flag_matched_pair_merge(
 
 def flag_matched_pair_shift(
     df, forward_or_backward, target, period, reference, strata, shift=1
->>>>>>> ab710d0 (Run commit hooks)
 ):
     """
     function to flag matched pairs using the shift method
