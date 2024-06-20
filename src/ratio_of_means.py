@@ -3,30 +3,27 @@ from typing import Dict
 import pandas as pd
 
 from src.apply_imputation_link import create_and_merge_imputation_values
+from src.calculate_imputation_link import calculate_imputation_link
 from src.construction_matches import flag_construction_matches
 from src.cumulative_imputation_links import get_cumulative_links
-from src.flag_and_count_matched_pairs import count_matches, flag_matched_pair_merge
-from src.calculate_imputation_link import calculate_imputation_link
+from src.flag_and_count_matched_pairs import count_matches, flag_matched_pair
 from src.imputation_flags import create_impute_flags, generate_imputation_marker
+from src.predictive_variable import shift_by_strata_period
 
 
-def flag_all_match_pairs(
+def wrap_flag_matched_pairs(
     df: pd.DataFrame, **default_columns: Dict[str, str]
 ) -> pd.DataFrame:
     """
-    Creates bool columns if a predictive values exists for each method (
-    forward, backward, construction) also we check if there is predictive
-    value for the auxiliary column which is needed for imputation flags.
-    This is wrapper for getting matched pairs for each method.
-    Note that the created columns are used as inputs in other function(s).
+    Wrapper function for flagging forward, backward and construction pair
+    matches.
 
     Parameters
     ----------
     df : pd.DataFrame
         Original dataframe.
     **default_columns : Dict[str, str]
-        The column names kwargs which were passed to ratio of means function.
-
+        The column names which were passed to ratio of means function.
     Returns
     -------
     df : pd.DataFrame
@@ -37,39 +34,28 @@ def flag_all_match_pairs(
     flag_arguments = [
         dict(**default_columns, **{"forward_or_backward": "f"}),
         dict(**default_columns, **{"forward_or_backward": "b"}),
-        {
-            "forward_or_backward": "f",
-            "target": "other",
-            "period": "date",
-            "reference": "identifier",
-            "strata": "group",
-        },
     ]
 
     for args in flag_arguments:
 
-        df = flag_matched_pair_merge(df, **args)
+        df = flag_matched_pair(df, **args)
 
     df = flag_construction_matches(df, **default_columns)
 
     return df
 
 
-def count_all_matches(
+def wrap_count_matches(
     df: pd.DataFrame, **default_columns: Dict[str, str]
 ) -> pd.DataFrame:
-    """
-    Creates 3 new numeric columns with the sum of matches between targeted and
-    predicted values for each imputation method. This is wrapper for
-    count_matches function.
+    """Wrapper function to get counts of flagged matched pairs.
 
     Parameters
     ----------
     df : pd.DataFrame
         Original dataframe.
     **default_columns : Dict[str, str]
-        The column names kwargs which were passed to ratio of means function.
-
+        The column names which were passed to ratio of means function.
     Returns
     -------
     df : pd.DataFrame
@@ -77,8 +63,8 @@ def count_all_matches(
     """
 
     count_arguments = (
-        dict(**default_columns, **{"flag_column_name": "f_matched_pair_question"}),
-        dict(**default_columns, **{"flag_column_name": "b_matched_pair_question"}),
+        dict(**default_columns, **{"flag_column_name": "f_match"}),
+        dict(**default_columns, **{"flag_column_name": "b_match"}),
         dict(**default_columns, **{"flag_column_name": "flag_construction_matches"}),
     )
 
@@ -88,13 +74,15 @@ def count_all_matches(
     return df
 
 
-def calculate_all_links(
+def wrap_shift_by_strata_period(
     df: pd.DataFrame, **default_columns: Dict[str, str]
 ) -> pd.DataFrame:
     """
-    Creates 3 new numeric columns with the link between target and
-    predictive_variable for every imputation method. This is wrapper for
-    get_cumulative_links function.
+    Wrapper function for shifting values.
+
+    f_predictive_question: is used from calculate imputation link
+    b_predictive_question: is used from calculate imputation link
+    f_predictive_auxiliary: is used from create_impute_flags
 
     Parameters
     ----------
@@ -106,33 +94,76 @@ def calculate_all_links(
     Returns
     -------
     df : pd.DataFrame
-        Original dataframe with 3 new numeric columns.
+        Original dataframe with 3 new numeric columns which contain the desired
+        shifted values.
+    """
+
+    link_arguments = (
+        dict(
+            **default_columns,
+            **{"time_difference": 1, "new_col": "f_predictive_question"}
+        ),
+        dict(
+            **default_columns,
+            **{"time_difference": -1, "new_col": "b_predictive_question"}
+        ),
+        # Needed for ccreate_impute_flags
+        dict(
+            **{**default_columns, "target": default_columns["auxiliary"]},
+            **{"time_difference": 1, "new_col": "f_predictive_auxiliary"}
+        ),
+    )
+
+    for args in link_arguments:
+        df = shift_by_strata_period(df, **args)
+
+    return df
+
+
+def wrap_calculate_imputation_link(
+    df: pd.DataFrame, **default_columns: Dict[str, str]
+) -> pd.DataFrame:
+    """Wrapper for calculate_imputation_link function.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    **default_columns : Dict[str, str]
+        The column names which were passed to ratio of means function.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Original dataframe with 3 new numeric columns which contain the
+        imputation links.
     """
 
     link_arguments = (
         dict(
             **default_columns,
             **{
-                "match_col": "f_matched_pair_question",
+                "match_col": "f_match",
                 "predictive_variable": "f_predictive_question",
-                "link_col" : "f_link_question"
+                "link_col_name": "f_link_question",
             }
         ),
         dict(
             **default_columns,
             **{
-                "match_col": "b_matched_pair_question",
+                "match_col": "b_match",
                 "predictive_variable": "b_predictive_question",
-                 "link_col" : "b_link_question"
+                "link_col_name": "b_link_question",
             }
         ),
-        {
-            "period": "date",
-            "strata": "group",
-            "match_col": "flag_construction_matches",
-            "target": "question",
-            "predictive_variable": "construction_link",
-        },
+        dict(
+            **default_columns,
+            **{
+                "match_col": "flag_construction_matches",
+                "predictive_variable": "other",
+                "link_col_name": "construction_link",
+            }
+        ),
     )
 
     for args in link_arguments:
@@ -141,12 +172,10 @@ def calculate_all_links(
     return df
 
 
-def calculate_all_cum_links(
+def wrap_get_cumulative_links(
     df: pd.DataFrame, **default_columns: Dict[str, str]
 ) -> pd.DataFrame:
-    """
-    Creates 2 new numeric columns with the cumulative product link, forward
-    uses ffill and backward bffill.
+    """Wrapper for calculate_imputation_link function.
 
     Parameters
     ----------
@@ -158,7 +187,9 @@ def calculate_all_cum_links(
     Returns
     -------
     df : pd.DataFrame
-        Original dataframe with 2 new numeric columns.
+        Original dataframe with 2 new numeric column, with the cummulative
+        product of imputation links. These are needed when consecutive periods
+        need imputing.
     """
 
     cum_links_arguments = (
@@ -220,24 +251,35 @@ def ratio_of_means(
     """
 
     # Saving args to dict, so we can pass same attributes to multiple functions
+    # These arguments are used from the majority of functions
+    # Removing though df since we are chaining function with pipe
 
     default_columns = locals()
 
     del default_columns["df"]
 
     # TODO: Is datetime needed? If so here is a good place to convert to datetime
+    df["date"] = pd.to_datetime(df["date"], format="%Y%m")
+
+    # TODO: Filter data out
+    # TODO: Pre calculated links
 
     df = (
-        df.pipe(flag_all_match_pairs, **default_columns)
-        .pipe(count_all_matches, **default_columns)
-        .pipe(calculate_all_links, **default_columns)
+        df.pipe(wrap_flag_matched_pairs, **default_columns)
+        # .pipe(wrap_count_matches, **default_columns) #needs to be seperated
+        .pipe(wrap_shift_by_strata_period, **default_columns)
+        .pipe(wrap_calculate_imputation_link, **default_columns)
         .pipe(
             create_impute_flags,
             **default_columns,
-            predictive_auxiliary="f_predictive_other"
+            predictive_auxiliary="f_predictive_auxiliary"
+        )
+        # TODO: How we gonna set defaults?
+        .fillna(
+            {"f_link_question": 1.0, "b_link_question": 1.0, "construction_link": 1.0}
         )
         .pipe(generate_imputation_marker)
-        .pipe(calculate_all_cum_links, **default_columns)
+        .pipe(wrap_get_cumulative_links, **default_columns)
         .pipe(
             create_and_merge_imputation_values,
             **default_columns,
@@ -251,11 +293,14 @@ def ratio_of_means(
         )
     )
 
+    df = df.reset_index(drop=True)
+
+    df["date"] = pd.to_numeric(df["date"].dt.strftime("%Y%m"), errors="coerce")
+
     df = df.drop(
         columns=[
-            "f_matched_pair_question",
-            "b_matched_pair_question",
-            "f_matched_pair_other",
+            "f_match",
+            "b_match",
             "flag_construction_matches",
             "r_flag",
             "fir_flag",
@@ -266,6 +311,10 @@ def ratio_of_means(
             "imputation_group",
             "cumulative_f_link_question",
             "cumulative_b_link_question",
+            "f_predictive_question",
+            "b_predictive_question",
+            "f_predictive_question_roll",
+            "b_predictive_question_roll",
         ]
     )
 
