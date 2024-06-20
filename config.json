@@ -5,13 +5,15 @@
     "period" : "period",
     "strata" : "group",
     "reference" : "reference",
-    "responses_keep_cols" : ["reference",
-                "period",
-                "response"],
-    "contributors_keep_cols" : ["reference",
-                "period",
-                "frozensic",
-                "frozenemployees",
-                "frozenturnover",
-                "cellnumber"]
+    "responses_keep_cols" : {
+                "reference" : "str",
+                "period": "DateTime",
+                "response" : "str"},
+    "contributors_keep_cols" : {
+                "reference" : "int",
+                "period" : "DateTime",
+                "frozensic" : "str",
+                "frozenemployees" : "int",
+                "frozenturnover" : "float",
+                "cellnumber" : "int"}
 }
