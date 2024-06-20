@@ -60,3 +60,21 @@ def clean_and_merge(
     contributors = contributors[contributors_keep_cols].set_index([reference, period])
 
     return responses.join(contributors, on=[reference, period])
+
+
+def enforce_datatypes(df, config):
+    joint_dictionary = {
+        **config["responses_keep_cols"],
+        **config["contributors_keep_cols"],
+    }
+    for key in joint_dictionary:
+        type_from_dict = joint_dictionary[key]
+        print(type_from_dict)
+        if type_from_dict in ["str", "float", "int"]:
+            df[key] = df[key].astype(type_from_dict)
+        elif type_from_dict == "DateTime":
+            print("cv dt")
+            df[key] = pd.to_datetime(df[key], format="%Y%m")
+        else:
+            print("check datatype for {}".format(key))
+        return df
