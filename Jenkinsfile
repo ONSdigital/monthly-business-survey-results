@@ -26,6 +26,8 @@ pipeline {
         // Only need these if you're deploying code to Artifactory
         ARTIFACTORY_CREDS = credentials("ARTIFACTORY_CREDENTIALS")
         ARTIFACTORY_PYPI_REPO = "LR_mbs_results"
+        BUILD_BRANCH = "main"
+        BUILD_TAG = "*-release"
     }
 
     // Don't use default checkout process, as we define it as a stage below
@@ -71,7 +73,13 @@ pipeline {
         //    }
         //}
         stage("Deploy") {
-            when { tag "v*" }  // Only run when there's a new tag that start with a v (for version)
+            when {
+                anyOf{
+                    branch BUILD_BRANCH
+                    tag BUILD_TAG
+                }
+                beforeAgent true
+            }
             agent { label "deploy.jenkins.slave" }
             steps {
                 unstash name: "Build"
