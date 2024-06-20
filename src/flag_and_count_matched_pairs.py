@@ -2,7 +2,6 @@ import numpy as np  # noqa F401
 import pandas as pd  # noqa F401
 
 
-
 def flag_matched_pair(
     df, forward_or_backward, target, period, reference, strata, time_difference=1
 ):
