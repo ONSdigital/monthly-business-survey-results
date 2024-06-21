@@ -34,6 +34,8 @@ def get_cumulative_links(
         column name containing imputation links
     time_difference : int
         time difference between predictive and target period in months
+    kwargs : mapping, optional
+        A dictionary of keyword arguments passed into func
 
     Returns
     -------
