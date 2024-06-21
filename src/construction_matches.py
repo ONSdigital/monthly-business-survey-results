@@ -16,7 +16,8 @@ def flag_construction_matches(dataframe, target, period, auxiliary, **kwargs):
         name of column containing time period
     auxiliary : string
         name of column containing auxiliary information
-
+    kwargs : mapping, optional
+        A dictionary of keyword arguments passed into func.
     Returns
     -------
     pandas.DataFrame

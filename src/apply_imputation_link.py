@@ -45,6 +45,8 @@ def create_and_merge_imputation_values(
         tuple. If 'fic' is selected 'c' must also be selected and proceed 'fic'.
         For 'fic' to produce the correct result, the C marker must be in the first
         period for a given reference.
+    kwargs : mapping, optional
+        A dictionary of keyword arguments passed into func.
 
     Returns
     -------
