@@ -10,6 +10,7 @@ def get_cumulative_links(
     period,
     imputation_link,
     time_difference=1,
+    **kwargs
 ):
     """
     Create cumulative imputation links for multiple consecutive periods
@@ -33,6 +34,8 @@ def get_cumulative_links(
         column name containing imputation links
     time_difference : int
         time difference between predictive and target period in months
+    kwargs : mapping, optional
+        A dictionary of keyword arguments passed into func
 
     Returns
     -------

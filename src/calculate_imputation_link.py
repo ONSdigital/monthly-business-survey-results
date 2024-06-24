@@ -10,6 +10,7 @@ def calculate_imputation_link(
     target_variable: str,
     predictive_variable: str,
     link_col: str,
+    **kwargs
 ) -> pd.DataFrame:
     """
     Calculate link between target_variable and predictive_variable by strata,
@@ -32,7 +33,8 @@ def calculate_imputation_link(
         Column name of the predicted target variable.
     link_col : str
         Name to use for the new column containing imputation link
-
+    kwargs : mapping, optional
+        A dictionary of keyword arguments passed into func.
     Returns
     -------
     df : pd.DataFrame
