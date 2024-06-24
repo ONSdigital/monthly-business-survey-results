@@ -65,6 +65,26 @@ def clean_and_merge(
 def enforce_datatypes(
     df, responses_keep_cols, contributors_keep_cols, temporarily_remove_cols, **config
 ):
+    """
+    function to change datatypes of columns based on config file
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        dataframe with combined responses and contributors columns
+    responses_keep_cols : dict
+        dictionary containing response columns to keep and datatypes
+    contributors_keep_cols : dict
+        dictionary containing contributors columns to keep and datatypes
+    temporarily_remove_cols : list
+        list containing column names to drop.
+        Implemented to remove columns while not removing datatypes
+
+    Returns
+    -------
+    pd.DataFrame
+        dataframe with correctly formatted column datatypes.
+    """
     response_dict = responses_keep_cols
     contributors_dict = contributors_keep_cols
     mismatched_types = [
