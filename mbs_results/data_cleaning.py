@@ -67,14 +67,25 @@ def enforce_datatypes(df, config):
         **config["responses_keep_cols"],
         **config["contributors_keep_cols"],
     }
+    df_convert = df.copy()
+    try:
+        temp_remove_cols = config["temporarily_remove_cols"]
+    except KeyError:
+        temp_remove_cols = []
+
+    print(df_convert.dtypes)
+    df_convert.drop(temp_remove_cols, axis=1, inplace=True)
+    for key1 in temp_remove_cols:
+        # Deletes key and value for any column in temp_remove_cols
+        # None handles cases when key is not included in joint_dict
+        joint_dictionary.pop(key1, None)
+
     for key in joint_dictionary:
         type_from_dict = joint_dictionary[key]
-        print(type_from_dict)
         if type_from_dict in ["str", "float", "int"]:
-            df[key] = df[key].astype(type_from_dict)
+            df_convert[key] = df_convert[key].astype(type_from_dict)
         elif type_from_dict == "DateTime":
-            print("cv dt")
-            df[key] = pd.to_datetime(df[key], format="%Y%m")
+            df_convert[key] = pd.to_datetime(df_convert[key], format="%Y%m")
         else:
-            print("check datatype for {}".format(key))
-        return df
+            print("check datatype for {}".format(key), type_from_dict)
+    return df_convert
