@@ -10,7 +10,7 @@
                 "period": "DateTime",
                 "response" : "str"},
     "contributors_keep_cols" : {
-                "reference" : "int",
+                "reference" : "str",
                 "period" : "DateTime",
                 "frozensic" : "str",
                 "frozenemployees" : "int",
