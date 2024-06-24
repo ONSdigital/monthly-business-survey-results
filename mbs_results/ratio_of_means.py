@@ -1,14 +1,14 @@
 from typing import Dict
 
-import pandas as pd
 import numpy as np
-
+import pandas as pd
 
 from src.apply_imputation_link import create_and_merge_imputation_values
+from src.calculate_imputation_link import calculate_imputation_link
+from src.predictive_variable import shift_by_strata_period
 from src.construction_matches import flag_construction_matches
 from src.cumulative_imputation_links import get_cumulative_links
-from src.flag_and_count_matched_pairs import  flag_matched_pair
-from src.calculate_imputation_link import calculate_imputation_link,shift_by_strata_period
+from src.flag_and_count_matched_pairs import count_matches, flag_matched_pair
 from src.imputation_flags import create_impute_flags, generate_imputation_marker
 from src.link_filter import flag_rows_to_ignore
 
@@ -17,7 +17,7 @@ def wrap_flag_matched_pairs(
     df: pd.DataFrame, **default_columns: Dict[str, str]
 ) -> pd.DataFrame:
     """
-    Wrapper function for flagging forward, backward and construction pair 
+    Wrapper function for flagging forward, backward and construction pair
     matches.
 
     Parameters
@@ -33,12 +33,11 @@ def wrap_flag_matched_pairs(
         forward_or_backward keyword and target column name to distinguish them
     """
 
-    if 'ignore_from_link' in df.columns:
-        
-        df["filtered_target"] = df["question"]
-        df.loc[df["ignore_from_link"] == True, "filtered_target"] = np.nan
-        default_columns =  {**default_columns,"target":"filtered_target"}
+    if "ignore_from_link" in df.columns:
 
+        df["filtered_target"] = df["question"]
+        df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
+        default_columns = {**default_columns, "target": "filtered_target"}
 
     flag_arguments = [
         dict(**default_columns, **{"forward_or_backward": "f"}),
@@ -50,8 +49,9 @@ def wrap_flag_matched_pairs(
         df = flag_matched_pair(df, **args)
 
     df = flag_construction_matches(df, **default_columns)
-    
+
     return df
+
 
 def wrap_count_matches(
     df: pd.DataFrame, **default_columns: Dict[str, str]
@@ -82,13 +82,12 @@ def wrap_count_matches(
     return df
 
 
-
 def wrap_shift_by_strata_period(
     df: pd.DataFrame, **default_columns: Dict[str, str]
 ) -> pd.DataFrame:
     """
-    Wrapper function for shifting values. 
-    
+    Wrapper function for shifting values.
+
     f_predictive_question: is used from calculate imputation link
     b_predictive_question: is used from calculate imputation link
     f_predictive_auxiliary: is used from create_impute_flags
@@ -106,41 +105,30 @@ def wrap_shift_by_strata_period(
         Original dataframe with 3 new numeric columns which contain the desired
         shifted values.
     """
-    
-    if 'ignore_from_link' in df.columns:
-               
-       #df["filtered_target"] = df["question"].mul(~(df["ignore_from_link"]))
-       
-       
-       df["filtered_target"] = df["question"]
-       df.loc[df["ignore_from_link"] == True, "filtered_target"] = np.nan
-       
-       default_columns =  {**default_columns,"target":"filtered_target"}
+
+    if "ignore_from_link" in df.columns:
+
+        # df["filtered_target"] = df["question"].mul(~(df["ignore_from_link"]))
+
+        df["filtered_target"] = df["question"]
+        df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
+
+        default_columns = {**default_columns, "target": "filtered_target"}
 
     link_arguments = (
         dict(
             **default_columns,
-            **{
-                "time_difference": 1,
-                "new_col" : "f_predictive_question"
-            }
+            **{"time_difference": 1, "new_col": "f_predictive_question"}
         ),
         dict(
             **default_columns,
-            **{
-                "time_difference": -1,
-                 "new_col" : "b_predictive_question"
-            }
+            **{"time_difference": -1, "new_col": "b_predictive_question"}
         ),
-        
-        #Needed for ccreate_impute_flags
-         dict(
-            ** {**default_columns,"target":default_columns['auxiliary']},
-            **{
-                "time_difference": 1,
-                 "new_col" : "f_predictive_auxiliary"
-            }
-        )
+        # Needed for ccreate_impute_flags
+        dict(
+            **{**default_columns, "target": default_columns["auxiliary"]},
+            **{"time_difference": 1, "new_col": "f_predictive_auxiliary"}
+        ),
     )
 
     for args in link_arguments:
@@ -149,12 +137,11 @@ def wrap_shift_by_strata_period(
     return df
 
 
-
 def wrap_calculate_imputation_link(
     df: pd.DataFrame, **default_columns: Dict[str, str]
 ) -> pd.DataFrame:
     """Wrapper for calculate_imputation_link function.
-    
+
     Parameters
     ----------
     df : pd.DataFrame
@@ -165,27 +152,24 @@ def wrap_calculate_imputation_link(
     Returns
     -------
     df : pd.DataFrame
-        Original dataframe with 3 new numeric columns which contain the 
+        Original dataframe with 3 new numeric columns which contain the
         imputation links.
     """
-    
-    if 'ignore_from_link' in df.columns:
-        
-                
-              
+
+    if "ignore_from_link" in df.columns:
+
         df["filtered_target"] = df["question"]
-        df.loc[df["ignore_from_link"] == True, "filtered_target"] = np.nan
-       
-        
-        default_columns =  {**default_columns,"target":"filtered_target"}
-        
+        df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
+
+        default_columns = {**default_columns, "target": "filtered_target"}
+
     link_arguments = (
         dict(
             **default_columns,
             **{
                 "match_col": "f_match",
                 "predictive_variable": "f_predictive_question",
-                "link_col_name" : "f_link_question"
+                "link_col_name": "f_link_question",
             }
         ),
         dict(
@@ -193,16 +177,17 @@ def wrap_calculate_imputation_link(
             **{
                 "match_col": "b_match",
                 "predictive_variable": "b_predictive_question",
-                 "link_col_name" : "b_link_question"
+                "link_col_name": "b_link_question",
             }
         ),
         dict(
             **default_columns,
-        **{
-            "match_col": "flag_construction_matches",
-            "predictive_variable": "other",
-            "link_col_name":"construction_link"
-        })
+            **{
+                "match_col": "flag_construction_matches",
+                "predictive_variable": "other",
+                "link_col_name": "construction_link",
+            }
+        ),
     )
 
     for args in link_arguments:
@@ -210,11 +195,12 @@ def wrap_calculate_imputation_link(
 
     return df
 
+
 def wrap_get_cumulative_links(
     df: pd.DataFrame, **default_columns: Dict[str, str]
 ) -> pd.DataFrame:
     """Wrapper for calculate_imputation_link function.
-    
+
     Parameters
     ----------
     df : pd.DataFrame
@@ -225,7 +211,7 @@ def wrap_get_cumulative_links(
     Returns
     -------
     df : pd.DataFrame
-        Original dataframe with 2 new numeric column, with the cummulative 
+        Original dataframe with 2 new numeric column, with the cummulative
         product of imputation links. These are needed when consecutive periods
         need imputing.
     """
@@ -247,6 +233,7 @@ def wrap_get_cumulative_links(
 
     return df
 
+
 def ratio_of_means(
     df: pd.DataFrame,
     target: str,
@@ -254,7 +241,7 @@ def ratio_of_means(
     reference: str,
     strata: str,
     auxiliary: str,
-    filters: pd.DataFrame = None
+    filters: pd.DataFrame = None,
 ) -> pd.DataFrame:
     """
     Imputes for each non-responding contributor a single numeric target
@@ -295,31 +282,30 @@ def ratio_of_means(
     default_columns = locals()
 
     del default_columns["df"]
-    
+
     if default_columns["filters"] is not None:
-     
-     df = flag_rows_to_ignore(df,default_columns["filters"])
- 
+
+        df = flag_rows_to_ignore(df, default_columns["filters"])
+
     # TODO: Is datetime needed? If so here is a good place to convert to datetime
     df["date"] = pd.to_datetime(df["date"], format="%Y%m")
-    
-    # TODO: Pre calculated links 
+
+    # TODO: Pre calculated links
 
     df = (
-        df
-        .pipe(wrap_flag_matched_pairs, **default_columns)
-        #.pipe(wrap_count_matches, **default_columns) #needs to be seperated
+        df.pipe(wrap_flag_matched_pairs, **default_columns)
+        # .pipe(wrap_count_matches, **default_columns) #needs to be seperated
         .pipe(wrap_shift_by_strata_period, **default_columns)
         .pipe(wrap_calculate_imputation_link, **default_columns)
-        .pipe(create_impute_flags,
+        .pipe(
+            create_impute_flags,
             **default_columns,
-            predictive_auxiliary="f_predictive_auxiliary")
-        
+            predictive_auxiliary="f_predictive_auxiliary"
+        )
         # TODO: How we gonna set defaults?
-        .fillna({
-            "f_link_question": 1.0,
-            "b_link_question": 1.0,
-            "construction_link": 1.0})
+        .fillna(
+            {"f_link_question": 1.0, "b_link_question": 1.0, "construction_link": 1.0}
+        )
         .pipe(generate_imputation_marker)
         .pipe(wrap_get_cumulative_links, **default_columns)
         .pipe(
@@ -335,30 +321,32 @@ def ratio_of_means(
         )
     )
 
-
     df = df.reset_index(drop=True)
-    
-    df["date"] = pd.to_numeric(df["date"].dt.strftime('%Y%m'), errors='coerce')
+
+    df["date"] = pd.to_numeric(df["date"].dt.strftime("%Y%m"), errors="coerce")
 
     df = df.drop(
-    columns=[
-        "f_match",
-        "b_match",
-        "flag_construction_matches",
-        "r_flag",
-        "fir_flag",
-        "bir_flag",
-        "c_flag",
-        "fic_flag",
-        "missing_value",
-        "imputation_group",
-        "cumulative_f_link_question",
-        "cumulative_b_link_question",
-        'f_predictive_question',
-        'b_predictive_question',
-        "ignore_from_link",
-        'filtered_target'], axis=1, errors='ignore')
-
+        columns=[
+            "f_match",
+            "b_match",
+            "flag_construction_matches",
+            "r_flag",
+            "fir_flag",
+            "bir_flag",
+            "c_flag",
+            "fic_flag",
+            "missing_value",
+            "imputation_group",
+            "cumulative_f_link_question",
+            "cumulative_b_link_question",
+            "f_predictive_question",
+            "b_predictive_question",
+            "ignore_from_link",
+            "filtered_target",
+        ],
+        axis=1,
+        errors="ignore",
+    )
 
     # TODO: Missing extra columns, default values and if filter was applied, all bool
 
