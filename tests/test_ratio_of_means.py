@@ -1,13 +1,11 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
+from helper_functions import load_filter
 from pandas.testing import assert_frame_equal
 
 from src.ratio_of_means import ratio_of_means
 
-scenario_path_prefix = Path("tests", "data", "ratio_of_means")
-
+scenario_path_prefix = "tests/data/"
 scenarios = [
     "01_C",  # dtype issue
     "02_C_FI",
@@ -34,17 +32,20 @@ scenarios = [
     "23_class_change_C_C_FI",
     "24_class_change_R_BI_R",
     "25_class_change_C_FI_FI",
-    '26_C_FI_FI_NS_BI_BI_R_filtered', #not yet implemented
-     '27_BI_BI_R_NS_R_FI_FI_filtered', #not yet implemented
+    "26_C_FI_FI_NS_BI_BI_R_filtered",  # not yet implemented
+    "27_BI_BI_R_NS_R_FI_FI_filtered",  # not yet implemented
     # '28_link_columns_filtered', #not yet implemented + ASAP-333
-     '29_mixed_data_filtered', #not yet implemented
-     '30_class_change_C_C_FI_filtered',  #not yet implemented
+    "29_mixed_data_filtered",  # not yet implemented
+    "30_class_change_C_C_FI_filtered",  # not yet implemented
     "31_no_response",  # bug fixed ASAP-402
     "32_divide_by_zero",
     "33_multi_variable_C_BI_R",  # issue with matches ASAP-427
-     '34_multi_variable_C_BI_R_filtered',  #not yet implemented
-     '35_BI_BI_R_FI_FI_R_FI_alternating_filtered' #not yet implemented
+    "34_multi_variable_C_BI_R_filtered",  # not yet implemented
+    "35_BI_BI_R_FI_FI_R_FI_alternating_filtered",  # not yet implemented
 ]
+
+
+pytestmark = pytest.mark.parametrize("base_file_name", scenarios)
 
 
 pytestmark = pytest.mark.parametrize("base_file_name", scenarios)
@@ -54,16 +55,17 @@ class TestRatioOfMeans:
     def test_ratio_of_means(self, base_file_name):
 
         input_data = pd.read_csv(
-            scenario_path_prefix
-            + base_file_name
-            + "_input.csv"
+            scenario_path_prefix + "ratio_of_means/" + base_file_name + "_input.csv"
         )
         expected_output = pd.read_csv(
-            scenario_path_prefix
-            + base_file_name
-            + "_output.csv"
+            scenario_path_prefix + "ratio_of_means/" + base_file_name + "_output.csv"
         )
 
+        filter_df = load_filter(
+            scenario_path_prefix + "ratio_of_means_filters/" + base_file_name + ".csv"
+        )
+
+        print(filter_df)
         # not yet implemented remove this when defaults are ready
         expected_output = expected_output.drop(
             columns=["default_forward", "default_backward", "default_construction"]
@@ -76,6 +78,7 @@ class TestRatioOfMeans:
             reference="identifier",
             strata="group",
             auxiliary="other",
+            filters=filter_df,
         )
 
         # imputed_value is in a seperate column, remove this if otherwise
