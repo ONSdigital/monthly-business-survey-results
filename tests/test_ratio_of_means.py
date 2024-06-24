@@ -5,11 +5,7 @@ from pandas.testing import assert_frame_equal
 
 from mbs_results.ratio_of_means import ratio_of_means
 
-<<<<<<< HEAD
 scenario_path_prefix = "tests/data/"
-=======
-scenario_path_prefix = Path("tests", "data", "ratio_of_means")
->>>>>>> 837afa7 ( Add shift_by_strata_period to wrapper)
 
 scenarios = [
     "01_C",  # dtype issue
@@ -37,7 +33,6 @@ scenarios = [
     "23_class_change_C_C_FI",
     "24_class_change_R_BI_R",
     "25_class_change_C_FI_FI",
-<<<<<<< HEAD
     "26_C_FI_FI_NS_BI_BI_R_filtered",  # not yet implemented
     "27_BI_BI_R_NS_R_FI_FI_filtered",  # not yet implemented
     # '28_link_columns_filtered', #not yet implemented + ASAP-333
@@ -48,18 +43,6 @@ scenarios = [
     "33_multi_variable_C_BI_R",  # issue with matches ASAP-427
     "34_multi_variable_C_BI_R_filtered",  # not yet implemented
     "35_BI_BI_R_FI_FI_R_FI_alternating_filtered",  # not yet implemented
-=======
-    # '26_C_FI_FI_NS_BI_BI_R_filtered', #not yet implemented
-    # '27_BI_BI_R_NS_R_FI_FI_filtered', #not yet implemented
-    # '28_link_columns_filtered', #not yet implemented + ASAP-333
-    # '29_mixed_data_filtered', #not yet implemented
-    # '30_class_change_C_C_FI_filtered',  #not yet implemented
-    "31_no_response",  # bug fixed ASAP-402
-    "32_divide_by_zero",
-    "33_multi_variable_C_BI_R",  # issue with matches ASAP-427
-    # '34_multi_variable_C_BI_R_filtered',  #not yet implemented
-    # '35_BI_BI_R_FI_FI_R_FI_alternating_filtered' #not yet implemented
->>>>>>> 837afa7 ( Add shift_by_strata_period to wrapper)
 ]
 
 
@@ -70,7 +53,6 @@ class TestRatioOfMeans:
     def test_ratio_of_means(self, base_file_name):
 
         input_data = pd.read_csv(
-<<<<<<< HEAD
             scenario_path_prefix + "ratio_of_means/" + base_file_name + "_input.csv"
         )
         expected_output = pd.read_csv(
@@ -85,17 +67,6 @@ class TestRatioOfMeans:
 
         input_data["date"] = pd.to_datetime(input_data["date"], format="%Y%m")
         expected_output["date"] = pd.to_datetime(expected_output["date"], format="%Y%m")
-=======
-            "D:/monthly-business-survey-results/tests/data/ratio_of_means/"
-            + base_file_name
-            + "_input.csv"
-        )
-        expected_output = pd.read_csv(
-            "D:/monthly-business-survey-results/tests/data/ratio_of_means/"
-            + base_file_name
-            + "_output.csv"
-        )
->>>>>>> 837afa7 ( Add shift_by_strata_period to wrapper)
 
         # not yet implemented remove this when defaults are ready
         expected_output = expected_output.drop(
@@ -149,19 +120,9 @@ class TestRatioOfMeans:
         actual_output = actual_output.reset_index(drop=True)
         expected_output = expected_output.reset_index(drop=True)
 
-<<<<<<< HEAD
-=======
-        actual_output = actual_output.round(5)
-        expected_output = expected_output.round(5)
-
->>>>>>> 837afa7 ( Add shift_by_strata_period to wrapper)
         expected_output["imputation_marker"] = expected_output[
             "imputation_marker"
         ].str.lower()
         expected_output = expected_output.replace({"bi": "bir"})
 
-<<<<<<< HEAD
         assert_frame_equal(actual_output, expected_output, check_dtype=False)
-=======
-        assert_frame_equal(actual_output, expected_output, check_dtype=False)
->>>>>>> 837afa7 ( Add shift_by_strata_period to wrapper)
