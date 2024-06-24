@@ -37,6 +37,8 @@ def create_impute_flags(
     predictive_auxiliary: str
         Column name containing predictive auxiliary data, this is created,
         by flag_matched_pair_merge function.
+    kwargs : mapping, optional
+        A dictionary of keyword arguments passed into func.
 
     Returns
     -------
