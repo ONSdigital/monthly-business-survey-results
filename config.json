@@ -15,5 +15,6 @@
                 "frozensic" : "str",
                 "frozenemployees" : "int",
                 "frozenturnover" : "float",
-                "cellnumber" : "int"}
+                "cellnumber" : "int"},
+    "temporarily_remove_cols": []
 }

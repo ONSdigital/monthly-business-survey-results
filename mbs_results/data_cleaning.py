@@ -62,18 +62,33 @@ def clean_and_merge(
     return responses.join(contributors, on=[reference, period])
 
 
-def enforce_datatypes(df, config):
+def enforce_datatypes(
+    df, responses_keep_cols, contributors_keep_cols, temporarily_remove_cols, **config
+):
+    response_dict = responses_keep_cols
+    contributors_dict = contributors_keep_cols
+    mismatched_types = [
+        x
+        for x in response_dict
+        if (x in contributors_dict) and (response_dict[x] != contributors_dict[x])
+    ]
+    if mismatched_types:
+        print(
+            "Mismatched data types between two dictionaries in columns:",
+            mismatched_types,
+        )
+
     joint_dictionary = {
-        **config["responses_keep_cols"],
-        **config["contributors_keep_cols"],
+        **response_dict,
+        **contributors_dict,
     }
     df_convert = df.copy()
     try:
-        temp_remove_cols = config["temporarily_remove_cols"]
+        temp_remove_cols = temporarily_remove_cols
     except KeyError:
+        # deals with case when key is not found in dict
         temp_remove_cols = []
 
-    print(df_convert.dtypes)
     df_convert.drop(temp_remove_cols, axis=1, inplace=True)
     for key1 in temp_remove_cols:
         # Deletes key and value for any column in temp_remove_cols

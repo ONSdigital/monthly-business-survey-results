@@ -24,6 +24,7 @@ def test_enforce_datatypes():
     test_setup_config = {
         "responses_keep_cols": {"period": "DateTime", "strata": "str"},
         "contributors_keep_cols": {"reference": "int", "target_variable": "float"},
+        "temporarily_remove_cols": [],
     }
-    actual_output = enforce_datatypes(df_subset, test_setup_config)
+    actual_output = enforce_datatypes(df_subset, **test_setup_config)
     assert_frame_equal(actual_output, expected_output)
