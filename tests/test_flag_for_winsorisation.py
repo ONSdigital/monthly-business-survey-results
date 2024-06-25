@@ -1,31 +1,33 @@
-""" What we need
-
-dataframe
-a weight
-g weight
-
-a * g to create a new column
-
-then flag anything <=1 as not to be winsorised
-
-"""
-
 import pandas as pd
+import pytest
+from pandas.testing import assert_frame_equal
+
+from src.flag_for_winsorisation import winsorisation_flag
+
+path = "/home/cdsw/monthly-business-survey-results"
 
 
-def winsorisation_flag(df, a_weight, g_weight):
+@pytest.fixture(scope="class")
+def winsorisation_flag_test_data():
+    return pd.read_csv(
+        path + "/tests/data/winsorisation/flag_data.csv",
+        low_memory=False,
+        usecols=lambda c: not c.startswith("Unnamed:"),
+    )
 
-    df["new_col"] = df.a_weight * df.g_weight
 
-    df["NW_AG_flag"] = df["new_col"].apply(lambda x: "NW_AG" if x <= 1 else "")
+class TestWinsorisationFlag:
+    def test_winsorisation_flag(self, winsorisation_flag_test_data):
+        df_expected_output = winsorisation_flag_test_data.copy()
+        df_input = df_expected_output.drop(columns=["nw_ag_flag"])
+        df_input = df_input[
+            [
+                "a_weight",
+                "g_weight",
+            ]
+        ]
+        df_output = winsorisation_flag(
+            df=df_input, a_weight="a_weight", g_weight="g_weight"
+        )
 
-    return df
-
-
-data = pd.read_csv(
-    "/home/cdsw/monthly-business-survey-results/tests/data/winsorisation/flag_data.csv"
-)
-
-print(data)
-
-test = winsorisation_flag(data, data.a_weight, data.g_weight)
+        assert_frame_equal(df_output, df_expected_output)
