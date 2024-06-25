@@ -93,11 +93,13 @@ def enforce_datatypes(
         if (x in contributors_dict) and (response_dict[x] != contributors_dict[x])
     ]
     if mismatched_types:
+        # Warning to catch if the same column name has different types
         print(
             "Mismatched data types between two dictionaries in columns:",
             mismatched_types,
         )
-
+    # Joining Dicts will overwrite first dict if values are different.
+    # check for this is carried out above
     joint_dictionary = {
         **response_dict,
         **contributors_dict,
