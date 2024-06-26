@@ -127,6 +127,22 @@ def enforce_datatypes(
 def validate_config_datatype_input(
     responses_keep_cols, contributors_keep_cols, **config
 ):
+    """
+    function to validate config datatypes inputted into the config file
+
+    Parameters
+    ----------
+    responses_keep_cols : dict
+        dictionary containing columns to keep from responses and datatypes
+    contributors_keep_cols : _type_
+        dictionary containing columns to keep from contributors and datatypes
+
+    Raises
+    ------
+    ValueError
+        ValueError if the specified datatype is not in the accepted_type list
+        ints and floats do not need to specify number of bits i.e. int32 etc.
+    """
     joint_dict = {**responses_keep_cols, **contributors_keep_cols}
     accepted_types = ["str", "float", "int", "date", "bool", "category"]
     incorrect_datatype = [
@@ -146,6 +162,22 @@ def validate_config_datatype_input(
 def validate_config_repeated_datatypes(
     responses_keep_cols, contributors_keep_cols, **config
 ):
+    """
+    Checking that repeated columns do not have conflicting data types
+
+    Parameters
+    ----------
+    responses_keep_cols : dict
+        dictionary containing columns to keep from responses and datatypes
+    contributors_keep_cols : _type_
+        dictionary containing columns to keep from contributors and datatypes
+
+    Raises
+    ------
+    ValueError
+        ValueError if any repeated column has a different data type in the contributors
+        and responses data sets.
+    """
 
     mismatched_types = [
         x
