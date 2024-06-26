@@ -63,7 +63,13 @@ def clean_and_merge(
 
 
 def enforce_datatypes(
-    df, responses_keep_cols, contributors_keep_cols, temporarily_remove_cols, **config
+    df,
+    reference,
+    period,
+    responses_keep_cols,
+    contributors_keep_cols,
+    temporarily_remove_cols,
+    **config
 ):
     """
     function to change datatypes of columns based on config file
@@ -85,20 +91,10 @@ def enforce_datatypes(
     pd.DataFrame
         dataframe with correctly formatted column datatypes.
     """
+    # Resetting to easiliy change datatypes
+    df = df.reset_index()
     response_dict = responses_keep_cols
     contributors_dict = contributors_keep_cols
-    mismatched_types = [
-        x
-        for x in response_dict
-        if (x in contributors_dict) and (response_dict[x] != contributors_dict[x])
-    ]
-    if mismatched_types:
-        # Warning to catch if the same column name has different types
-        raise ValueError(
-            "Mismatched data types between two dictionaries in columns: {}".format(
-                mismatched_types
-            )
-        )
     # Joining Dicts will overwrite first dict if values are different.
     # check for this is carried out above
     joint_dictionary = {
@@ -120,10 +116,47 @@ def enforce_datatypes(
 
     for key in joint_dictionary:
         type_from_dict = joint_dictionary[key]
-        if type_from_dict in ["str", "float", "int"]:
+        if type_from_dict in ["str", "float", "int", "bool", "category"]:
             df_convert[key] = df_convert[key].astype(type_from_dict)
-        elif type_from_dict == "DateTime":
+        elif type_from_dict == "date":
             df_convert[key] = pd.to_datetime(df_convert[key], format="%Y%m")
-        else:
-            print("check datatype for {}".format(key), type_from_dict)
+    df = df_convert.set_index([reference, period])
     return df_convert
+
+
+def validate_config_datatype_input(
+    responses_keep_cols, contributors_keep_cols, **config
+):
+    joint_dict = {**responses_keep_cols, **contributors_keep_cols}
+    accepted_types = ["str", "float", "int", "date", "bool", "category"]
+    incorrect_datatype = [
+        x for x in list(joint_dict) if joint_dict.get(x) not in accepted_types
+    ]
+
+    if incorrect_datatype:
+        given_types = [joint_dict.get(key) for key in incorrect_datatype]
+        raise ValueError(
+            "Check the inputted datatype(s) for column(s) {}:{},\
+            only the following datatypes are accepted: {}".format(
+                incorrect_datatype, given_types, accepted_types
+            )
+        )
+
+
+def validate_config_repeated_datatypes(
+    responses_keep_cols, contributors_keep_cols, **config
+):
+
+    mismatched_types = [
+        x
+        for x in responses_keep_cols
+        if (x in contributors_keep_cols)
+        and (responses_keep_cols[x] != contributors_keep_cols[x])
+    ]
+    if mismatched_types:
+        # Warning to catch if the same column name has different types
+        raise ValueError(
+            "Mismatched data types between two dictionaries in columns: {}".format(
+                mismatched_types
+            )
+        )
