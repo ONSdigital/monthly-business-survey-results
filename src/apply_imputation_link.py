@@ -76,6 +76,9 @@ def create_and_merge_imputation_values(
             "link_column": cumulative_backward_link,
         },
         "fic": {
+            # FIC only works if the C is in the first period of the business being
+            # sampled. This is fine for automatic imputation, but should be careful
+            # if manual construction imputation is done
             "intermediate_column": "fic",
             "marker": "fic",
             "fill_column": "imputed_value",
