@@ -78,6 +78,7 @@ def enforce_datatypes(
     ----------
     df : pd.DataFrame
         dataframe with combined responses and contributors columns
+        index is expected to be 'period' and 'reference'
     responses_keep_cols : dict
         dictionary containing response columns to keep and datatypes
     contributors_keep_cols : dict
@@ -92,7 +93,12 @@ def enforce_datatypes(
         dataframe with correctly formatted column datatypes.
     """
     # Resetting to easiliy change datatypes
-    df = df.reset_index()
+    df_convert = df.copy()
+    df_convert = df_convert.reset_index().drop("index", axis=1)
+    # print(df_convert.head())
+    # index_1_name = df_convert.index.names[0]
+    # index_2_name = df_convert.index.names[0]
+
     response_dict = responses_keep_cols
     contributors_dict = contributors_keep_cols
     # Joining Dicts will overwrite first dict if values are different.
@@ -101,7 +107,7 @@ def enforce_datatypes(
         **response_dict,
         **contributors_dict,
     }
-    df_convert = df.copy()
+
     try:
         temp_remove_cols = temporarily_remove_cols
     except KeyError:
@@ -120,7 +126,7 @@ def enforce_datatypes(
             df_convert[key] = df_convert[key].astype(type_from_dict)
         elif type_from_dict == "date":
             df_convert[key] = pd.to_datetime(df_convert[key], format="%Y%m")
-    df = df_convert.set_index([reference, period])
+    df_convert = df_convert.set_index([reference, period], drop=True)
     return df_convert
 
 
