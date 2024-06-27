@@ -7,11 +7,11 @@
     "reference" : "reference",
     "responses_keep_cols" : {
                 "reference" : "str",
-                "period": "DateTime",
+                "period": "date",
                 "response" : "str"},
     "contributors_keep_cols" : {
                 "reference" : "str",
-                "period" : "DateTime",
+                "period" : "date",
                 "frozensic" : "str",
                 "frozenemployees" : "int",
                 "frozenturnover" : "float",

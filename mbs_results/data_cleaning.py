@@ -92,17 +92,18 @@ def enforce_datatypes(
     pd.DataFrame
         dataframe with correctly formatted column datatypes.
     """
-    # Resetting to easiliy change datatypes
-    df_convert = df.copy()
-    df_convert = df_convert.reset_index().drop("index", axis=1)
-    # print(df_convert.head())
-    # index_1_name = df_convert.index.names[0]
-    # index_2_name = df_convert.index.names[0]
-
+    # Resetting to easily change datatypes
     response_dict = responses_keep_cols
     contributors_dict = contributors_keep_cols
+
+    df_convert = df.copy()
+    print(df_convert.columns.tolist())
+    df_convert = df_convert.reset_index()
+    if "index" in df_convert.columns.tolist():
+        df_convert.drop("index", axis=1, inplace=True)
+
     # Joining Dicts will overwrite first dict if values are different.
-    # check for this is carried out above
+    # check for this is carried out in 'validate_config_repeated_datatypes'
     joint_dictionary = {
         **response_dict,
         **contributors_dict,
@@ -112,6 +113,7 @@ def enforce_datatypes(
         temp_remove_cols = temporarily_remove_cols
     except KeyError:
         # deals with case when key is not found in dict
+        # Or when temporarily_remove_cols is empty in config
         temp_remove_cols = []
 
     df_convert.drop(temp_remove_cols, axis=1, inplace=True)
@@ -126,7 +128,8 @@ def enforce_datatypes(
             df_convert[key] = df_convert[key].astype(type_from_dict)
         elif type_from_dict == "date":
             df_convert[key] = pd.to_datetime(df_convert[key], format="%Y%m")
-    df_convert = df_convert.set_index([reference, period], drop=True)
+    # Re-set the index back to reference and period
+    df_convert = df_convert.set_index([reference, period])
     return df_convert
 
 

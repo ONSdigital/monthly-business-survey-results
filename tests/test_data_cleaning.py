@@ -22,6 +22,7 @@ def test_enforce_datatypes():
     df = pd.read_csv(Path("tests") / "imputation_flag_data.csv")
     df_subset = df[["period", "strata", "reference", "target_variable"]]
     expected_output = correct_types(df_subset)
+    df_subset = df_subset.set_index(["reference", "period"])
     test_setup_config = {
         "period": "period",
         "reference": "reference",
