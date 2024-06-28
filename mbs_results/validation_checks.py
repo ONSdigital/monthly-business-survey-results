@@ -6,10 +6,6 @@ def validate_config(config):
     ----------
     config: Dict
       main pipeline configuration
-    Returns
-    -------
-    pd.DataFrame
-      Main analysis dataset
 
     """
 
@@ -43,8 +39,9 @@ def colnames_clash(
       main pipeline configuration. Can be used to input the entire config dictionary
     Returns
     -------
-    pd.DataFrame
-      Main analysis dataset
+    list
+      list containing column names which are in both contributors and responses,
+      excluding period and reference.
 
     """
 
