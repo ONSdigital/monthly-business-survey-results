@@ -3,7 +3,14 @@ import pandas as pd  # noqa F401
 
 
 def flag_matched_pair(
-    df, forward_or_backward, target, period, reference, strata, time_difference=1
+    df,
+    forward_or_backward,
+    target,
+    period,
+    reference,
+    strata,
+    time_difference=1,
+    **kwargs
 ):
     """
     function to flag matched pairs using the shift method
@@ -24,6 +31,8 @@ def flag_matched_pair(
         column name containing strata information (sic)
     time_difference: int
         lookup distance for matched pairs
+    kwargs : mapping, optional
+        A dictionary of keyword arguments passed into func.
 
     Returns
     -------
@@ -54,7 +63,7 @@ def flag_matched_pair(
     return df
 
 
-def count_matches(df, flag, period, strata):
+def count_matches(df, flag, period, strata, **kwargs):
     """
     function to flag matched pairs using the shift method
 
@@ -70,6 +79,8 @@ def count_matches(df, flag, period, strata):
         column name containing time period
     strata : str
         column name containing strata information (sic)
+    kwargs : mapping, optional
+        A dictionary of keyword arguments passed into func.
 
     Returns
     -------

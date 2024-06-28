@@ -5,10 +5,12 @@ import pandas as pd
 def create_impute_flags(
     df: pd.DataFrame,
     target: str,
+    period: str,
     reference: str,
     strata: str,
     auxiliary: str,
     predictive_auxiliary: str,
+    **kwargs
 ):
 
     """
@@ -24,9 +26,10 @@ def create_impute_flags(
         DataFrame containing forward, backward predictive period columns (
         These columns are created by calling flag_matched_pair_merge forward
         and backwards)
-
     target : str
         Column name containing target variable.
+    period: str
+        Column name containing date variable.
     reference : str
         Column name containing business reference id.
     strata : str
@@ -36,6 +39,8 @@ def create_impute_flags(
     predictive_auxiliary: str
         Column name containing predictive auxiliary data, this is created,
         by flag_matched_pair_merge function.
+    kwargs : mapping, optional
+        A dictionary of keyword arguments passed into func.
 
     Returns
     -------
@@ -56,11 +61,20 @@ def create_impute_flags(
     backward_target_roll = "b_predictive_" + target + "_roll"
     forward_aux_roll = "f_predictive_" + auxiliary + "_roll"
 
-    df[forward_target_roll] = df.groupby([reference, strata])[
+    df.sort_values([reference, strata, period], inplace=True)
+
+    # TODO : similar conditions at cum imputation links
+    df["fill_group"] = (
+        (df[period] - pd.DateOffset(months=1) != df.shift(1)[period])
+        | (df[strata].diff(1) != 0)
+        | (df[reference].diff(1) != 0)
+    ).cumsum()
+
+    df[forward_target_roll] = df.groupby([reference, strata, "fill_group"])[
         "f_predictive_" + target
     ].ffill()
 
-    df[backward_target_roll] = df.groupby([reference, strata])[
+    df[backward_target_roll] = df.groupby([reference, strata, "fill_group"])[
         "b_predictive_" + target
     ].bfill()
 
@@ -77,7 +91,9 @@ def create_impute_flags(
     construction_conditions = df[target].isna() & df[auxiliary].notna()
     df["c_flag"] = np.where(construction_conditions, True, False)
 
-    df[forward_aux_roll] = df.groupby([reference, strata])[predictive_auxiliary].ffill()
+    df[forward_aux_roll] = df.groupby([reference, strata, "fill_group"])[
+        predictive_auxiliary
+    ].ffill()
 
     fic_conditions = df[target].isna() & df[forward_aux_roll].notna()
     df["fic_flag"] = np.where(fic_conditions, True, False)
@@ -88,6 +104,7 @@ def create_impute_flags(
             backward_target_roll,
             forward_aux_roll,
             predictive_auxiliary,
+            "fill_group",
         ],
         axis=1,
         inplace=True,

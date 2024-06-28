@@ -32,6 +32,7 @@ class TestImputationFlags:
         df_output = create_impute_flags(
             df=df_input,
             target="target_variable",
+            period="period",
             reference="reference",
             strata="strata",
             auxiliary="auxiliary",
