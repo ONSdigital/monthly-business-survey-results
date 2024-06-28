@@ -12,18 +12,19 @@ def cumulative_links_test_data():
     return load_and_format(Path("tests") / "cumulative_links.csv")
 
 
-class TestComulativeLinks:
+class TestCumulativeLinks:
     def test_get_cumulative_links_forward(self, cumulative_links_test_data):
         input_data = cumulative_links_test_data.drop(
-            columns=["cumulative_forward_imputation_link", "imputation_group"]
+            columns=[
+                "cumulative_backward_imputation_link",
+                "cumulative_forward_imputation_link",
+                "imputation_group",
+            ]
         )
 
-        expected_output = cumulative_links_test_data[
-            [
-                "imputation_group",
-                "cumulative_forward_imputation_link",
-            ]
-        ]
+        expected_output = cumulative_links_test_data.drop(
+            columns=["imputation_group", "cumulative_backward_imputation_link"]
+        )
 
         actual_output = get_cumulative_links(
             input_data,
@@ -36,19 +37,24 @@ class TestComulativeLinks:
             1,
         )
 
+        actual_output = actual_output.drop(
+            columns=["imputation_group", "missing_value"]
+        )
+
         assert_frame_equal(actual_output, expected_output)
 
     def test_get_cumulative_links_backward(self, cumulative_links_test_data):
         input_data = cumulative_links_test_data.drop(
-            columns=["cumulative_backward_imputation_link", "imputation_group"]
+            columns=[
+                "cumulative_backward_imputation_link",
+                "cumulative_forward_imputation_link",
+                "imputation_group",
+            ]
         )
 
-        expected_output = cumulative_links_test_data[
-            [
-                "imputation_group",
-                "cumulative_backward_imputation_link",
-            ]
-        ]
+        expected_output = cumulative_links_test_data.drop(
+            columns=["imputation_group", "cumulative_forward_imputation_link"]
+        )
 
         actual_output = get_cumulative_links(
             input_data,
@@ -59,6 +65,10 @@ class TestComulativeLinks:
             "period",
             "backward_imputation_link",
             1,
+        )
+
+        actual_output = actual_output.drop(
+            columns=["imputation_group", "missing_value"]
         )
 
         assert_frame_equal(actual_output, expected_output)

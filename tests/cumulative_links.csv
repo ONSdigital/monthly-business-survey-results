@@ -1,7 +1,7 @@
-strata,reference,target,period,forward_imputation_link,backward_imputation_link,imputation_group,cumulative_forward_imputation_link,cumulative_backward_imputation_link
-100,100000,200,202402,1,2,1,,
-100,100000,,202403,2,0.6,2,2,0.6
-100,100000,,202404,3,1,2,6,1
-200,100001,,202402,1,4,3,1,2
-200,100001,,202403,3,0.5,3,3,0.5
-200,100001,300,202404,0.5,1,4,,
+strata,reference,target,period,forward_imputation_link,backward_imputation_link,imputation_marker,imputation_group,cumulative_forward_imputation_link,cumulative_backward_imputation_link
+100,100000,200,202402,1,2,r,1,,
+100,100000,,202403,2,0.6,fir,2,2,0.6
+100,100000,,202404,3,1,fir,2,6,1
+200,100001,,202402,1,4,bir,3,1,2
+200,100001,,202403,3,0.5,bir,3,3,0.5
+200,100001,300,202404,0.5,1,r,4,,
