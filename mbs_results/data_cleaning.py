@@ -1,4 +1,5 @@
 import pandas as pd
+from validation_checks import validate_indices
 
 
 def filter_responses(df, reference, period, last_update):
@@ -59,7 +60,8 @@ def clean_and_merge(
     responses = responses[responses_keep_cols].set_index([reference, period])
     contributors = contributors[contributors_keep_cols].set_index([reference, period])
 
-    return responses.join(contributors, on=[reference, period])
+    validate_indices(responses, contributors)
+    return responses.merge(contributors, on=[reference, period])
 
 
 def enforce_datatypes(

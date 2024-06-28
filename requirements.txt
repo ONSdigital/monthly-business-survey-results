@@ -9,7 +9,8 @@ black
 isort
 nbstripout
 nbqa
-#research_and_development==1.0.0
+# pydoop
+# research_and_development==1.0.0
 pre_commit_hooks
 flake8
 pandas==1.1.5
