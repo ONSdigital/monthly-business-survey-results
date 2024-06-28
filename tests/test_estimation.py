@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from src.estimation import calculate_calibration_factor, calculate_design_weight
+from mbs_results.estimation import calculate_calibration_factor, calculate_design_weight
 
 
 @pytest.fixture(scope="class")

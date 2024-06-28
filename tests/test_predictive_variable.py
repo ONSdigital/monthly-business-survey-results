@@ -4,7 +4,7 @@ import pytest
 from helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
-from src.predictive_variable import shift_by_strata_period
+from mbs_results.predictive_variable import shift_by_strata_period
 
 
 @pytest.fixture(scope="class")

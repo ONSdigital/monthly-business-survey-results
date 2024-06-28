@@ -1,0 +1,20 @@
+{
+    "folder_path" : "/dapsen/workspace_zone/mbs-results/",
+    "mbs_file_name" : "snapshot-202212-002-2156d36b-e61f-42f1-a0f1-61d1f8568b8e.json",
+    "target" : "return",
+    "period" : "period",
+    "strata" : "group",
+    "reference" : "reference",
+    "responses_keep_cols" : {
+                "reference" : "str",
+                "period": "date",
+                "response" : "str"},
+    "contributors_keep_cols" : {
+                "reference" : "str",
+                "period" : "date",
+                "frozensic" : "str",
+                "frozenemployees" : "int",
+                "frozenturnover" : "float",
+                "cellnumber" : "int"},
+    "temporarily_remove_cols": []
+}

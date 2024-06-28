@@ -4,7 +4,7 @@ import pytest
 from helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
-from src.cumulative_imputation_links import get_cumulative_links
+from mbs_results.cumulative_imputation_links import get_cumulative_links
 
 
 @pytest.fixture(scope="class")
