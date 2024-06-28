@@ -97,7 +97,6 @@ def enforce_datatypes(
     contributors_dict = contributors_keep_cols
 
     df_convert = df.copy()
-    print(df_convert.columns.tolist())
     df_convert = df_convert.reset_index()
     if "index" in df_convert.columns.tolist():
         df_convert.drop("index", axis=1, inplace=True)
