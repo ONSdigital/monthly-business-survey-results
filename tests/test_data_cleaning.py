@@ -3,7 +3,8 @@ from pathlib import Path
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from mbs_results.data_cleaning import enforce_datatypes, validate_config_datatype_input
+from mbs_results.data_cleaning import enforce_datatypes
+from mbs_results.validation_checks import validate_config_datatype_input
 
 
 def correct_types(df):
