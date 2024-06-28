@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from src.link_filter import flag_rows_to_ignore
+from mbs_results.link_filter import flag_rows_to_ignore
 
 
 @pytest.mark.parametrize("scenario", ["test_flag_data"])
