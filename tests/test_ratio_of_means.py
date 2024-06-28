@@ -3,9 +3,10 @@ import pytest
 from helper_functions import load_filter
 from pandas.testing import assert_frame_equal
 
-from src.ratio_of_means import ratio_of_means
+from mbs_results.ratio_of_means import ratio_of_means
 
 scenario_path_prefix = "tests/data/"
+
 scenarios = [
     "01_C",  # dtype issue
     "02_C_FI",
@@ -48,9 +49,6 @@ scenarios = [
 pytestmark = pytest.mark.parametrize("base_file_name", scenarios)
 
 
-pytestmark = pytest.mark.parametrize("base_file_name", scenarios)
-
-
 class TestRatioOfMeans:
     def test_ratio_of_means(self, base_file_name):
 
@@ -65,7 +63,6 @@ class TestRatioOfMeans:
             scenario_path_prefix + "ratio_of_means_filters/" + base_file_name + ".csv"
         )
 
-        print(filter_df)
         # not yet implemented remove this when defaults are ready
         expected_output = expected_output.drop(
             columns=["default_forward", "default_backward", "default_construction"]
