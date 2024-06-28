@@ -1,5 +1,6 @@
 import pandas as pd
-from validation_checks import validate_indices
+
+from mbs_results.validation_checks import validate_indices
 
 
 def filter_responses(df, reference, period, last_update):
