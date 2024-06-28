@@ -3,14 +3,14 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 
-from src.apply_imputation_link import create_and_merge_imputation_values
-from src.calculate_imputation_link import calculate_imputation_link
-from src.predictive_variable import shift_by_strata_period
-from src.construction_matches import flag_construction_matches
-from src.cumulative_imputation_links import get_cumulative_links
-from src.flag_and_count_matched_pairs import count_matches, flag_matched_pair
-from src.imputation_flags import create_impute_flags, generate_imputation_marker
-from src.link_filter import flag_rows_to_ignore
+from mbs_results.apply_imputation_link import create_and_merge_imputation_values
+from mbs_results.calculate_imputation_link import calculate_imputation_link
+from mbs_results.construction_matches import flag_construction_matches
+from mbs_results.cumulative_imputation_links import get_cumulative_links
+from mbs_results.flag_and_count_matched_pairs import count_matches, flag_matched_pair
+from mbs_results.imputation_flags import create_impute_flags, generate_imputation_marker
+from mbs_results.link_filter import flag_rows_to_ignore
+from mbs_results.predictive_variable import shift_by_strata_period
 
 
 def wrap_flag_matched_pairs(
@@ -71,15 +71,18 @@ def wrap_count_matches(
     """
 
     count_arguments = (
-        dict(**default_columns, **{"flag_column_name": "f_match"}),
-        dict(**default_columns, **{"flag_column_name": "b_match"}),
-        dict(**default_columns, **{"flag_column_name": "flag_construction_matches"}),
+        dict(**default_columns, **{"flag": "f_match"}),
+        dict(**default_columns, **{"flag": "b_match"}),
+        dict(**default_columns, **{"flag": "flag_construction_matches"}),
     )
 
-    for args in count_arguments:
-        df = count_matches(df, **args)
+    all_counts = pd.DataFrame(columns=default_columns.values())
 
-    return df
+    for args in count_arguments:
+        counts = count_matches(df, **args)
+        all_counts = counts.merge(all_counts, how="left")
+
+    return all_counts
 
 
 def wrap_shift_by_strata_period(
@@ -169,7 +172,7 @@ def wrap_calculate_imputation_link(
             **{
                 "match_col": "f_match",
                 "predictive_variable": "f_predictive_question",
-                "link_col_name": "f_link_question",
+                "link_col": "f_link_question",
             }
         ),
         dict(
@@ -177,7 +180,7 @@ def wrap_calculate_imputation_link(
             **{
                 "match_col": "b_match",
                 "predictive_variable": "b_predictive_question",
-                "link_col_name": "b_link_question",
+                "link_col": "b_link_question",
             }
         ),
         dict(
@@ -185,7 +188,7 @@ def wrap_calculate_imputation_link(
             **{
                 "match_col": "flag_construction_matches",
                 "predictive_variable": "other",
-                "link_col_name": "construction_link",
+                "link_col": "construction_link",
             }
         ),
     )
@@ -230,6 +233,21 @@ def wrap_get_cumulative_links(
     for args in cum_links_arguments:
 
         df = get_cumulative_links(df, **args)
+
+    return df
+
+
+def count_impute_matches(df, target, period, reference, strata, auxiliary):
+
+    default_columns = locals()
+
+    del default_columns["df"]
+
+    df["date"] = pd.to_datetime(df["date"], format="%Y%m")
+
+    df = df.pipe(wrap_flag_matched_pairs, **default_columns).pipe(
+        wrap_count_matches, **default_columns
+    )
 
     return df
 
@@ -282,6 +300,8 @@ def ratio_of_means(
     default_columns = locals()
 
     del default_columns["df"]
+
+    print(default_columns)
 
     if default_columns["filters"] is not None:
 
