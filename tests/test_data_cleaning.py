@@ -4,7 +4,6 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 
 from mbs_results.data_cleaning import clean_and_merge, enforce_datatypes
-from mbs_results.validation_checks import validate_config_datatype_input
 
 
 def correct_types(df):
@@ -31,7 +30,6 @@ def test_enforce_datatypes():
         "contributors_keep_cols": {"reference": "int", "target_variable": "float"},
         "temporarily_remove_cols": [],
     }
-    validate_config_datatype_input(**test_setup_config)
     actual_output = enforce_datatypes(df_subset, **test_setup_config)
 
     assert_frame_equal(actual_output, expected_output)
