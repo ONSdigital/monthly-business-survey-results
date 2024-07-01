@@ -67,7 +67,7 @@ def wrap_count_matches(
     Returns
     -------
     df : pd.DataFrame
-        Original dataframe with 3 new numeric columns.
+        Dataframe with 3 numeric columns.
     """
 
     count_arguments = (
@@ -111,8 +111,6 @@ def wrap_shift_by_strata_period(
 
     if "ignore_from_link" in df.columns:
 
-        # df["filtered_target"] = df["question"].mul(~(df["ignore_from_link"]))
-
         df["filtered_target"] = df["question"]
         df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
 
@@ -127,7 +125,7 @@ def wrap_shift_by_strata_period(
             **default_columns,
             **{"time_difference": -1, "new_col": "b_predictive_question"}
         ),
-        # Needed for ccreate_impute_flags
+        # Needed for create_impute_flags
         dict(
             **{**default_columns, "target": default_columns["auxiliary"]},
             **{"time_difference": 1, "new_col": "f_predictive_auxiliary"}
@@ -237,19 +235,39 @@ def wrap_get_cumulative_links(
     return df
 
 
-def count_impute_matches(df, target, period, reference, strata, auxiliary):
+def count_impute_matches(
+    df: pd.DataFrame, **default_columns: Dict[str, str]
+) -> pd.DataFrame:
+    """Wrapper function to get counts of flagged matched pairs.
 
-    default_columns = locals()
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    **default_columns : Dict[str, str]
+        The column names which were passed to ratio of means function.
+    Returns
+    -------
+    df : pd.DataFrame
+        Original dataframe with 3 new numeric columns.
+    """
 
-    del default_columns["df"]
+    count_arguments = [
+        dict(**default_columns, **{"flag": "f_match"}),
+        dict(**default_columns, **{"flag": "b_match"}),
+        dict(**default_columns, **{"flag": "flag_construction_matches"}),
+    ]
 
-    df["date"] = pd.to_datetime(df["date"], format="%Y%m")
+    #TODO: count_matches return type not very convenient to combine all counts
+    #TODO: if count_matches returns a series then easier to combine them
 
-    df = df.pipe(wrap_flag_matched_pairs, **default_columns).pipe(
-        wrap_count_matches, **default_columns
-    )
+    all_counts = pd.DataFrame(columns=default_columns.values())
 
-    return df
+    for args in count_arguments:
+        counts = count_matches(df, **args)
+        all_counts = counts.merge(all_counts, how="left")
+
+    return all_counts
 
 
 def ratio_of_means(
@@ -295,13 +313,11 @@ def ratio_of_means(
 
     # Saving args to dict, so we can pass same attributes to multiple functions
     # These arguments are used from the majority of functions
-    # Removing though df since we are chaining function with pipe
+    # Remove df to allow pipe chain
 
     default_columns = locals()
 
     del default_columns["df"]
-
-    print(default_columns)
 
     if default_columns["filters"] is not None:
 
@@ -314,7 +330,6 @@ def ratio_of_means(
 
     df = (
         df.pipe(wrap_flag_matched_pairs, **default_columns)
-        # .pipe(wrap_count_matches, **default_columns) #needs to be seperated
         .pipe(wrap_shift_by_strata_period, **default_columns)
         .pipe(wrap_calculate_imputation_link, **default_columns)
         .pipe(
