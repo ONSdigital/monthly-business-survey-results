@@ -258,8 +258,8 @@ def count_impute_matches(
         dict(**default_columns, **{"flag": "flag_construction_matches"}),
     ]
 
-    #TODO: count_matches return type not very convenient to combine all counts
-    #TODO: if count_matches returns a series then easier to combine them
+    # TODO: count_matches return type not very convenient to combine all counts
+    # TODO: if count_matches returns a series then easier to combine them
 
     all_counts = pd.DataFrame(columns=default_columns.values())
 
