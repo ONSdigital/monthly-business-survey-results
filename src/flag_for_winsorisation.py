@@ -24,7 +24,7 @@ def winsorisation_flag(df, a_weight, g_weight):
         winsorisation should be applied.
     """
 
-    df["flag_calculation"] = df["a_weight"] * df["g_weight"]
+    df["flag_calculation"] = df[a_weight] * df[g_weight]
 
     df["nw_ag_flag"] = df["flag_calculation"].apply(lambda x: 1 if x <= 1 else 0)
 
