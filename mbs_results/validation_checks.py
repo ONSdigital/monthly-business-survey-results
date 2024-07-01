@@ -11,9 +11,15 @@ def validate_config(config):
 
     if colnames_clash(**config):
         raise ValueError(
-            """Overlapping column names in responses_keep_cols and and
+            """Overlapping column names in responses_keep_cols and
             contributors_keep_cols (main config)."""
         )
+    if period_and_reference_not_given(**config):
+        raise ValueError(
+            """Period and/or Reference is not given in responses_keep_cols
+             and/or contributors_keep_cols (main config). """
+        )
+
     validate_config_datatype_input(**config)
     validate_config_repeated_datatypes(**config)
 
@@ -39,16 +45,50 @@ def colnames_clash(
       main pipeline configuration. Can be used to input the entire config dictionary
     Returns
     -------
-    list
-      list containing column names which are in both contributors and responses,
+    bool
+      Returns true if any column names are in both contributors and responses,
       excluding period and reference.
-
+      False otherwise
     """
 
     return any(
         [
             i in contributors_keep_cols and i not in [reference, period]
             for i in responses_keep_cols
+        ]
+    )
+
+
+def period_and_reference_not_given(
+    reference, period, responses_keep_cols, contributors_keep_cols, **config
+):
+    """
+    _summary_
+
+    reference: Str
+      the name of the reference column
+    period: Str
+      the name of the period column
+    response_keep_cols: Str
+      the names of the columns to keep from the responses data
+    contributors_keep_cols: Str
+        the names of the columns to keep from the contributors data
+    **config: Dict
+      main pipeline configuration. Can be used to input the entire config dictionary
+
+    Returns
+    -------
+    bool
+        Returns True if response and period are not in both responses_keep_cols
+        and contributors_keep_cols
+        False otherwise
+    """
+
+    return any(
+        [
+            i
+            for i in [reference, period]
+            if (i not in responses_keep_cols) or (i not in contributors_keep_cols)
         ]
     )
 
@@ -107,8 +147,8 @@ def validate_config_datatype_input(
     if incorrect_datatype:
         given_types = [joint_dict.get(key) for key in incorrect_datatype]
         raise ValueError(
-            "Check the inputted datatype(s) for column(s) {}:{},\
-            only the following datatypes are accepted: {}".format(
+            """Check the inputted datatype(s) for column(s) {}:{},
+            only the following datatypes are accepted: {}""".format(
                 incorrect_datatype, given_types, accepted_types
             )
         )
