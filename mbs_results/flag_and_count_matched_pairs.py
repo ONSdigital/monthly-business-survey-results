@@ -42,7 +42,7 @@ def flag_matched_pair(
         predictive target variable data column
     """
 
-    df = df.sort_values(by=[reference, period])
+    df = df.sort_values(by=[strata, reference, period])
 
     if forward_or_backward == "b":
         time_difference = -time_difference
