@@ -3,7 +3,7 @@ from pathlib import Path
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from mbs_results.data_cleaning import enforce_datatypes
+from mbs_results.data_cleaning import clean_and_merge, enforce_datatypes
 from mbs_results.validation_checks import validate_config_datatype_input
 
 
@@ -34,4 +34,46 @@ def test_enforce_datatypes():
     validate_config_datatype_input(**test_setup_config)
     actual_output = enforce_datatypes(df_subset, **test_setup_config)
 
+    assert_frame_equal(actual_output, expected_output)
+
+
+def test_clean_and_merge():
+    test_setup_config = {
+        "period": "period",
+        "reference": "reference",
+        "responses_keep_cols": {
+            "period": "date",
+            "reference": "int",
+            "target_variable": "float",
+        },
+        "contributors_keep_cols": {
+            "reference": "int",
+            "period": "date",
+            "strata": "str",
+        },
+        "temporarily_remove_cols": [],
+    }
+    snapshot = {
+        "responses": [
+            {
+                "reference": "1",
+                "period": "202212",
+                "target_variable": "20",
+                "lastupdateddate": "2024-06-28 00:00:01.999999+00",
+            }
+        ],
+        "contributors": [
+            {"reference": "1", "period": "202212", "survey": "202", "strata": "101"}
+        ],
+    }
+    actual_output = clean_and_merge(snapshot, **test_setup_config)
+    dictionary_data = {
+        "reference": ["1"],
+        "period": ["202212"],
+        "target_variable": ["20"],
+        "strata": ["101"],
+    }
+    expected_output = pd.DataFrame(data=dictionary_data).set_index(
+        ["reference", "period"]
+    )
     assert_frame_equal(actual_output, expected_output)
