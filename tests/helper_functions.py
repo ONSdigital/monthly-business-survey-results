@@ -17,4 +17,8 @@ def load_filter(filter_path):
     if my_file.is_file():
 
         df = pd.read_csv(my_file)
+
+        if "date" in df.columns:
+            df["date"] = pd.to_datetime(df["date"], format="%Y%m")
+
         return df
