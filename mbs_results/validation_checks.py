@@ -11,9 +11,15 @@ def validate_config(config):
 
     if colnames_clash(**config):
         raise ValueError(
-            """Overlapping column names in responses_keep_cols and and
+            """Overlapping column names in responses_keep_cols and
             contributors_keep_cols (main config)."""
         )
+    if period_and_reference_not_given(**config):
+        raise ValueError(
+            """Period and/or Reference is not given in responses_keep_cols
+             and/or contributors_keep_cols (main config). """
+        )
+
     validate_config_datatype_input(**config)
     validate_config_repeated_datatypes(**config)
 
@@ -39,16 +45,54 @@ def colnames_clash(
       main pipeline configuration. Can be used to input the entire config dictionary
     Returns
     -------
-    list
-      list containing column names which are in both contributors and responses,
+    bool
+      Returns true if any column names are in both contributors and responses,
       excluding period and reference.
-
+      False otherwise
     """
 
     return any(
         [
-            i in contributors_keep_cols and i not in [reference, period]
-            for i in responses_keep_cols
+            column in contributors_keep_cols and column not in [reference, period]
+            for column in responses_keep_cols
+        ]
+    )
+
+
+def period_and_reference_not_given(
+    reference, period, responses_keep_cols, contributors_keep_cols, **config
+):
+    """
+    Function checks that both reference and period columns are supplied in
+    response_keep_cols and contributors_keep_cols.
+    Returns True if period or reference is missing from either
+    responses_keep_cols and contributors_keep_cols, False otherwise
+
+    reference: Str
+      the name of the reference column
+    period: Str
+      the name of the period column
+    response_keep_cols: Str
+      the names of the columns to keep from the responses data
+    contributors_keep_cols: Str
+        the names of the columns to keep from the contributors data
+    **config: Dict
+      main pipeline configuration. Can be used to input the entire config dictionary
+
+    Returns
+    -------
+    bool
+        Returns True if response and period are not in both responses_keep_cols
+        and contributors_keep_cols
+        False otherwise
+    """
+
+    return any(
+        [
+            column
+            for column in [reference, period]
+            if (column not in responses_keep_cols)
+            or (column not in contributors_keep_cols)
         ]
     )
 
@@ -101,14 +145,14 @@ def validate_config_datatype_input(
     joint_dict = {**responses_keep_cols, **contributors_keep_cols}
     accepted_types = ["str", "float", "int", "date", "bool", "category"]
     incorrect_datatype = [
-        x for x in list(joint_dict) if joint_dict.get(x) not in accepted_types
+        item for item in list(joint_dict) if joint_dict.get(item) not in accepted_types
     ]
 
     if incorrect_datatype:
         given_types = [joint_dict.get(key) for key in incorrect_datatype]
         raise ValueError(
-            "Check the inputted datatype(s) for column(s) {}:{},\
-            only the following datatypes are accepted: {}".format(
+            """Check the inputted datatype(s) for column(s) {}:{},
+            only the following datatypes are accepted: {}""".format(
                 incorrect_datatype, given_types, accepted_types
             )
         )
@@ -135,10 +179,10 @@ def validate_config_repeated_datatypes(
     """
 
     mismatched_types = [
-        x
-        for x in responses_keep_cols
-        if (x in contributors_keep_cols)
-        and (responses_keep_cols[x] != contributors_keep_cols[x])
+        key
+        for key in responses_keep_cols
+        if (key in contributors_keep_cols)
+        and (responses_keep_cols[key] != contributors_keep_cols[key])
     ]
     if mismatched_types:
         # Warning to catch if the same column name has different types
