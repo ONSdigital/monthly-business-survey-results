@@ -66,7 +66,7 @@ def period_and_reference_not_given(
     Function checks that both reference and period columns are supplied in
     response_keep_cols and contributors_keep_cols.
     Returns True if period or reference is missing from either
-    responses_keep_cols and contributors_keep_cols, False otherwise 
+    responses_keep_cols and contributors_keep_cols, False otherwise
 
     reference: Str
       the name of the reference column
@@ -91,7 +91,8 @@ def period_and_reference_not_given(
         [
             column
             for column in [reference, period]
-            if (column not in responses_keep_cols) or (column not in contributors_keep_cols)
+            if (column not in responses_keep_cols)
+            or (column not in contributors_keep_cols)
         ]
     )
 
