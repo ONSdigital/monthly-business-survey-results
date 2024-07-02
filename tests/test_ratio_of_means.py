@@ -63,6 +63,11 @@ class TestRatioOfMeans:
             scenario_path_prefix + "ratio_of_means_filters/" + base_file_name + ".csv"
         )
 
+        # Can't use load_format helper, test cases have date instead of period
+
+        input_data["date"] = pd.to_datetime(input_data["date"], format="%Y%m")
+        expected_output["date"] = pd.to_datetime(expected_output["date"], format="%Y%m")
+
         # not yet implemented remove this when defaults are ready
         expected_output = expected_output.drop(
             columns=["default_forward", "default_backward", "default_construction"]
@@ -114,9 +119,6 @@ class TestRatioOfMeans:
 
         actual_output = actual_output.reset_index(drop=True)
         expected_output = expected_output.reset_index(drop=True)
-
-        actual_output = actual_output.round(5)
-        expected_output = expected_output.round(5)
 
         expected_output["imputation_marker"] = expected_output[
             "imputation_marker"

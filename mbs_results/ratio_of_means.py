@@ -278,6 +278,7 @@ def ratio_of_means(
     strata: str,
     auxiliary: str,
     filters: pd.DataFrame = None,
+    **kwargs
 ) -> pd.DataFrame:
     """
     Imputes for each non-responding contributor a single numeric target
@@ -303,6 +304,10 @@ def ratio_of_means(
         Column name containing strata information (sic).
     auxiliary : str
         Column name containing auxiliary information (sic).
+    filters : pd.DataFrame, optional
+        Dataframe with values to exclude from imputation method.
+    kwargs : mapping, optional
+        A dictionary of keyword arguments passed into func.
 
     Returns
     -------
@@ -313,18 +318,20 @@ def ratio_of_means(
 
     # Saving args to dict, so we can pass same attributes to multiple functions
     # These arguments are used from the majority of functions
-    # Remove df to allow pipe chain
 
-    default_columns = locals()
+    # TODO: Consider more elegant solution, or define function arguments explicitly
 
-    del default_columns["df"]
+    default_columns = {
+        "target": target,
+        "period": period,
+        "reference": reference,
+        "strata": strata,
+        "auxiliary": auxiliary,
+    }
 
-    if default_columns["filters"] is not None:
+    if filters is not None:
 
-        df = flag_rows_to_ignore(df, default_columns["filters"])
-
-    # TODO: Is datetime needed? If so here is a good place to convert to datetime
-    df["date"] = pd.to_datetime(df["date"], format="%Y%m")
+        df = flag_rows_to_ignore(df, filters)
 
     # TODO: Pre calculated links
 
@@ -356,9 +363,17 @@ def ratio_of_means(
         )
     )
 
+    # TODO: Reset index needed because of sorting, perhaps reset index
+    #       when sorting directly in the low level functions or consider
+    #       sorting here before chaining
+
     df = df.reset_index(drop=True)
 
-    df["date"] = pd.to_numeric(df["date"].dt.strftime("%Y%m"), errors="coerce")
+    # TODO: Relates to ASAP-415, comment from pull request:
+    #       You could extact this into its own function which can be called. It might
+    #       be nice to switch this on and off incase we need to verify the methods or
+    #       methogology needs this. Also potential argument of selecting the needed
+    #       columns vs dropping un-needed, guess whichever is a shorter list
 
     df = df.drop(
         columns=[
