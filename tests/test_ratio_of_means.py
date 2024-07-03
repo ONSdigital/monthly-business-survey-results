@@ -26,7 +26,7 @@ scenarios = [
     "16_BI_BI_R_NS_C_FI_FI",  # bug fixed ASAP-402
     "17_NS_R_FI_NS",
     "18_NS_BI_R_NS",
-    "19_link_columns",  #not yet implemented ASAP-333
+    "19_link_columns",
     "20_mixed_data",
     "21_class_change_R_C_FI",
     "22_class_change_C_BI_R",
@@ -35,7 +35,7 @@ scenarios = [
     "25_class_change_C_FI_FI",
     "26_C_FI_FI_NS_BI_BI_R_filtered",  # not yet implemented
     "27_BI_BI_R_NS_R_FI_FI_filtered",  # not yet implemented
-    '28_link_columns_filtered', #not yet implemented + ASAP-333
+    '28_link_columns_filtered',
     "29_mixed_data_filtered",  # not yet implemented
     "30_class_change_C_C_FI_filtered",  # not yet implemented
     "31_no_response",  # bug fixed ASAP-402

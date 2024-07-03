@@ -281,7 +281,7 @@ def ratio_of_means(
     strata: str,
     auxiliary: str,
     filters: pd.DataFrame = None,
-    imputation_links: dict = {},
+    imputation_links: Dict[str, str] = {},
     **kwargs
 ) -> pd.DataFrame:
     """
