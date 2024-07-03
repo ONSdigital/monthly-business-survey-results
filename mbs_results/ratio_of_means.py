@@ -311,7 +311,8 @@ def ratio_of_means(
     filters : pd.DataFrame, optional
         Dataframe with values to exclude from imputation method.
     imputation_links : dict, optional
-        Dictionary of column names matching to their imputation link type.
+        Dictionary of column name keys matching to their imputation link value
+        ("f_link_question", "b_link_question", "construction_link").
     kwargs : mapping, optional
         A dictionary of keyword arguments passed into func.
 
