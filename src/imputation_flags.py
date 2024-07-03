@@ -10,7 +10,6 @@ def create_impute_flags(
     auxiliary: str,
     predictive_auxiliary: str,
 ):
-
     """
     function to create logical columns for each type of imputation
     output columns are needed to create the string flag column for

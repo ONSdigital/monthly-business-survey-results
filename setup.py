@@ -1,4 +1,5 @@
 """Setup script for creating package from code."""
+
 from setuptools import setup, find_packages
 import re
 
