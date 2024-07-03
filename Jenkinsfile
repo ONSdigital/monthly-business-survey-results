@@ -45,8 +45,14 @@ pipeline {
             // Choose from download, build, test, deploy
             agent { label "download.jenkins.slave" }
             steps {
+		onStage()
                 colourText("info", "Checking out code from source control.")
                 checkout scm
+		script {
+                    buildInfo.name = "${PROJECT_NAME}"
+                    buildInfo.number = "${BUILD_NUMBER}"
+                    buildInfo.env.collect()
+                }
                 // Stash the files that have been checked out, for use in subsequent stages
                 stash name: "Checkout", useDefaultExcludes: false
             }
