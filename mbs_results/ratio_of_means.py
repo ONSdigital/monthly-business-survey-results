@@ -115,7 +115,7 @@ def wrap_shift_by_strata_period(
         df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
 
         default_columns = {**default_columns, "target": "filtered_target"}
-
+        
     link_arguments = (
         dict(
             **default_columns,
@@ -131,6 +131,9 @@ def wrap_shift_by_strata_period(
             **{"time_difference": 1, "new_col": "f_predictive_auxiliary"}
         ),
     )
+    
+    if ["f_link_question", "b_link_question", "construction_link"] in df.columns:
+        link_arguments = link_arguments[2]
 
     for args in link_arguments:
         df = shift_by_strata_period(df, **args)
@@ -278,6 +281,7 @@ def ratio_of_means(
     strata: str,
     auxiliary: str,
     filters: pd.DataFrame = None,
+    imputation_links: dict = None,
     **kwargs
 ) -> pd.DataFrame:
     """
@@ -306,6 +310,8 @@ def ratio_of_means(
         Column name containing auxiliary information (sic).
     filters : pd.DataFrame, optional
         Dataframe with values to exclude from imputation method.
+    imputation_links : dict, optional
+        Dictionary of column names matching to their imputation link type.
     kwargs : mapping, optional
         A dictionary of keyword arguments passed into func.
 
@@ -332,14 +338,24 @@ def ratio_of_means(
     if filters is not None:
 
         df = flag_rows_to_ignore(df, filters)
+        
+    if ["f_link_question", "b_link_question", "construction_link"] in imputation_links.values():
+                
+        df = (
+            df.rename(columns=imputation_links, inplace=True)
+            .pipe(wrap_shift_by_strata_period, **default_columns)
+        )
 
-    # TODO: Pre calculated links
+    else: 
 
+        df = (
+            df.pipe(wrap_flag_matched_pairs, **default_columns)
+            .pipe(wrap_shift_by_strata_period, **default_columns)
+            .pipe(wrap_calculate_imputation_link, **default_columns)
+        )
+        
     df = (
-        df.pipe(wrap_flag_matched_pairs, **default_columns)
-        .pipe(wrap_shift_by_strata_period, **default_columns)
-        .pipe(wrap_calculate_imputation_link, **default_columns)
-        .pipe(
+        df.pipe(
             create_impute_flags,
             **default_columns,
             predictive_auxiliary="f_predictive_auxiliary"
