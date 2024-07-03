@@ -45,7 +45,7 @@ pipeline {
             // Choose from download, build, test, deploy
             agent { label "download.jenkins.slave" }
             steps {
-		onStage()
+		//onStage()
                 colourText("info", "Checking out code from source control.")
                 checkout scm
 		script {
