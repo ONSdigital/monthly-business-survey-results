@@ -132,8 +132,8 @@ def wrap_shift_by_strata_period(
         ),
     )
     
-    if ["f_link_question", "b_link_question", "construction_link"] in df.columns:
-        link_arguments = link_arguments[2]
+    if df.columns.isin(["f_link_question", "b_link_question", "construction_link"]).all():
+        link_arguments = link_arguments[2:]
 
     for args in link_arguments:
         df = shift_by_strata_period(df, **args)
@@ -281,7 +281,7 @@ def ratio_of_means(
     strata: str,
     auxiliary: str,
     filters: pd.DataFrame = None,
-    imputation_links: dict = None,
+    imputation_links: dict = {},
     **kwargs
 ) -> pd.DataFrame:
     """
@@ -338,11 +338,11 @@ def ratio_of_means(
     if filters is not None:
 
         df = flag_rows_to_ignore(df, filters)
-        
-    if ["f_link_question", "b_link_question", "construction_link"] in imputation_links.values():
+    
+    if all(links in imputation_links.values() for links in ["f_link_question", "b_link_question", "construction_link"]):
                 
         df = (
-            df.rename(columns=imputation_links, inplace=True)
+            df.rename(columns=imputation_links)
             .pipe(wrap_shift_by_strata_period, **default_columns)
         )
 
