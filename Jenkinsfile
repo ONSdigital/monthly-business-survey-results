@@ -45,7 +45,6 @@ pipeline {
             // Choose from download, build, test, deploy
             agent { label "download.jenkins.slave" }
             steps {
-		//onStage()
                 colourText("info", "Checking out code from source control.")
                 checkout scm
 		script {
@@ -68,16 +67,6 @@ pipeline {
                 stash name: "Build", useDefaultExcludes: false
             }
         }
-        //stage("Test") {
-        //    agent { label "test.${agentPython3Version}" }
-        //    steps {
-        //        unstash name: "Checkout"
-        //        colourText('info', "Running pytest.")                
-        //        sh 'pip3 install pytest'
-        //        sh 'python3 setup.py install'  // Possibly more realistic than `pip install -e .`
-        //        sh 'python3 -m pytest'
-        //    }
-        //}
         stage("Deploy") {
             when {
                 anyOf{
