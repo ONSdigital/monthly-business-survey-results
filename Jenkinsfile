@@ -25,7 +25,7 @@ pipeline {
         PROXY = credentials("PROXY")  // Http proxy address, set in Jenkins Credentials
         // Only need these if you're deploying code to Artifactory
         ARTIFACTORY_CREDS = "ARTIFACTORY_CREDENTIALS"
-        ARTIFACTORY_PYPI_REPO = "LR_mbs_results"
+        ARTIFACTORY_PYPI_REPO = "LR_mbs-results"
         BUILD_BRANCH = "main"
         BUILD_TAG = "*-release"
     }
