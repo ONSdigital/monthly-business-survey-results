@@ -23,7 +23,6 @@ pipeline {
         PROJECT_NAME = "mbs_results"
         MAIN_BRANCH = "main"
         PROXY = credentials("PROXY")  // Http proxy address, set in Jenkins Credentials
-        // Only need these if you're deploying code to Artifactory
         ARTIFACTORY_CREDS = "ARTIFACTORY_CREDENTIALS"
         ARTIFACTORY_PYPI_REPO = "LR_mbs-results"
         BUILD_BRANCH = "main"
@@ -39,7 +38,6 @@ pipeline {
     agent any
 
     stages {
-        // Checkout stage to fetch code from  GitLab
         stage("Checkout") {
             // We have to specify an appropriate slave for each stage
             // Choose from download, build, test, deploy
