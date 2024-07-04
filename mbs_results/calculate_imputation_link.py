@@ -59,5 +59,6 @@ def calculate_imputation_link(
     denominator.replace(0, np.nan, inplace=True)  # cover division with 0
 
     df[link_col] = numerator / denominator
+    df[link_col] = numerator / denominator
 
     return df

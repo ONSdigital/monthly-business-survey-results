@@ -13,14 +13,14 @@ def flag_matched_pair(
     **kwargs
 ):
     """
-    function to add flag to df if data forms a matched pair
-    i.e. data is given for both period and predictive period
+    function to flag matched pairs using the shift method
+
     Parameters
     ----------
     df : pd.DataFrame
         pandas dataframe of original data
-    forward_or_backward: str
-        either f or b for forward or backward method
+    forward_or_backward : str
+        number of rows to shift up or down
     target : str
         column name containing target variable
     period : str
@@ -29,14 +29,16 @@ def flag_matched_pair(
         column name containing business reference id
     strata : str
         column name containing strata information (sic)
-    time_difference : int
-        time difference between predictive and target period in months
-
+    time_difference: int
+        lookup distance for matched pairs
+    kwargs : mapping, optional
+        A dictionary of keyword arguments passed into func.
 
     Returns
     -------
-    pd.DataFrame
-        dataframe with column added flagging forward matched paris and
+    _type_
+        two pandas dataframes: the main dataframe with column added flagging
+        forward matched pairs and
         predictive target variable data column
     """
 
@@ -45,30 +47,19 @@ def flag_matched_pair(
     if forward_or_backward == "b":
         time_difference = -time_difference
 
-    # Creating new DF, shifting period for forward or backward
-    df_with_predictive_column = df.copy()[[reference, strata, target]]
-    df_with_predictive_column["predictive_period"] = df[period] + pd.DateOffset(
-        months=time_difference
-    )
-    predictive_col_name = forward_or_backward + "_predictive_" + target
-    df_with_predictive_column.rename(
-        columns={target: predictive_col_name}, inplace=True
-    )
-
-    df = df.merge(
-        df_with_predictive_column,
-        left_on=[reference, period, strata],
-        right_on=[reference, "predictive_period", strata],
-        how="left",
+    df[forward_or_backward + "_match"] = (
+        df.groupby([strata, reference])
+        .shift(time_difference)[target]
+        .notnull()
+        .mul(df[target].notnull())
+        .mul(
+            df[period] - pd.DateOffset(months=time_difference)
+            == df.shift(time_difference)[period]
+        )
     )
 
-    matched_col_name = forward_or_backward + "_matched_pair_" + target
+    df.reset_index(drop=True, inplace=True)
 
-    df[matched_col_name] = np.where(
-        df[[target, predictive_col_name]].isnull().any(axis=1), False, True
-    )
-
-    df.drop(["predictive_period"], axis=1, inplace=True)
     return df
 
 
