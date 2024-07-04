@@ -132,6 +132,11 @@ def wrap_shift_by_strata_period(
         ),
     )
 
+    if df.columns.isin(
+        ["f_link_question", "b_link_question", "construction_link"]
+    ).all():
+        link_arguments = link_arguments[2:]
+
     for args in link_arguments:
         df = shift_by_strata_period(df, **args)
 
@@ -278,6 +283,7 @@ def ratio_of_means(
     strata: str,
     auxiliary: str,
     filters: pd.DataFrame = None,
+    imputation_links: Dict[str, str] = {},
     **kwargs
 ) -> pd.DataFrame:
     """
@@ -306,6 +312,9 @@ def ratio_of_means(
         Column name containing auxiliary information (sic).
     filters : pd.DataFrame, optional
         Dataframe with values to exclude from imputation method.
+    imputation_links : dict, optional
+        Dictionary of column name keys matching to their imputation link value
+        ("f_link_question", "b_link_question", "construction_link").
     kwargs : mapping, optional
         A dictionary of keyword arguments passed into func.
 
@@ -333,13 +342,25 @@ def ratio_of_means(
 
         df = flag_rows_to_ignore(df, filters)
 
-    # TODO: Pre calculated links
+    if all(
+        links in imputation_links.values()
+        for links in ["f_link_question", "b_link_question", "construction_link"]
+    ):
+
+        df = df.rename(columns=imputation_links).pipe(
+            wrap_shift_by_strata_period, **default_columns
+        )
+
+    else:
+
+        df = (
+            df.pipe(wrap_flag_matched_pairs, **default_columns)
+            .pipe(wrap_shift_by_strata_period, **default_columns)
+            .pipe(wrap_calculate_imputation_link, **default_columns)
+        )
 
     df = (
-        df.pipe(wrap_flag_matched_pairs, **default_columns)
-        .pipe(wrap_shift_by_strata_period, **default_columns)
-        .pipe(wrap_calculate_imputation_link, **default_columns)
-        .pipe(
+        df.pipe(
             create_impute_flags,
             **default_columns,
             predictive_auxiliary="f_predictive_auxiliary"
