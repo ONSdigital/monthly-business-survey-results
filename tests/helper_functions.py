@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from pathlib import Path
 
 import pandas as pd
@@ -22,3 +23,10 @@ def load_filter(filter_path):
             df["date"] = pd.to_datetime(df["date"], format="%Y%m")
 
         return df
+
+
+# when updating to python>=3.7 this can be replaced by importing
+# contextlib.nullcontext as does_not_raise
+@contextmanager
+def does_not_raise():
+    yield
