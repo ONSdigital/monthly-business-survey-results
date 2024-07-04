@@ -73,17 +73,7 @@ class TestRatioOfMeans:
             columns=["default_forward", "default_backward", "default_construction"]
         )
 
-        if base_file_name not in ["19_link_columns", "28_link_columns_filtered"]:
-            actual_output = ratio_of_means(
-                input_data,
-                target="question",
-                period="date",
-                reference="identifier",
-                strata="group",
-                auxiliary="other",
-                filters=filter_df,
-            )
-        else:
+        if base_file_name in ["19_link_columns", "28_link_columns_filtered"]:
             actual_output = ratio_of_means(
                 input_data,
                 target="question",
@@ -97,6 +87,16 @@ class TestRatioOfMeans:
                     "backward": "b_link_question",
                     "construction": "construction_link",
                 },
+            )
+        else:
+            actual_output = ratio_of_means(
+                input_data,
+                target="question",
+                period="date",
+                reference="identifier",
+                strata="group",
+                auxiliary="other",
+                filters=filter_df,
             )
 
         # imputed_value is in a seperate column, remove this if otherwise
