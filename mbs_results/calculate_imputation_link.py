@@ -59,6 +59,15 @@ def calculate_imputation_link(
     denominator.replace(0, np.nan, inplace=True)  # cover division with 0
 
     df[link_col] = numerator / denominator
-    df[link_col] = numerator / denominator
+
+    # Handling exception when denominator is 0, replaced with nan
+    # If denom is 0, "match pairs" should be set to 0?
+    # Should this matched pairs be the count or the bool
+    df.loc[np.isnan(denominator), link_col] = 1
+    df.loc[np.isnan(denominator), match_col] = 0
+
+    # Dealing with case where link cannot be calculated
+    df.loc[(df[link_col] == 0) | (df[link_col].isna()), link_col] = 0
+    df.loc[(df[link_col] == 0) | (df[link_col].isna()), match_col] = None
 
     return df
