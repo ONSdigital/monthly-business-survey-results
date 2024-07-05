@@ -191,3 +191,34 @@ def validate_config_repeated_datatypes(
                 mismatched_types
             )
         )
+
+
+def validate_manual_constructions(df, manual_constructions):
+    """
+    Checks that manual construction identifiers match those in the main dataset
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        the main dataframe after preprocessing
+    manual_constructions: pd.DataFrame
+        the manual constructions input read in as a dataframe
+
+    Raises
+    ------
+    ValueError
+        ValueError if any combinations of period and reference appear in the manual
+        constructions input but not in the main dataframe
+    """
+
+    incorrect_ids = set(manual_constructions.index) - set(df.index)
+
+    if len(incorrect_ids) > 1:
+        string_ids = " ".join(
+            [f"\nreference: {str(i[0])}, period: {str(i[1])}" for i in incorrect_ids]
+        )
+
+        raise ValueError(
+            f"""There are reference and period combinations in the manual constructions
+      with no match: {string_ids}"""
+        )

@@ -1,6 +1,10 @@
 import pandas as pd
 
-from mbs_results.validation_checks import validate_indices
+from mbs_results.utils import convert_column_to_datetime
+from mbs_results.validation_checks import (
+    validate_indices,
+    validate_manual_constructions,
+)
 
 
 def filter_responses(df, reference, period, last_update):
@@ -48,6 +52,7 @@ def clean_and_merge(
         the names of the columns to keep from the contributors data
     **config: Dict
       main pipeline configuration. Can be used to input the entire config dictionary
+
     Returns
     -------
     pd.DataFrame
@@ -133,3 +138,42 @@ def enforce_datatypes(
     # Re-set the index back to reference and period
     df_convert = df_convert.set_index([reference, period])
     return df_convert
+
+
+def load_manual_constructions(
+    df, reference, period, manual_constructions_path, **config
+):
+    """
+    function to change datatypes of columns based on config file
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        dataframe with combined responses and contributors columns
+        index is expected to be 'period' and 'reference'
+    reference: str
+        the name of the reference column
+    period: str
+        the name of the period column
+    manual_constructions_path: str
+        the location of the manual construction data
+    **config: Dict
+        main pipeline configuration. Can be used to input the entire config dictionary
+
+    Returns
+    -------
+    pd.DataFrame
+        dataframe with correctly formatted column datatypes.
+    """
+    manual_constructions = pd.read_csv(manual_constructions_path)
+    manual_constructions[period] = convert_column_to_datetime(
+        manual_constructions[period]
+    )
+    manual_constructions[reference] = manual_constructions[reference].astype("str")
+    manual_constructions.set_index([reference, period], inplace=True)
+
+    validate_manual_constructions(df, manual_constructions)
+
+    return df.merge(
+        manual_constructions, on=[reference, period], how="outer", suffixes=("", "_man")
+    )
