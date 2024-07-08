@@ -13,4 +13,4 @@ def convert_column_to_datetime(dates):
     -------
     df : pd.Series
     """
-    return pd.to_datetime(dates, yearfirst=True)
+    return pd.to_datetime(dates, format="%Y%m")

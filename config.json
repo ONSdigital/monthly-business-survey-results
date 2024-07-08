@@ -1,6 +1,7 @@
 {
     "folder_path" : "/dapsen/workspace_zone/mbs-results/",
     "mbs_file_name" : "snapshot-202212-002-2156d36b-e61f-42f1-a0f1-61d1f8568b8e.json",
+    "manual_constructions_path": "data/manual_constructions.csv",
     "target" : "return",
     "period" : "period",
     "strata" : "group",
