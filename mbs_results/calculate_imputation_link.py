@@ -71,10 +71,10 @@ def calculate_imputation_link(
         # Handling exception when denominator is 0, replaced with nan
         # If denom is 0, "match pairs" should be set to 0?
         # Should this matched pairs be the count or the bool
-        mask_denominator_zero = ((df[link_col] == 0) | (df[link_col].isna())) & (
+        mask_denominator_zero = (df[link_col].isna()) & (
             np.isnan(denominator)
         )
-        mask_cannot_calculate = ((df[link_col] == 0) | (df[link_col].isna())) & (
+        mask_cannot_calculate = (df[link_col].isna()) & (
             ~np.isnan(denominator)
         )
         df.loc[mask_cannot_calculate, match_col + count_suffix] = None
