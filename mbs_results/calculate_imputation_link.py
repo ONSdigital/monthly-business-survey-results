@@ -60,14 +60,33 @@ def calculate_imputation_link(
 
     df[link_col] = numerator / denominator
 
-    # Handling exception when denominator is 0, replaced with nan
-    # If denom is 0, "match pairs" should be set to 0?
-    # Should this matched pairs be the count or the bool
-    df.loc[np.isnan(denominator), link_col] = 1
-    df.loc[np.isnan(denominator), match_col] = 0
+    fix_default = True
+    number_matches = count_matches(df, match_col, period, strata)
+    count_suffix = "_count"
+    df = df.merge(
+        number_matches, on=[period, strata], suffixes=("", count_suffix), how="left"
+    )
+    if fix_default:
 
-    # Dealing with case where link cannot be calculated
-    df.loc[(df[link_col] == 0) | (df[link_col].isna()), link_col] = 0
-    df.loc[(df[link_col] == 0) | (df[link_col].isna()), match_col] = None
+        # Handling exception when denominator is 0, replaced with nan
+        # If denom is 0, "match pairs" should be set to 0?
+        # Should this matched pairs be the count or the bool
+        mask_denominator_zero = ((df[link_col] == 0) | (df[link_col].isna())) & (
+            np.isnan(denominator)
+        )
+        mask_cannot_calculate = ((df[link_col] == 0) | (df[link_col].isna())) & (
+            ~np.isnan(denominator)
+        )
+        df.loc[mask_cannot_calculate, match_col + count_suffix] = None
+        df.loc[mask_cannot_calculate, link_col] = 1
+
+        # Dealing with case where link cannot be calculated
+        df.loc[
+            mask_denominator_zero,
+            match_col + count_suffix,
+        ] = 0
+        df.loc[mask_denominator_zero, link_col] = 1
+    print(df.columns)
+    df.drop(columns=[match_col + count_suffix], inplace=True)
 
     return df
