@@ -366,9 +366,9 @@ def ratio_of_means(
             predictive_auxiliary="f_predictive_auxiliary"
         )
         # TODO: How we gonna set defaults?
-        .fillna(
-            {"f_link_question": 1.0, "b_link_question": 1.0, "construction_link": 1.0}
-        )
+        # .fillna(
+        #     {"f_link_question": 1.0, "b_link_question": 1.0, "construction_link": 1.0}
+        # )
         .pipe(generate_imputation_marker)
         .pipe(wrap_get_cumulative_links, **default_columns)
         .pipe(
