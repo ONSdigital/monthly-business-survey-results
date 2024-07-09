@@ -22,7 +22,6 @@ class TestFilters:
         assert_frame_equal(df_output, df_output_expected)
 
     def test_exception(self, scenario, filters):
-
         """Test if function raises an exception when the columns in filters
         do not exist in scenario."""
 
