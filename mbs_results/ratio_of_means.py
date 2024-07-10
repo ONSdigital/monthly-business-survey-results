@@ -35,7 +35,7 @@ def wrap_flag_matched_pairs(
 
     if "ignore_from_link" in df.columns:
 
-        df["filtered_target"] = df["question"]
+        df["filtered_target"] = df[default_columns["target"]]
         df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
         default_columns = {**default_columns, "target": "filtered_target"}
 
@@ -109,9 +109,12 @@ def wrap_shift_by_strata_period(
         shifted values.
     """
 
+    target_col = default_columns["target"]
+
     if "ignore_from_link" in df.columns:
 
-        df["filtered_target"] = df["question"]
+        df["filtered_target"] = df[target_col]
+
         df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
 
         default_columns = {**default_columns, "target": "filtered_target"}
@@ -119,11 +122,11 @@ def wrap_shift_by_strata_period(
     link_arguments = (
         dict(
             **default_columns,
-            **{"time_difference": 1, "new_col": "f_predictive_question"}
+            **{"time_difference": 1, "new_col": "f_predictive_" + target_col}
         ),
         dict(
             **default_columns,
-            **{"time_difference": -1, "new_col": "b_predictive_question"}
+            **{"time_difference": -1, "new_col": "b_predictive_" + target_col}
         ),
         # Needed for create_impute_flags
         dict(
@@ -161,10 +164,11 @@ def wrap_calculate_imputation_link(
         Original dataframe with 3 new numeric columns which contain the
         imputation links.
     """
+    target_col = default_columns["target"]
 
     if "ignore_from_link" in df.columns:
 
-        df["filtered_target"] = df["question"]
+        df["filtered_target"] = df[target_col]
         df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
 
         default_columns = {**default_columns, "target": "filtered_target"}
@@ -174,23 +178,23 @@ def wrap_calculate_imputation_link(
             **default_columns,
             **{
                 "match_col": "f_match",
-                "predictive_variable": "f_predictive_question",
-                "link_col": "f_link_question",
+                "predictive_variable": "f_predictive_" + target_col,
+                "link_col": "f_link_" + target_col,
             }
         ),
         dict(
             **default_columns,
             **{
                 "match_col": "b_match",
-                "predictive_variable": "b_predictive_question",
-                "link_col": "b_link_question",
+                "predictive_variable": "b_predictive_" + target_col,
+                "link_col": "b_link_" + target_col,
             }
         ),
         dict(
             **default_columns,
             **{
                 "match_col": "flag_construction_matches",
-                "predictive_variable": "other",
+                "predictive_variable": default_columns["auxiliary"],
                 "link_col": "construction_link",
             }
         ),
@@ -221,15 +225,16 @@ def wrap_get_cumulative_links(
         product of imputation links. These are needed when consecutive periods
         need imputing.
     """
+    target_col = default_columns["target"]
 
     cum_links_arguments = (
         dict(
             **default_columns,
-            **{"forward_or_backward": "f", "imputation_link": "f_link_question"}
+            **{"forward_or_backward": "f", "imputation_link": "f_link_" + target_col}
         ),
         dict(
             **default_columns,
-            **{"forward_or_backward": "b", "imputation_link": "b_link_question"}
+            **{"forward_or_backward": "b", "imputation_link": "b_link_" + target_col}
         ),
     )
 
@@ -374,11 +379,11 @@ def ratio_of_means(
         .pipe(
             create_and_merge_imputation_values,
             **default_columns,
-            imputation_class="group",
+            imputation_class=strata,
             marker="imputation_marker",
             combined_imputation="imputed_value",
-            cumulative_forward_link="cumulative_f_link_question",
-            cumulative_backward_link="cumulative_b_link_question",
+            cumulative_forward_link="cumulative_f_link_" + target,
+            cumulative_backward_link="cumulative_b_link_" + target,
             construction_link="construction_link",
             imputation_types=("c", "fir", "bir", "fic")
         )
@@ -408,10 +413,10 @@ def ratio_of_means(
             "fic_flag",
             "missing_value",
             "imputation_group",
-            "cumulative_f_link_question",
-            "cumulative_b_link_question",
-            "f_predictive_question",
-            "b_predictive_question",
+            "cumulative_f_link_" + target,
+            "cumulative_b_link_" + target,
+            "f_predictive_" + target,
+            "b_predictive_" + target,
             "ignore_from_link",
             "filtered_target",
         ],
