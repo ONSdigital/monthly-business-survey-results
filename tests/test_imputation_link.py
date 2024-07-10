@@ -56,5 +56,8 @@ class TestLinks:
             predictive,
             link,
         )
+        df_input.drop(
+            columns=[match + "_pair_count", "default_link_" + match], inplace=True
+        )
 
         assert_frame_equal(df_input, df_output, check_like=True)

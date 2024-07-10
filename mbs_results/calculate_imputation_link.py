@@ -65,40 +65,33 @@ def calculate_imputation_link(
 
     df[link_col] = numerator / denominator
 
-    fix_default = True
-    if fix_default:
-        # ToDo: Needs to return the count as this is used to verify
-        # What case it is, denom = 0 or undefined?
+    # Re adding count matches column as this is needed for default cases
+    number_matches = count_matches(df, match_col, period, strata)
+    count_suffix = "_pair_count"
+    df = df.merge(
+        number_matches, on=[period, strata], suffixes=("", count_suffix), how="left"
+    )
+    # Creating two logical masks for cases when denominator is zero and
+    # link cannot be calculated
+    mask_denominator_zero = ((df[link_col].isna()) | (np.isinf(df[link_col]))) & (
+        denominator_copy == 0
+    )
+    mask_cannot_calculate = ((df[link_col].isna()) | (np.isinf(df[link_col]))) & (
+        denominator_copy != 0
+    )
+    # Default link is always 1:
+    df.loc[(mask_cannot_calculate | mask_denominator_zero), link_col] = 1
+    # Cant calculate, set count to None set link to
+    # setting to Null fails unit tests
 
-        number_matches = count_matches(df, match_col, period, strata)
-        count_suffix = "_pair_count"
-        df = df.merge(
-            number_matches, on=[period, strata], suffixes=("", count_suffix), how="left"
-        )
+    df.loc[
+        mask_cannot_calculate, match_col + count_suffix
+    ] = 0  # Setting to None fails tests
+    df.loc[mask_denominator_zero, match_col + count_suffix] = 0
 
-        # Handling exception when denominator is 0, sreplaced with nan
-        # If denominator is 0, match pairs count should be set to 0
-
-        mask_denominator_zero = (df[link_col].isna()) & (denominator_copy == 0)
-        mask_cannot_calculate = (df[link_col].isna()) & (denominator_copy != 0)
-        # Cant calculate, set count to None set link to
-        # df.loc[mask_cannot_calculate, match_col + count_suffix] = None
-        df.loc[mask_cannot_calculate, link_col] = 1
-
-        # Denom is 0, set count to 0, set link to 1
-        df.loc[
-            mask_denominator_zero,
-            match_col + count_suffix,
-        ] = 0
-        df.loc[mask_denominator_zero, link_col] = 1
-        df["default_link_" + match_col] = np.where(
-            (mask_cannot_calculate | mask_denominator_zero), True, False
-        )
-
-        # df.drop(columns=[match_col + count_suffix], inplace=True)
-
-        ## At the moment, dropping match_count to pass unit tests.
-        # Should include match count in wrapper function to then test
-        # Expected count outputs
+    # Creating default link bool column
+    df["default_link_" + match_col] = np.where(
+        (mask_cannot_calculate | mask_denominator_zero), True, False
+    )
 
     return df
