@@ -48,6 +48,15 @@ def calculate_imputation_link(
 
     df_intermediate = df.copy()
 
+    # Need this for edge case when denominator is zero
+    # But is from a valid zero return
+    df_intermediate["true_zeros_column"] = df_intermediate[predictive_variable] == 0
+    grouped_true_zeros = df_intermediate.groupby([strata, period])[
+        "true_zeros_column"
+    ].transform("sum")
+    grouped_true_zeros = grouped_true_zeros != 0
+    df_intermediate.drop(columns=["true_zeros_column"])
+
     df_intermediate[target] = df_intermediate[target] * df_intermediate[match_col]
 
     df_intermediate[predictive_variable] = (
@@ -60,12 +69,15 @@ def calculate_imputation_link(
         predictive_variable
     ].transform("sum")
 
-    denominator_copy = denominator.copy()
+    df["denominator"] = denominator
     denominator.replace(0, np.nan, inplace=True)  # cover division with 0
 
     df[link_col] = numerator / denominator
 
     # Re adding count matches column as this is needed for default cases
+    # This count is just the filtered target counts if issues come up.
+    # (If there is a filter applied to this data)
+
     number_matches = count_matches(df, match_col, period, strata)
     count_suffix = "_pair_count"
     df = df.merge(
@@ -73,25 +85,21 @@ def calculate_imputation_link(
     )
     # Creating two logical masks for cases when denominator is zero and
     # link cannot be calculated
-    mask_denominator_zero = ((df[link_col].isna()) | (np.isinf(df[link_col]))) & (
-        denominator_copy == 0
-    )
+    mask_denominator_zero = df["denominator"] == 0
     mask_cannot_calculate = ((df[link_col].isna()) | (np.isinf(df[link_col]))) & (
-        denominator_copy != 0
+        df["denominator"] != 0
     )
     # Default link is always 1:
     df.loc[(mask_cannot_calculate | mask_denominator_zero), link_col] = 1
-    # Cant calculate, set count to None set link to
-    # setting to Null fails unit tests
 
+    df.loc[mask_cannot_calculate, match_col + count_suffix] = None
     df.loc[
-        mask_cannot_calculate, match_col + count_suffix
-    ] = 0  # Setting to None fails tests
-    df.loc[mask_denominator_zero, match_col + count_suffix] = 0
+        (mask_denominator_zero) & (~grouped_true_zeros), match_col + count_suffix
+    ] = 0
 
     # Creating default link bool column
     df["default_link_" + match_col] = np.where(
         (mask_cannot_calculate | mask_denominator_zero), True, False
     )
-
+    df.drop(columns=["denominator"], inplace=True)
     return df
