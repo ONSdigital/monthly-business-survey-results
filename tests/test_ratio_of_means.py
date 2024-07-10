@@ -68,11 +68,6 @@ class TestRatioOfMeans:
         input_data["date"] = pd.to_datetime(input_data["date"], format="%Y%m")
         expected_output["date"] = pd.to_datetime(expected_output["date"], format="%Y%m")
 
-        # not yet implemented remove this when defaults are ready
-        # expected_output = expected_output.drop(
-        #     columns=["default_forward", "default_backward", "default_construction"]
-        # )
-
         if base_file_name in ["19_link_columns", "28_link_columns_filtered"]:
             actual_output = ratio_of_means(
                 input_data,
@@ -127,14 +122,6 @@ class TestRatioOfMeans:
                 "count_construction": "flag_match_pair_count",
             }
         )
-
-        # expected_output = expected_output.drop(
-        #     columns=[
-        #         "f_matched_pair_count",
-        #         "b_matched_pair_count",
-        #         "flag_matched_pair_count",
-        #     ]
-        # )
 
         expected_output = expected_output[actual_output.columns]
 
