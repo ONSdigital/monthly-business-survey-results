@@ -134,7 +134,7 @@ def enforce_datatypes(
         if type_from_dict in ["str", "float", "int", "bool", "category"]:
             df_convert[key] = df_convert[key].astype(type_from_dict)
         elif type_from_dict == "date":
-            df_convert[key] = pd.to_datetime(df_convert[key], format="%Y%m")
+            df_convert[key] = convert_column_to_datetime(df_convert[key])
     # Re-set the index back to reference and period
     df_convert = df_convert.set_index([reference, period])
     return df_convert
