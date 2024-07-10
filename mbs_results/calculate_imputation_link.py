@@ -3,9 +3,6 @@ import pandas as pd
 
 from mbs_results.flag_and_count_matched_pairs import count_matches
 
-# from flag_and_count_matched_pairs import count_matches
-
-
 def calculate_imputation_link(
     df: pd.DataFrame,
     period: str,
