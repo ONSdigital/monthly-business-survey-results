@@ -1,7 +1,5 @@
 import os  # noqa F401
 
-from src.utils.hdfs_mods import hdfs_load_json as read_json
-
 from mbs_results.data_cleaning import (
     clean_and_merge,
     enforce_datatypes,
@@ -9,6 +7,7 @@ from mbs_results.data_cleaning import (
 )
 from mbs_results.inputs import load_config
 from mbs_results.validation_checks import validate_config
+from src.utils.hdfs_mods import hdfs_load_json as read_json
 
 # os.chdir("/home/cdsw/monthly-business-survey-results/")
 
