@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -8,7 +10,7 @@ from mbs_results.calculate_predicted_unit_value import calculate_predicted_unit_
 @pytest.fixture(scope="class")
 def predicted_unit_value_test_data():
     return pd.read_csv(
-        "tests/data/winsorisation/predicted_unit_value.csv",
+        Path("tests") / "data" / "winsorisation" / "predicted_unit_value.csv",
         low_memory=False,
         usecols=lambda c: not c.startswith("Unnamed:"),
     )
