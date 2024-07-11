@@ -1,16 +1,19 @@
 import pandas as pd
 
-df = pd.read_csv("/home/cdsw/monthly-business-survey-results/tests/data/winsorisation/predicted_unit_value.csv")
+tests = "/home/cdsw/monthly-business-survey-results/tests"
+df = pd.read_csv(tests + "/data/winsorisation/predicted_unit_value.csv")
 
-def calculate_predicted_unit_value(df: pd.DataFrame,
+
+def calculate_predicted_unit_value(
+    df: pd.DataFrame,
     period: str,
     strata: str,
-    aux: str, 
-    sampled:str,
-    a_weight:str,                               
+    aux: str,
+    sampled: str,
+    a_weight: str,
     target_variable: str,
-    nw_ag_flag: str
-    ) -> pd.DataFrame:
+    nw_ag_flag: str,
+) -> pd.DataFrame:
     """
     Calculate link between target_variable and predictive_variable by strata,
     a match_col must be supplied which indicates if target_variable
@@ -33,22 +36,22 @@ def calculate_predicted_unit_value(df: pd.DataFrame,
     target_variable : str
         Column name of the predicted target variable.
     nw_ag_flag: str
-        column name indicating whether it can't be winsorised- boolean (1 means it can't be winsorised, 0 means it can).
+        column name indicating whether it can't be winsorised-
+        boolean (1 means it can't be winsorised, 0 means it can).
     Returns
     -------
     df : pd.DataFrame
         A pandas DataFrame with a new column containing the predicted unit value.
     """
-    
-    df = df.loc[(df['sampled']==1)&(df['nw_ag_flag']==0)]
+
+    df = df.loc[(df["sampled"] == 1) & (df["nw_ag_flag"] == 0)]
     df = df.reset_index(drop=True)
 
-    sum_weighted_target_values = (df['a_weight']* df['target_variable']).sum()
-    sum_weighted_auxiliary_values = (df['a_weight']* df['aux']).sum()
-    
-    df['predicted_unit_value'] = df['aux'].apply(lambda x: x* (sum_weighted_target_values/sum_weighted_auxiliary_values))
-    
+    sum_weighted_target_values = (df["a_weight"] * df["target_variable"]).sum()
+    sum_weighted_auxiliary_values = (df["a_weight"] * df["aux"]).sum()
+
+    df["predicted_unit_value"] = df["aux"].apply(
+        lambda x: x * (sum_weighted_target_values / sum_weighted_auxiliary_values)
+    )
+
     return df
-  
-  
-calculate_predicted_unit_value(df, 'period','strata', 'aux', 'sampled', 'a_weight', 'target_variable', 'nw_ag_flag')
