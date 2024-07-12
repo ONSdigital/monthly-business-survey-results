@@ -1,8 +1,4 @@
-from pathlib import Path
-
 import pandas as pd
-
-df = pd.read_csv(Path("tests") / "data" / "winsorisation" / "predicted_unit_value.csv")
 
 
 def calculate_predicted_unit_value(

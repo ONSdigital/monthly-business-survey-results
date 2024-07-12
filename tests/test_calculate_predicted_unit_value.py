@@ -19,7 +19,7 @@ def predicted_unit_value_test_data():
 @pytest.fixture(scope="class")
 def predicted_unit_value_test_output():
     return pd.read_csv(
-        "tests/data/winsorisation/predicted_unit_value_output.csv",
+        Path("tests") / "data" / "winsorisation" / "predicted_unit_value_output.csv",
         low_memory=False,
         usecols=lambda c: not c.startswith("Unnamed:"),
     )
