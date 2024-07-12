@@ -24,9 +24,9 @@ class TestImputationFlags:
                 "period",
                 "target_variable",
                 "auxiliary",
-                "f_predictive_target_variable",
-                "b_predictive_target_variable",
-                "f_predictive_auxiliary",
+                "f_match_target_variable",
+                "b_match_target_variable",
+                "f_match_auxiliary",
             ]
         ]
         df_output = create_impute_flags(
@@ -36,10 +36,8 @@ class TestImputationFlags:
             reference="reference",
             strata="strata",
             auxiliary="auxiliary",
-            predictive_auxiliary="f_predictive_auxiliary",
+            predictive_auxiliary="f_match_auxiliary",
         )
-
-        df_expected_output.drop(["f_predictive_auxiliary"], axis=1, inplace=True)
 
         assert_frame_equal(df_output, df_expected_output)
 

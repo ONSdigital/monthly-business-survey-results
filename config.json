@@ -6,6 +6,8 @@
     "period" : "period",
     "strata" : "group",
     "reference" : "reference",
+    "auxiliary": "auxiliary",
+    "predictive_auxiliary": "f_match_auxiliary",
     "responses_keep_cols" : {
                 "reference" : "str",
                 "period": "date",

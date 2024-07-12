@@ -10,7 +10,7 @@ def flag_matched_pair(
     reference,
     strata,
     time_difference=1,
-    **kwargs
+    **kwargs,
 ):
     """
     function to flag matched pairs using the shift method
@@ -37,9 +37,8 @@ def flag_matched_pair(
     Returns
     -------
     _type_
-        two pandas dataframes: the main dataframe with column added flagging
-        forward matched pairs and
-        predictive target variable data column
+        pd.DataFrame: the main dataframe with column added flagging
+        forward matched pairs and predictive target variable data column
     """
 
     df = df.sort_values(by=[strata, reference, period])
@@ -47,7 +46,7 @@ def flag_matched_pair(
     if forward_or_backward == "b":
         time_difference = -time_difference
 
-    df[forward_or_backward + "_match"] = (
+    df[f"{forward_or_backward}_match_{target}"] = (
         df.groupby([strata, reference])
         .shift(time_difference)[target]
         .notnull()
@@ -57,8 +56,6 @@ def flag_matched_pair(
             == df.shift(time_difference)[period]
         )
     )
-
-    df.reset_index(drop=True, inplace=True)
 
     return df
 

@@ -10,20 +10,19 @@ def create_impute_flags(
     strata: str,
     auxiliary: str,
     predictive_auxiliary: str,
+    time_difference=1,
     **kwargs
 ):
     """
     function to create logical columns for each type of imputation
     output columns are needed to create the string flag column for
     imputation methods.
-    Function requires f_predictive and b_predictive columns produced
-    by `flag_matched_pair` function.
 
     Parameters
     ----------
     df : pd.DataFrame
         DataFrame containing forward, backward predictive period columns (
-        These columns are created by calling flag_matched_pair_merge forward
+        These columns are created by calling flag_matched_pair forward
         and backwards)
     target : str
         Column name containing target variable.
@@ -38,6 +37,8 @@ def create_impute_flags(
     predictive_auxiliary: str
         Column name containing predictive auxiliary data, this is created,
         by flag_matched_pair_merge function.
+    time_difference: int
+        lookup distance for matched pairs
     kwargs : mapping, optional
         A dictionary of keyword arguments passed into func.
 
@@ -48,68 +49,61 @@ def create_impute_flags(
         is a return (r_flag) can be imputed by forward imputation (fir_flag),
         backward imputation (bir_flag) or can be constructed (c_flag)
     """
-    for direction in ["f", "b"]:
-        try:
-            df["{}_predictive_{}".format(direction, target)]
-        except KeyError:
-            raise KeyError(
-                "Dataframe needs column '{}_predictive_{}',".format(direction, target)
-                + " run flag_matched_pair function first"
-            )
-    forward_target_roll = "f_predictive_" + target + "_roll"
-    backward_target_roll = "b_predictive_" + target + "_roll"
-    forward_aux_roll = "f_predictive_" + auxiliary + "_roll"
 
     df.sort_values([reference, strata, period], inplace=True)
 
-    # TODO : similar conditions at cum imputation links
-    df["fill_group"] = (
-        (df[period] - pd.DateOffset(months=1) != df.shift(1)[period])
-        | (df[strata].diff(1) != 0)
-        | (df[reference].diff(1) != 0)
-    ).cumsum()
-
-    df[forward_target_roll] = df.groupby([reference, strata, "fill_group"])[
-        "f_predictive_" + target
-    ].ffill()
-
-    df[backward_target_roll] = df.groupby([reference, strata, "fill_group"])[
-        "b_predictive_" + target
-    ].bfill()
-
     df["r_flag"] = df[target].notna()
 
-    df["fir_flag"] = np.where(
-        df[forward_target_roll].notna() & df[target].isna(), True, False
-    )
+    df["fir_flag"] = flag_rolling_impute(df, 1, strata, reference, target, period)
 
-    df["bir_flag"] = np.where(
-        df[backward_target_roll].notna() & df[target].isna(), True, False
-    )
+    df["bir_flag"] = flag_rolling_impute(df, 1, strata, reference, target, period)
 
     construction_conditions = df[target].isna() & df[auxiliary].notna()
     df["c_flag"] = np.where(construction_conditions, True, False)
 
-    df[forward_aux_roll] = df.groupby([reference, strata, "fill_group"])[
-        predictive_auxiliary
-    ].ffill()
+    df["fic_flag"] = flag_rolling_impute(df, 1, strata, reference, auxiliary, period)
 
-    fic_conditions = df[target].isna() & df[forward_aux_roll].notna()
-    df["fic_flag"] = np.where(fic_conditions, True, False)
-
-    df.drop(
-        [
-            forward_target_roll,
-            backward_target_roll,
-            forward_aux_roll,
-            predictive_auxiliary,
-            "fill_group",
-        ],
-        axis=1,
-        inplace=True,
-    )
+    df.drop
 
     return df
+
+
+def flag_rolling_impute(df, time_difference, strata, reference, target, period):
+    """
+    Function to create logical values for whether rolling imputation can be done.
+    Used to account for gaps of over one month when imputing.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing forward, backward predictive period columns (
+        These columns are created by calling flag_matched_pair forward
+        and backwards)
+    time_difference: int
+        lookup distance for matched pairs
+    target : str
+        Column name containing target variable.
+    period: str
+        Column name containing date variable.
+    reference : str
+        Column name containing business reference id.
+    strata : str
+        Column name containing strata information (sic).
+
+    Returns
+    -------
+    pd.Series
+    """
+
+    return (
+        df.groupby([strata, reference])
+        .shift(time_difference)[target]
+        .notnull()
+        .mul(
+            df[period] - pd.DateOffset(months=time_difference)
+            == df.shift(time_difference)[period]
+        )
+    )
 
 
 def generate_imputation_marker(df: pd.DataFrame) -> pd.DataFrame:
