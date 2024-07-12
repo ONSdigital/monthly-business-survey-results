@@ -43,6 +43,7 @@ def calculate_predicted_unit_value(
 
     df = df.loc[(df["sampled"] == 1) & (df["nw_ag_flag"] == 0)]
     df = df.reset_index(drop=True)
+    #check if reset index creates problems down the line
 
     sum_weighted_target_values = (df["a_weight"] * df["target_variable"]).sum()
     sum_weighted_auxiliary_values = (df["a_weight"] * df["aux"]).sum()
