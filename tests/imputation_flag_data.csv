@@ -1,4 +1,4 @@
-reference,strata,period,target_variable,auxiliary,f_match_target_variable,b_match_target_variable,f_match_auxiliary,r_flag,fir_flag,bir_flag,c_flag,fic_flag,imputation_marker
+reference,strata,period,target_variable,auxiliary,f_match_target_variable,b_match_target_variable,f_match_auxiliary,r_flag_target_variable,fir_flag_target_variable,bir_flag_target_variable,c_flag_target_variable,fic_flag_target_variable,imputation_flags_target_variable
 1,100,202001,8444,51,,,,TRUE,FALSE,FALSE,FALSE,FALSE,r
 1,100,202002,,51,8444,2003,51,FALSE,TRUE,TRUE,TRUE,TRUE,fir
 1,100,202003,2003,51,,1003,51,TRUE,FALSE,FALSE,FALSE,FALSE,r

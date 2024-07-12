@@ -9,7 +9,6 @@ def create_impute_flags(
     reference: str,
     strata: str,
     auxiliary: str,
-    predictive_auxiliary: str,
     time_difference=1,
     **kwargs,
 ):
@@ -34,9 +33,6 @@ def create_impute_flags(
         Column name containing strata information (sic).
     auxiliary : str
         Column name containing auxiliary data.
-    predictive_auxiliary: str
-        Column name containing predictive auxiliary data, this is created,
-        by flag_matched_pair_merge function.
     time_difference: int
         lookup distance for matched pairs
     kwargs : mapping, optional
@@ -54,7 +50,8 @@ def create_impute_flags(
 
     df[f"r_flag_{target}"] = df[target].notna()
 
-    df[f"mc_flag_{target}"] = df[f"{target}_man"].notna()
+    if f"{target}_man" in df.columns:
+        df[f"mc_flag_{target}"] = df[f"{target}_man"].notna()
 
     df[f"fir_flag_{target}"] = flag_rolling_impute(
         df, 1, strata, reference, target, period
@@ -64,9 +61,10 @@ def create_impute_flags(
         df, -1, strata, reference, target, period
     )
 
-    df[f"fimc_flag_{target}"] = flag_rolling_impute(
-        df, 1, strata, reference, f"{target}_man", period
-    )
+    if f"{target}_man" in df.columns:
+        df[f"fimc_flag_{target}"] = flag_rolling_impute(
+            df, 1, strata, reference, f"{target}_man", period
+        )
 
     construction_conditions = df[target].isna() & df[auxiliary].notna()
     df[f"c_flag_{target}"] = np.where(construction_conditions, True, False)
@@ -98,8 +96,11 @@ def generate_imputation_marker(df: pd.DataFrame, target) -> pd.DataFrame:
         i.e. the type of imputation method that should be used to fill
         missing returns.
     """
+    if f"{target}_man" in df.columns:
+        flags = ["r", "mc", "fir", "bir", "fimc", "c", "fic"]
+    else:
+        flags = ["r", "fir", "bir", "c", "fic"]
 
-    flags = ["r", "mc", "fir", "bir", "fimc", "c", "fic"]
     select_cols = [f"{i}_flag_{target}" for i in flags]
     first_condition_met = [np.where(i)[0][0] for i in df[select_cols].values]
     df[f"imputation_flags_{target}"] = [flags[i] for i in first_condition_met]
@@ -147,4 +148,5 @@ def flag_rolling_impute(df, time_difference, strata, reference, target, period):
             df[period] - pd.DateOffset(months=time_difference)
             == df.shift(time_difference)[period]
         )
+        .mul(df[target].isna())
     )
