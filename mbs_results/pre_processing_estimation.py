@@ -1,41 +1,43 @@
-def collate_estimation_data(
-    population_frame, sample, period, reference, cell_num, auxiliary, **config
+def derive_estimation_variables(
+    population_frame,
+    sample,
+    calibration_group_map,
+    period,
+    reference,
+    cell_number,
+    **config
 ):
     """
-    Collate extra data required for estimation.
+    Derive extra variables required for estimation.
 
     Parameters
     ----------
     population_frame: pd.DataFrame
-      dataframe containing population frame
+        dataframe containing population frame
     sample: pd.DataFrame
-      dataframe containing sample data
+        dataframe containing sample data
+    calibration_group_map: pd.DataFrame
+        dataframe containing map between cell number and calibration group
     period: Str
-      the name of the period column
-    cell_num: Str
-      the name of the cell number column
-    auxiliary: Str
-      the name of the auxillary column
+        the name of the period column
+    cell_number: Str
+        the name of the cell number column
     reference: Str
-      the name of the reference column
+        the name of the reference column
     **config: Dict
-      main pipeline configuration. Can be used to input the entire config dictionary
+       main pipeline configuration. Can be used to input the entire config dictionary
 
     Returns
     -------
     pd.DataFrame
-      population frame containing sampled column
+        population frame containing sampled column
 
     """
+    population_frame.merge(calibration_group_map, on=[cell_number], how="left")
+    # TODO: check if cell_no is needed or should be dropped
 
-    population_frame = population_frame[[reference, cell_num, auxiliary, period]]
     sample = sample[[reference, period]]
-
     sample["sampled"] = 1
-    # population_frame[
-    #     "strata"
-    # ] = ""  # Need to figure out what part of cell_num is strata.
-    print()
 
     return population_frame.merge(sample, on=[reference, period], how="left").fillna(
         value={"sampled": 0}

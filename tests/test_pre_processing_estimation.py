@@ -1,10 +1,11 @@
 from pathlib import Path
 
+import pandas as pd
 import pytest
 from helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
-from mbs_results.pre_processing_estimation import collate_estimation_data
+from mbs_results.pre_processing_estimation import derive_estimation_variables
 
 
 @pytest.fixture(scope="class")
@@ -13,20 +14,41 @@ def filepath():
 
 
 @pytest.fixture(scope="class")
-def collate_estimation_data_expected(filepath):
-    return load_and_format(filepath / "collate_estimation_data.csv")
+def derive_estimation_variables_data(filepath):
+    return load_and_format(filepath / "derive_estimation_variables.csv")
 
 
 class TestPreProcessingEstimation:
-    def test_collate_estimation_data(self, collate_estimation_data_expected):
-        expected = collate_estimation_data_expected[
-            ["period", "reference", "cell_num", "auxiliary", "sampled"]
+    def test_derive_estimation_variables(self, derive_estimation_variables_data):
+        expected = derive_estimation_variables_data[
+            [
+                "period",
+                "reference",
+                "cell_no",
+                "calibration_group",
+                "auxiliary",
+                "sampled",
+            ]
         ]
         population_frame = expected.drop(columns=["sampled"])
         sample = population_frame.loc[:1, ["reference", "period"]]
 
-        actual = collate_estimation_data(
-            population_frame, sample, "period", "reference", "cell_num", "auxiliary"
+        calibration_group_map = pd.DataFrame(
+            {
+                "cell_no": [123456, 234567, 345678],
+                "calibration_number": [123456, 123456, 345678],
+            }
         )
 
-        assert_frame_equal(collate_estimation_data_expected, actual, check_dtype=False)
+        actual = derive_estimation_variables(
+            population_frame,
+            sample,
+            calibration_group_map,
+            "period",
+            "reference",
+            "cell_no",
+        )
+
+        assert_frame_equal(
+            derive_estimation_variables_data, actual, check_dtype=False, check_like=True
+        )
