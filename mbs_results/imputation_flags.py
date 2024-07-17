@@ -2,7 +2,67 @@ import numpy as np
 import pandas as pd
 
 
-def create_impute_flags(
+def generate_imputation_marker(
+    df: pd.DataFrame,
+    target: str,
+    period: str,
+    reference: str,
+    strata: str,
+    auxiliary: str,
+    time_difference=1,
+    **kwargs,
+) -> pd.DataFrame:
+    """
+    Function to add column containing the a string indicating the method of
+    imputation to use following the hierarchy in specifications
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing target, auxiliary and manual construction columns
+        and containing forward, backward predictive period columns (
+        These columns are created by calling flag_matched_pair forward
+        and backwards)
+    target : str
+        Column name containing target variable.
+    period: str
+        Column name containing date variable.
+    reference : str
+        Column name containing business reference id.
+    strata : str
+        Column name containing strata information (sic).
+    auxiliary : str
+        Column name containing auxiliary data.
+    time_difference: int
+        lookup distance for matched pairs
+    kwargs : mapping, optional
+        A dictionary of keyword arguments passed into func.
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataframe with additional column containing imputation marker
+        i.e. the type of imputation method that should be used to fill
+        missing returns.
+    """
+    if f"{target}_man" in df.columns:
+        flags = ["r", "mc", "fir", "bir", "fimc", "c", "fic"]
+    else:
+        flags = ["r", "fir", "bir", "c", "fic"]
+
+    create_imputation_logical_columns(
+        df, target, period, reference, strata, auxiliary, time_difference
+    )
+
+    select_cols = [f"{i}_flag_{target}" for i in flags]
+    first_condition_met = [np.where(i)[0][0] for i in df[select_cols].values]
+    df[f"imputation_flags_{target}"] = [flags[i] for i in first_condition_met]
+    df.drop(columns=select_cols, inplace=True)
+
+    return df
+
+
+def create_imputation_logical_columns(
     df: pd.DataFrame,
     target: str,
     period: str,
@@ -35,8 +95,6 @@ def create_impute_flags(
         Column name containing auxiliary data.
     time_difference: int
         lookup distance for matched pairs
-    kwargs : mapping, optional
-        A dictionary of keyword arguments passed into func.
 
     Returns
     -------
@@ -54,19 +112,19 @@ def create_impute_flags(
         df[f"mc_flag_{target}"] = df[f"{target}_man"].notna()
 
     df[f"fir_flag_{target}"] = flag_rolling_impute(
-        df, 1, strata, reference, target, period
+        df, time_difference, strata, reference, target, period
     )
 
     df[f"bir_flag_{target}"] = flag_rolling_impute(
-        df, -1, strata, reference, target, period
+        df, -time_difference, strata, reference, target, period
     )
 
     if f"{target}_man" in df.columns:
         df[f"fimc_flag_{target}"] = flag_rolling_impute(
-            df, 1, strata, reference, f"{target}_man", period
+            df, time_difference, strata, reference, f"{target}_man", period
         )
         df[f"bimc_flag_{target}"] = flag_rolling_impute(
-            df, -1, strata, reference, f"{target}_man", period
+            df, -time_difference, strata, reference, f"{target}_man", period
         )
         df[f"bir_flag_{target}"] = df[f"bir_flag_{target}"] & ~df[f"bimc_flag_{target}"]
 
@@ -78,39 +136,6 @@ def create_impute_flags(
     df[f"fic_flag_{target}"] = flag_rolling_impute(
         df, 1, strata, reference, auxiliary, period
     )
-
-    return df
-
-
-def generate_imputation_marker(df: pd.DataFrame, target) -> pd.DataFrame:
-    """
-    Function to add column containing the a string indicating the method of
-    imputation to use following the hierarchy in specifications
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame containing logical columns produced by `create_imputation_flags`
-        (r_flag, fir_flag, bir_flag, fic_flag and c_flag)
-    target : str
-        the name of the column used for imputation
-
-    Returns
-    -------
-    pd.DataFrame
-        Dataframe with additional column containing imputation marker
-        i.e. the type of imputation method that should be used to fill
-        missing returns.
-    """
-    if f"{target}_man" in df.columns:
-        flags = ["r", "mc", "fir", "bir", "fimc", "c", "fic"]
-    else:
-        flags = ["r", "fir", "bir", "c", "fic"]
-
-    select_cols = [f"{i}_flag_{target}" for i in flags]
-    first_condition_met = [np.where(i)[0][0] for i in df[select_cols].values]
-    df[f"imputation_flags_{target}"] = [flags[i] for i in first_condition_met]
-    df.drop(columns=select_cols, inplace=True)
 
     return df
 
