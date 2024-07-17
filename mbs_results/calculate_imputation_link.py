@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from mbs_results.flag_and_count_matched_pairs import count_matches
+
 
 def calculate_imputation_link(
     df: pd.DataFrame,
@@ -56,9 +58,102 @@ def calculate_imputation_link(
         predictive_variable
     ].transform("sum")
 
+    denominator_col = "denominator"
+
+    df[denominator_col] = denominator
     denominator.replace(0, np.nan, inplace=True)  # cover division with 0
 
     df[link_col] = numerator / denominator
-    df[link_col] = numerator / denominator
 
+    df = calculate_default_imputation_links(
+        df, period, strata, match_col, predictive_variable, link_col, denominator_col
+    )
+
+    return df
+
+
+def calculate_default_imputation_links(
+    df: pd.DataFrame,
+    period: str,
+    strata: str,
+    match_col: str,
+    predictive_variable: str,
+    link_col: str,
+    denominator: str,
+) -> pd.DataFrame:
+    """
+    Calculates and replaces links to default values when either,
+    denominator is zero or the link cannot be calculated.
+    Both cases link is replaced with 1
+    Matched pair counts is replaced with either 0 (denominator zero)
+    or null (link cannot be calculated)
+
+
+    Parameters
+    ----------
+    df : pd.Dataframe
+        Original dataframe.
+    period : str
+        Column name containing time period.
+    strata : str
+        Column name containing strata information (sic).
+    match_col : str
+        Column name of the matched pair links, this column should be bool.
+    predictive_variable : str
+        Column name of the predicted target variable.
+    link_col : str
+        Name to use for the new column containing imputation link
+    denominator : str
+        Name used for the column containing the denominators of the link
+        calculation
+
+    Returns
+    -------
+    df : pd.DataFrame
+        A pandas DataFrame with default values overwriting values in
+        imputation link columns.
+    """
+
+    df_intermediate = df.copy()
+
+    # Need this for edge case when denominator is zero
+    # But is from a valid zero return. i.e. retuned zero and
+    # not a filled zero from empty or Null
+    df_intermediate["return_in_predictive_is_zero"] = (
+        df_intermediate[predictive_variable] == 0
+    )
+    grouped_true_zeros = df_intermediate.groupby([strata, period])[
+        "return_in_predictive_is_zero"
+    ].transform("sum")
+    grouped_true_zeros = grouped_true_zeros != 0
+    df_intermediate.drop(columns=["return_in_predictive_is_zero"])
+
+    # Re adding count matches column as this is needed for default cases
+    # This count is just the filtered target counts if issues come up.
+    # (If there is a filter applied to this data)
+
+    number_matches = count_matches(df, match_col, period, strata)
+    count_suffix = "_pair_count"
+    df = df.merge(
+        number_matches, on=[period, strata], suffixes=("", count_suffix), how="left"
+    )
+    # Creating two logical masks for cases when denominator is zero and
+    # link cannot be calculated
+    mask_denominator_zero = df[denominator] == 0
+    mask_cannot_calculate = ((df[link_col].isna()) | (np.isinf(df[link_col]))) & (
+        df[denominator] != 0
+    )
+    # Default link is always 1:
+    df.loc[(mask_cannot_calculate | mask_denominator_zero), link_col] = 1
+
+    df.loc[mask_cannot_calculate, match_col + count_suffix] = None
+    df.loc[
+        (mask_denominator_zero) & (~grouped_true_zeros), match_col + count_suffix
+    ] = 0
+
+    # Creating default link bool column
+    df["default_link_" + match_col] = np.where(
+        (mask_cannot_calculate | mask_denominator_zero), True, False
+    )
+    df.drop(columns=[denominator], inplace=True)
     return df
