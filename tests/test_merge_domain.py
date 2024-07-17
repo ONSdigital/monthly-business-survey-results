@@ -14,7 +14,7 @@ def filepath():
 
 @pytest.fixture(scope="class")
 def merged_domain_test_data(filepath):
-    return pd.read_csv(filepath / "merged_domain.csv", index_col=False)
+    return pd.read_csv(filepath / "merge_domain.csv", index_col=False)
 
 
 @pytest.fixture(scope="class")

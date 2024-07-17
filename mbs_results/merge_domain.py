@@ -8,7 +8,8 @@ def merge_domain(
     SIC_mapping: str,
 ) -> pd.DataFrame:
     """
-    Returning a merged dataframe including SIC and domain from the domain mapping dataframe.
+    Returning a merged dataframe including SIC and domain from the domain mapping
+    dataframe.
 
     Parameters
     ----------

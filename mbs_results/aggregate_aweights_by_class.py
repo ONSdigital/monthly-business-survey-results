@@ -1,7 +1,7 @@
 import pandas as pd
 
 
-def aggregate_aweight(
+def aggregate_aweights_by_class(
     dataframe: pd.DataFrame,
     reference: str,
     imp_class: str,
@@ -10,7 +10,8 @@ def aggregate_aweight(
     current_period: int,
 ) -> pd.DataFrame:
     """
-    Returning imp_class and a_weight for current period based on reference dataframe.
+    Returning imp_class and design weights (a_weights) for current period
+    based on reference dataframe.
 
     Parameters
     ----------
@@ -33,8 +34,8 @@ def aggregate_aweight(
         dataframe with aggregated imp_class and a_weights values for current period.
 
     """
-    current_df = dataframe[dataframe["period"] == current_period]
+    current_df = dataframe[dataframe[period] == current_period]
 
-    aggregate_df = current_df[["imp_class", "a_weight"]].drop_duplicates()
+    aggregate_df = current_df[[imp_class, a_weight]].drop_duplicates()
 
     return aggregate_df.reset_index(drop=True)
