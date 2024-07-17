@@ -47,6 +47,7 @@ class TestImputationFlags:
             auxiliary="auxiliary",
             predictive_auxiliary="f_match_auxiliary",
         )
+        print(df_output.columns, df_expected_output.columns)
 
         assert_frame_equal(df_output, df_expected_output)
 
@@ -78,11 +79,10 @@ class TestImputationFlags:
                 "f_match_target_variable",
                 "b_match_target_variable",
                 "f_match_auxiliary",
-                "fic_flag_target_variable",
             ],
             inplace=True,
         )
-        df_output.drop(columns=["fic_flag_target_variable"], inplace=True)
+        # df_output.drop(columns=["fic_flag_target_variable"], inplace=True)
         assert_frame_equal(df_output, df_expected_output)
 
     def test_imputation_marker_manual_construction(
@@ -112,18 +112,18 @@ class TestImputationFlags:
         )
 
         df_output = generate_imputation_marker(df_input, "target_variable")
-        df_output.drop(
-            columns=[
-                "r_flag_target_variable",
-                "fir_flag_target_variable",
-                "bir_flag_target_variable",
-                "c_flag_target_variable",
-                "fic_flag_target_variable",
-                "mc_flag_target_variable",
-                "fimc_flag_target_variable",
-            ],
-            inplace=True,
-        )
+        # df_output.drop(
+        #     columns=[
+        #         "r_flag_target_variable",
+        #         "fir_flag_target_variable",
+        #         "bir_flag_target_variable",
+        #         "c_flag_target_variable",
+        #         "fic_flag_target_variable",
+        #         "mc_flag_target_variable",
+        #         "fimc_flag_target_variable",
+        #     ],
+        #     inplace=True,
+        # )
         df_expected_output.drop(
             columns=[
                 "f_match_target_variable",

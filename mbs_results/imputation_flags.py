@@ -65,6 +65,12 @@ def create_impute_flags(
         df[f"fimc_flag_{target}"] = flag_rolling_impute(
             df, 1, strata, reference, f"{target}_man", period
         )
+        df[f"bimc_flag_{target}"] = flag_rolling_impute(
+            df, -1, strata, reference, f"{target}_man", period
+        )
+        df[f"bir_flag_{target}"] = df[f"bir_flag_{target}"] & ~df[f"bimc_flag_{target}"]
+
+        df.drop(columns=[f"bimc_flag_{target}"], inplace=True)
 
     construction_conditions = df[target].isna() & df[auxiliary].notna()
     df[f"c_flag_{target}"] = np.where(construction_conditions, True, False)
@@ -104,6 +110,7 @@ def generate_imputation_marker(df: pd.DataFrame, target) -> pd.DataFrame:
     select_cols = [f"{i}_flag_{target}" for i in flags]
     first_condition_met = [np.where(i)[0][0] for i in df[select_cols].values]
     df[f"imputation_flags_{target}"] = [flags[i] for i in first_condition_met]
+    df.drop(columns=select_cols, inplace=True)
 
     return df
 
