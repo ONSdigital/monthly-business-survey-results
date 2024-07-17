@@ -123,21 +123,65 @@ def create_imputation_logical_columns(
         df[f"fimc_flag_{target}"] = flag_rolling_impute(
             df, time_difference, strata, reference, f"{target}_man", period
         )
-        df[f"bimc_flag_{target}"] = flag_rolling_impute(
-            df, -time_difference, strata, reference, f"{target}_man", period
-        )
-        df[f"bir_flag_{target}"] = df[f"bir_flag_{target}"] & ~df[f"bimc_flag_{target}"]
 
-        df.drop(columns=[f"bimc_flag_{target}"], inplace=True)
+        df["back_impute_overlaps_mc"] = np.where(
+            df[f"bir_flag_{target}"] & df[f"mc_flag_{target}"], False, None
+        )
+        df["back_impute_overlaps_mc"] = (
+            df.groupby([strata, reference])["back_impute_overlaps_mc"].fillna(
+                method="bfill"
+            )
+        ).fillna(True)
+        df[f"bir_flag_{target}"] = (
+            df[f"bir_flag_{target}"] & df["back_impute_overlaps_mc"]
+        )
+
+        df["forward_impute_overlaps_mc"] = np.where(
+            df[f"fir_flag_{target}"] & df[f"mc_flag_{target}"], False, None
+        )
+        df["forward_impute_overlaps_mc"] = (
+            df.groupby([strata, reference])["forward_impute_overlaps_mc"].fillna(
+                method="ffill"
+            )
+        ).fillna(True)
+
+        df[f"fir_flag_{target}"] = (
+            df[f"fir_flag_{target}"] & df["forward_impute_overlaps_mc"]
+        )
+        df.drop(
+            columns=["back_impute_overlaps_mc", "forward_impute_overlaps_mc"],
+            inplace=True,
+        )
 
     construction_conditions = df[target].isna() & df[auxiliary].notna()
     df[f"c_flag_{target}"] = np.where(construction_conditions, True, False)
 
     df[f"fic_flag_{target}"] = flag_rolling_impute(
-        df, 1, strata, reference, auxiliary, period
+        df, time_difference, strata, reference, auxiliary, period
     )
 
     return df
+
+
+def check_imputation_overlaps_manual_construction(
+    df, target, strata, reference, time_difference
+):
+    if time_difference < 0:
+        direction = "backwards"
+        fillmethod = "bfill"
+    elif time_difference > 0:
+        direction = "forwards"
+        fillmethod = "ffill"
+    direction_flag = direction[0]
+
+    df[f"{direction}_impute_overlaps_mc"] = np.where(
+        df[f"{direction_flag}ir_flag_{target}"] & df[f"mc_flag_{target}"], False, None
+    )
+    df[f"{direction}_impute_overlaps_mc"] = (
+        df.groupby([strata, reference])["{direction}_impute_overlaps_mc"].fillna(
+            method=fillmethod
+        )
+    ).fillna(True)
 
 
 def flag_rolling_impute(df, time_difference, strata, reference, target, period):
