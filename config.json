@@ -17,15 +17,5 @@
                 "frozenemployees" : "int",
                 "frozenturnover" : "float",
                 "cellnumber" : "int"},
-    "temporarily_remove_cols": [],
-    "sample_columns" : [
-        "ruref","checkletter","frosic2003","rusic2003","frosic2007",
-        "rusic2007","froempees","employees   ","froempment","employment","froFTEempt",
-        "FTEempt","frotover","turnover","entref","wowentref","vatref","payeref","crn",
-        "live_lu","live_vat","live_paye","legalstatus","entrepmkr","region",
-        "birthdate","entname1","entname2","entname3","runame1","runame2","runame3",
-        "ruaddr1","ruaddr2","ruaddr3","ruaddr4","ruaddr5","rupostcode","tradstyle1",
-        "tradstyle2","tradstyle3","contact","telephone","fax","seltype","inclexcl",
-        "cell_no","formtype","cso_tel","currency"
-    ]
+    "temporarily_remove_cols": []
 }
