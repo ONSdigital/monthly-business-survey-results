@@ -34,7 +34,7 @@ def derive_estimation_variables(
 
     """
     population_frame.merge(calibration_group_map, on=[cell_number], how="left")
-    # TODO: check if cell_no is needed or should be dropped
+    # TODO: check if cell_no is the strata or if it should be dropped
 
     sample = sample[[reference, period]]
     sample["sampled"] = 1
