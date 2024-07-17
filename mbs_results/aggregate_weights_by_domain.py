@@ -11,8 +11,8 @@ def aggregate_weights_by_domain(
     previous_period: int,
 ) -> pd.DataFrame:
     """
-    Returning design weights (a_weights), outliering weights (o_weights) 
-    and calibration factors (g_weights) grouped by domain for previous 
+    Returning design weights (a_weights), outliering weights (o_weights)
+    and calibration factors (g_weights) grouped by domain for previous
     period based on reference dataframe.
 
     Parameters
@@ -30,13 +30,13 @@ def aggregate_weights_by_domain(
     g_weight : str
         name of column in dataframe containing g_weight variable
     previous_period : int
-        Previous period to take domain, a_weight, o_weight, and g_weight for, 
+        Previous period to take domain, a_weight, o_weight, and g_weight for,
         in the format yyyymm
 
     Returns
     -------
     pd.DataFrame
-        dataframe with aggregated domain, a_weights, o_weights, and g_weights 
+        dataframe with aggregated domain, a_weights, o_weights, and g_weights
         values for current period.
 
     """
