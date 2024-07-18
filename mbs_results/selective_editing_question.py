@@ -55,13 +55,34 @@ def create_selective_editing_question(
 
     """
     previous_df = dataframe[dataframe[period] == previous_period]
-    previous_df = previous_df[previous_df[question_code].isin([40,49])]
-    
-    previous_df["standardising_factor"] = (previous_df[predicted_value]*previous_df[a_weight]*previous_df[o_weight]*previous_df[g_weight])
-    
-    previous_df = previous_df.assign(standardising_factor = lambda x: x.groupby([domain,question_code]).transform("sum")["standardising_factor"])
-    previous_df["standardising_factor"] = previous_df["standardising_factor"].astype(float)
+    previous_df = previous_df[previous_df[question_code].isin([40, 49])]
 
-    output_df = previous_df[[period,reference,question_code,"standardising_factor",predicted_value,imputation_marker,auxiliary_value]]
-    
+    previous_df["standardising_factor"] = (
+        previous_df[predicted_value]
+        * previous_df[a_weight]
+        * previous_df[o_weight]
+        * previous_df[g_weight]
+    )
+
+    previous_df = previous_df.assign(
+        standardising_factor=lambda x: x.groupby([domain, question_code]).transform(
+            "sum"
+        )["standardising_factor"]
+    )
+    previous_df["standardising_factor"] = previous_df["standardising_factor"].astype(
+        float
+    )
+
+    output_df = previous_df[
+        [
+            period,
+            reference,
+            question_code,
+            "standardising_factor",
+            predicted_value,
+            imputation_marker,
+            auxiliary_value,
+        ]
+    ]
+
     return output_df.reset_index(drop=True)
