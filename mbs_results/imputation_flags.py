@@ -70,7 +70,6 @@ def create_imputation_logical_columns(
     strata: str,
     auxiliary: str,
     time_difference=1,
-    **kwargs,
 ):
     """
     function to create logical columns for each type of imputation
@@ -126,7 +125,6 @@ def create_imputation_logical_columns(
 
         df = imputation_overlaps_mc(df, target, reference, strata)
 
-
     construction_conditions = df[target].isna() & df[auxiliary].notna()
     df[f"c_flag_{target}"] = np.where(construction_conditions, True, False)
 
@@ -136,11 +134,12 @@ def create_imputation_logical_columns(
 
     return df
 
+
 def imputation_overlaps_mc(df, target, reference, strata):
     """
-    function which checks and breaks a chain of imputations if a 
+    function which checks and breaks a chain of imputations if a
     manual construction is present
-    e.g. r, fir, mc, fimc or c, mc, bir, r 
+    e.g. r, fir, mc, fimc or c, mc, bir, r
 
     Parameters
     ----------
@@ -161,26 +160,23 @@ def imputation_overlaps_mc(df, target, reference, strata):
     pd.Dataframe
         Original dataframe with updated columns for forward and backwards
         imputation boolean columns
-    """    
+    """
 
-    for column in ["back_impute_overlaps_mc","forward_impute_overlaps_mc"]:
+    for column in ["back_impute_overlaps_mc", "forward_impute_overlaps_mc"]:
         direction_single_string = column[0]
         imputation_marker_column = direction_single_string + f"ir_flag_{target}"
-        print(imputation_marker_column)
         df[column] = np.where(
             df[imputation_marker_column] & df[f"mc_flag_{target}"], False, None
         )
         df[column] = (
             df.groupby([strata, reference])[column].fillna(
-                method= direction_single_string+"fill"
+                method=direction_single_string + "fill"
             )
         ).fillna(True)
-        df[imputation_marker_column] = (
-            df[imputation_marker_column] & df[column]
-        )
+        df[imputation_marker_column] = df[imputation_marker_column] & df[column]
         df.drop(
-        columns=[column],
-        inplace=True,
+            columns=[column],
+            inplace=True,
         )
     return df
 
