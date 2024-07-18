@@ -124,34 +124,8 @@ def create_imputation_logical_columns(
             df, time_difference, strata, reference, f"{target}_man", period
         )
 
-        df["back_impute_overlaps_mc"] = np.where(
-            df[f"bir_flag_{target}"] & df[f"mc_flag_{target}"], False, None
-        )
-        df["back_impute_overlaps_mc"] = (
-            df.groupby([strata, reference])["back_impute_overlaps_mc"].fillna(
-                method="bfill"
-            )
-        ).fillna(True)
-        df[f"bir_flag_{target}"] = (
-            df[f"bir_flag_{target}"] & df["back_impute_overlaps_mc"]
-        )
+        df = imputation_overlaps_mc(df, target, reference, strata)
 
-        df["forward_impute_overlaps_mc"] = np.where(
-            df[f"fir_flag_{target}"] & df[f"mc_flag_{target}"], False, None
-        )
-        df["forward_impute_overlaps_mc"] = (
-            df.groupby([strata, reference])["forward_impute_overlaps_mc"].fillna(
-                method="ffill"
-            )
-        ).fillna(True)
-
-        df[f"fir_flag_{target}"] = (
-            df[f"fir_flag_{target}"] & df["forward_impute_overlaps_mc"]
-        )
-        df.drop(
-            columns=["back_impute_overlaps_mc", "forward_impute_overlaps_mc"],
-            inplace=True,
-        )
 
     construction_conditions = df[target].isna() & df[auxiliary].notna()
     df[f"c_flag_{target}"] = np.where(construction_conditions, True, False)
@@ -160,6 +134,54 @@ def create_imputation_logical_columns(
         df, time_difference, strata, reference, auxiliary, period
     )
 
+    return df
+
+def imputation_overlaps_mc(df, target, reference, strata):
+    """
+    function which checks and breaks a chain of imputations if a 
+    manual construction is present
+    e.g. r, fir, mc, fimc or c, mc, bir, r 
+
+    Parameters
+    ----------
+    df : pd.Dataframe
+        dataframe
+    target : str
+        Column name containing target variable.
+    period: str
+        Column name containing date variable.
+    reference : str
+        Column name containing business reference id.
+    strata : str
+        Column name containing strata information (sic).
+
+
+    Returns
+    -------
+    pd.Dataframe
+        Original dataframe with updated columns for forward and backwards
+        imputation boolean columns
+    """    
+
+    for column in ["back_impute_overlaps_mc","forward_impute_overlaps_mc"]:
+        direction_single_string = column[0]
+        imputation_marker_column = direction_single_string + f"ir_flag_{target}"
+        print(imputation_marker_column)
+        df[column] = np.where(
+            df[imputation_marker_column] & df[f"mc_flag_{target}"], False, None
+        )
+        df[column] = (
+            df.groupby([strata, reference])[column].fillna(
+                method= direction_single_string+"fill"
+            )
+        ).fillna(True)
+        df[imputation_marker_column] = (
+            df[imputation_marker_column] & df[column]
+        )
+        df.drop(
+        columns=[column],
+        inplace=True,
+        )
     return df
 
 

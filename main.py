@@ -9,7 +9,7 @@ from mbs_results.data_cleaning import (
     load_manual_constructions,
 )
 from mbs_results.flag_and_count_matched_pairs import flag_matched_pair
-from mbs_results.imputation_flags import create_impute_flags, generate_imputation_marker
+from mbs_results.imputation_flags import generate_imputation_marker
 from mbs_results.inputs import load_config
 from mbs_results.utils import convert_column_to_datetime
 from mbs_results.validation_checks import validate_config
@@ -39,5 +39,5 @@ df = flag_matched_pair(
     df, forward_or_backward="f", **{**config, **{"target": "auxiliary"}}
 )
 
-df = create_impute_flags(df, **config)
+# df = create_impute_flags(df, **config)
 df = generate_imputation_marker(df, config["target"])
