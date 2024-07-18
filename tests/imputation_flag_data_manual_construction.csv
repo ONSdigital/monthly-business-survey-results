@@ -34,3 +34,7 @@ reference,strata,period,target_variable,auxiliary,target_variable_man,f_match_ta
 9,100,202002,3214,,,,,72,r
 9,100,202003,,,72,3214,,,mc
 9,100,202004,,,,,,,fimc
+10,100,202001,3214,,,,,,r
+10,100,202002,,,,3214,,,fir
+10,100,202003,,,72,3214,,,mc
+10,100,202004,,,,3214,,,fimc
