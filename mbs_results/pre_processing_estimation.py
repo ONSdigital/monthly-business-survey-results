@@ -16,7 +16,36 @@ def get_estimation_data(
     cell_number,
     **config
 ):
+    """
+    Get the input data required to run estimation.
 
+    Parameters
+    ----------
+    population_path: pd.DataFrame
+        file path to the folder containing the population frames
+    population_column_names: List
+        list of column names for the population frames
+    sample_path: pd.DataFrame
+        file path to the folder containing the sample data
+    sample_column_names: List
+        list of column names for the sample data
+    calibration_group_map: pd.DataFrame
+        dataframe containing map between cell number and calibration group
+    period: Str
+        the name of the period column
+    reference: Str
+        the name of the reference column
+    cell_number: Str
+        the name of the cell number column
+    **config: Dict
+       main pipeline configuration. Can be used to input the entire config dictionary
+
+    Returns
+    -------
+    pd.DataFrame
+        population frame containing period and sampled columns.
+
+    """
     population_files = glob("universe.*", root_dir=population_path)
     sample_files = glob("finalsel.*", root_dir=sample_path)
 
