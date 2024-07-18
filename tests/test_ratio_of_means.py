@@ -110,7 +110,7 @@ class TestRatioOfMeans:
         expected_output = expected_output.rename(
             columns={
                 "output": "question",
-                "marker": "imputation_marker",
+                "marker": "imputation_flags_question",
                 "forward": "f_link_question",
                 "backward": "b_link_question",
                 "construction": "construction_link",
@@ -128,6 +128,10 @@ class TestRatioOfMeans:
             ]
         )
 
+        print(actual_output.columns)
+        print(expected_output.columns)
+
+
         expected_output = expected_output[actual_output.columns]
 
         actual_output = actual_output.sort_values(by=["identifier", "date"])
@@ -136,8 +140,8 @@ class TestRatioOfMeans:
         actual_output = actual_output.reset_index(drop=True)
         expected_output = expected_output.reset_index(drop=True)
 
-        expected_output["imputation_marker"] = expected_output[
-            "imputation_marker"
+        expected_output["imputation_flags_question"] = expected_output[
+            "imputation_flags_question"
         ].str.lower()
         expected_output = expected_output.replace({"bi": "bir"})
 

@@ -46,9 +46,10 @@ def generate_imputation_marker(
         missing returns.
     """
     if f"{target}_man" in df.columns:
-        flags = ["r", "mc", "fir", "bir", "fimc", "c", "fic"]
+        flags = ["r", "mc", "fir", "bir", "fimc", "fic", "c"]
+        # Check order from Specs
     else:
-        flags = ["r", "fir", "bir", "c", "fic"]
+        flags = ["r", "fir", "bir", "fic", "c"]
 
     create_imputation_logical_columns(
         df, target, period, reference, strata, auxiliary, time_difference
@@ -242,5 +243,52 @@ def flag_rolling_impute(df, time_difference, strata, reference, target, period):
             df[period] - pd.DateOffset(months=time_difference)
             == df.shift(time_difference)[period]
         )
-        .mul(df[target].isna())
+        # .mul(df[target].isna())
     )
+
+
+if __name__ == "__main__":
+    from utils import convert_column_to_datetime
+
+    df = pd.read_csv("tests/imputation_flag_data_manual_construction.csv")
+    df.period = convert_column_to_datetime(df.period)
+    df.drop(["imputation_flags_target_variable"], axis=1, inplace=True)
+
+    df_input = df[
+        [
+            "reference",
+            "strata",
+            "period",
+            "target_variable",
+            "auxiliary",
+            "target_variable_man",
+        ]
+    ]
+
+    # print(df)
+    target = "target_variable"
+
+    if f"{target}_man" in df.columns:
+        flags = ["r", "mc", "fir", "bir", "fimc", "c", "fic"]
+    else:
+        flags = ["r", "fir", "bir", "c", "fic"]
+
+    temp = generate_imputation_marker(
+        df=df_input,
+        target="target_variable",
+        period="period",
+        reference="reference",
+        strata="strata",
+        auxiliary="auxiliary",
+        predictive_auxiliary="f_match_auxiliary",
+    )
+
+    print(temp)
+    # df_output = generate_imputation_marker(df=df_input,
+    #     target="target_variable",
+    #     period="period",
+    #     reference="reference",
+    #     strata="strata",
+    #     auxiliary="auxiliary",
+    #     predictive_auxiliary="f_match_auxiliary",)
+    # print(df_output.iloc[0:10, :])

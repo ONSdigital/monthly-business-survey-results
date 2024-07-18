@@ -10,7 +10,7 @@ def get_cumulative_links(
     period,
     imputation_link,
     time_difference=1,
-    **kwargs
+    **kwargs,
 ):
     """
     Create cumulative imputation links for multiple consecutive periods
@@ -49,8 +49,8 @@ def get_cumulative_links(
 
     # TODO: These conditions are similar with the ones at flags, consider a fun for this
     marker_diff_con = (
-        dataframe["imputation_marker"]
-        .ne(dataframe["imputation_marker"].shift().bfill())
+        dataframe[f"imputation_flags_{target}"]
+        .ne(dataframe[f"imputation_flags_{target}"].shift().bfill())
         .astype(int)
         != 0
     )

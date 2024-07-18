@@ -8,7 +8,7 @@ from mbs_results.calculate_imputation_link import calculate_imputation_link
 from mbs_results.construction_matches import flag_construction_matches
 from mbs_results.cumulative_imputation_links import get_cumulative_links
 from mbs_results.flag_and_count_matched_pairs import count_matches, flag_matched_pair
-from mbs_results.imputation_flags import create_impute_flags, generate_imputation_marker
+from mbs_results.imputation_flags import generate_imputation_marker
 from mbs_results.link_filter import flag_rows_to_ignore
 from mbs_results.predictive_variable import shift_by_strata_period
 
@@ -98,22 +98,22 @@ def ratio_of_means(
         )
 
     df = (
-        df.pipe(
-            create_impute_flags,
-            **default_columns,
-            predictive_auxiliary="f_predictive_auxiliary"
-        )
+        df # .pipe(
+        #     create_impute_flags,
+        #     **default_columns,
+        #     predictive_auxiliary="f_predictive_auxiliary"
+        # )
         # TODO: How we gonna set defaults?
         .fillna(
             {"f_link_question": 1.0, "b_link_question": 1.0, "construction_link": 1.0}
         )
-        .pipe(generate_imputation_marker)
+        .pipe(generate_imputation_marker, **default_columns)
         .pipe(wrap_get_cumulative_links, **default_columns)
         .pipe(
             create_and_merge_imputation_values,
             **default_columns,
             imputation_class=strata,
-            marker="imputation_marker",
+            marker=f"imputation_flags_{target}",
             combined_imputation="imputed_value",
             cumulative_forward_link="cumulative_f_link_" + target,
             cumulative_backward_link="cumulative_b_link_" + target,
@@ -125,7 +125,7 @@ def ratio_of_means(
     # TODO: Reset index needed because of sorting, perhaps reset index
     #       when sorting directly in the low level functions or consider
     #       sorting here before chaining
-
+    df.drop(columns = ["f_match_question","f_predictive_auxiliary","b_match_question"],inplace = True)
     df = df.reset_index(drop=True)
 
     # TODO: Relates to ASAP-415, comment from pull request:
@@ -326,7 +326,7 @@ def wrap_calculate_imputation_link(
         dict(
             **default_columns,
             **{
-                "match_col": "f_match",
+                "match_col": f"f_match_{target_col}",
                 "predictive_variable": "f_predictive_" + target_col,
                 "link_col": "f_link_" + target_col,
             }
@@ -334,7 +334,7 @@ def wrap_calculate_imputation_link(
         dict(
             **default_columns,
             **{
-                "match_col": "b_match",
+                "match_col": f"b_match_{target_col}",
                 "predictive_variable": "b_predictive_" + target_col,
                 "link_col": "b_link_" + target_col,
             }
@@ -370,7 +370,7 @@ def wrap_get_cumulative_links(
     Returns
     -------
     df : pd.DataFrame
-        Original dataframe with 2 new numeric column, with the cummulative
+        Original dataframe with 2 new numeric column, with the cumulative
         product of imputation links. These are needed when consecutive periods
         need imputing.
     """
@@ -410,10 +410,11 @@ def count_impute_matches(
     df : pd.DataFrame
         Original dataframe with 3 new numeric columns.
     """
+    target =  default_columns["target"]
 
     count_arguments = [
-        dict(**default_columns, **{"flag": "f_match"}),
-        dict(**default_columns, **{"flag": "b_match"}),
+        dict(**default_columns, **{"flag": f"f_match_{target}"}),
+        dict(**default_columns, **{"flag": f"b_match_{target}"}),
         dict(**default_columns, **{"flag": "flag_construction_matches"}),
     ]
 
