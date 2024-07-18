@@ -15,11 +15,12 @@ def validate_imputation(df: pd.DataFrame, target: str) -> None:
 
     Raises
     ------
+    `ValueError`
     """
     if df[target].isna().any():
         raise ValueError(
             f"""
-            Target column should have no missing values following imputation:
-            missing values found in column {target}
+Target column should have no missing values following imputation:
+missing values found in column {target}
             """
         )
