@@ -3,7 +3,12 @@ from pathlib import Path
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from mbs_results.data_cleaning import clean_and_merge, enforce_datatypes
+from mbs_results.data_cleaning import (
+    clean_and_merge,
+    create_imputation_class,
+    enforce_datatypes,
+    run_live_or_frozen,
+)
 
 
 def correct_types(df):
@@ -75,3 +80,30 @@ def test_clean_and_merge():
         ["reference", "period"]
     )
     assert_frame_equal(actual_output, expected_output)
+
+
+def test_create_imputation_class():
+
+    expected_output = pd.read_csv(Path("tests") / "test_create_imputation_class.csv")
+
+    df_in = expected_output.drop(columns=["expected"])
+
+    actual_output = create_imputation_class(df_in, "cell_no", "expected")
+
+    assert_frame_equal(actual_output, expected_output)
+
+
+def test_run_live_or_frozen():
+
+    df = pd.read_csv(Path("tests") / "test_run_live_or_frozen.csv")
+
+    df_in = df.drop(columns=["frozen"])
+
+    live_ouput = run_live_or_frozen(df_in, "target", "error", "live")
+    frozen_output = run_live_or_frozen(df_in, "target", "error", "frozen")
+
+    expected_output_frozen = df_in.copy()
+    expected_output_frozen["target"] = df["frozen"]
+
+    assert_frame_equal(frozen_output, expected_output_frozen)
+    assert_frame_equal(live_ouput, df_in)
