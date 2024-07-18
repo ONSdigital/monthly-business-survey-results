@@ -64,15 +64,6 @@ class TestImputationFlags:
                 "auxiliary",
             ]
         ]
-        # df_output = create_impute_flags(
-        #     df=df_input,
-        #     target="target_variable",
-        #     period="period",
-        #     reference="reference",
-        #     strata="strata",
-        #     auxiliary="auxiliary",
-        #     predictive_auxiliary="f_match_auxiliary",
-        # )
         df_output = generate_imputation_marker(
             df=df_input,
             target="target_variable",
@@ -90,7 +81,6 @@ class TestImputationFlags:
             ],
             inplace=True,
         )
-        # df_output.drop(columns=["fic_flag_target_variable"], inplace=True)
         assert_frame_equal(df_output, df_expected_output)
 
     def test_imputation_marker_manual_construction(
@@ -117,20 +107,7 @@ class TestImputationFlags:
             reference="reference",
             strata="strata",
             auxiliary="auxiliary",
-            predictive_auxiliary="f_match_auxiliary",
         )
-        # df_output.drop(
-        #     columns=[
-        #         "r_flag_target_variable",
-        #         "fir_flag_target_variable",
-        #         "bir_flag_target_variable",
-        #         "c_flag_target_variable",
-        #         "fic_flag_target_variable",
-        #         "mc_flag_target_variable",
-        #         "fimc_flag_target_variable",
-        #     ],
-        #     inplace=True,
-        # )
         df_expected_output.drop(
             columns=[
                 "f_match_target_variable",
