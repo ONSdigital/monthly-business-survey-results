@@ -1,7 +1,8 @@
 from glob import glob
 
 import pandas as pd
-from utils import read_colon_separated_file
+
+from mbs_results.utils import read_colon_separated_file
 
 
 def get_estimation_data(
