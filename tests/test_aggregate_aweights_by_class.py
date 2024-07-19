@@ -36,7 +36,6 @@ class TestAggregateAWeightsByClass:
 
         actual_output = aggregate_aweights_by_class(
             input_data,
-            "reference",
             "imp_class",
             "period",
             "a_weight",
