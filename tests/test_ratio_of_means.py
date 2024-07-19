@@ -8,42 +8,42 @@ from mbs_results.ratio_of_means import ratio_of_means
 scenario_path_prefix = "tests/data/"
 
 scenarios = [
-    # "01_C",  # dtype issue
-    # "02_C_FI",
-    # "03_R_R_FI",
-    # "04_R_R_FI_FI",
-    # "05_R_R_FI_FI_FI_year_span",
-    # "06_BI_BI_R",
-    # "07_BI_BI_R_FI_FI_R_FI",
-    # "08_R_R_R",  # dtype issue
-    # "09_R_NS_C",
-    # "10_C_FI_NS_R",
-    # "11_R_R_FI-BI_R_R",
-    # "12_C_FI_FI_FI_FI",
-    # "13_R_FI_FI_NS_BI_BI_R",  # bug fixed ASAP-402
-    # "14_C_FI_FI_NS_BI_BI_R",  # bug fixed ASAP-402
-    # "15_BI_BI_R_NS_R_FI_FI",  # bug fixed ASAP-402
-    # "16_BI_BI_R_NS_C_FI_FI",  # bug fixed ASAP-402
-    # "17_NS_R_FI_NS",
-    # "18_NS_BI_R_NS",
+    "01_C",  # dtype issue
+    "02_C_FI",
+    "03_R_R_FI",
+    "04_R_R_FI_FI",
+    "05_R_R_FI_FI_FI_year_span",
+    "06_BI_BI_R",
+    "07_BI_BI_R_FI_FI_R_FI",
+    "08_R_R_R",  # dtype issue
+    "09_R_NS_C",
+    "10_C_FI_NS_R",
+    "11_R_R_FI-BI_R_R",
+    "12_C_FI_FI_FI_FI",
+    "13_R_FI_FI_NS_BI_BI_R",  # bug fixed ASAP-402
+    "14_C_FI_FI_NS_BI_BI_R",  # bug fixed ASAP-402
+    "15_BI_BI_R_NS_R_FI_FI",  # bug fixed ASAP-402
+    "16_BI_BI_R_NS_C_FI_FI",  # bug fixed ASAP-402
+    "17_NS_R_FI_NS",
+    "18_NS_BI_R_NS",
     "19_link_columns",
-    # "20_mixed_data",
-    # "21_class_change_R_C_FI",
-    # "22_class_change_C_BI_R",
-    # "23_class_change_C_C_FI",
-    # "24_class_change_R_BI_R",
-    # "25_class_change_C_FI_FI",
-    # "26_C_FI_FI_NS_BI_BI_R_filtered",  # not yet implemented
-    # "27_BI_BI_R_NS_R_FI_FI_filtered",  # not yet implemented
-    # "28_link_columns_filtered",
-    # "29_mixed_data_filtered",  # not yet implemented
-    # "30_class_change_C_C_FI_filtered",  # not yet implemented
-    # "31_no_response",  # bug fixed ASAP-402
-    # "32_divide_by_zero",
-    # "33_multi_variable_C_BI_R",  # issue with matches ASAP-427
-    # "34_multi_variable_C_BI_R_filtered",  # not yet implemented
-    # "35_BI_BI_R_FI_FI_R_FI_alternating_filtered",  # not yet implemented
-    "36_R_MC_FIMC_weighted",  # not yet implemented
+    "20_mixed_data",
+    "21_class_change_R_C_FI",
+    "22_class_change_C_BI_R",
+    "23_class_change_C_C_FI",
+    "24_class_change_R_BI_R",
+    "25_class_change_C_FI_FI",
+    "26_C_FI_FI_NS_BI_BI_R_filtered",  # not yet implemented
+    "27_BI_BI_R_NS_R_FI_FI_filtered",  # not yet implemented
+    "28_link_columns_filtered",
+    "29_mixed_data_filtered",  # not yet implemented
+    "30_class_change_C_C_FI_filtered",  # not yet implemented
+    "31_no_response",  # bug fixed ASAP-402
+    "32_divide_by_zero",
+    "33_multi_variable_C_BI_R",  # issue with matches ASAP-427
+    "34_multi_variable_C_BI_R_filtered",  # not yet implemented
+    "35_BI_BI_R_FI_FI_R_FI_alternating_filtered",  # not yet implemented
+    # "36_R_MC_FIMC_weighted",  # not yet implemented
 ]
 
 
@@ -83,6 +83,7 @@ class TestRatioOfMeans:
                 strata="group",
                 auxiliary="other",
                 filters=filter_df,
+                # HERE ####
                 imputation_links={
                     "forward": "f_link_question",
                     "backward": "b_link_question",
@@ -129,7 +130,7 @@ class TestRatioOfMeans:
             ]
         )
 
-        actual_output.drop(columns=["question_man"], errors="ignore", inplace=True)
+        actual_output.drop(columns = ["question_man"],errors='ignore',inplace=True)
         # Temp work around to drop mc column until its fully integrated
         expected_output = expected_output[actual_output.columns]
 

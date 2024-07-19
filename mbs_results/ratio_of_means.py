@@ -134,6 +134,7 @@ def ratio_of_means(
     df.drop(
         columns=["f_match_question", "f_predictive_auxiliary", "b_match_question"],
         inplace=True,
+        errors='ignore'
     )
     df = df.reset_index(drop=True)
 
