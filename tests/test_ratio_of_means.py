@@ -43,6 +43,7 @@ scenarios = [
     "33_multi_variable_C_BI_R",  # issue with matches ASAP-427
     "34_multi_variable_C_BI_R_filtered",  # not yet implemented
     "35_BI_BI_R_FI_FI_R_FI_alternating_filtered",  # not yet implemented
+    "36_R_MC_FIMC_weighted",  # not yet implemented
 ]
 
 
@@ -128,9 +129,8 @@ class TestRatioOfMeans:
             ]
         )
 
-        print(actual_output.columns)
-        print(expected_output.columns)
-
+        actual_output.drop(columns = ["question_man"],errors='ignore',inplace=True)
+        # Temp work around to drop mc column until its fully integrated
         expected_output = expected_output[actual_output.columns]
 
         actual_output = actual_output.sort_values(by=["identifier", "date"])

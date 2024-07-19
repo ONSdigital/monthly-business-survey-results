@@ -96,7 +96,13 @@ def ratio_of_means(
             .pipe(wrap_shift_by_strata_period, **default_columns)
             .pipe(wrap_calculate_imputation_link, **default_columns)
         )
+    if f"{target}_man" in df.columns:
+        imputation_types = ("c", "mc", "fir", "bir","fimc" ,"fic")
+        df["man_link"] = 1
 
+    else:
+        imputation_types = ("c", "fir", "bir" ,"fic")
+        
     df = (
         df  # .pipe(
         #     create_impute_flags,
@@ -118,7 +124,7 @@ def ratio_of_means(
             cumulative_forward_link="cumulative_f_link_" + target,
             cumulative_backward_link="cumulative_b_link_" + target,
             construction_link="construction_link",
-            imputation_types=("c", "fir", "bir", "fic"),
+            imputation_types=imputation_types,
         )
     )
 
@@ -155,6 +161,7 @@ def ratio_of_means(
             "b_predictive_" + target,
             "ignore_from_link",
             "filtered_target",
+            "man_link"
         ],
         axis=1,
         errors="ignore",

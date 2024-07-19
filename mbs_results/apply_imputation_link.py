@@ -64,6 +64,14 @@ def create_and_merge_imputation_values(
             "fill_method": "ffill",
             "link_column": construction_link,
         },
+        "mc": {
+            "intermediate_column": "manual_constructed",
+            "marker": "mc",
+            # doesn't actually apply a fill so can be forward or back
+            "fill_column": f"{target}_man",
+            "fill_method": "ffill",
+            "link_column": "man_link",
+        },
         "fir": {
             "intermediate_column": "fir",
             "marker": "fir",
@@ -78,6 +86,14 @@ def create_and_merge_imputation_values(
             "fill_column": target,
             "fill_method": "bfill",
             "link_column": cumulative_backward_link,
+        },
+        "fimc": {
+            "intermediate_column": "fimc",
+            "marker": "fimc",
+            # doesn't actually apply a fill so can be forward or back
+            "fill_column": f"{target}_man",
+            "fill_method": "ffill",
+            "link_column": cumulative_forward_link,
         },
         # FIMC Here instead, check specs?
         "fic": {
