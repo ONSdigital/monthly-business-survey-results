@@ -71,6 +71,7 @@ def create_and_merge_imputation_values(
             "fill_method": "ffill",
             "link_column": cumulative_forward_link,
         },
+        # FIMC Here or after BIR
         "bir": {
             "intermediate_column": "bir",
             "marker": "bir",
@@ -78,6 +79,7 @@ def create_and_merge_imputation_values(
             "fill_method": "bfill",
             "link_column": cumulative_backward_link,
         },
+        # FIMC Here instead, check specs?
         "fic": {
             # FIC only works if the C is in the first period of the business being
             # sampled. This is fine for automatic imputation, but should be careful

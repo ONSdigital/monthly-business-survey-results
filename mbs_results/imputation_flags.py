@@ -182,27 +182,6 @@ def imputation_overlaps_mc(df, target, reference, strata):
     return df
 
 
-def check_imputation_overlaps_manual_construction(
-    df, target, strata, reference, time_difference
-):
-    if time_difference < 0:
-        direction = "backwards"
-        fillmethod = "bfill"
-    elif time_difference > 0:
-        direction = "forwards"
-        fillmethod = "ffill"
-    direction_flag = direction[0]
-
-    df[f"{direction}_impute_overlaps_mc"] = np.where(
-        df[f"{direction_flag}ir_flag_{target}"] & df[f"mc_flag_{target}"], False, None
-    )
-    df[f"{direction}_impute_overlaps_mc"] = (
-        df.groupby([strata, reference])["{direction}_impute_overlaps_mc"].fillna(
-            method=fillmethod
-        )
-    ).fillna(True)
-
-
 def flag_rolling_impute(df, time_difference, strata, reference, target, period):
     """
     Function to create logical values for whether rolling imputation can be done.
@@ -235,16 +214,25 @@ def flag_rolling_impute(df, time_difference, strata, reference, target, period):
     elif time_difference > 0:
         fillmethod = "ffill"
 
-    return (
-        df.groupby([strata, reference])[target]
+    df["fill_group"] = (
+        (df[period] - pd.DateOffset(months=1) != df.shift(1)[period])
+        | (df[strata].diff(1) != 0)
+        | (df[reference].diff(1) != 0)
+    ).cumsum()
+
+    boolean_column = (
+        df.groupby([strata, reference, "fill_group"])[target]
         .fillna(method=fillmethod)
         .notnull()
         .mul(
             df[period] - pd.DateOffset(months=time_difference)
             == df.shift(time_difference)[period]
         )
-        # .mul(df[target].isna())
+        .mul(df[strata] == df.shift(time_difference)[strata])
     )
+    df.drop(columns="fill_group", inplace=True)
+
+    return boolean_column
 
 
 if __name__ == "__main__":

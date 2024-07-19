@@ -22,7 +22,7 @@ def ratio_of_means(
     auxiliary: str,
     filters: pd.DataFrame = None,
     imputation_links: Dict[str, str] = {},
-    **kwargs
+    **kwargs,
 ) -> pd.DataFrame:
     """
     Imputes for each non-responding contributor a single numeric target
@@ -98,7 +98,7 @@ def ratio_of_means(
         )
 
     df = (
-        df # .pipe(
+        df  # .pipe(
         #     create_impute_flags,
         #     **default_columns,
         #     predictive_auxiliary="f_predictive_auxiliary"
@@ -118,14 +118,17 @@ def ratio_of_means(
             cumulative_forward_link="cumulative_f_link_" + target,
             cumulative_backward_link="cumulative_b_link_" + target,
             construction_link="construction_link",
-            imputation_types=("c", "fir", "bir", "fic")
+            imputation_types=("c", "fir", "bir", "fic"),
         )
     )
 
     # TODO: Reset index needed because of sorting, perhaps reset index
     #       when sorting directly in the low level functions or consider
     #       sorting here before chaining
-    df.drop(columns = ["f_match_question","f_predictive_auxiliary","b_match_question"],inplace = True)
+    df.drop(
+        columns=["f_match_question", "f_predictive_auxiliary", "b_match_question"],
+        inplace=True,
+    )
     df = df.reset_index(drop=True)
 
     # TODO: Relates to ASAP-415, comment from pull request:
@@ -271,16 +274,16 @@ def wrap_shift_by_strata_period(
     link_arguments = (
         dict(
             **default_columns,
-            **{"time_difference": 1, "new_col": "f_predictive_" + target_col}
+            **{"time_difference": 1, "new_col": "f_predictive_" + target_col},
         ),
         dict(
             **default_columns,
-            **{"time_difference": -1, "new_col": "b_predictive_" + target_col}
+            **{"time_difference": -1, "new_col": "b_predictive_" + target_col},
         ),
         # Needed for create_impute_flags
         dict(
             **{**default_columns, "target": default_columns["auxiliary"]},
-            **{"time_difference": 1, "new_col": "f_predictive_auxiliary"}
+            **{"time_difference": 1, "new_col": "f_predictive_auxiliary"},
         ),
     )
 
@@ -329,7 +332,7 @@ def wrap_calculate_imputation_link(
                 "match_col": f"f_match_{target_col}",
                 "predictive_variable": "f_predictive_" + target_col,
                 "link_col": "f_link_" + target_col,
-            }
+            },
         ),
         dict(
             **default_columns,
@@ -337,7 +340,7 @@ def wrap_calculate_imputation_link(
                 "match_col": f"b_match_{target_col}",
                 "predictive_variable": "b_predictive_" + target_col,
                 "link_col": "b_link_" + target_col,
-            }
+            },
         ),
         dict(
             **default_columns,
@@ -345,7 +348,7 @@ def wrap_calculate_imputation_link(
                 "match_col": "flag_construction_matches",
                 "predictive_variable": default_columns["auxiliary"],
                 "link_col": "construction_link",
-            }
+            },
         ),
     )
 
@@ -379,11 +382,11 @@ def wrap_get_cumulative_links(
     cum_links_arguments = (
         dict(
             **default_columns,
-            **{"forward_or_backward": "f", "imputation_link": "f_link_" + target_col}
+            **{"forward_or_backward": "f", "imputation_link": "f_link_" + target_col},
         ),
         dict(
             **default_columns,
-            **{"forward_or_backward": "b", "imputation_link": "b_link_" + target_col}
+            **{"forward_or_backward": "b", "imputation_link": "b_link_" + target_col},
         ),
     )
 
@@ -410,7 +413,7 @@ def count_impute_matches(
     df : pd.DataFrame
         Original dataframe with 3 new numeric columns.
     """
-    target =  default_columns["target"]
+    target = default_columns["target"]
 
     count_arguments = [
         dict(**default_columns, **{"flag": f"f_match_{target}"}),

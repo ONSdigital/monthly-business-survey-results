@@ -34,3 +34,6 @@ reference,strata,period,target_variable,auxiliary,f_match_target_variable,b_matc
 9,100,202002,,5,,,55,fic
 9,100,202003,,,,,55,fic
 9,100,202004,,,,,55,fic
+10,100,202001,,55,,,,c
+10,100,202002,,,,,55,fic
+10,100,202004,20,,,,,r

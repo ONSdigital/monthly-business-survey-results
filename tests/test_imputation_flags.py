@@ -116,7 +116,5 @@ class TestImputationFlags:
             ],
             inplace=True,
         )
-        print(df_expected_output.columns)
-        print(df_output.columns)
 
         assert_frame_equal(df_output, df_expected_output)

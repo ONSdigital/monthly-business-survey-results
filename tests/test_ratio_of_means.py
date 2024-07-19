@@ -131,7 +131,6 @@ class TestRatioOfMeans:
         print(actual_output.columns)
         print(expected_output.columns)
 
-
         expected_output = expected_output[actual_output.columns]
 
         actual_output = actual_output.sort_values(by=["identifier", "date"])
@@ -144,5 +143,4 @@ class TestRatioOfMeans:
             "imputation_flags_question"
         ].str.lower()
         expected_output = expected_output.replace({"bi": "bir"})
-
         assert_frame_equal(actual_output, expected_output, check_dtype=False)

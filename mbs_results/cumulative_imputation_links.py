@@ -53,6 +53,7 @@ def get_cumulative_links(
         .ne(dataframe[f"imputation_flags_{target}"].shift().bfill())
         .astype(int)
         != 0
+        # is false
     )
 
     strat_diff_con = dataframe[strata].diff(time_difference) != 0
