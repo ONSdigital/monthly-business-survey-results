@@ -9,7 +9,7 @@ from mbs_results.merge_domain import merge_domain
 
 @pytest.fixture(scope="class")
 def filepath():
-    return Path("tests/data/estimation")
+    return Path("tests")
 
 
 @pytest.fixture(scope="class")

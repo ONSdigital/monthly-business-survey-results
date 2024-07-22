@@ -9,7 +9,7 @@ from mbs_results.selective_editing import create_standardising_factor
 
 @pytest.fixture(scope="class")
 def filepath():
-    return Path("tests/data/estimation")
+    return Path("tests")
 
 
 @pytest.fixture(scope="class")
