@@ -43,6 +43,7 @@ scenarios = [
     "33_multi_variable_C_BI_R",  # issue with matches ASAP-427
     "34_multi_variable_C_BI_R_filtered",  # not yet implemented
     "35_BI_BI_R_FI_FI_R_FI_alternating_filtered",  # not yet implemented
+    # "36_R_MC_FIMC_weighted",  # not yet implemented
 ]
 
 
@@ -110,7 +111,7 @@ class TestRatioOfMeans:
         expected_output = expected_output.rename(
             columns={
                 "output": "question",
-                "marker": "imputation_marker",
+                "marker": "imputation_flags_question",
                 "forward": "f_link_question",
                 "backward": "b_link_question",
                 "construction": "construction_link",
@@ -128,6 +129,10 @@ class TestRatioOfMeans:
             ]
         )
 
+        actual_output.drop(columns = ["question_man"],errors='ignore',inplace=True)
+        # Temp work around to drop mc column until its fully integrated
+        actual_output.drop(columns = ["b_match_filtered_question","b_predictive_filtered_question","b_link_filtered_question","f_match_filtered_question","f_predictive_filtered_question","f_link_filtered_question","filtered_question","cumulative_b_link_filtered_question","cumulative_f_link_filtered_question"],errors="ignore",inplace=True)
+        actual_output.drop(columns = ["forward","backward","construction"],errors="ignore",inplace=True)
         expected_output = expected_output[actual_output.columns]
 
         actual_output = actual_output.sort_values(by=["identifier", "date"])
@@ -136,9 +141,11 @@ class TestRatioOfMeans:
         actual_output = actual_output.reset_index(drop=True)
         expected_output = expected_output.reset_index(drop=True)
 
-        expected_output["imputation_marker"] = expected_output[
-            "imputation_marker"
+        expected_output["imputation_flags_question"] = expected_output[
+            "imputation_flags_question"
         ].str.lower()
         expected_output = expected_output.replace({"bi": "bir"})
 
+        print(actual_output)
+        print(expected_output)
         assert_frame_equal(actual_output, expected_output, check_dtype=False)

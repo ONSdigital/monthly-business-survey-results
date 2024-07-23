@@ -55,6 +55,7 @@ def create_and_merge_imputation_values(
     """
 
     # constructed has to come first to use the result for forward impute from contructed
+    print(target)
     imputation_config = {
         "c": {
             "intermediate_column": "constructed",
@@ -64,6 +65,14 @@ def create_and_merge_imputation_values(
             "fill_method": "ffill",
             "link_column": construction_link,
         },
+        "mc": {
+            "intermediate_column": "manual_constructed",
+            "marker": "mc",
+            # doesn't actually apply a fill so can be forward or back
+            "fill_column": f"{target}_man",
+            "fill_method": "ffill",
+            "link_column": "man_link",
+        },
         "fir": {
             "intermediate_column": "fir",
             "marker": "fir",
@@ -71,6 +80,7 @@ def create_and_merge_imputation_values(
             "fill_method": "ffill",
             "link_column": cumulative_forward_link,
         },
+        # FIMC Here or after BIR
         "bir": {
             "intermediate_column": "bir",
             "marker": "bir",
@@ -78,6 +88,15 @@ def create_and_merge_imputation_values(
             "fill_method": "bfill",
             "link_column": cumulative_backward_link,
         },
+        "fimc": {
+            "intermediate_column": "fimc",
+            "marker": "fimc",
+            # doesn't actually apply a fill so can be forward or back
+            "fill_column": f"{target}_man",
+            "fill_method": "ffill",
+            "link_column": cumulative_forward_link,
+        },
+        # FIMC Here instead, check specs?
         "fic": {
             # FIC only works if the C is in the first period of the business being
             # sampled. This is fine for automatic imputation, but should be careful
@@ -124,11 +143,21 @@ def create_impute(df, group, imputation_spec):
     pandas.DataFrame
         dataframe with an added imputation column defined by the imputation_spec
     """
+    # if f"filtered_question" in df.columns and imputation_spec["link_column"] != "construction_link":
+    #     # target_col = f"filtered_{target_col}"
+
+    #     print(imputation_spec["link_column"])
+    #     # link_column = imputation_spec["link_column"][0:18] + "filtered_question"
+    # else: 
+    link_column = imputation_spec["link_column"]
+
+
+
     column_name = imputation_spec["intermediate_column"]
     fill_column = imputation_spec["fill_column"]
     fill_method = imputation_spec["fill_method"]
-    link_column = imputation_spec["link_column"]
-
+    # link_column = imputation_spec["link_column"]
+    print(link_column,df.columns)
     df[column_name] = (
         df.groupby(group)[fill_column].fillna(method=fill_method) * df[link_column]
     )

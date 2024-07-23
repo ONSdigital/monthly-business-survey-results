@@ -43,7 +43,12 @@ def calculate_imputation_link(
     """
 
     df_intermediate = df.copy()
-
+    # print(target, f"filtered_{target}")
+    if f"filtered_{target}" in df.columns:
+        # target = f"filtered_{target}"
+        print("if")
+    print(predictive_variable,target,match_col)
+    print(df.columns)
     df_intermediate[target] = df_intermediate[target] * df_intermediate[match_col]
 
     df_intermediate[predictive_variable] = (

@@ -46,7 +46,7 @@ def flag_matched_pair(
     if forward_or_backward == "b":
         time_difference = -time_difference
 
-    df[f"{forward_or_backward}_match_{target}"] = (
+    df[f"{forward_or_backward}_match"] = (
         df.groupby([strata, reference])
         .shift(time_difference)[target]
         .notnull()

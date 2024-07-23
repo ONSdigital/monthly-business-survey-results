@@ -35,7 +35,7 @@ def count_expected_output():
 @pytest.mark.parametrize("match_test_data", match_inputs)
 class TestMatchedPair:
     def test_flag_matched_pair_forward(self, match_test_data):
-        expected_output = match_test_data.drop(["b_match_target_variable"], axis=1)
+        expected_output = match_test_data.drop(["b_match"], axis=1)
         df_input = match_test_data[
             ["reference", "strata", "period", "target_variable"]
         ].sample(frac=1)
@@ -45,7 +45,7 @@ class TestMatchedPair:
         assert_frame_equal(df_output, expected_output)
 
     def test_flag_matched_pair_backward(self, match_test_data):
-        expected_output = match_test_data.drop(["f_match_target_variable"], axis=1)
+        expected_output = match_test_data.drop(["f_match"], axis=1)
         df_input = match_test_data[["reference", "strata", "period", "target_variable"]]
         df_output = flag_matched_pair(
             df_input, "b", "target_variable", "period", "reference", "strata"
