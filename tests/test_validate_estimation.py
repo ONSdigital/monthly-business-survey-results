@@ -35,5 +35,5 @@ def test_validate_estimation(
 ):
     with expectation:
         validate_estimation(
-            validate_estimation_data, design_weight, calibration_factor, "target"
+            validate_estimation_data, design_weight, calibration_factor, "auxiliary"
         )
