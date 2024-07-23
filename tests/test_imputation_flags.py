@@ -20,7 +20,6 @@ def imputation_flag_test_data_manual():
 
 
 class TestImputationFlags:
-
     def test_imputation_marker(self, imputation_flag_test_data):
         df_expected_output = imputation_flag_test_data.copy()
         df_input = imputation_flag_test_data.copy()
