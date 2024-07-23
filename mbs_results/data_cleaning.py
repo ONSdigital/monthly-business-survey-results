@@ -203,7 +203,8 @@ def run_live_or_frozen(
     error_marker : str
         Column name with error values.
     state : str, optional
-        Function config parameter. The default is "live".
+        Function config parameter. The default is "live". "Live" state won't do
+        anyting, "frozen" will convert to null the error_values within error_marker
     error_values : list[str], optional
         Values to ignore. The default is ['E', 'W'].
 
@@ -213,7 +214,12 @@ def run_live_or_frozen(
 
     """
 
-    # TODO: raise error if state is not frozen or live
+    if state not in ["frozen", "live"]:
+        raise ValueError(
+            """{} is not an accepted state status, use either frozen or live """.format(
+                state
+            )
+        )
 
     if state == "frozen":
 
@@ -263,7 +269,7 @@ def create_imputation_class(
     Returns
     -------
     df : pd.DataFrame
-        Oringal dataframe with new_col.
+        Original dataframe with new_col.
     """
     df[new_col] = (
         df[cell_no_col]

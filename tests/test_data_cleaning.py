@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+import pytest
 from pandas.testing import assert_frame_equal
 
 from mbs_results.data_cleaning import (
@@ -107,3 +108,11 @@ def test_run_live_or_frozen():
 
     assert_frame_equal(frozen_output, expected_output_frozen)
     assert_frame_equal(live_ouput, df_in)
+
+
+def test_run_live_or_frozen_exception():
+
+    df = pd.read_csv(Path("tests") / "test_run_live_or_frozen.csv")
+
+    with pytest.raises(ValueError):
+        run_live_or_frozen(df, "target", "error", "love")
