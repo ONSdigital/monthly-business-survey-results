@@ -7,7 +7,7 @@ from mbs_results.apply_imputation_link import create_and_merge_imputation_values
 from mbs_results.calculate_imputation_link import calculate_imputation_link
 from mbs_results.construction_matches import flag_construction_matches
 from mbs_results.cumulative_imputation_links import get_cumulative_links
-from mbs_results.flag_and_count_matched_pairs import count_matches, flag_matched_pair
+from mbs_results.flag_and_count_matched_pairs import  flag_matched_pair
 from mbs_results.imputation_flags import generate_imputation_marker
 from mbs_results.link_filter import flag_rows_to_ignore
 from mbs_results.predictive_variable import shift_by_strata_period
@@ -84,9 +84,9 @@ def ratio_of_means(
 
     if all(
         links in imputation_links.values()
-        for links in [f"f_link_{target}", f"b_link_{target}", "construction_link"]
+        for links in ["f_link_question", "b_link_question", "construction_link"]
     ):
-
+        print("triggered")
         df = df.rename(columns=imputation_links).pipe(
             wrap_shift_by_strata_period, **default_columns
         )
@@ -98,7 +98,9 @@ def ratio_of_means(
             .pipe(wrap_shift_by_strata_period, **default_columns)
             .pipe(wrap_calculate_imputation_link, **default_columns)
         )
+    
     if f"{target}_man" in df.columns:
+        # Manual Construction
         imputation_types = ("c", "mc", "fir", "bir","fimc" ,"fic")
         df["man_link"] = 1
 
@@ -198,10 +200,10 @@ def wrap_flag_matched_pairs(
 
     if "ignore_from_link" in df.columns:
 
-        target = default_columns["target"]
-        df[f"filtered_{target}"] = df[default_columns["target"]]
-        df.loc[df["ignore_from_link"], f"filtered_{target}"] = np.nan
-        default_columns = {**default_columns, "target": f"filtered_{target}"}
+        # target = default_columns["target"]
+        df["filtered_target"] = df[default_columns["target"]]
+        df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
+        default_columns = {**default_columns, "target": "filtered_target"}
 
     flag_arguments = [
         dict(**default_columns, **{"forward_or_backward": "f"}),
@@ -213,41 +215,9 @@ def wrap_flag_matched_pairs(
         df = flag_matched_pair(df, **args)
 
     df = flag_construction_matches(df, **default_columns)
-    print("wrap flag", default_columns["target"])
 
     return df
 
-
-def wrap_count_matches(
-    df: pd.DataFrame, **default_columns: Dict[str, str]
-) -> pd.DataFrame:
-    """Wrapper function to get counts of flagged matched pairs.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Original dataframe.
-    **default_columns : Dict[str, str]
-        The column names which were passed to ratio of means function.
-    Returns
-    -------
-    df : pd.DataFrame
-        Dataframe with 3 numeric columns.
-    """
-
-    count_arguments = (
-        dict(**default_columns, **{"flag": "f_match"}),
-        dict(**default_columns, **{"flag": "b_match"}),
-        dict(**default_columns, **{"flag": "flag_construction_matches"}),
-    )
-
-    all_counts = pd.DataFrame(columns=default_columns.values())
-
-    for args in count_arguments:
-        counts = count_matches(df, **args)
-        all_counts = counts.merge(all_counts, how="left")
-
-    return all_counts
 
 
 def wrap_shift_by_strata_period(
@@ -278,11 +248,11 @@ def wrap_shift_by_strata_period(
 
     if "ignore_from_link" in df.columns:
 
-        df[f"filtered_{target_col}"] = df[target_col]
+        df["filtered_target"] = df[target_col]
 
-        df.loc[df["ignore_from_link"], f"filtered_{target_col}"] = np.nan
+        df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
 
-        default_columns = {**default_columns, "target": f"filtered_{target_col}"}
+        default_columns = {**default_columns, "target": "filtered_target"}
 
     link_arguments = (
         dict(
@@ -334,16 +304,16 @@ def wrap_calculate_imputation_link(
 
     if "ignore_from_link" in df.columns:
 
-        df[f"filtered_{target_col}"] = df[target_col]
-        df.loc[df["ignore_from_link"], f"filtered_{target_col}"] = np.nan
+        df["filtered_target"] = df[target_col]
+        df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
 
-        default_columns = {**default_columns, "target": f"filtered_{target_col}"}
-        target_col = f"filtered_{target_col}"
+        default_columns = {**default_columns, "target": "filtered_target"}
+        # target_col = f"filtered_{target_col}"
     link_arguments = (
         dict(
             **default_columns,
             **{
-                "match_col": f"f_match_{target_col}",
+                "match_col": "f_match",
                 "predictive_variable": "f_predictive_" + target_col,
                 "link_col": "f_link_" + target_col,
             },
@@ -351,7 +321,7 @@ def wrap_calculate_imputation_link(
         dict(
             **default_columns,
             **{
-                "match_col": f"b_match_{target_col}",
+                "match_col": "b_match",
                 "predictive_variable": "b_predictive_" + target_col,
                 "link_col": "b_link_" + target_col,
             },
@@ -412,38 +382,3 @@ def wrap_get_cumulative_links(
 
     return df
 
-
-def count_impute_matches(
-    df: pd.DataFrame, **default_columns: Dict[str, str]
-) -> pd.DataFrame:
-    """Wrapper function to get counts of flagged matched pairs.
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        Original dataframe.
-    **default_columns : Dict[str, str]
-        The column names which were passed to ratio of means function.
-    Returns
-    -------
-    df : pd.DataFrame
-        Original dataframe with 3 new numeric columns.
-    """
-    target = default_columns["target"]
-
-    count_arguments = [
-        dict(**default_columns, **{"flag": f"f_match_{target}"}),
-        dict(**default_columns, **{"flag": f"b_match_{target}"}),
-        dict(**default_columns, **{"flag": "flag_construction_matches"}),
-    ]
-
-    # TODO: count_matches return type not very convenient to combine all counts
-    # TODO: if count_matches returns a series then easier to combine them
-
-    all_counts = pd.DataFrame(columns=default_columns.values())
-
-    for args in count_arguments:
-        counts = count_matches(df, **args)
-        all_counts = counts.merge(all_counts, how="left")
-
-    return all_counts
