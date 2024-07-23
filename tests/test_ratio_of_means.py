@@ -13,10 +13,10 @@ scenarios = [
     # "03_R_R_FI",
     # "04_R_R_FI_FI",
     # "05_R_R_FI_FI_FI_year_span",
-    # "06_BI_BI_R",
-    # "07_BI_BI_R_FI_FI_R_FI",
-    # "08_R_R_R",  # dtype issue
-    # "09_R_NS_C",
+    "06_BI_BI_R",
+    "07_BI_BI_R_FI_FI_R_FI",
+    "08_R_R_R",  # dtype issue
+    "09_R_NS_C",
     # "10_C_FI_NS_R",
     # "11_R_R_FI-BI_R_R",
     # "12_C_FI_FI_FI_FI",
@@ -83,7 +83,6 @@ class TestRatioOfMeans:
                 strata="group",
                 auxiliary="other",
                 filters=filter_df,
-                # HERE ####
                 imputation_links={
                     "forward": "f_link_question",
                     "backward": "b_link_question",
