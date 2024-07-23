@@ -43,7 +43,7 @@ def get_cumulative_links(
         dataframe with imputation_group and
         cumulative_forward/backward_imputation_link column
     """
-
+    print(dataframe.columns)
     dataframe.sort_values([strata, reference, period], inplace=True)
     dataframe["missing_value"] = np.where(dataframe[target].isnull(), True, False)
 

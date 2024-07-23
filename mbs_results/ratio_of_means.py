@@ -79,10 +79,12 @@ def ratio_of_means(
     if filters is not None:
 
         df = flag_rows_to_ignore(df, filters)
+        # target = f"filtered_{default_columns['target']}"
+        # default_columns = {**default_columns, **{"target": f"filtered_{target_col}"}}
 
     if all(
         links in imputation_links.values()
-        for links in ["f_link_question", "b_link_question", "construction_link"]
+        for links in [f"f_link_{target}", f"b_link_{target}", "construction_link"]
     ):
 
         df = df.rename(columns=imputation_links).pipe(
@@ -90,7 +92,7 @@ def ratio_of_means(
         )
 
     else:
-
+        print("else: ",default_columns)
         df = (
             df.pipe(wrap_flag_matched_pairs, **default_columns)
             .pipe(wrap_shift_by_strata_period, **default_columns)
@@ -192,12 +194,14 @@ def wrap_flag_matched_pairs(
         Original dataframe with 4 bool columns, column names are
         forward_or_backward keyword and target column name to distinguish them
     """
+    print("wrap flag", default_columns["target"])
 
     if "ignore_from_link" in df.columns:
 
-        df["filtered_target"] = df[default_columns["target"]]
-        df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
-        default_columns = {**default_columns, "target": "filtered_target"}
+        target = default_columns["target"]
+        df[f"filtered_{target}"] = df[default_columns["target"]]
+        df.loc[df["ignore_from_link"], f"filtered_{target}"] = np.nan
+        default_columns = {**default_columns, "target": f"filtered_{target}"}
 
     flag_arguments = [
         dict(**default_columns, **{"forward_or_backward": "f"}),
@@ -209,6 +213,7 @@ def wrap_flag_matched_pairs(
         df = flag_matched_pair(df, **args)
 
     df = flag_construction_matches(df, **default_columns)
+    print("wrap flag", default_columns["target"])
 
     return df
 
@@ -273,11 +278,11 @@ def wrap_shift_by_strata_period(
 
     if "ignore_from_link" in df.columns:
 
-        df["filtered_target"] = df[target_col]
+        df[f"filtered_{target_col}"] = df[target_col]
 
-        df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
+        df.loc[df["ignore_from_link"], f"filtered_{target_col}"] = np.nan
 
-        default_columns = {**default_columns, "target": "filtered_target"}
+        default_columns = {**default_columns, "target": f"filtered_{target_col}"}
 
     link_arguments = (
         dict(
@@ -325,14 +330,15 @@ def wrap_calculate_imputation_link(
         imputation links.
     """
     target_col = default_columns["target"]
+    print("wrap link", default_columns["target"])
 
     if "ignore_from_link" in df.columns:
 
-        df["filtered_target"] = df[target_col]
-        df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
+        df[f"filtered_{target_col}"] = df[target_col]
+        df.loc[df["ignore_from_link"], f"filtered_{target_col}"] = np.nan
 
-        default_columns = {**default_columns, "target": "filtered_target"}
-
+        default_columns = {**default_columns, "target": f"filtered_{target_col}"}
+        target_col = f"filtered_{target_col}"
     link_arguments = (
         dict(
             **default_columns,
@@ -386,6 +392,8 @@ def wrap_get_cumulative_links(
         need imputing.
     """
     target_col = default_columns["target"]
+    # if f"filtered_{target_col}" in df.columns:
+    #     target_col = f"filtered_{target_col}"
 
     cum_links_arguments = (
         dict(
