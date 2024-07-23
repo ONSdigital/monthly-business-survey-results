@@ -11,7 +11,7 @@ def create_and_merge_imputation_values(
     auxiliary,
     construction_link,
     imputation_types=("c", "fir", "bir", "fic"),
-    **kwargs
+    **kwargs,
 ):
     """
     Loop through different imputation types and merge the results according
@@ -54,8 +54,7 @@ def create_and_merge_imputation_values(
         dataframe with imputation values defined by the imputation marker
     """
 
-    # constructed has to come first to use the result for forward impute from contructed
-    print(target)
+    # constructed has to come first to use the result for forward impute from constructed
     imputation_config = {
         "c": {
             "intermediate_column": "constructed",
@@ -143,21 +142,11 @@ def create_impute(df, group, imputation_spec):
     pandas.DataFrame
         dataframe with an added imputation column defined by the imputation_spec
     """
-    # if f"filtered_question" in df.columns and imputation_spec["link_column"] != "construction_link":
-    #     # target_col = f"filtered_{target_col}"
-
-    #     print(imputation_spec["link_column"])
-    #     # link_column = imputation_spec["link_column"][0:18] + "filtered_question"
-    # else: 
-    link_column = imputation_spec["link_column"]
-
-
 
     column_name = imputation_spec["intermediate_column"]
     fill_column = imputation_spec["fill_column"]
     fill_method = imputation_spec["fill_method"]
-    # link_column = imputation_spec["link_column"]
-    print(link_column,df.columns)
+    link_column = imputation_spec["link_column"]
     df[column_name] = (
         df.groupby(group)[fill_column].fillna(method=fill_method) * df[link_column]
     )
