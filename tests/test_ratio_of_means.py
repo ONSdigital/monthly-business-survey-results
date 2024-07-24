@@ -43,6 +43,16 @@ scenarios = [
     "33_multi_variable_C_BI_R",
     "34_multi_variable_C_BI_R_filtered",
     "35_BI_BI_R_FI_FI_R_FI_alternating_filtered",
+    "rom_test_data_case_mc_1",
+    "rom_test_data_case_mc_2",
+    "rom_test_data_case_mc_3",
+    "rom_test_data_case_mc_4",
+    "rom_test_data_case_mc_5",
+    "rom_test_data_case_mc_6",
+    "rom_test_data_case_mc_7",
+    "rom_test_data_case_mc_8",
+    "rom_test_data_case_mc_9",
+    "rom_test_data_case_mc_10",
 ]
 
 
@@ -100,8 +110,8 @@ class TestRatioOfMeans:
         )
         actual_output = actual_output.rename(
             columns={
-                "default_link_b_match": "default_backward",
-                "default_link_f_match": "default_forward",
+                "default_link_b_match_question": "default_backward",
+                "default_link_f_match_question": "default_forward",
                 "default_link_flag_construction_matches": "default_construction",
                 "flag_construction_matches_pair_count": "flag_match_pair_count",
             }
@@ -117,8 +127,8 @@ class TestRatioOfMeans:
                 "forward": "f_link_question",
                 "backward": "b_link_question",
                 "construction": "construction_link",
-                "count_forward": "f_match_pair_count",
-                "count_backward": "b_match_pair_count",
+                "count_forward": "f_match_question_pair_count",
+                "count_backward": "b_match_question_pair_count",
                 "count_construction": "flag_match_pair_count",
             }
         )
@@ -138,16 +148,11 @@ class TestRatioOfMeans:
                 "b_match_filtered_question",
                 "b_predictive_filtered_question",
                 "b_link_filtered_question",
-                "f_match_filtered_question",
                 "f_predictive_filtered_question",
                 "f_link_filtered_question",
                 "filtered_question",
                 "cumulative_b_link_filtered_question",
                 "cumulative_f_link_filtered_question",
-                "default_link_b_match_question",
-                "f_match_question_pair_count",
-                "b_match_question_pair_count",
-                "default_link_f_match_question",
             ],
             errors="ignore",
             inplace=True,
@@ -157,7 +162,7 @@ class TestRatioOfMeans:
             errors="ignore",
             inplace=True,
         )
-        print(expected_output.columns, actual_output.columns)
+        print(expected_output.columns)
         expected_output = expected_output[actual_output.columns]
 
         actual_output = actual_output.sort_values(by=["identifier", "date"])
@@ -170,5 +175,7 @@ class TestRatioOfMeans:
             "imputation_flags_question"
         ].str.lower()
         expected_output = expected_output.replace({"bi": "bir"})
+
+        print(expected_output.columns)
 
         assert_frame_equal(actual_output, expected_output, check_dtype=False)
