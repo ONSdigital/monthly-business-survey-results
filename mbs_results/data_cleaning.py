@@ -203,7 +203,7 @@ def run_live_or_frozen(
     error_marker : str
         Column name with error values.
     state : str, optional
-        Function config parameter. The default is "live". "Live" state won't do
+        Function config parameter. The default is "live". "live" state won't do
         anyting, "frozen" will convert to null the error_values within error_marker
     error_values : list[str], optional
         Values to ignore. The default is ['E', 'W'].
