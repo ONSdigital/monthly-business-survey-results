@@ -10,7 +10,7 @@ def calculate_imputation_link(
     target: str,
     predictive_variable: str,
     link_col: str,
-    **kwargs
+    **kwargs,
 ) -> pd.DataFrame:
     """
     Calculate link between target and predictive_variable by strata,
@@ -43,12 +43,16 @@ def calculate_imputation_link(
     """
 
     df_intermediate = df.copy()
-    # print(target, f"filtered_{target}")
-    if f"filtered_{target}" in df.columns:
-        # target = f"filtered_{target}"
-        print("if")
-    print(predictive_variable,target,match_col)
-    print(df.columns)
+    if "ignore_from_link" in df.columns:
+        # Quick and dirty work around when dealing with filtered cases
+        df_intermediate.rename(
+            columns={
+                f"f_match_filtered_{target}": f"f_match_{target}",
+                f"b_match_filtered_{target}": f"b_match_{target}",
+            },
+            inplace=True,
+        )
+
     df_intermediate[target] = df_intermediate[target] * df_intermediate[match_col]
 
     df_intermediate[predictive_variable] = (

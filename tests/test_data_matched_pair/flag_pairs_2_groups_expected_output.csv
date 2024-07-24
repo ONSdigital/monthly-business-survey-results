@@ -1,4 +1,4 @@
-reference,strata,period,target_variable,f_match,b_match
+reference,strata,period,target_variable,f_match_target_variable,b_match_target_variable
 1,101,202401,237,False,True
 1,101,202402,281,True,False
 1,101,202403,,False,False

@@ -253,7 +253,6 @@ if __name__ == "__main__":
         ]
     ]
 
-    # print(df)
     target = "target_variable"
 
     if f"{target}_man" in df.columns:
@@ -270,13 +269,3 @@ if __name__ == "__main__":
         auxiliary="auxiliary",
         predictive_auxiliary="f_match_auxiliary",
     )
-
-    print(temp)
-    # df_output = generate_imputation_marker(df=df_input,
-    #     target="target_variable",
-    #     period="period",
-    #     reference="reference",
-    #     strata="strata",
-    #     auxiliary="auxiliary",
-    #     predictive_auxiliary="f_match_auxiliary",)
-    # print(df_output.iloc[0:10, :])

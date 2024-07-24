@@ -7,7 +7,7 @@ from mbs_results.apply_imputation_link import create_and_merge_imputation_values
 from mbs_results.calculate_imputation_link import calculate_imputation_link
 from mbs_results.construction_matches import flag_construction_matches
 from mbs_results.cumulative_imputation_links import get_cumulative_links
-from mbs_results.flag_and_count_matched_pairs import  flag_matched_pair
+from mbs_results.flag_and_count_matched_pairs import flag_matched_pair
 from mbs_results.imputation_flags import generate_imputation_marker
 from mbs_results.link_filter import flag_rows_to_ignore
 from mbs_results.predictive_variable import shift_by_strata_period
@@ -86,27 +86,25 @@ def ratio_of_means(
         links in imputation_links.values()
         for links in ["f_link_question", "b_link_question", "construction_link"]
     ):
-        print("triggered")
         df = df.rename(columns=imputation_links).pipe(
             wrap_shift_by_strata_period, **default_columns
         )
 
     else:
-        print("else: ",default_columns)
         df = (
             df.pipe(wrap_flag_matched_pairs, **default_columns)
             .pipe(wrap_shift_by_strata_period, **default_columns)
             .pipe(wrap_calculate_imputation_link, **default_columns)
         )
-    
+
     if f"{target}_man" in df.columns:
         # Manual Construction
-        imputation_types = ("c", "mc", "fir", "bir","fimc" ,"fic")
+        imputation_types = ("c", "mc", "fir", "bir", "fimc", "fic")
         df["man_link"] = 1
 
     else:
-        imputation_types = ("c", "fir", "bir" ,"fic")
-        
+        imputation_types = ("c", "fir", "bir", "fic")
+
     df = (
         df  # .pipe(
         #     create_impute_flags,
@@ -138,7 +136,7 @@ def ratio_of_means(
     df.drop(
         columns=["f_match_question", "f_predictive_auxiliary", "b_match_question"],
         inplace=True,
-        errors='ignore'
+        errors="ignore",
     )
     df = df.reset_index(drop=True)
 
@@ -166,7 +164,7 @@ def ratio_of_means(
             "b_predictive_" + target,
             "ignore_from_link",
             "filtered_target",
-            "man_link"
+            "man_link",
         ],
         axis=1,
         errors="ignore",
@@ -196,14 +194,13 @@ def wrap_flag_matched_pairs(
         Original dataframe with 4 bool columns, column names are
         forward_or_backward keyword and target column name to distinguish them
     """
-    print("wrap flag", default_columns["target"])
 
     if "ignore_from_link" in df.columns:
 
-        # target = default_columns["target"]
-        df["filtered_target"] = df[default_columns["target"]]
-        df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
-        default_columns = {**default_columns, "target": "filtered_target"}
+        target = default_columns["target"]
+        df[f"filtered_{target}"] = df[default_columns["target"]]
+        df.loc[df["ignore_from_link"], f"filtered_{target}"] = np.nan
+        default_columns = {**default_columns, "target": f"filtered_{target}"}
 
     flag_arguments = [
         dict(**default_columns, **{"forward_or_backward": "f"}),
@@ -217,7 +214,6 @@ def wrap_flag_matched_pairs(
     df = flag_construction_matches(df, **default_columns)
 
     return df
-
 
 
 def wrap_shift_by_strata_period(
@@ -300,20 +296,19 @@ def wrap_calculate_imputation_link(
         imputation links.
     """
     target_col = default_columns["target"]
-    print("wrap link", default_columns["target"])
 
     if "ignore_from_link" in df.columns:
 
         df["filtered_target"] = df[target_col]
         df.loc[df["ignore_from_link"], "filtered_target"] = np.nan
 
-        default_columns = {**default_columns, "target": "filtered_target"}
+        # default_columns = {**default_columns, "target": "filtered_target"}
         # target_col = f"filtered_{target_col}"
     link_arguments = (
         dict(
             **default_columns,
             **{
-                "match_col": "f_match",
+                "match_col": f"f_match_{target_col}",
                 "predictive_variable": "f_predictive_" + target_col,
                 "link_col": "f_link_" + target_col,
             },
@@ -321,7 +316,7 @@ def wrap_calculate_imputation_link(
         dict(
             **default_columns,
             **{
-                "match_col": "b_match",
+                "match_col": f"b_match_{target_col}",
                 "predictive_variable": "b_predictive_" + target_col,
                 "link_col": "b_link_" + target_col,
             },
@@ -381,4 +376,3 @@ def wrap_get_cumulative_links(
         df = get_cumulative_links(df, **args)
 
     return df
-
