@@ -69,11 +69,6 @@ class TestRatioOfMeans:
         input_data["date"] = pd.to_datetime(input_data["date"], format="%Y%m")
         expected_output["date"] = pd.to_datetime(expected_output["date"], format="%Y%m")
 
-        # not yet implemented remove this when defaults are ready
-        expected_output = expected_output.drop(
-            columns=["default_forward", "default_backward", "default_construction"]
-        )
-
         if base_file_name in ["19_link_columns", "28_link_columns_filtered"]:
             actual_output = ratio_of_means(
                 input_data,
@@ -100,9 +95,17 @@ class TestRatioOfMeans:
                 filters=filter_df,
             )
 
-        # imputed_value is in a seperate column, remove this if otherwise
+        # imputed_value is in a separate column, remove this if otherwise
         actual_output["question"] = actual_output[["question", "imputed_value"]].agg(
             sum, axis=1
+        )
+        actual_output = actual_output.rename(
+            columns={
+                "default_link_b_match": "default_backward",
+                "default_link_f_match": "default_forward",
+                "default_link_flag_construction_matches": "default_construction",
+                "flag_construction_matches_pair_count": "flag_match_pair_count",
+            }
         )
 
         actual_output = actual_output.drop(columns=["imputed_value", "other"])
@@ -115,9 +118,9 @@ class TestRatioOfMeans:
                 "forward": "f_link_question",
                 "backward": "b_link_question",
                 "construction": "construction_link",
-                "count_forward": "f_matched_pair_count",
-                "count_backward": "b_matched_pair_count",
-                "count_construction": "flag_matched_pair_count",
+                "count_forward": "f_match_pair_count",
+                "count_backward": "b_match_pair_count",
+                "count_construction": "flag_match_pair_count",
             }
         )
 
