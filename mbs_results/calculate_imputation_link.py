@@ -75,7 +75,14 @@ def calculate_imputation_link(
     df[link_col] = numerator / denominator
 
     df = calculate_default_imputation_links(
-        df, period, strata, match_col, predictive_variable, link_col, denominator_col
+        df,
+        target,
+        period,
+        strata,
+        match_col,
+        predictive_variable,
+        link_col,
+        denominator_col,
     )
 
     return df
@@ -83,6 +90,7 @@ def calculate_imputation_link(
 
 def calculate_default_imputation_links(
     df: pd.DataFrame,
+    target: str,
     period: str,
     strata: str,
     match_col: str,
@@ -140,6 +148,15 @@ def calculate_default_imputation_links(
     # Re adding count matches column as this is needed for default cases
     # This count is just the filtered target counts if issues come up.
     # (If there is a filter applied to this data)
+    if "ignore_from_link" in df.columns and match_col != "flag_construction_matches":
+        df.rename(
+            columns={
+                f"f_match_filtered_{target}": f"f_match_{target}",
+                f"b_match_filtered_{target}": f"b_match_{target}",
+            },
+            inplace=True,
+        )
+        print(match_col, df.columns)
 
     number_matches = count_matches(df, match_col, period, strata)
     count_suffix = "_pair_count"

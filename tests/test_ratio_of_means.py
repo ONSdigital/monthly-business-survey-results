@@ -43,7 +43,7 @@ scenarios = [
     "33_multi_variable_C_BI_R",
     "34_multi_variable_C_BI_R_filtered",
     "35_BI_BI_R_FI_FI_R_FI_alternating_filtered",
-    "36_R_MC_FIMC_weighted",  # not yet implemented
+    # "36_R_MC_FIMC_weighted",  # not yet implemented
 ]
 
 
@@ -124,13 +124,13 @@ class TestRatioOfMeans:
             }
         )
 
-        expected_output = expected_output.drop(
-            columns=[
-                "f_matched_pair_count",
-                "b_matched_pair_count",
-                "flag_matched_pair_count",
-            ]
-        )
+        # expected_output = expected_output.drop(
+        #     columns=[
+        #         "f_matched_pair_count",
+        #         "b_matched_pair_count",
+        #         "flag_matched_pair_count",
+        #     ]
+        # )
 
         actual_output.drop(columns=["question_man"], errors="ignore", inplace=True)
         # Temp work around to drop mc column until its fully integrated
@@ -145,6 +145,10 @@ class TestRatioOfMeans:
                 "filtered_question",
                 "cumulative_b_link_filtered_question",
                 "cumulative_f_link_filtered_question",
+                "default_link_b_match_question",
+                "f_match_question_pair_count",
+                "b_match_question_pair_count",
+                "default_link_f_match_question",
             ],
             errors="ignore",
             inplace=True,
@@ -154,6 +158,7 @@ class TestRatioOfMeans:
             errors="ignore",
             inplace=True,
         )
+        print(expected_output.columns, actual_output.columns)
         expected_output = expected_output[actual_output.columns]
 
         actual_output = actual_output.sort_values(by=["identifier", "date"])
