@@ -13,168 +13,6 @@ from mbs_results.link_filter import flag_rows_to_ignore
 from mbs_results.predictive_variable import shift_by_strata_period
 
 
-def ratio_of_means(
-    df: pd.DataFrame,
-    target: str,
-    period: str,
-    reference: str,
-    strata: str,
-    auxiliary: str,
-    filters: pd.DataFrame = None,
-    imputation_links: Dict[str, str] = {},
-    **kwargs,
-) -> pd.DataFrame:
-    """
-    Imputes for each non-responding contributor a single numeric target
-    variable within the dataset for multiple periods simultaneously. It uses
-    the relationship between the target variable of interest and a predictive
-    value and/or auxiliary variable to inform the imputed value. The method
-    can apply forward, backward, construction or forward from construction
-    imputation. The type of imputation used will vary for each non-respondent
-    in each period depending on whether data is available in the predictive
-    period
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-         Original dataframe.
-    target : str
-        Column name of values to be imputed.
-    period : str
-        Column name containing datetime information.
-    reference : str
-        Column name of unique Identifier.
-    strata : str
-        Column name containing strata information (sic).
-    auxiliary : str
-        Column name containing auxiliary information (sic).
-    filters : pd.DataFrame, optional
-        Dataframe with values to exclude from imputation method.
-    imputation_links : dict, optional
-        Dictionary of column name keys matching to their imputation link value
-        ("f_link_question", "b_link_question", "construction_link").
-    kwargs : mapping, optional
-        A dictionary of keyword arguments passed into func.
-
-    Returns
-    -------
-    pd.DataFrame
-        Original dataframe with imputed values in the target column, and with
-        intermediate columns which were used for the imputation method.
-    """
-
-    # Saving args to dict, so we can pass same attributes to multiple functions
-    # These arguments are used from the majority of functions
-
-    # TODO: Consider more elegant solution, or define function arguments explicitly
-
-    default_columns = {
-        "target": target,
-        "period": period,
-        "reference": reference,
-        "strata": strata,
-        "auxiliary": auxiliary,
-    }
-
-    if filters is not None:
-
-        df = flag_rows_to_ignore(df, filters)
-        # target = f"filtered_{default_columns['target']}"
-        # default_columns = {**default_columns, **{"target": f"filtered_{target_col}"}}
-
-    if all(
-        links in imputation_links.values()
-        for links in ["f_link_question", "b_link_question", "construction_link"]
-    ):
-        df = df.rename(columns=imputation_links).pipe(
-            wrap_shift_by_strata_period, **default_columns
-        )
-
-    else:
-        df = (
-            df.pipe(wrap_flag_matched_pairs, **default_columns)
-            .pipe(wrap_shift_by_strata_period, **default_columns)
-            .pipe(wrap_calculate_imputation_link, **default_columns)
-        )
-
-    if f"{target}_man" in df.columns:
-        # Manual Construction
-        imputation_types = ("c", "mc", "fir", "bir", "fimc", "fic")
-        df["man_link"] = 1
-
-    else:
-        imputation_types = ("c", "fir", "bir", "fic")
-
-    df = (
-        df  # .pipe(
-        #     create_impute_flags,
-        #     **default_columns,
-        #     predictive_auxiliary="f_predictive_auxiliary"
-        # )
-        # TODO: How we gonna set defaults?
-        .fillna(
-            {"f_link_question": 1.0, "b_link_question": 1.0, "construction_link": 1.0}
-        )
-        .pipe(generate_imputation_marker, **default_columns)
-        .pipe(wrap_get_cumulative_links, **default_columns)
-        .pipe(
-            create_and_merge_imputation_values,
-            **default_columns,
-            imputation_class=strata,
-            marker=f"imputation_flags_{target}",
-            combined_imputation="imputed_value",
-            cumulative_forward_link="cumulative_f_link_" + target,
-            cumulative_backward_link="cumulative_b_link_" + target,
-            construction_link="construction_link",
-            imputation_types=imputation_types,
-        )
-    )
-
-    # TODO: Reset index needed because of sorting, perhaps reset index
-    #       when sorting directly in the low level functions or consider
-    #       sorting here before chaining
-    df.drop(
-        columns=["f_match_question", "f_predictive_auxiliary", "b_match_question"],
-        inplace=True,
-        errors="ignore",
-    )
-    df = df.reset_index(drop=True)
-
-    # TODO: Relates to ASAP-415, comment from pull request:
-    #       You could extact this into its own function which can be called. It might
-    #       be nice to switch this on and off incase we need to verify the methods or
-    #       methogology needs this. Also potential argument of selecting the needed
-    #       columns vs dropping un-needed, guess whichever is a shorter list
-
-    df = df.drop(
-        columns=[
-            "f_match",
-            "b_match",
-            "flag_construction_matches",
-            "r_flag",
-            "fir_flag",
-            "bir_flag",
-            "c_flag",
-            "fic_flag",
-            "missing_value",
-            "imputation_group",
-            "cumulative_f_link_" + target,
-            "cumulative_b_link_" + target,
-            "f_predictive_" + target,
-            "b_predictive_" + target,
-            "ignore_from_link",
-            "filtered_target",
-            "man_link",
-        ],
-        axis=1,
-        errors="ignore",
-    )
-
-    # TODO: Missing extra columns, default values and if filter was applied, all bool
-
-    return df
-
-
 def wrap_flag_matched_pairs(
     df: pd.DataFrame, **default_columns: Dict[str, str]
 ) -> pd.DataFrame:
@@ -374,5 +212,167 @@ def wrap_get_cumulative_links(
     for args in cum_links_arguments:
 
         df = get_cumulative_links(df, **args)
+
+    return df
+
+
+def ratio_of_means(
+    df: pd.DataFrame,
+    target: str,
+    period: str,
+    reference: str,
+    strata: str,
+    auxiliary: str,
+    filters: pd.DataFrame = None,
+    imputation_links: Dict[str, str] = {},
+    **kwargs,
+) -> pd.DataFrame:
+    """
+    Imputes for each non-responding contributor a single numeric target
+    variable within the dataset for multiple periods simultaneously. It uses
+    the relationship between the target variable of interest and a predictive
+    value and/or auxiliary variable to inform the imputed value. The method
+    can apply forward, backward, construction or forward from construction
+    imputation. The type of imputation used will vary for each non-respondent
+    in each period depending on whether data is available in the predictive
+    period
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+         Original dataframe.
+    target : str
+        Column name of values to be imputed.
+    period : str
+        Column name containing datetime information.
+    reference : str
+        Column name of unique Identifier.
+    strata : str
+        Column name containing strata information (sic).
+    auxiliary : str
+        Column name containing auxiliary information (sic).
+    filters : pd.DataFrame, optional
+        Dataframe with values to exclude from imputation method.
+    imputation_links : dict, optional
+        Dictionary of column name keys matching to their imputation link value
+        ("f_link_question", "b_link_question", "construction_link").
+    kwargs : mapping, optional
+        A dictionary of keyword arguments passed into func.
+
+    Returns
+    -------
+    pd.DataFrame
+        Original dataframe with imputed values in the target column, and with
+        intermediate columns which were used for the imputation method.
+    """
+
+    # Saving args to dict, so we can pass same attributes to multiple functions
+    # These arguments are used from the majority of functions
+
+    # TODO: Consider more elegant solution, or define function arguments explicitly
+
+    default_columns = {
+        "target": target,
+        "period": period,
+        "reference": reference,
+        "strata": strata,
+        "auxiliary": auxiliary,
+    }
+
+    if filters is not None:
+
+        df = flag_rows_to_ignore(df, filters)
+        # target = f"filtered_{default_columns['target']}"
+        # default_columns = {**default_columns, **{"target": f"filtered_{target_col}"}}
+
+    if all(
+        links in imputation_links.values()
+        for links in ["f_link_question", "b_link_question", "construction_link"]
+    ):
+        df = df.rename(columns=imputation_links).pipe(
+            wrap_shift_by_strata_period, **default_columns
+        )
+
+    else:
+        df = (
+            df.pipe(wrap_flag_matched_pairs, **default_columns)
+            .pipe(wrap_shift_by_strata_period, **default_columns)
+            .pipe(wrap_calculate_imputation_link, **default_columns)
+        )
+
+    if f"{target}_man" in df.columns:
+        # Manual Construction
+        imputation_types = ("c", "mc", "fir", "bir", "fimc", "fic")
+        df["man_link"] = 1
+
+    else:
+        imputation_types = ("c", "fir", "bir", "fic")
+
+    df = (
+        df  # .pipe(
+        #     create_impute_flags,
+        #     **default_columns,
+        #     predictive_auxiliary="f_predictive_auxiliary"
+        # )
+        # TODO: How we gonna set defaults?
+        .fillna(
+            {"f_link_question": 1.0, "b_link_question": 1.0, "construction_link": 1.0}
+        )
+        .pipe(generate_imputation_marker, **default_columns)
+        .pipe(wrap_get_cumulative_links, **default_columns)
+        .pipe(
+            create_and_merge_imputation_values,
+            **default_columns,
+            imputation_class=strata,
+            marker=f"imputation_flags_{target}",
+            combined_imputation="imputed_value",
+            cumulative_forward_link="cumulative_f_link_" + target,
+            cumulative_backward_link="cumulative_b_link_" + target,
+            construction_link="construction_link",
+            imputation_types=imputation_types,
+        )
+    )
+
+    # TODO: Reset index needed because of sorting, perhaps reset index
+    #       when sorting directly in the low level functions or consider
+    #       sorting here before chaining
+    df.drop(
+        columns=["f_match_question", "f_predictive_auxiliary", "b_match_question"],
+        inplace=True,
+        errors="ignore",
+    )
+    df = df.reset_index(drop=True)
+
+    # TODO: Relates to ASAP-415, comment from pull request:
+    #       You could extact this into its own function which can be called. It might
+    #       be nice to switch this on and off incase we need to verify the methods or
+    #       methogology needs this. Also potential argument of selecting the needed
+    #       columns vs dropping un-needed, guess whichever is a shorter list
+
+    df = df.drop(
+        columns=[
+            "f_match",
+            "b_match",
+            "flag_construction_matches",
+            "r_flag",
+            "fir_flag",
+            "bir_flag",
+            "c_flag",
+            "fic_flag",
+            "missing_value",
+            "imputation_group",
+            "cumulative_f_link_" + target,
+            "cumulative_b_link_" + target,
+            "f_predictive_" + target,
+            "b_predictive_" + target,
+            "ignore_from_link",
+            "filtered_target",
+            "man_link",
+        ],
+        axis=1,
+        errors="ignore",
+    )
+
+    # TODO: Missing extra columns, default values and if filter was applied, all bool
 
     return df
