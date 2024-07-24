@@ -54,7 +54,8 @@ def create_and_merge_imputation_values(
         dataframe with imputation values defined by the imputation marker
     """
 
-    # constructed has to come first to use the result for forward impute from constructed
+    # constructed has to come first to use the result for forward
+    # impute from constructed
     imputation_config = {
         "c": {
             "intermediate_column": "constructed",
