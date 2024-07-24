@@ -43,7 +43,6 @@ scenarios = [
     "33_multi_variable_C_BI_R",
     "34_multi_variable_C_BI_R_filtered",
     "35_BI_BI_R_FI_FI_R_FI_alternating_filtered",
-    # "36_R_MC_FIMC_weighted",  # not yet implemented
 ]
 
 
