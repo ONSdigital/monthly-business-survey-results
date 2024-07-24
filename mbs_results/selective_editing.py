@@ -68,10 +68,7 @@ def create_standardising_factor(
         standardising_factor=lambda x: x.groupby([domain, question_code]).transform(
             "sum"
         )["standardising_factor"]
-    )
-    previous_df["standardising_factor"] = previous_df["standardising_factor"].astype(
-        float
-    )
+    ).astype({"standardising_factor": "float"})
 
     output_df = previous_df[
         [

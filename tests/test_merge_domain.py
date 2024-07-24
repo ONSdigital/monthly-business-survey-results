@@ -31,7 +31,7 @@ class TestMergeDomain:
         actual_output = merge_domain(
             input_data,
             domain_mapping_test_data,
-            "SIC",
+            "sic",
             "classification",
         )
 

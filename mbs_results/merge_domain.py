@@ -4,8 +4,8 @@ import pandas as pd
 def merge_domain(
     input_df: pd.DataFrame,
     domain_mapping: pd.DataFrame,
-    SIC_input: str,
-    SIC_mapping: str,
+    sic_input: str,
+    sic_mapping: str,
 ) -> pd.DataFrame:
     """
     Returning a merged dataframe including SIC and domain from the domain mapping
@@ -17,9 +17,9 @@ def merge_domain(
         Dataframe containing reference, imp_class, period and SIC columns
     domain_mapping : pd.DataFrame
         Dataframe containing SIC and domain columns
-    SIC_input : str
+    sic_input : str
         name of column in input_df dataframe containing SIC variable
-    SIC_mapping : str
+    sic_mapping : str
         name of column in domain_mapping dataframe containing SIC variable
 
     Returns
@@ -30,7 +30,7 @@ def merge_domain(
     """
 
     merged_df = input_df.merge(
-        domain_mapping, how="left", left_on=SIC_input, right_on=SIC_mapping
+        domain_mapping, how="left", left_on=sic_input, right_on=sic_mapping
     )
 
-    return merged_df.drop(columns=SIC_mapping)
+    return merged_df.drop(columns=sic_mapping)
