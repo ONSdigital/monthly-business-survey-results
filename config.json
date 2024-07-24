@@ -17,5 +17,7 @@
                 "frozenemployees" : "int",
                 "frozenturnover" : "float",
                 "cellnumber" : "int"},
-    "temporarily_remove_cols": []
+    "temporarily_remove_cols": [],
+    "current_period" : 202401,
+    "previous_period" : 202312
 }
