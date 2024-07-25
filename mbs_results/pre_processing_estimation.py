@@ -6,13 +6,13 @@ from mbs_results.utils import read_colon_separated_file
 
 
 def get_estimation_data(
+    reference,
+    period,
     population_path,
     population_column_names,
     sample_path,
     sample_column_names,
     calibration_group_map,
-    period,
-    reference,
     cell_number,
     **config
 ):
@@ -46,8 +46,8 @@ def get_estimation_data(
         population frame containing period and sampled columns.
 
     """
-    population_files = glob("universe.*", root_dir=population_path)
-    sample_files = glob("finalsel.*", root_dir=sample_path)
+    population_files = glob(population_path + "universe.*")
+    sample_files = glob(sample_path + "finalsel.*")
 
     population_dfs = []
     for file in population_files:
@@ -109,10 +109,11 @@ def derive_estimation_variables(
         population frame containing sampled column
 
     """
-    population_frame.merge(calibration_group_map, on=[cell_number], how="left")
-    # TODO: check if cell_no is the strata or if it should be dropped
+    population_frame = population_frame.merge(
+        calibration_group_map, on=[cell_number], how="left"
+    )
 
-    sample = sample[[reference, period]]
+    sample = sample.copy()[[reference, period]]
     sample["sampled"] = 1
 
     return population_frame.merge(sample, on=[reference, period], how="left").fillna(
