@@ -46,8 +46,8 @@ def get_estimation_data(
         population frame containing period and sampled columns.
 
     """
-    population_files = glob(population_path + "universe.*")
-    sample_files = glob(sample_path + "finalsel.*")
+    population_files = glob(population_path + "universe*")
+    sample_files = glob(sample_path + "finalsel*")
 
     population_dfs = []
     for file in population_files:
