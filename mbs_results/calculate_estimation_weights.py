@@ -6,6 +6,7 @@ def calculate_design_weight(
     period: str,
     strata: str,
     sampled: str,
+    **config,
 ) -> pd.DataFrame:
     """
     Add column to dataframe containing design weights based on sampled flag
@@ -52,31 +53,32 @@ def calculate_calibration_factor(
     sampled: str,
     auxiliary: str,
     design_weight: str,
+    **config,
 ) -> pd.DataFrame:
     """
-     Add column to dataframe to calculate calibration factor
+    Add column to dataframe to calculate calibration factor
 
-     Parameters
-     ----------
-     dataframe : pd.DataFrame
-         data to be weighted
-     period : str
-         name of column in dataframe containing period variable
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        data to be weighted
+    period : str
+        name of column in dataframe containing period variable
     group: str
-         name of column in dataframe containing group level data
-         for separate ratio, use strata variable
-         for combined ratio, use calibration group level variable
-     sampled : str
-         name of column in dataframe containing sample flag
-     auxiliary : str
-         name of column in dataframe containing auxiliary variable
-     design_weight: str
-         name of column in dataframe containing design weight
+        name of column in dataframe containing group level data
+        for separate ratio, use strata variable
+        for combined ratio, use calibration group level variable
+    sampled : str
+        name of column in dataframe containing sample flag
+    auxiliary : str
+        name of column in dataframe containing auxiliary variable
+    design_weight: str
+        name of column in dataframe containing design weight
 
-     Returns
-     -------
-     pd.DataFrame
-         dataframe with new column `calibration_factor`
+    Returns
+    -------
+    pd.DataFrame
+        dataframe with new column `calibration_factor`
     """
 
     population_sums = dataframe.groupby([period, group])[auxiliary].sum()

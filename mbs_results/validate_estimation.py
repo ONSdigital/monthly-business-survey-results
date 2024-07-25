@@ -2,7 +2,11 @@ import pandas as pd
 
 
 def validate_estimation(
-    df: pd.DataFrame, design_weight: str, calibration_factor: str, auxiliary: str
+    df: pd.DataFrame,
+    design_weight: str,
+    calibration_factor: str,
+    auxiliary: str,
+    **config,
 ) -> None:
     """
     Validation for the estimation, including:
