@@ -38,9 +38,11 @@ def apply_estimation(df, reference, period, **config):
     """
     population_frame = get_estimation_data(reference, period, **config)
 
+    population_frame = calculate_design_weight(population_frame, period, **config)
+    population_frame = calculate_calibration_factor(population_frame, period, **config)
+
+    validate_estimation(population_frame, **config)
+
     df = df.merge(population_frame, how="left", on=[reference, period])
-    df = calculate_design_weight(df, period, **config)
-    df = calculate_calibration_factor(df, period, **config)
-    validate_estimation(df, **config)
 
     return df
