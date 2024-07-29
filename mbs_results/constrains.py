@@ -88,3 +88,78 @@ def sum_sub_df(df: pd.DataFrame, derive_from: List[int]) -> pd.DataFrame:
     )
 
     return sums.assign(constrain_marker=f"sum{derive_from}").reset_index()
+
+def constrain(
+        df: pd.DataFrame,
+        period: str,
+        reference: str,
+        target: str,
+        target_imputed: str,
+        question_no: str,
+        spp_form_id: str
+) -> pd.DataFrame:
+    """
+    Creates new rows with derived values based on form id and adds a relevant
+    marker to constain_marker column (is created if not existing).
+        
+        For form id 13, question number 40 is created by summing 46,47.
+        For form id 14, question number 40 is created by summing 42,43.
+        For form id 15, question number 46 is created from 40.
+        For form id 16, question number 42 is created from 40.
+    
+    In addition for all form types (when question number is available):
+        
+        Replaces 49 with 40 when 49 > 40.
+        Replaces 90 with 40 when 49 >= 40.
+        
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe to apply the constrains.
+    period : str
+        Column name containing date information.
+    reference : str
+        Column name containing reference.
+    target : str
+        Column name containing target value.
+    target_imputed : str
+        Column name containing imputed target value.
+    question_no : str
+        Column name containing question number.
+    spp_form_id : str
+        Column name containing form id.
+    
+    Returns
+    -------
+    final_constrained : pd.DataFrame
+        Original dataframe with constrains.
+    """
+    
+    derive_map = {    
+     13: {"derive":40,"from":[46,47]},
+     14: {"derive":40,"from":[42,43]},
+     15: {"derive":46,"from":[40]},
+     16: {"derive":42,"from":[40]},
+     }
+    
+    # pre_derive_df has dimenesions as index, columns the values to be used when derived
+    pre_derive_df = df.set_index([spp_form_id,question_no,period,reference],verify_integrity=False)
+    pre_derive_df = pre_derive_df[[target,target_imputed]]
+    
+    derived_values = pd.concat([
+        sum_sub_df(
+            pre_derive_df.loc[form_type],
+            derives["from"])
+        .assign(question_no=derives['derive'])
+        for form_type, derives in derive_map.items()])
+
+    df.set_index([question_no,period,reference],inplace=True)
+
+    replace_values_index_based(df,target_imputed,49,'>',40)
+    replace_values_index_based(df,target_imputed,90,'>=',40)
+    
+    df.reset_index(inplace=True)
+
+    final_constrained = pd.concat([df,derived_values])
+    
+    return final_constrained
