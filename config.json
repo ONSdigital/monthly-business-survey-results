@@ -17,5 +17,10 @@
                 "frozenemployees" : "int",
                 "frozenturnover" : "float",
                 "cellnumber" : "int"},
-    "temporarily_remove_cols": []
+    "temporarily_remove_cols": [],
+    "non_sampled_strata": [
+        "5141", "5142", "5143",
+        "5371", "5372", "5373",
+        "5661", "5662", "5663"
+    ]
 }

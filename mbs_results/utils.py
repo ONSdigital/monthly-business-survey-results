@@ -1,5 +1,8 @@
+import fnmatch
 import re
 from io import BytesIO
+from os import listdir
+from os.path import isfile, join
 from typing import List
 
 import pandas as pd
@@ -47,3 +50,25 @@ def read_colon_separated_file(
         df[period] = int(date_string[0])
 
     return df
+
+
+def get_qv_df(filepath, qv_pattern="qv*.csv"):
+    """
+    Get required variables from qv data files
+
+    Parameters
+    ----------
+    filepath : str
+        location of cp and qv data files
+    qv_pattern : str
+        pattern for qv filenames
+        defaults to "qv*.csv"
+    """
+    filenames = [
+        filename for filename in listdir(filepath) if isfile(join(filepath, filename))
+    ]
+    qv_filenames = fnmatch.filter(filenames, qv_pattern)
+    df_list = [pd.read_csv(filepath + filename) for filename in qv_filenames]
+    df = pd.concat(df_list, ignore_index=True)
+
+    return df[["period", "reference", "question_no", "adjusted_value"]]
