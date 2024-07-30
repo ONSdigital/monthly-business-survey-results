@@ -61,7 +61,7 @@ pipeline {
                 unstash name: 'Checkout'
                 colourText('info', "Building package")
                 sh 'pip3 install wheel==0.29.0'
-                sh 'python3 setup.py build bdist_wheel'
+                sh 'python -m build'
                 stash name: "Build", useDefaultExcludes: false
             }
         }

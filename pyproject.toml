@@ -1,3 +1,56 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+exclude = ["test"]
+
+[project]
+name = "monthly-business-survey-results"
+authors = [
+  {name = "Analysis Standards and Pipelines", email = "ASAP@ons.gov.uk"}
+]
+maintainers = [
+  {name = "Analysis Standards and Pipelines", email = "ASAP@ons.gov.uk"}
+]
+dynamic = ["version"]
+requires-python = '>=3.6.1'
+description = 'Public Sector local Python downloads and preprocessing package'
+readme = "README.md"
+license = {text = "MIT License"}
+classifiers = [
+        "Programming Language :: Python :: 3",
+        "Operating System :: OS Independent"
+]
+dependencies = [
+    "pandas==1.1.5",
+    "numpy",
+    "build
+]
+
+[project.optional-dependencies]
+docs = [
+    "sphinx",
+]
+testing = [
+    "coverage",
+    "detect-secrets==1.0.3",
+    "myst-parser",
+    "pre-commit",
+    "pytest",
+    "Sphinx",
+    "toml",
+    "black",
+    "isort",
+    "nbstripout",
+    "nbqa",
+    "pre_commit_hooks",
+    "flake8",
+    "sphinx",
+    "coverage",
+    "pytest==7.0.1",
+]
+
 # `coverage` configurations
 [tool.coverage.run]
 source = [
