@@ -1,3 +1,7 @@
+import glob
+
+import pandas as pd
+
 from mbs_results.calculate_estimation_weights import (
     calculate_calibration_factor,
     calculate_design_weight,
@@ -6,7 +10,7 @@ from mbs_results.pre_processing_estimation import get_estimation_data
 from mbs_results.validate_estimation import validate_estimation
 
 
-def apply_estimation(df, reference, period, **config):
+def apply_estimation(df, reference, period, population_path, sample_path, **config):
     """
     Read population frame and sample, merge key variables onto df then derive
     and validate estimation weights.
@@ -19,6 +23,10 @@ def apply_estimation(df, reference, period, **config):
         name of column in df containing reference
     period : str
         name of column in df containing period
+    population_path : str
+        filepath for population frame data
+    sample_path : str
+        filepath for sample_path
     strata : str
         name of column in df containing strata
     group : str
@@ -36,13 +44,27 @@ def apply_estimation(df, reference, period, **config):
     `ValueError`
 
     """
-    population_frame = get_estimation_data(reference, period, **config)
+    population_files = glob.glob(population_path)
+    sample_files = glob.glob(sample_path)
 
-    population_frame = calculate_design_weight(population_frame, period, **config)
-    population_frame = calculate_calibration_factor(population_frame, period, **config)
+    estimation_df_list = []
 
-    validate_estimation(population_frame, **config)
+    for population_file, sample_file in zip(population_files, sample_files):
+        estimation_data = get_estimation_data(
+            reference, period, population_file, sample_file, **config
+        )
 
-    df = df.merge(population_frame, how="left", on=[reference, period])
+        estimation_data = calculate_design_weight(estimation_data, period, **config)
+        estimation_data = calculate_calibration_factor(
+            estimation_data, period, **config
+        )
+
+        estimation_df_list.append(estimation_data)
+
+    estimation_df = pd.concat(estimation_df_list, ignore_index=True)
+
+    validate_estimation(estimation_df, **config)
+
+    df = df.merge(estimation_df, how="left", on=[reference, period])
 
     return df
