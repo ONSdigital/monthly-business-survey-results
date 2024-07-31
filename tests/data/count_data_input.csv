@@ -1,4 +1,4 @@
-group,period,flag_1,flag_2
+group,period,f_count,b_count
 100,202001,2,3
 100,202002,1,0
 100,202003,0,2
