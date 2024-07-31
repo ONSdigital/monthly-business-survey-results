@@ -8,10 +8,10 @@ def replace_values_index_based(
     df: pd.DataFrame, target: str, a: int, compare: str, b: int
 ) -> None:
     """
-    Perform comparisons between a subset of df with a and subset of df with b and
-    replace target from a with target from b when comparison is met. Both a
-    and b must exist in the first level index, the comparison is based on the
-    remaining indices.
+    Perform comparisons between the dataframe which has `a` in first level index and
+    the dataframe which has `b`  in the first level index and replace target when
+    condition  is met. Both `a` and `b` must exist in the first level index, 
+    the comparison is based on the remaining indices.
 
     Note that this function does not return anything, it modifies the input
     dataframe.
@@ -54,7 +54,7 @@ def replace_values_index_based(
     if len(index_to_replace) > 0:
         for date_ref_idx in index_to_replace.values:
 
-            # Has format (question,no,period,reference)
+            # Has format (question_no,period,reference)
             index_to_replace = (a,) + date_ref_idx
             index_to_replace_with = (b,) + date_ref_idx
             # Filter target based on the indices
@@ -111,7 +111,7 @@ def constrain(
     In addition for all form types (when question number is available):
 
         Replaces 49 with 40 when 49 > 40.
-        Replaces 90 with 40 when 49 >= 40.
+        Replaces 90 with 40 when 90 >= 40.
 
     Parameters
     ----------
