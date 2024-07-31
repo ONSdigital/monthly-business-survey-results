@@ -97,6 +97,8 @@ def pivot_imputation_value(
         name of column in dataframe containing f_count variable
     b_count: str,
         name of column in dataframe containing b_count variable
+    selected_periods: list,
+        list containing periods to include in output
 
     Returns
     -------
