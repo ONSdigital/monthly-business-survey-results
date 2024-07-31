@@ -2,8 +2,6 @@ from mbs_results.utils import read_colon_separated_file
 
 
 def get_estimation_data(
-    reference,
-    period,
     population_file,
     sample_file,
     population_column_names,
@@ -11,6 +9,8 @@ def get_estimation_data(
     population_keep_columns,
     sample_keep_columns,
     calibration_group_map,
+    period,
+    reference,
     cell_number,
     **config
 ):
@@ -98,6 +98,13 @@ def derive_estimation_variables(
         population frame containing sampled column
 
     """
+    population_frame[cell_number] = (
+        population_frame[cell_number]
+        .astype(str)
+        .map(lambda x: str(5) + x[1:] if x[0] == str(7) else x)
+        .astype(int)
+    )
+
     population_frame = population_frame.merge(
         calibration_group_map, on=[cell_number], how="left"
     )
