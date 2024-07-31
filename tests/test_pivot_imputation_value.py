@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -44,15 +43,11 @@ class TestMergeCounts:
 
 
 class TestPivotImputationValue:
-    def test_pivot_imputation_value(
+    def test_pivot_imputation_value_filter(
         self, pivot_imputation_value_output, merge_counts_output
     ):
 
-        expected_output = pivot_imputation_value_output
-
-        expected_output["link_type"] = pd.Categorical(
-            expected_output["link_type"], categories=["F", "B", "C"], ordered=True
-        )
+        expected_output = pivot_imputation_value_output.query("date == 202001")
 
         input_data = merge_counts_output.drop(columns=["identifier"])
 
@@ -60,7 +55,6 @@ class TestPivotImputationValue:
             input_data,
             "identifier",
             "date",
-            "sic",
             "cell",
             "forward",
             "backward",
@@ -69,10 +63,32 @@ class TestPivotImputationValue:
             "imputed_value",
             "f_count",
             "b_count",
+            [202001],
         )
 
-        actual_output["link_type"] = pd.Categorical(
-            actual_output["link_type"], categories=["F", "B", "C"], ordered=True
+        assert_frame_equal(actual_output, expected_output)
+
+    def test_pivot_imputation_value_no_filter(
+        self, pivot_imputation_value_output, merge_counts_output
+    ):
+
+        expected_output = pivot_imputation_value_output
+
+        input_data = merge_counts_output.drop(columns=["identifier"])
+        input_data = input_data.query("date in [202001, 202002]")
+
+        actual_output = pivot_imputation_value(
+            input_data,
+            "identifier",
+            "date",
+            "cell",
+            "forward",
+            "backward",
+            "construction",
+            "question",
+            "imputed_value",
+            "f_count",
+            "b_count",
         )
 
         assert_frame_equal(actual_output, expected_output)
