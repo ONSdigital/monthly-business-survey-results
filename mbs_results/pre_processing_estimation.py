@@ -4,12 +4,12 @@ from mbs_results.utils import read_colon_separated_file
 def get_estimation_data(
     population_file,
     sample_file,
+    period,
     population_column_names,
     sample_column_names,
     population_keep_columns,
     sample_keep_columns,
     calibration_group_map,
-    period,
     reference,
     cell_number,
     **config

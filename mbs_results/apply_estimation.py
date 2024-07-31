@@ -41,7 +41,9 @@ def apply_estimation(population_path, sample_path, period, **config):
     estimation_df_list = []
 
     for population_file, sample_file in zip(population_files, sample_files):
-        estimation_data = get_estimation_data(population_file, sample_file, **config)
+        estimation_data = get_estimation_data(
+            population_file, sample_file, period, **config
+        )
 
         estimation_data = calculate_design_weight(estimation_data, period, **config)
         estimation_data = calculate_calibration_factor(
