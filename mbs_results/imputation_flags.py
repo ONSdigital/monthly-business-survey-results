@@ -15,6 +15,8 @@ def generate_imputation_marker(
     """
     Function to add column containing the a string indicating the method of
     imputation to use following the hierarchy in specifications
+        Implements the following hierarchy:
+        r - mc - fir - bir - fimc - fic - c
 
     Parameters
     ----------
@@ -70,12 +72,14 @@ def create_imputation_logical_columns(
     reference: str,
     strata: str,
     auxiliary: str,
-    time_difference=1,
+    time_difference: int = 1,
 ):
     """
     function to create logical columns for each type of imputation
     output columns are needed to create the string flag column for
     imputation methods.
+    No order is needed for imputation logical columns, this is
+    handled in the generate_imputation_marker function.
 
     Parameters
     ----------
@@ -182,7 +186,14 @@ def imputation_overlaps_mc(df, target, reference, strata):
     return df
 
 
-def flag_rolling_impute(df, time_difference, strata, reference, target, period):
+def flag_rolling_impute(
+    df: pd.DataFrame,
+    time_difference: int,
+    strata: str,
+    reference: str,
+    target: str,
+    period: str,
+):
     """
     Function to create logical values for whether rolling imputation can be done.
     Used to account for gaps of over one month when imputing.
@@ -233,39 +244,3 @@ def flag_rolling_impute(df, time_difference, strata, reference, target, period):
     df.drop(columns="fill_group", inplace=True)
 
     return boolean_column
-
-
-if __name__ == "__main__":
-    from utils import convert_column_to_datetime
-
-    df = pd.read_csv("tests/imputation_flag_data_manual_construction.csv")
-    df.period = convert_column_to_datetime(df.period)
-    df.drop(["imputation_flags_target_variable"], axis=1, inplace=True)
-
-    df_input = df[
-        [
-            "reference",
-            "strata",
-            "period",
-            "target_variable",
-            "auxiliary",
-            "target_variable_man",
-        ]
-    ]
-
-    target = "target_variable"
-
-    if f"{target}_man" in df.columns:
-        flags = ["r", "mc", "fir", "bir", "fimc", "c", "fic"]
-    else:
-        flags = ["r", "fir", "bir", "c", "fic"]
-
-    temp = generate_imputation_marker(
-        df=df_input,
-        target="target_variable",
-        period="period",
-        reference="reference",
-        strata="strata",
-        auxiliary="auxiliary",
-        predictive_auxiliary="f_match_auxiliary",
-    )
