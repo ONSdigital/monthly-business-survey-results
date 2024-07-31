@@ -69,6 +69,7 @@ def create_and_merge_imputation_values(
             "intermediate_column": "manual_constructed",
             "marker": "mc",
             # doesn't actually apply a fill so can be forward or back
+            # ToDo rework to worth with None as input
             "fill_column": f"{target}_man",
             "fill_method": "ffill",
             "link_column": "man_link",
@@ -91,7 +92,6 @@ def create_and_merge_imputation_values(
         "fimc": {
             "intermediate_column": "fimc",
             "marker": "fimc",
-            # doesn't actually apply a fill so can be forward or back
             "fill_column": f"{target}_man",
             "fill_method": "ffill",
             "link_column": cumulative_forward_link,
