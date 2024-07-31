@@ -10,7 +10,7 @@ def replace_values_index_based(
     """
     Perform comparisons between the dataframe which has `a` in first level index and
     the dataframe which has `b`  in the first level index and replace target when
-    condition  is met. Both `a` and `b` must exist in the first level index, 
+    condition  is met. Both `a` and `b` must exist in the first level index,
     the comparison is based on the remaining indices.
 
     Note that this function does not return anything, it modifies the input
