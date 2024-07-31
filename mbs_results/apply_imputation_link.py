@@ -11,7 +11,7 @@ def create_and_merge_imputation_values(
     auxiliary,
     construction_link,
     imputation_types=("c", "fir", "bir", "fic"),
-    **kwargs
+    **kwargs,
 ):
     """
     Loop through different imputation types and merge the results according
@@ -54,7 +54,8 @@ def create_and_merge_imputation_values(
         dataframe with imputation values defined by the imputation marker
     """
 
-    # constructed has to come first to use the result for forward impute from contructed
+    # constructed has to come first to use the result for forward
+    # impute from constructed
     imputation_config = {
         "c": {
             "intermediate_column": "constructed",
@@ -64,6 +65,15 @@ def create_and_merge_imputation_values(
             "fill_method": "ffill",
             "link_column": construction_link,
         },
+        "mc": {
+            "intermediate_column": "manual_constructed",
+            "marker": "mc",
+            # doesn't actually apply a fill so can be forward or back
+            # ToDo rework to worth with None as input
+            "fill_column": f"{target}_man",
+            "fill_method": "ffill",
+            "link_column": "man_link",
+        },
         "fir": {
             "intermediate_column": "fir",
             "marker": "fir",
@@ -71,6 +81,7 @@ def create_and_merge_imputation_values(
             "fill_method": "ffill",
             "link_column": cumulative_forward_link,
         },
+        # FIMC Here or after BIR
         "bir": {
             "intermediate_column": "bir",
             "marker": "bir",
@@ -78,6 +89,14 @@ def create_and_merge_imputation_values(
             "fill_method": "bfill",
             "link_column": cumulative_backward_link,
         },
+        "fimc": {
+            "intermediate_column": "fimc",
+            "marker": "fimc",
+            "fill_column": f"{target}_man",
+            "fill_method": "ffill",
+            "link_column": cumulative_forward_link,
+        },
+        # FIMC Here instead, check specs?
         "fic": {
             # FIC only works if the C is in the first period of the business being
             # sampled. This is fine for automatic imputation, but should be careful
@@ -124,11 +143,11 @@ def create_impute(df, group, imputation_spec):
     pandas.DataFrame
         dataframe with an added imputation column defined by the imputation_spec
     """
+
     column_name = imputation_spec["intermediate_column"]
     fill_column = imputation_spec["fill_column"]
     fill_method = imputation_spec["fill_method"]
     link_column = imputation_spec["link_column"]
-
     df[column_name] = (
         df.groupby(group)[fill_column].fillna(method=fill_method) * df[link_column]
     )

@@ -6,6 +6,7 @@
     "period" : "period",
     "strata" : "group",
     "reference" : "reference",
+    "auxiliary": "auxiliary",
     "responses_keep_cols" : {
                 "reference" : "str",
                 "period": "date",
