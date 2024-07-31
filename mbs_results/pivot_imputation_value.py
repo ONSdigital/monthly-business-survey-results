@@ -19,7 +19,7 @@ def merge_counts(
         Reference dataframe with identifier, date, sic, cell, forward, backward,
         construction, question, imputed_value
     count_df : pd.DataFrame
-        DataFrame with group, period, flag_1 and flag_2.
+        DataFrame with group, period, f_count and b_count
     input_cell : str
         name of column in input_df dataframe containing cell variable
     count_cell : str
@@ -36,12 +36,6 @@ def merge_counts(
     Dataframe resulting from the left-join of input_df and count_df on the cell and
     date columns.
     """
-    count_df = count_df.rename(
-        columns={
-            "flag_1": "f_count",
-            "flag_2": "b_count",
-        }
-    )
     df_merge = pd.merge(
         input_df,
         count_df,
