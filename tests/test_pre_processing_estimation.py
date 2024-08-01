@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import pandas as pd
 import pytest
 from helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
@@ -30,15 +29,10 @@ class TestPreProcessingEstimation:
                 "sampled",
             ]
         ]
-        population_frame = expected.drop(columns=["sampled"])
+        population_frame = expected.drop(columns=["calibration_group", "sampled"])
         sample = population_frame.loc[:1, ["reference", "period"]]
 
-        calibration_group_map = pd.DataFrame(
-            {
-                "cell_no": [123456, 234567, 345678],
-                "calibration_number": [123456, 123456, 345678],
-            }
-        )
+        calibration_group_map = expected[["cell_no", "calibration_group"]]
 
         actual = derive_estimation_variables(
             population_frame,
@@ -49,6 +43,4 @@ class TestPreProcessingEstimation:
             "cell_no",
         )
 
-        assert_frame_equal(
-            derive_estimation_variables_data, actual, check_dtype=False, check_like=True
-        )
+        assert_frame_equal(expected, actual, check_dtype=False, check_like=True)

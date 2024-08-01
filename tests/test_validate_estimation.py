@@ -33,7 +33,16 @@ def test_validate_estimation(
     calibration_factor,
     expectation,
 ):
+    non_sampled_strata = [5002]
+
     with expectation:
         validate_estimation(
-            validate_estimation_data, design_weight, calibration_factor, "auxiliary"
+            validate_estimation_data,
+            design_weight,
+            calibration_factor,
+            "strata",
+            "auxiliary",
+            "region",
+            "sampled",
+            non_sampled_strata,
         )

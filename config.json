@@ -19,6 +19,11 @@
                 "frozenturnover" : "float",
                 "cellnumber" : "int"},
     "temporarily_remove_cols": [],
+    "non_sampled_strata": [
+        "5141", "5142", "5143",
+        "5371", "5372", "5373",
+        "5661", "5662", "5663"
+    ],
     "current_period" : 202401,
     "previous_period" : 202312
 }

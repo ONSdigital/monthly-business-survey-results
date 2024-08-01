@@ -1,17 +1,15 @@
-from glob import glob
-
-import pandas as pd
-
 from mbs_results.utils import read_colon_separated_file
 
 
 def get_estimation_data(
-    population_path,
-    population_column_names,
-    sample_path,
-    sample_column_names,
-    calibration_group_map,
+    population_file,
+    sample_file,
     period,
+    population_column_names,
+    sample_column_names,
+    population_keep_columns,
+    sample_keep_columns,
+    calibration_group_map,
     reference,
     cell_number,
     **config
@@ -21,14 +19,18 @@ def get_estimation_data(
 
     Parameters
     ----------
-    population_path: pd.DataFrame
+    population_file: pd.DataFrame
         file path to the folder containing the population frames
-    population_column_names: List
-        list of column names for the population frames
     sample_path: pd.DataFrame
         file path to the folder containing the sample data
-    sample_column_names: List
+    population_column_names: List[str]
+        list of column names for the population frames
+    sample_column_names: List[str]
         list of column names for the sample data
+    population_keep_columns: List[str]
+        list of names of columns to keep from population frame
+    sample_keep_columns: List[str]
+        list of names of columns to keep from sample
     calibration_group_map: pd.DataFrame
         dataframe containing map between cell number and calibration group
     period: Str
@@ -46,29 +48,16 @@ def get_estimation_data(
         population frame containing period and sampled columns.
 
     """
-    population_files = glob("universe.*", root_dir=population_path)
-    sample_files = glob("finalsel.*", root_dir=sample_path)
+    population_df = read_colon_separated_file(population_file, population_column_names)
 
-    population_dfs = []
-    for file in population_files:
+    population_df = population_df[population_keep_columns]
 
-        population_df = read_colon_separated_file(file, population_column_names)
+    sample_df = read_colon_separated_file(sample_file, sample_column_names)
 
-        population_dfs.append(population_df)
-
-    population = pd.concat(population_dfs, ignore_index=True)
-
-    sample_dfs = []
-    for file in sample_files:
-
-        sample_df = read_colon_separated_file(file, sample_column_names)
-
-        sample_dfs.append(sample_df)
-
-    sample = pd.concat(sample_dfs, ignore_index=True)
+    sample_df = sample_df[sample_keep_columns]
 
     estimation_data = derive_estimation_variables(
-        population, sample, calibration_group_map, period, reference, cell_number
+        population_df, sample_df, calibration_group_map, period, reference, cell_number
     )
 
     return estimation_data
@@ -109,10 +98,18 @@ def derive_estimation_variables(
         population frame containing sampled column
 
     """
-    population_frame.merge(calibration_group_map, on=[cell_number], how="left")
-    # TODO: check if cell_no is the strata or if it should be dropped
+    population_frame[cell_number] = (
+        population_frame[cell_number]
+        .astype(str)
+        .map(lambda x: str(5) + x[1:] if x[0] == str(7) else x)
+        .astype(int)
+    )
 
-    sample = sample[[reference, period]]
+    population_frame = population_frame.merge(
+        calibration_group_map, on=[cell_number], how="left"
+    )
+
+    sample = sample.copy()[[reference, period]]
     sample["sampled"] = 1
 
     return population_frame.merge(sample, on=[reference, period], how="left").fillna(
