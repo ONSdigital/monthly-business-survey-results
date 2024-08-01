@@ -31,43 +31,41 @@ class TestRatioEstimation:
     ):
         expected_output = ratio_estimation_test_output[
             [
-                "strata",
-                "period",
                 "aux",
                 "sampled",
                 "a_weight",
                 "g_weight",
                 "target_variable",
                 "predicted_unit_value",
-                "l_values",
+                "l_value",
+                "nw_ag_flag",
                 "ratio_estimation_treshold",
             ]
         ]
+
         input_data = ratio_estimation_test_data[
             [
-                "strata",
-                "period",
                 "aux",
                 "sampled",
                 "a_weight",
                 "g_weight",
                 "target_variable",
                 "predicted_unit_value",
-                "l_values",
+                "l_value",
+                "nw_ag_flag",
             ]
         ]
 
         actual_output = calculate_ratio_estimation(
             input_data,
-            "strata",
-            "period",
             "aux",
             "sampled",
             "a_weight",
             "g_weight",
             "target_variale",
             "predicted_unit_value",
-            "l_values",
+            "l_value",
+            "nw_ag_flag",
         )
 
         assert_frame_equal(actual_output, expected_output)

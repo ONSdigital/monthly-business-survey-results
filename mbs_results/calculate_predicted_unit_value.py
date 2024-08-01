@@ -1,29 +1,16 @@
-import pandas as pd
+import numpy as np
 
 
 def calculate_predicted_unit_value(
-    df: pd.DataFrame,
-    period: str,
-    strata: str,
-    aux: str,
-    sampled: str,
-    a_weight: str,
-    target_variable: str,
-    nw_ag_flag: str,
-) -> pd.DataFrame:
+    df, aux, sampled, a_weight, target_variable, nw_ag_flag
+):
     """
-    Calculate link between target_variable and predictive_variable by strata,
-    a match_col must be supplied which indicates if target_variable
-    and predictive_variable can be linked.
+    Calculate predicted unit value
 
     Parameters
     ----------
     df : pd.Dataframe
         Original dataframe.
-    period : str
-        Column name containing time period.
-    strata : str
-        Column name containing strata information (sic).
     aux : str
         Column name containing auxiliary variable (x).
     sampled : str
@@ -41,15 +28,19 @@ def calculate_predicted_unit_value(
         A pandas DataFrame with a new column containing the predicted unit value.
     """
 
-    df = df.loc[(df["sampled"] == 1) & (df["nw_ag_flag"] == 0)]
-    df = df.reset_index(drop=True)
-    # check if reset index creates problems down the line
+    winsorised = (df[sampled] == 1) & (not df[nw_ag_flag] is True)
+    filtered_df = df.loc[winsorised]
 
-    sum_weighted_target_values = (df["a_weight"] * df["target_variable"]).sum()
-    sum_weighted_auxiliary_values = (df["a_weight"] * df["aux"]).sum()
+    sum_weighted_target_values = (
+        filtered_df[a_weight] * filtered_df[target_variable]
+    ).sum()
+    sum_weighted_auxiliary_values = (filtered_df[a_weight] * filtered_df[aux]).sum()
 
-    df["predicted_unit_value"] = df["aux"].apply(
+    df["predicted_unit_value"] = df[aux].apply(
         lambda x: x * (sum_weighted_target_values / sum_weighted_auxiliary_values)
     )
+
+    non_winsorised = (df[sampled] == 0) | (df[nw_ag_flag] is True)
+    df["predicted_unit_value"] = df["predicted_unit_value"].mask(non_winsorised, np.nan)
 
     return df
