@@ -29,7 +29,7 @@ dependencies = [
 
 [project.optional-dependencies]
 docs = [
-    "sphinx",
+    "Sphinx",
 ]
 testing = [
     "coverage",
@@ -45,7 +45,6 @@ testing = [
     "nbqa",
     "pre_commit_hooks",
     "flake8",
-    "sphinx",
     "coverage",
     "pytest==7.0.1",
 ]

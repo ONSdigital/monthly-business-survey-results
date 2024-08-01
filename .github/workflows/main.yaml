@@ -43,7 +43,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install wheel
-          pip install --upgrade-strategy eager -e .[testing]
+          pip install -e .[testing]
 
       - name: Run pytest
         run: |
@@ -63,7 +63,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install wheel
-          pip install --upgrade-strategy eager -e .[testing]
+          pip install -e .[testing]
           pre-commit install
 
       - name: Check commit hooks
