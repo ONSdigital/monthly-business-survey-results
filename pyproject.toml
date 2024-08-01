@@ -28,9 +28,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-docs = [
-    "Sphinx",
-]
+docs = ["Sphinx"]
 testing = [
     "coverage",
     "detect-secrets==1.0.3",
@@ -46,7 +44,7 @@ testing = [
     "pre_commit_hooks",
     "flake8",
     "coverage",
-    "pytest==7.0.1",
+    "pytest==7.0.1"
 ]
 
 # `coverage` configurations
