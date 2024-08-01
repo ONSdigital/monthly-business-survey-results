@@ -10,7 +10,7 @@ def get_cumulative_links(
     period,
     imputation_link,
     time_difference=1,
-    **kwargs
+    **kwargs,
 ):
     """
     Create cumulative imputation links for multiple consecutive periods
@@ -43,16 +43,16 @@ def get_cumulative_links(
         dataframe with imputation_group and
         cumulative_forward/backward_imputation_link column
     """
-
     dataframe.sort_values([strata, reference, period], inplace=True)
     dataframe["missing_value"] = np.where(dataframe[target].isnull(), True, False)
 
     # TODO: These conditions are similar with the ones at flags, consider a fun for this
     marker_diff_con = (
-        dataframe["imputation_marker"]
-        .ne(dataframe["imputation_marker"].shift().bfill())
+        dataframe[f"imputation_flags_{target}"]
+        .ne(dataframe[f"imputation_flags_{target}"].shift().bfill())
         .astype(int)
         != 0
+        # is false
     )
 
     strat_diff_con = dataframe[strata].diff(time_difference) != 0

@@ -1,4 +1,4 @@
-strata,reference,target,period,forward_imputation_link,backward_imputation_link,imputation_marker,imputation_group,cumulative_forward_imputation_link,cumulative_backward_imputation_link
+strata,reference,target,period,forward_imputation_link,backward_imputation_link,imputation_flags_target,imputation_group,cumulative_forward_imputation_link,cumulative_backward_imputation_link
 100,100000,200,202402,1,2,r,1,,
 100,100000,,202403,2,0.6,fir,2,2,0.6
 100,100000,,202404,3,1,fir,2,6,1

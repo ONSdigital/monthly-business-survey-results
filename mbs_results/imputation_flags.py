@@ -2,28 +2,28 @@ import numpy as np
 import pandas as pd
 
 
-def create_impute_flags(
+def generate_imputation_marker(
     df: pd.DataFrame,
     target: str,
     period: str,
     reference: str,
     strata: str,
     auxiliary: str,
-    predictive_auxiliary: str,
-    **kwargs
-):
+    time_difference=1,
+    **kwargs,
+) -> pd.DataFrame:
     """
-    function to create logical columns for each type of imputation
-    output columns are needed to create the string flag column for
-    imputation methods.
-    Function requires f_predictive and b_predictive columns produced
-    by `flag_matched_pair` function.
+    Function to add column containing the a string indicating the method of
+    imputation to use following the hierarchy in specifications
+        Implements the following hierarchy:
+        r - mc - fir - bir - fimc - fic - c
 
     Parameters
     ----------
     df : pd.DataFrame
-        DataFrame containing forward, backward predictive period columns (
-        These columns are created by calling flag_matched_pair_merge forward
+        DataFrame containing target, auxiliary and manual construction columns
+        and containing forward, backward predictive period columns (
+        These columns are created by calling flag_matched_pair forward
         and backwards)
     target : str
         Column name containing target variable.
@@ -35,94 +35,10 @@ def create_impute_flags(
         Column name containing strata information (sic).
     auxiliary : str
         Column name containing auxiliary data.
-    predictive_auxiliary: str
-        Column name containing predictive auxiliary data, this is created,
-        by flag_matched_pair_merge function.
+    time_difference: int
+        lookup distance for matched pairs
     kwargs : mapping, optional
         A dictionary of keyword arguments passed into func.
-
-    Returns
-    -------
-    pd.DataFrame
-        Dataframe with four additional logical columns determining if target
-        is a return (r_flag) can be imputed by forward imputation (fir_flag),
-        backward imputation (bir_flag) or can be constructed (c_flag)
-    """
-    for direction in ["f", "b"]:
-        try:
-            df["{}_predictive_{}".format(direction, target)]
-        except KeyError:
-            raise KeyError(
-                "Dataframe needs column '{}_predictive_{}',".format(direction, target)
-                + " run flag_matched_pair function first"
-            )
-    forward_target_roll = "f_predictive_" + target + "_roll"
-    backward_target_roll = "b_predictive_" + target + "_roll"
-    forward_aux_roll = "f_predictive_" + auxiliary + "_roll"
-
-    df.sort_values([reference, strata, period], inplace=True)
-
-    # TODO : similar conditions at cum imputation links
-    df["fill_group"] = (
-        (df[period] - pd.DateOffset(months=1) != df.shift(1)[period])
-        | (df[strata].diff(1) != 0)
-        | (df[reference].diff(1) != 0)
-    ).cumsum()
-
-    df[forward_target_roll] = df.groupby([reference, strata, "fill_group"])[
-        "f_predictive_" + target
-    ].ffill()
-
-    df[backward_target_roll] = df.groupby([reference, strata, "fill_group"])[
-        "b_predictive_" + target
-    ].bfill()
-
-    df["r_flag"] = df[target].notna()
-
-    df["fir_flag"] = np.where(
-        df[forward_target_roll].notna() & df[target].isna(), True, False
-    )
-
-    df["bir_flag"] = np.where(
-        df[backward_target_roll].notna() & df[target].isna(), True, False
-    )
-
-    construction_conditions = df[target].isna() & df[auxiliary].notna()
-    df["c_flag"] = np.where(construction_conditions, True, False)
-
-    df[forward_aux_roll] = df.groupby([reference, strata, "fill_group"])[
-        predictive_auxiliary
-    ].ffill()
-
-    fic_conditions = df[target].isna() & df[forward_aux_roll].notna()
-    df["fic_flag"] = np.where(fic_conditions, True, False)
-
-    df.drop(
-        [
-            forward_target_roll,
-            backward_target_roll,
-            forward_aux_roll,
-            predictive_auxiliary,
-            "fill_group",
-        ],
-        axis=1,
-        inplace=True,
-    )
-
-    return df
-
-
-def generate_imputation_marker(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Function to add column containing the a string indicating the method of
-    imputation to use following the hierarchy in specifications
-
-    Parameters
-    ----------
-    df : pd.DataFrame
-        DataFrame containing logical columns produced by `create_imputation_flags`
-        (r_flag, fir_flag, bir_flag, fic_flag and c_flag)
-
 
     Returns
     -------
@@ -131,23 +47,200 @@ def generate_imputation_marker(df: pd.DataFrame) -> pd.DataFrame:
         i.e. the type of imputation method that should be used to fill
         missing returns.
     """
+    if f"{target}_man" in df.columns:
+        flags = ["r", "mc", "fir", "bir", "fimc", "fic", "c"]
+        # Check order from Specs
+    else:
+        flags = ["r", "fir", "bir", "fic", "c"]
 
-    imputation_markers_and_conditions = {
-        "r": df["r_flag"],
-        "fir": ~df["r_flag"] & df["fir_flag"],
-        "bir": ~df["r_flag"] & ~df["fir_flag"] & df["bir_flag"],
-        "fic": ~df["r_flag"] & ~df["fir_flag"] & ~df["bir_flag"] & df["fic_flag"],
-        "c": ~df["r_flag"]
-        & ~df["fir_flag"]
-        & ~df["bir_flag"]
-        & ~df["fic_flag"]
-        & df["c_flag"],
-    }
+    create_imputation_logical_columns(
+        df, target, period, reference, strata, auxiliary, time_difference
+    )
 
-    df["imputation_marker"] = np.select(
-        imputation_markers_and_conditions.values(),
-        imputation_markers_and_conditions.keys(),
-        default="error",
+    select_cols = [f"{i}_flag_{target}" for i in flags]
+    first_condition_met = [np.where(i)[0][0] for i in df[select_cols].values]
+    df[f"imputation_flags_{target}"] = [flags[i] for i in first_condition_met]
+    df.drop(columns=select_cols, inplace=True)
+
+    return df
+
+
+def create_imputation_logical_columns(
+    df: pd.DataFrame,
+    target: str,
+    period: str,
+    reference: str,
+    strata: str,
+    auxiliary: str,
+    time_difference: int = 1,
+):
+    """
+    function to create logical columns for each type of imputation
+    output columns are needed to create the string flag column for
+    imputation methods.
+    No order is needed for imputation logical columns, this is
+    handled in the generate_imputation_marker function.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing forward, backward predictive period columns (
+        These columns are created by calling flag_matched_pair forward
+        and backwards)
+    target : str
+        Column name containing target variable.
+    period: str
+        Column name containing date variable.
+    reference : str
+        Column name containing business reference id.
+    strata : str
+        Column name containing strata information (sic).
+    auxiliary : str
+        Column name containing auxiliary data.
+    time_difference: int
+        lookup distance for matched pairs
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataframe with four additional logical columns determining if target
+        is a return (r_flag) can be imputed by forward imputation (fir_flag),
+        backward imputation (bir_flag) or can be constructed (c_flag)
+    """
+
+    df.sort_values([reference, strata, period], inplace=True)
+
+    df[f"r_flag_{target}"] = df[target].notna()
+
+    if f"{target}_man" in df.columns:
+        df[f"mc_flag_{target}"] = df[f"{target}_man"].notna()
+
+    df[f"fir_flag_{target}"] = flag_rolling_impute(
+        df, time_difference, strata, reference, target, period
+    )
+
+    df[f"bir_flag_{target}"] = flag_rolling_impute(
+        df, -time_difference, strata, reference, target, period
+    )
+
+    if f"{target}_man" in df.columns:
+        df[f"fimc_flag_{target}"] = flag_rolling_impute(
+            df, time_difference, strata, reference, f"{target}_man", period
+        )
+
+        df = imputation_overlaps_mc(df, target, reference, strata)
+
+    construction_conditions = df[target].isna() & df[auxiliary].notna()
+    df[f"c_flag_{target}"] = np.where(construction_conditions, True, False)
+
+    df[f"fic_flag_{target}"] = flag_rolling_impute(
+        df, time_difference, strata, reference, auxiliary, period
     )
 
     return df
+
+
+def imputation_overlaps_mc(df, target, reference, strata):
+    """
+    function which checks and breaks a chain of imputations if a
+    manual construction is present
+    e.g. r, fir, mc, fimc or c, mc, bir, r
+
+    Parameters
+    ----------
+    df : pd.Dataframe
+        dataframe
+    target : str
+        Column name containing target variable.
+    period: str
+        Column name containing date variable.
+    reference : str
+        Column name containing business reference id.
+    strata : str
+        Column name containing strata information (sic).
+
+
+    Returns
+    -------
+    pd.Dataframe
+        Original dataframe with updated columns for forward and backwards
+        imputation boolean columns
+    """
+
+    for column in ["back_impute_overlaps_mc", "forward_impute_overlaps_mc"]:
+        direction_single_string = column[0]
+        imputation_marker_column = direction_single_string + f"ir_flag_{target}"
+        df[column] = np.where(
+            df[imputation_marker_column] & df[f"mc_flag_{target}"], False, None
+        )
+        df[column] = (
+            df.groupby([strata, reference])[column].fillna(
+                method=direction_single_string + "fill"
+            )
+        ).fillna(True)
+        df[imputation_marker_column] = df[imputation_marker_column] & df[column]
+        df.drop(
+            columns=[column],
+            inplace=True,
+        )
+    return df
+
+
+def flag_rolling_impute(
+    df: pd.DataFrame,
+    time_difference: int,
+    strata: str,
+    reference: str,
+    target: str,
+    period: str,
+):
+    """
+    Function to create logical values for whether rolling imputation can be done.
+    Used to account for gaps of over one month when imputing.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing forward, backward predictive period columns (
+        These columns are created by calling flag_matched_pair forward
+        and backwards)
+    time_difference: int
+        lookup distance for matched pairs
+    target : str
+        Column name containing target variable.
+    period: str
+        Column name containing date variable.
+    reference : str
+        Column name containing business reference id.
+    strata : str
+        Column name containing strata information (sic).
+
+    Returns
+    -------
+    pd.Series
+    """
+
+    if time_difference < 0:
+        fillmethod = "bfill"
+    elif time_difference > 0:
+        fillmethod = "ffill"
+
+    df["fill_group"] = (
+        (df[period] - pd.DateOffset(months=1) != df.shift(1)[period])
+        | (df[strata].diff(1) != 0)
+        | (df[reference].diff(1) != 0)
+    ).cumsum()
+
+    boolean_column = (
+        df.groupby([strata, reference, "fill_group"])[target]
+        .fillna(method=fillmethod)
+        .notnull()
+        .mul(
+            df[period] - pd.DateOffset(months=time_difference)
+            == df.shift(time_difference)[period]
+        )
+        .mul(df[strata] == df.shift(time_difference)[strata])
+    )
+    df.drop(columns="fill_group", inplace=True)
+
+    return boolean_column
