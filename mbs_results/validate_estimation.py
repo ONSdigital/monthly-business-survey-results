@@ -70,7 +70,7 @@ missing values found in column {column}
         * sampled_df[calibration_factor]
     ).sum()
 
-    if not (isclose(weighted_sum, unweighted_sum)):
+    if not (isclose(weighted_sum, unweighted_sum, rel_tol=1e-09)):
         raise ValueError(
             f"""
 Sum of auxiliary variable multiplied by design weight and calibration factor
