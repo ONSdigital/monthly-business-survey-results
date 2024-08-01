@@ -1,0 +1,50 @@
+{
+    "df_path": "replace_with_cp_qv_path",
+    "l_values_path":"replace_with_l_values_path",
+    "population_path": "replace_with_universe_path_and_wildcard",
+    "population_column_names": [
+        "reference", "checkletter", "inqcode", "entref", "wowentref", "frosic2003",
+        "rusic2003", "frosic2007", "rusic2007", "froempees", "employees",
+        "froempment", "employment", "froFTEempt", "FTEempt", "frotover",
+        "turnover", "entrepmkr", "legalstatus", "inqstop", "entzonemkr", "region",
+        "live_lu", "live_vat", "live_paye", "immfoc", "ultfoc", "cell_no",
+        "selmkr", "inclexcl"
+    ],
+    "sample_path": "replace_with_finalsel_path_and_wildcard",
+    "sample_column_names": [
+        "reference","checkletter","frosic2003","rusic2003","frosic2007",
+        "rusic2007","froempees","employees","froempment","employment","froFTEempt",
+        "FTEempt","frotover","turnover","entref","wowentref","vatref","payeref",
+        "crn","live_lu","live_vat","live_paye","legalstatus","entrepmkr","region",
+        "birthdate","entname1","entname2","entname3","runame1","runame2","runame3",
+        "ruaddr1","ruaddr2","ruaddr3","ruaddr4","ruaddr5","rupostcode","tradstyle1",
+        "tradstyle2","tradstyle3","contact","telephone","fax","seltype","inclexcl",
+        "cell_no","formtype","cso_tel","currency"
+    ],
+    "calibration_group_map": "replace_with_calibration_path",
+    "period": "period",
+    "reference": "reference",
+    "cell_number": "cell_no",
+    "auxiliary": "frotover",
+    "strata": "cell_no",
+    "group": "calibration_group",
+    "sampled": "sampled",
+    "design_weight": "design_weight",
+    "calibration_factor": "calibration_factor",
+    "region": "region",
+    "non_sampled_strata": [
+        "5141", "5142", "5143",
+        "5371", "5372", "5373",
+        "5661", "5662", "5663"
+    ],
+    "out_path": "replace_with_out_path",
+    "out_columns": [
+        "reference", "period", "cell_no", "sampled", "frotover",
+        "calibration_group", "design_weight", "calibration_factor",
+        "question_no", "adjusted_value", "frosic2007"
+    ],
+    "population_keep_columns": [
+        "reference", "region", "frotover", "cell_no", "period", "frosic2007"
+    ],
+    "sample_keep_columns": ["reference", "period"]
+}
