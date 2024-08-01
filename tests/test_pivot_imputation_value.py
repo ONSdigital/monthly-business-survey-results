@@ -32,7 +32,7 @@ def pivot_imputation_value_output(filepath):
 class TestMergeCounts:
     def test_merge_counts(self, count_data_input, merge_counts_output):
 
-        input_df = merge_counts_output.drop(columns=["f_count", "b_count"])
+        input_df = merge_counts_output.drop(columns=["f_count", "b_count", "c_count"])
 
         actual_output = merge_counts(
             input_df, count_data_input, "cell", "group", "date", "period", "identifier"
@@ -55,6 +55,7 @@ class TestPivotImputationValue:
             input_data,
             "identifier",
             "date",
+            "sic",
             "cell",
             "forward",
             "backward",
@@ -63,6 +64,7 @@ class TestPivotImputationValue:
             "imputed_value",
             "f_count",
             "b_count",
+            "c_count",
             [202001],
         )
 
@@ -81,6 +83,7 @@ class TestPivotImputationValue:
             input_data,
             "identifier",
             "date",
+            "sic",
             "cell",
             "forward",
             "backward",
@@ -89,6 +92,7 @@ class TestPivotImputationValue:
             "imputed_value",
             "f_count",
             "b_count",
+            "c_count",
         )
 
         assert_frame_equal(actual_output, expected_output)

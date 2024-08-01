@@ -51,6 +51,7 @@ def pivot_imputation_value(
     df: pd.DataFrame,
     identifier: str,
     date: str,
+    sic: str,
     cell: str,
     forward: str,
     backward: str,
@@ -59,6 +60,7 @@ def pivot_imputation_value(
     imputed_value: str,
     f_count: str,
     b_count: str,
+    c_count: str,
     selected_periods: list = None,
 ) -> pd.DataFrame:
 
@@ -75,6 +77,8 @@ def pivot_imputation_value(
         name of column in dataframe containing identifier variable
     date : str
         name of column in dataframe containing date variable
+    sic : str
+        name of column in dataframe containing sic variable
     cell : str
         name of column in dataframe containing cell variable
     forward : str
@@ -91,6 +95,8 @@ def pivot_imputation_value(
         name of column in dataframe containing f_count variable
     b_count: str,
         name of column in dataframe containing b_count variable
+    c_count: str,
+        name of column in dataframe containing c_count variable
     selected_periods: list,
         list containing periods to include in output
 
@@ -104,7 +110,7 @@ def pivot_imputation_value(
         df = df.query("{} in {}".format(date, selected_periods))
 
     links_df = df.melt(
-        id_vars=[date, cell, question, imputed_value],
+        id_vars=[date, sic, cell, question, imputed_value],
         value_vars=[forward, backward, construction],
         var_name="link_type",
         value_name="imputation_link",
@@ -114,34 +120,34 @@ def pivot_imputation_value(
     links_df["link_type"] = links_df["link_type"].map(link_type_map)
 
     counts_df = df.melt(
-        id_vars=[date, cell, question],
-        value_vars=[f_count, b_count],
+        id_vars=[date, sic, cell, question],
+        value_vars=[f_count, b_count, c_count],
         var_name="link_type_count",
         value_name="count",
     )
 
-    link_type_map_count = {f_count: "F", b_count: "B"}
+    link_type_map_count = {f_count: "F", b_count: "B", c_count: "C"}
     counts_df["link_type_count"] = counts_df["link_type_count"].map(link_type_map_count)
 
     merged_df = pd.merge(
         links_df,
         counts_df,
         how="outer",
-        left_on=[date, cell, question, "link_type"],
-        right_on=[date, cell, question, "link_type_count"],
+        left_on=[date, sic, cell, question, "link_type"],
+        right_on=[date, sic, cell, question, "link_type_count"],
     )
 
     merged_df.drop_duplicates(inplace=True)
     merged_df.drop(["link_type_count"], axis=1, inplace=True)
 
     merged_df = merged_df.groupby(
-        [date, cell, question, "link_type"], as_index=False
+        [date, sic, cell, question, "link_type"], as_index=False
     ).agg({imputed_value: "sum", "count": "first", "imputation_link": "first"})
 
     sorting_order = {"F": 1, "B": 2, "C": 3}
     merged_df["sort_column"] = merged_df["link_type"].map(sorting_order)
 
-    merged_df = merged_df.sort_values([date, cell, question, "sort_column"])
+    merged_df = merged_df.sort_values([date, sic, cell, question, "sort_column"])
 
     merged_df.drop("sort_column", axis=1, inplace=True)
 
@@ -150,6 +156,7 @@ def pivot_imputation_value(
     merged_df = merged_df[
         [
             date,
+            sic,
             cell,
             question,
             "imputation_link",
