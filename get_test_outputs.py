@@ -6,7 +6,7 @@ Created on Thu Aug  1 12:24:43 2024
 """
 
 from pathlib import Path
-
+from importlib import metadata
 import pandas as pd
 
 import json
@@ -53,7 +53,7 @@ def load_config():
     
 if __name__ == "__main__":
     
-    FILE_VERSION = "v0.0.0"
+    FILE_VERSION = metadata.metadata("monthly-business-survey-results")["version"]
     
     config = load_config()
     config['calibration_group_map'] = pd.read_csv(config['calibration_group_map'])
