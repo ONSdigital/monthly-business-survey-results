@@ -28,7 +28,7 @@ def calculate_predicted_unit_value(
         A pandas DataFrame with a new column containing the predicted unit value.
     """
 
-    winsorised = (df[sampled] == 1) & (not df[nw_ag_flag] is True)
+    winsorised = (df[sampled] == 1) & (df[nw_ag_flag] == False)  # noqa: E712
     filtered_df = df.loc[winsorised]
 
     sum_weighted_target_values = (
@@ -40,7 +40,7 @@ def calculate_predicted_unit_value(
         lambda x: x * (sum_weighted_target_values / sum_weighted_auxiliary_values)
     )
 
-    non_winsorised = (df[sampled] == 0) | (df[nw_ag_flag] is True)
+    non_winsorised = (df[sampled] == 0) | (df[nw_ag_flag] == True)  # noqa: E712
     df["predicted_unit_value"] = df["predicted_unit_value"].mask(non_winsorised, np.nan)
 
     return df

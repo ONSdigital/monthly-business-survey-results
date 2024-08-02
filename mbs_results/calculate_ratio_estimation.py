@@ -49,7 +49,7 @@ def calculate_ratio_estimation(
     )
     df = df.drop("flag_calculation", axis=1)
 
-    non_winsorised = (df[sampled] == 0) | (df[nw_ag_flag] is True)
+    non_winsorised = (df[sampled] == 0) | (df[nw_ag_flag] == True)  # noqa: E712
     df["ratio_estimation_treshold"] = df["ratio_estimation_treshold"].mask(
         non_winsorised, np.nan
     )
