@@ -19,10 +19,6 @@ def calculate_ratio_estimation(
     ----------
     df : pd.Dataframe
         Original dataframe.
-    period : str
-        Column name containing time period.
-    strata : str
-        Column name containing strata information (sic).
     aux : str
         Column name containing auxiliary variable (x).
     sampled : str
@@ -39,7 +35,7 @@ def calculate_ratio_estimation(
         column containing the l values provided by methodology
     nw_ag_flag: str
         column name indicating whether it can't be winsorised-
-        boolean (1 means it can't be winsorised, 0 means it can).
+        boolean (True means it can't be winsorised, False means it can).
 
     Returns
     -------

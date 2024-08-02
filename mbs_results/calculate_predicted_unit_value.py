@@ -21,7 +21,7 @@ def calculate_predicted_unit_value(
         Column name of the predicted target variable.
     nw_ag_flag: str
         column name indicating whether it can't be winsorised-
-        boolean (1 means it can't be winsorised, 0 means it can).
+        boolean (True means it can't be winsorised, False means it can).
     Returns
     -------
     df : pd.DataFrame

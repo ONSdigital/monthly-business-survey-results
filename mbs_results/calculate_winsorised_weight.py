@@ -22,11 +22,11 @@ def calculate_winsorised_weight(
     Parameters
     ----------
     df : pd.Dataframe
-        Original dataframe.
-    period : str
-        Column name containing time period.
+        Original dataframe
     strata : str
         Column name containing strata information (sic).
+    period : str
+        Column name containing time period.
     aux : str
         Column name containing auxiliary variable (x).
     sampled : str
@@ -37,9 +37,6 @@ def calculate_winsorised_weight(
         column name containing the g weight.
     target_variable : str
         Column name of the predicted target variable.
-    nw_ag_flag: str
-        column name indicating whether it can't be winsorised-
-        boolean (1 means it can't be winsorised, 0 means it can).
     predicted_unit_value: str
         column name containing the predicted unit value.
     l_values: str
@@ -48,7 +45,7 @@ def calculate_winsorised_weight(
         column name containing the previously calculated ratio estimation threshold.
     nw_ag_flag: str
         column name indicating whether it can't be winsorised-
-        boolean (1 means it can't be winsorised, 0 means it can).
+        boolean (True means it can't be winsorised, False means it can).
 
 
     Returns
