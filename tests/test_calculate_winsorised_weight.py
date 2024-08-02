@@ -38,10 +38,10 @@ class TestWinsorisedWeight:
                 "a_weight",
                 "g_weight",
                 "target_variable",
-                "nw_ag_flag",
                 "predicted_unit_value",
-                "l_values",
+                "l_value",
                 "ratio_estimation_treshold",
+                "nw_ag_flag",
                 "new_target_variable",
                 "outlier_weight",
             ]
@@ -55,10 +55,10 @@ class TestWinsorisedWeight:
                 "a_weight",
                 "g_weight",
                 "target_variable",
-                "nw_ag_flag",
                 "predicted_unit_value",
-                "l_values",
+                "l_value",
                 "ratio_estimation_treshold",
+                "nw_ag_flag",
             ]
         ]
 
@@ -71,10 +71,10 @@ class TestWinsorisedWeight:
             "a_weight",
             "g_weight",
             "target_variable",
-            "nw_ag_flag",
             "predicted_unit_value",
-            "l_values",
+            "l_value",
             "ratio_estimation_treshold",
+            "nw_ag_flag",
         )
 
         assert_frame_equal(actual_output, expected_output)

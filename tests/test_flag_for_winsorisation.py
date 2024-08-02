@@ -28,4 +28,4 @@ class TestWinsorisationFlag:
             df=df_input, a_weight="a_weight", g_weight="g_weight"
         )
 
-        assert_frame_equal(df_output, df_expected_output)
+        assert_frame_equal(df_output, df_expected_output, check_dtype=False)

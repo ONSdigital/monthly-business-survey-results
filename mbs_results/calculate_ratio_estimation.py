@@ -1,32 +1,24 @@
-import pandas as pd
+import numpy as np
 
 
 def calculate_ratio_estimation(
-    df: pd.DataFrame,
-    strata: str,
-    period: str,
-    aux: str,
-    sampled: str,
-    a_weight: str,
-    g_weight: str,
-    target_variable: str,
-    predicted_unit_value: str,
-    l_values: str,
-) -> pd.DataFrame:
+    df,
+    aux,
+    sampled,
+    a_weight,
+    g_weight,
+    target_variable,
+    predicted_unit_value,
+    l_values,
+    nw_ag_flag,
+):
 
     """
-    Calculate link between target_variable and predictive_variable by strata,
-    a match_col must be supplied which indicates if target_variable
-    and predictive_variable can be linked.
-
+    Calculate ratio estimation threshold
     Parameters
     ----------
     df : pd.Dataframe
         Original dataframe.
-    period : str
-        Column name containing time period.
-    strata : str
-        Column name containing strata information (sic).
     aux : str
         Column name containing auxiliary variable (x).
     sampled : str
@@ -41,20 +33,25 @@ def calculate_ratio_estimation(
         column name containing the predicted unit value
     l_values:str
         column containing the l values provided by methodology
+    nw_ag_flag: str
+        column name indicating whether it can't be winsorised-
+        boolean (True means it can't be winsorised, False means it can).
+
     Returns
     -------
     df : pd.DataFrame
-        A pandas DataFrame with a new column containing the predicted unit value.
+        A pandas DataFrame with a new column containing the ratio estimation.
     """
 
-    df = df[df["predicted_unit_value"].notna()]
-    df = df.reset_index(drop=True)
-    # check if reset index creates problems down the line
-
-    df["flag_calculation"] = df["a_weight"] * df["g_weight"]
-    df["ratio_estimation_treshold"] = df["predicted_unit_value"] + (
-        df["l_values"] / (df["flag_calculation"] - 1)
+    df["flag_calculation"] = df[a_weight] * df[g_weight]
+    df["ratio_estimation_treshold"] = (df[predicted_unit_value]) + (
+        df[l_values] / (df["flag_calculation"] - 1)
     )
     df = df.drop("flag_calculation", axis=1)
+
+    non_winsorised = (df[sampled] == 0) | (df[nw_ag_flag] is True)
+    df["ratio_estimation_treshold"] = df["ratio_estimation_treshold"].mask(
+        non_winsorised, np.nan
+    )
 
     return df
