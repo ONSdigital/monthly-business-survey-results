@@ -168,3 +168,64 @@ def constrain(
     final_constrained = pd.concat([df, derived_values])
 
     return final_constrained
+
+
+# Outliering constraints
+
+# Does the same replacement constraint occur
+# refactor into function that derives questions from inputs and second one which constrains?
+
+
+def derive_questions(
+    df: pd.DataFrame,
+    period: str,
+    reference: str,
+    target: str,
+    question_no: str,
+    spp_form_id: str,
+) -> pd.DataFrame:
+    derive_map = {
+        13: {"derive": 40, "from": [46, 47]},
+        14: {"derive": 40, "from": [42, 43]},
+    }
+    pre_derive_df = df.set_index(
+        [spp_form_id, question_no, period, reference], verify_integrity=False
+    )
+    pre_derive_df = pre_derive_df[[target]].fillna(value=0)
+
+    derived_values = pd.concat(
+        [
+            sum_sub_df(pre_derive_df.loc[form_type], derives["from"]).assign(
+                question_no=derives["derive"]
+            )
+            for form_type, derives in derive_map.items()
+        ]
+    )
+
+    return derived_values
+
+
+if __name__ == "__main__":
+    df = pd.read_csv(
+        "tests/data/winsorisation/derived-questions-winsor.csv", index_col=False
+    )
+    df_input = df.drop(df[df["question_no"] == 40].index)
+    target_variable_col = "new_target_variable"
+    df_input[target_variable_col] = df_input[target_variable_col].astype(float)
+    df_input["outlier_weight"] = df_input["outlier_weight"].astype(float)
+    print(df_input.dtypes)
+    df_input["winsorised_value"] = (
+        df_input["outlier_weight"] * df_input[target_variable_col]
+    )
+
+    df_ouput = derive_questions(
+        df_input,
+        "period",
+        "reference",
+        "winsorised_value",
+        "question_no",
+        "spp_form_id",
+    )
+    print(df_ouput)
+
+    # Q40 derived -> Estimation -> q40 derived from estimation?
