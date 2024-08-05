@@ -1,15 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Aug  1 12:24:43 2024
-
-@author: zogkoa
-"""
-
-from pathlib import Path
 from importlib import metadata
 import pandas as pd
 import numpy as np
-
 import json
 
 from testing_helpers import get_pre_impute_data, proccess_for_pre_impute, check_na_duplicates,map_form_type
@@ -31,8 +22,6 @@ def wrap_winsorised(df,l_values_path):
     """Temporary wrap"""
 
     l_values = pd.read_csv(l_values_path)
-    
-    
     
     df1 = winsorisation_flag(df,"design_weight","calibration_factor")
     
@@ -91,7 +80,7 @@ if __name__ == "__main__":
     post_constrain = constrain(post_impute,"period","reference","adjusted_value","imputed_value","question_no","form_type_spp")
     
     # Imputation test data here
-    post_constrain.to_csv(config['out_path']+f"imputation_{FILE_VERSION}.csv",index=False)
+    post_constrain.to_csv(config['out_path']+f"imputation_output_{FILE_VERSION}.csv",index=False)
     
     estimate_df = apply_estimation(**config)
 
@@ -100,16 +89,13 @@ if __name__ == "__main__":
     # frotover_x has na for derived values frotover_y has original values
     
     post_estimate = pd.merge(post_constrain,estimate_df,how = "left",on = ["period","reference"])
-    
-    post_estimate.to_csv("D:/post_estimate.csv",index=False)
-    
+        
     estimate_out = post_estimate[["period","cell_no_y","calibration_group","design_weight","calibration_factor"]]
     
-    estimate_out.to_csv(config['out_path']+f"estimation_{FILE_VERSION}.csv",index=False)
-    
-    post_estimate = pd.read_csv("D:/post_estimate.csv")
+    estimate_out.to_csv(config['out_path']+f"estimation_output_{FILE_VERSION}.csv",index=False)
+        
     post_win = wrap_winsorised(post_estimate,config['l_values_path'])
     
-    post_win.to_csv(config['out_path']+f"winsorisation_{FILE_VERSION}.csv",index=False)
+    post_win.to_csv(config['out_path']+f"winsorisation_output_{FILE_VERSION}.csv",index=False)
 
     
