@@ -23,6 +23,8 @@ def wrap_winsorised(df,l_values_path):
 
     l_values = pd.read_csv(l_values_path)
     
+    df = df.drop_duplicates(subset=['period','reference','question_no'],keep = "last")
+
     # Imputed values are in a seperate column 
     df["adjusted_value"] = df[["adjusted_value", "imputed_value"]].agg(
           sum, axis=1
@@ -77,12 +79,16 @@ if __name__ == "__main__":
     post_impute['period']  =  post_impute['period'].dt.strftime('%Y%m').astype("int")
 
     post_impute = post_impute.reset_index(drop=True) #remove groupby leftovers
+    
+    check_na_duplicates(post_impute) #just basic check
 
     post_impute = map_form_type(post_impute)
     
 
     post_constrain = constrain(post_impute,"period","reference","adjusted_value","imputed_value","question_no","form_type_spp")
     
+    check_na_duplicates(post_constrain) #just basic check
+
     # Imputation test data here
     post_constrain.to_csv(config['out_path']+f"imputation_output_{FILE_VERSION}.csv",index=False)
     
@@ -93,7 +99,7 @@ if __name__ == "__main__":
     # frotover_x has na for derived values frotover_y has original values
     
     post_estimate = pd.merge(post_constrain,estimate_df,how = "left",on = ["period","reference"])
-        
+            
     estimate_out = post_estimate[["period","cell_no_y","calibration_group","design_weight","calibration_factor"]]
     
     estimate_out.to_csv(config['out_path']+f"estimation_output_{FILE_VERSION}.csv",index=False)

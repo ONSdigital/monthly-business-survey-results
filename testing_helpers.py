@@ -51,9 +51,18 @@ def proccess_for_pre_impute(df):
     df = df[['period', 'reference', 'question_no', 'adjusted_value',"cell_no","frotover","form_type"]]
 
     questions = [40, 42, 43, 46, 47, 49, 90, 110]
-
-
+    
     df = df.loc[df['question_no'].isin(questions)]
+    
+    df["form_type"] = df["form_type"].str.strip()
+
+    df.drop(df.loc[df['form_type'].isin(["T117G","T167G","T123G","T173G"]) & (df['question_no']==40)].index, inplace=True)
+    
+    df.drop(df.loc[df['form_type'].isin(["T823G","T873G"]) & (df['question_no']==42)].index, inplace=True)
+
+    df.drop(df.loc[df['form_type'].isin(["T817G","T867G"]) & (df['question_no']==46)].index, inplace=True)
+
+    df.reset_index(drop=True,inplace=True)
     
     return df
 
