@@ -23,6 +23,10 @@ def wrap_winsorised(df,l_values_path):
 
     l_values = pd.read_csv(l_values_path)
     
+    # Imputed values are in a seperate column 
+    df["adjusted_value"] = df[["adjusted_value", "imputed_value"]].agg(
+          sum, axis=1
+      )
     df1 = winsorisation_flag(df,"design_weight","calibration_factor")
     
     df2 = calculate_predicted_unit_value(df1,"frotover_y","sampled","design_weight","adjusted_value",'nw_ag_flag')
