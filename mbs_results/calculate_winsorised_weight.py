@@ -3,7 +3,7 @@ import numpy as np
 
 def calculate_winsorised_weight(
     df,
-    strata,
+    group,
     period,
     aux,
     sampled,
@@ -23,8 +23,8 @@ def calculate_winsorised_weight(
     ----------
     df : pd.Dataframe
         Original dataframe
-    strata : str
-        Column name containing strata information (sic).
+    group : str
+        Column name containing group information (sic).
     period : str
         Column name containing time period.
     aux : str
