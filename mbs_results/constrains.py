@@ -87,7 +87,10 @@ def sum_sub_df(df: pd.DataFrame, derive_from: List[int]) -> pd.DataFrame:
         [df.loc[question_no] for question_no in derive_from if question_no in df.index]
     )
 
-    return sums.assign(constrain_marker=f"sum{derive_from}").reset_index()
+    return (
+        sums.assign(constrain_marker=f"sum{derive_from}")
+        .reset_index()
+    )
 
 
 def constrain(
@@ -136,12 +139,7 @@ def constrain(
         Original dataframe with constrains.
     """
 
-    derive_map = {
-        13: {"derive": 40, "from": [46, 47]},
-        14: {"derive": 40, "from": [42, 43]},
-        15: {"derive": 46, "from": [40]},
-        16: {"derive": 42, "from": [40]},
-    }
+    derive_map = create_derive_map(df, spp_form_id)
 
     # pre_derive_df has dimenesions as index, columns the values to be used when derived
     pre_derive_df = df.set_index(
@@ -160,8 +158,10 @@ def constrain(
 
     df.set_index([question_no, period, reference], inplace=True)
 
-    replace_values_index_based(df, target_imputed, 49, ">", 40)
-    replace_values_index_based(df, target_imputed, 90, ">=", 40)
+    if 49 in df[question_no].unique(): 
+        replace_values_index_based(df, target_imputed, 49, ">", 40)
+    elif 90 in df[question_no].unique():
+        replace_values_index_based(df, target_imputed, 90, ">=", 40)
 
     df.reset_index(inplace=True)
 
@@ -184,25 +184,127 @@ def derive_questions(
     question_no: str,
     spp_form_id: str,
 ) -> pd.DataFrame:
-    derive_map = {
-        13: {"derive": 40, "from": [46, 47]},
-        14: {"derive": 40, "from": [42, 43]},
-    }
+    derive_map = create_derive_map(df, spp_form_id)
+
     pre_derive_df = df.set_index(
         [spp_form_id, question_no, period, reference], verify_integrity=False
     )
-    pre_derive_df = pre_derive_df[[target]].fillna(value=0)
+    pre_derive_df = pre_derive_df[[target]].fillna(
+        value=0
+    )  # Assuming default value of o-weight is 0
 
     derived_values = pd.concat(
         [
-            sum_sub_df(pre_derive_df.loc[form_type], derives["from"]).assign(
-                question_no=derives["derive"]
-            )
+            sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
+            .assign(question_no=derives["derive"])
+            .assign(spp_form_id=form_type)
             for form_type, derives in derive_map.items()
         ]
     )
+    unique_q_numbers = df.question_no.unique()
 
-    return derived_values
+    df.set_index([question_no, period, reference], inplace=True)
+
+    # This would replace 49 with 40, but might have been winsorised independently
+    if [40,49] in unique_q_numbers: 
+        replace_values_index_based(df, target, 49, ">", 40)
+    elif [90,40]in unique_q_numbers:
+        replace_values_index_based(df, target, 90, ">=", 40)
+    df.reset_index(inplace=True)
+
+
+    final_constrained = pd.concat([df, derived_values]).reset_index(drop=True)
+    # final_constrained.rename(columns={"constrain_marker":f"constrain_marker_{target}"},inplace=True)
+
+    return final_constrained
+
+
+def create_derive_map(df, spp_form_id):
+    """
+    Function to create derive mapping dictionary
+    Will check the unique values for form types and remove this
+    from the dictionary if not present. handles error
+
+    Parameters
+    ----------
+    df : _type_
+        _description_
+    spp_form_id : _type_
+        _description_
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+
+    derive_map = {
+        13: {"derive": 40, "from": [46, 47]},
+        14: {"derive": 40, "from": [42, 43]},
+        15: {"derive": 46, "from": [40]},
+        16: {"derive": 42, "from": [40]},
+    }
+    form_ids_present = df[spp_form_id].dropna().unique()
+    ids_not_present = [x for x in derive_map.keys() if x not in form_ids_present]
+    for key in ids_not_present:
+        derive_map.pop(key)
+
+    return derive_map
+
+
+def calculate_derived_outlier_weights(
+    df: pd.DataFrame,
+    period: str,
+    reference: str,
+    target: str,
+    question_no: str,
+    spp_form_id: str,
+    outlier_weight: str,
+):
+    
+    
+    # if constrain_marker exists in columns, then run second part. if not run first then second. 
+    if "constrain_marker" not in df.columns:
+        # Handelling case where q40 has not been derived pre winsorisation
+
+        df_pre_winsorised = derive_questions(
+            df,
+            period,
+            reference,
+            target,
+            question_no,
+            spp_form_id,
+        )
+    else:
+        df_pre_winsorised = df.copy()
+    # Deriving winsorised value from targert 
+    # print("inside_function:\n", df_pre_winsorised[target])
+
+    df["winsorised_value"] = df[outlier_weight].fillna(1) * df[target_variable_col]
+
+    post_winsorised_derived_questions = derive_questions(
+        df,
+        period,
+        reference,
+        "winsorised_value",
+        question_no,
+        spp_form_id,
+    )
+    post_winsorised_derived_questions = post_winsorised_derived_questions.loc[post_winsorised_derived_questions["constrain_marker"].notna()]
+
+    df_merged = pd.concat([df_pre_winsorised,post_winsorised_derived_questions])
+    print("pre",df_merged.head())
+
+    df_merged = df_merged.groupby(
+        ["spp_form_id", "question_no", "period", "reference"]
+    ).aggregate("first")
+    print("post",df_merged.head())
+
+    df_merged.reset_index(inplace=True)
+    df_merged.loc[df_merged["constrain_marker"].notna(),"outlier_weight"] = df_merged["winsorised_value"] / df_merged[target] 
+    df_merged.sort_values(by=[reference,period,question_no,spp_form_id],inplace=True)
+
+    return df_merged
 
 
 if __name__ == "__main__":
@@ -213,19 +315,63 @@ if __name__ == "__main__":
     target_variable_col = "new_target_variable"
     df_input[target_variable_col] = df_input[target_variable_col].astype(float)
     df_input["outlier_weight"] = df_input["outlier_weight"].astype(float)
-    print(df_input.dtypes)
     df_input["winsorised_value"] = (
         df_input["outlier_weight"] * df_input[target_variable_col]
     )
 
-    df_ouput = derive_questions(
+    df_output = calculate_derived_outlier_weights(
         df_input,
         "period",
         "reference",
-        "winsorised_value",
+        target_variable_col,
         "question_no",
         "spp_form_id",
+        "outlier_weight",
     )
-    print(df_ouput)
+
+    print(df_output)
+    # subset_output = df_output.loc[df_output["constrain_marker"].notna()]
+    # subset_output1 = subset_output.groupby(
+    #     ["spp_form_id", "question_no", "period", "reference"]
+    # ).aggregate("first")
+    # subset_output1["o_weights"] = (
+    #     subset_output1["winsorised_value"] / subset_output1["new_target_variable"]
+    # )
+    # print(subset_output)
+    # print(subset_output1.reset_index(drop=True))
 
     # Q40 derived -> Estimation -> q40 derived from estimation?
+    # Should values be replaced after outliering using same constraints
+    # Which column is used as the before(target, new_target) and after outliering(winsorised_value)?
+    # Default o weights?
+
+    # Imputation -> constraints? -> derives q40 -> estimation -> winsoriation -> constraints on winsorisation
+
+# Winsorised 49 compared to winsorised 40. 
+# Need to check if business areas need to update outlier weight
+# Check 
+
+# What should happen if q42 has o weight and been winsorised, but q43 hasnt, assume o weight is 1 and use target variable?
+    large_df = pd.read_csv("tests/data/winsorisation/post_win.csv",index_col=False)
+    form_13_subset = large_df.loc[(large_df["constrain_marker"].notna()) ]
+    one_reference = large_df.loc[large_df["reference"] == 11000475087]
+    one_reference.to_csv('one_ref.csv')
+    one_reference=one_reference[["question_no","period","reference","form_type_spp","adjusted_value","constrain_marker","outlier_weight","new_target_variable"]]
+    
+
+    target_variable_col = "adjusted_value"
+    df_output = calculate_derived_outlier_weights(
+        one_reference,
+        "period",
+        "reference",
+        target_variable_col,
+        "question_no",
+        "form_type_spp",
+        "outlier_weight",
+    )
+    # print(df_output.loc[df_output["winsorised_value"] != 0,["question_no","adjusted_value",target_variable_col,"winsorised_value","constrain_marker"]])
+    
+    one_ref = one_reference
+    print(one_ref.head())
+    one_ref = df_output.loc[(df_output["reference"] == 11323051017)  ]
+    print(one_ref.head())
