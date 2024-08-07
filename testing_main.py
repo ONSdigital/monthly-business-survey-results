@@ -23,20 +23,20 @@ def wrap_winsorised(df,l_values_path):
 
     l_values = pd.read_csv(l_values_path)
     
-    df = df.drop_duplicates(subset=['period','reference','question_no'],keep = "last")
-
     # Imputed values are in a seperate column 
     df["adjusted_value"] = df[["adjusted_value", "imputed_value"]].agg(
           sum, axis=1
       )
+    
+    df['frosic2007_3d'] = (pd.Series(np.floor(df['frosic2007']/100 )*100)).astype(int)
+
     df1 = winsorisation_flag(df,"design_weight","calibration_factor")
     
-    df2 = calculate_predicted_unit_value(df1,"frotover_y","sampled","design_weight","adjusted_value",'nw_ag_flag')
     
-    df2 = pd.merge(df2,l_values,how="left",left_on=["period","question_no","frosic2007"],right_on=["period","question_no","classification"])
+    df2 = calculate_predicted_unit_value(df1,"frosic2007_3d","period","frotover_y","sampled","design_weight","adjusted_value",'nw_ag_flag')
+    
+    df2 = pd.merge(df2,l_values,how="left",left_on=["period","question_no","frosic2007_3d"],right_on=["period","question_no","classification"])
 
-    df2['frosic2007_3d'] = (pd.Series(np.floor(df2['frosic2007']/100 )*100)).astype(int)
- 
     
     df3 = calculate_ratio_estimation(df2,"frotover_y","sampled","design_weight","calibration_factor","adjusted_value","predicted_unit_value",
                                      "l_value",'nw_ag_flag')
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     estimate_out = post_estimate[["period","cell_no_y","calibration_group","design_weight","calibration_factor"]]
     
     estimate_out.to_csv(config['out_path']+f"estimation_output_{FILE_VERSION}.csv",index=False)
-        
+            
     post_win = wrap_winsorised(post_estimate,config['l_values_path'])
     
     post_win.to_csv(config['out_path']+f"winsorisation_output_{FILE_VERSION}.csv",index=False)
