@@ -31,7 +31,7 @@ class TestWinsorisedWeight:
     ):
         expected_output = winsorised_weight_test_output[
             [
-                "strata",
+                "group",
                 "period",
                 "aux",
                 "sampled",
@@ -48,7 +48,7 @@ class TestWinsorisedWeight:
         ]
         input_data = winsorised_weight_test_data[
             [
-                "strata",
+                "group",
                 "period",
                 "aux",
                 "sampled",
@@ -64,7 +64,7 @@ class TestWinsorisedWeight:
 
         actual_output = calculate_winsorised_weight(
             input_data,
-            "strata",
+            "group",
             "period",
             "aux",
             "sampled",

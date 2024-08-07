@@ -31,6 +31,8 @@ class TestPredictedUnitValue:
     ):
         expected_output = predicted_unit_value_test_output[
             [
+                "group",
+                "period",
                 "aux",
                 "sampled",
                 "a_weight",
@@ -41,6 +43,8 @@ class TestPredictedUnitValue:
         ]
         input_data = predicted_unit_value_test_data[
             [
+                "group",
+                "period",
                 "aux",
                 "sampled",
                 "a_weight",
@@ -51,6 +55,8 @@ class TestPredictedUnitValue:
 
         actual_output = calculate_predicted_unit_value(
             input_data,
+            "group",
+            "period",
             "aux",
             "sampled",
             "a_weight",
