@@ -1,4 +1,4 @@
-strata,period,aux,sampled,a_weight,g_weight,target_variable,nw_ag_flag,predicted_unit_value,l_value
+group,period,aux,sampled,a_weight,g_weight,target_variable,nw_ag_flag,predicted_unit_value,l_value
 101,202401,10,0,1.666666667,1.023809524,12,False,,
 101,202401,23,1,1.666666667,1.023809524,20,False,14.375,0.5
 101,202401,41,1,1.666666667,1.023809524,20,False,25.625,0.5

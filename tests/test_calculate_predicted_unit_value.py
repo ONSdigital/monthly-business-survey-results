@@ -31,7 +31,7 @@ class TestPredictedUnitValue:
     ):
         expected_output = predicted_unit_value_test_output[
             [
-                "strata",
+                "group",
                 "period",
                 "aux",
                 "sampled",
@@ -43,7 +43,7 @@ class TestPredictedUnitValue:
         ]
         input_data = predicted_unit_value_test_data[
             [
-                "strata",
+                "group",
                 "period",
                 "aux",
                 "sampled",
@@ -55,7 +55,7 @@ class TestPredictedUnitValue:
 
         actual_output = calculate_predicted_unit_value(
             input_data,
-            "strata",
+            "group",
             "period",
             "aux",
             "sampled",
