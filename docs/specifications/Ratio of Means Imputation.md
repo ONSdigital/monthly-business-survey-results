@@ -8,7 +8,8 @@
 
 ## 2.0 Terminology
 
-* Contributor - A member of the sample; identified by a unique identifier.
+* Contributor - A member of the sample; identified by a unique identifier or
+    reference.
 * Record - A set of values for each contributor and period.
 * Target Period - The period which requires imputation to be applied.
 * Target Variable - The variable of interest that requires data values
@@ -29,14 +30,8 @@
     period.
 * Link - A ratio used as part of the imputation process. Commonly known as
     the imputation link.
-* Previous year link - This is the imputation link for the previous year
-for a given contributor. This should be input into the method if the user
-wishes to apply weighted imputation.
-* Target period link weight -  If using weighted imputation, this value
-represents the weight of the target period imputation link as a proportion
-of 1. If = 1 or missing, then weighted imputation is not applied.
 * Matched Pair - A contributor that has returned, cleaned values in
-both the target and predictive period.
+    both the target and predictive period.
 
 ## 3.0 Introduction
 
@@ -56,7 +51,7 @@ can be:
 
 Typically, the auxiliary variable can be:
 
-* a known register based variable for the non-responder that is well
+* a known register-based variable for the non-responder that is well
   correlated with the variable of interest, used for construction
   imputation.
 
@@ -71,6 +66,8 @@ construction) for the non-respondent from a previous/consecutive/current period
 for forwards/backwards/construction imputation respectively.
 
 Due to its robust nature, it does not use any form of trimming or outliering.
+This method is also available in PySpark with added functionality of using
+weighting imputation and can be found [here](https://github.com/ONSdigital/Statistical-Method-Specifications/blob/main/editing_and_imputation/imputation/ratio_of_means/methodological_specification.md).
 
 ## 4.0 Assumptions
 
@@ -95,32 +92,30 @@ implementation detail and thus out of scope of this document.
 
 Input records must include the following fields of the correct types:
 
-* Unique Identifier - Any
-* Period - String in "YYYYMM" format
-* Imputation Class - Any
+* Unique Identifier - Numeric
+* Period - datetime64[ns]
+* Imputation Class - Numeric
 * Target Variable - Numeric - Nulls Allowed
 * Auxiliary Variable - Numeric
-* Forward Link (Optional) - Numeric
-* Backward Link (Optional) - Numeric
-* Construction Link (Optional) - Numeric
-* Manually Constructed Value – Numeric – Optional – Nulls
- allowed – This column is used at target variable level to
- input manually constructed values into the method
- (section 8.4 and 8.8)
-* Link Filter Columns (Optional) - This can be any number of
-columns of any type that are to be used by the link filter
-(7.1) to prevent responders being used in the imputation
-link calculations.
+* Imputation links (Optional but will need all below) - Dictionary
+    * Forward Link - Numeric
+    * Backward Link - Numeric
+    * Construction Link - Numeric
+* Manually Constructed Value (Optional) – Input as a dataframe of references,
+    periods and values (section 8.4 and 8.7)
+* Link Filter Columns (Optional) - Input as a dataframe of references
+    and periods
 
 ### 5.2 Output Records
 
 Output records shall always contain the following fields with the following
 types:
 
-* Unique Identifier - Any
-* Period - String in "YYYYMM" format
-* Imputation Class - Any
-* Final Target Variable - Numeric
+* Unique Identifier - Numeric
+* Period - datetime64[ns]
+* Imputation Class - Numeric
+* Target Column - Numeric
+* Imputed Value Column - Numeric
 * Imputation Marker - String
 * Forward Link - Numeric
 * Backward Link - Numeric
@@ -134,32 +129,20 @@ types:
 
 If Responder Filtering is performed, then output records should also contain:
 
-* Post Filter Inclusion Marker Previous – Boolean – Nulls Allowed
-* Post Filter Inclusion Marker Target – Boolean – Nulls Allowed
-* Post Filter Inclusion Marker Next – Boolean – Nulls Allowed
+* Filtered target column - Numeric
 
-If weighted imputation is performed, then the output record should also
-contain:
-
-* Unweighted Forward Link - Numeric - Optional - Nulls Allowed
-* Unweighted Backward Link - Numeric - Optional - Nulls Allowed
-* Unweighted Construction Link - Numeric - Optional - Nulls Allowed
-
-Fields of type "Any" shall be of the same type as the corresponding input
-fields as the values shall be the same in both input and output records.
-
-Output records labelled 'Optional' shall only be populated in the ouput
-dataset if the corresponding functionality was used e.g., weighting.
+Output records labelled 'Optional' shall only be populated in the output
+dataset if the corresponding functionality was used e.g., filtering.
 
 The imputation marker must be one of the following:
 
-* FIR = Forwards imputation from response
-* FIC = Forwards imputation from construction
-* FIMC = Forwards imputation from manual construction
-* BI = Backwards imputation
-* C = Construction imputation from auxiliary variable
-* MC = Manual construction
-* R = Response. This value is cleared of errors or warnings
+* fir = Forwards imputation from response
+* fir = Forwards imputation from construction
+* fimc = Forwards imputation from manual construction
+* bir = Backwards imputation
+* c = Construction imputation from auxiliary variable
+* mc = Manual construction
+* r = Response. This value is cleared of errors or warnings.
 
 ### 5.3 Back Data
 
@@ -170,27 +153,14 @@ the result of a prior imputation run and must not appear in the output.
 
 Back data records shall always contain the following fields:
 
-* Unique Identifier - Any e.g. Business Reporting Unit
-* Period - String in "YYYYMM" format
-* Imputation Class
+* Unique Identifier - Numeric
+* Period - datetime64[ns]
+* Imputation Class - Numeric
 * Final Target Variable - Numeric
 * Imputation Marker - String
 
 These fields must have the same types as their counterparts in the Input
 and Output records.
-
-If weighted imputation is being implemented, then the back data should
-include the necessary periods for the specified time lag (e.g., the
-previous year) to allow this.
-
-The back data for weighting should also contain:
-
-* Unweighted Forward Link - Numeric
-* Unweighted Backward Link - Numeric
-* Unweighted Construction Link - Numeric
-
-These fields must have the same types as their weighted counterparts in
-the Output records.
 
 ## 6.0 Method
 
@@ -239,8 +209,8 @@ class in the dataset separately. In addition, since all contributors
 must have a populated auxiliary variable, failure to fully populate the target
 variable by this method shall constitute an error.
 
-Typically, a register-based variable such as frozen turnover or frozen
-employment would be used as a contributor's auxiliary variable.
+Typically, a register-based variable such as frozen turnover would be used as
+a contributor's auxiliary variable.
 
 ## 7.0 Link Calculation
 
@@ -250,7 +220,7 @@ When calculating imputation links, it is essential that matched pairs of
 clean respondent data (data that are not in error) are used. More specifically,
 only clean respondents that are present in both the target and predictive
 periods should be used. In the case of construction imputation, only clean
-respondent present in the target period and corresponding auxiliary
+respondents present in the target period and corresponding auxiliary
 variable should be used.
 
 By default, the method will consider all responders when calculating links.
@@ -320,13 +290,14 @@ Instead, a suitable error shall be emitted.
 
 When the imputation link cannot be calculated the imputation link will be
 defaulted to 1. To distinguish that this link cannot be calculated the matched
-pairs will be missing.
+pairs will be set to 0.
 
 #### 7.6.2 Zero in link calculations
 
 When the denominator of the imputation link calculation is 0 the link is
 defaulted to 1. To distinguish this link from the above default the matched
-pairs will be set to 0.
+pairs will be set to the amount of matched pairs that would be used in the
+calculation.
 
 ## 8.0 Imputation
 
@@ -352,7 +323,7 @@ responder) then the output imputation marker is set to R.
 
 Forward imputation imputes data for non-responders in the target period by
 multiplying a link to the predictive data, where the predictive period is the
-peiod that immediately precedes the target period. It should be noted that the
+period that immediately precedes the target period. It should be noted that the
 same link is used for forwards imputation from a response and from a
 construction.
 
@@ -397,24 +368,11 @@ Please see section 8.8 for more details.
 
 #### 8.4.1 Forward Imputation from Manual Construction
 
-For forward imputation from manual construction, the predictve value must
+For forward imputation from manual construction, the predictive value must
 only come from manually constructed values or forward imputed values from
 a manual construction. Records using this imputation will be marked FIMC.
 
-### 8.5 Weighted imputation links
-
-In some cases, it may be appropriate to use an imputation link which is an
-average of imputation links for more than one period. In the simplest case
-this could be the average of two links. Two further parameters would need
-to specified: the time lag (k) and the weight (w) given to each period. In
-this case the imputation link is calculated as:
-
-```asciimath
-Weighted imputation link = w*{sum y_{i, t}}/{sum x_{i, t}}
-          + (1-w)*{sum y_{i, t-k}}/{sum x_{i, t-k}}
-```
-
-### 8.6 User specified imputation links
+### 8.5 User specified imputation links
 
 In some instances, a user may want to specify that the imputed value for a
 given target variable is constructed using links that have been calculated
@@ -424,7 +382,7 @@ forwards imputed using links that have been calculated for another variable
 named by the user within a corresponding imputation class or use a link of
 1.
 
-### 8.7 Imputation rules
+### 8.6 Imputation rules
 
 Ratio of means imputation follows a set of rules to ensure that it is used
 correctly, these rules are in the same order as the flow chart below:
@@ -471,9 +429,9 @@ Please see the image below for further information.
 
 ![imputation_types4](https://github.com/ONSdigital/Statistical-Method-Specifications/assets/87982871/eafd5663-8870-4c03-9819-125d1ff38fc4)
 
-### 8.8 Manual Construction Rules
+### 8.7 Manual Construction Rules
 
-#### 8.8.1 Rules
+#### 8.7.1 Rules
 
 * Only a return or another manual construction can override a manual
   construction (MC).
@@ -488,11 +446,11 @@ Please see the image below for further information.
 * A manual construction cannot be used as the predictive value when carrying
   out backward imputation.
 * A return can override a forward impute from a manual construction.
-* A foward impute from a return can override a forward impute from a manual
+* A forward impute from a return can override a forward impute from a manual
   construction.
 * A backward impute can override a forward impute from a manual construction.
 
-#### 8.8.2 Scenarios
+#### 8.7.2 Scenarios
 
 These scenarios are in the same order as the flow chart above in section 8.7:
 
@@ -531,7 +489,7 @@ MC, R, FIR.
 * If a value of any type is held in the first period, then manual construction is
 input for the second period, then do not backward impute from the manual construction.
 
-# Parts of the specification left out but can be found 
+#### Parts of the specification left out but can be found in the [PySpark method](https://github.com/ONSdigital/Statistical-Method-Specifications/blob/main/editing_and_imputation/imputation/ratio_of_means/methodological_specification.md).
 
 - Weighting
                                         
