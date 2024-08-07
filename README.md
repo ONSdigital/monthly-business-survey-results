@@ -1,6 +1,6 @@
 ## How to run
 1. clone this branch
-2. pip install git+https://github.com/ONSdigital/monthly-business-survey-results.git (installs main otherwise add version)
+2. pip install git+https://github.com/ONSdigital/monthly-business-survey-results.git@v0.0.1
 3. add paths in [json config](https://github.com/ONSdigital/monthly-business-survey-results/blob/testing_outputs/test_outputs_config.json)
 4. run [testing_main](https://github.com/ONSdigital/monthly-business-survey-results/blob/480-testing-outputs/testing_main.py)
 
