@@ -280,7 +280,7 @@ def calculate_derived_outlier_weights(
     # Deriving winsorised value from targert 
     # print("inside_function:\n", df_pre_winsorised[target])
 
-    df["winsorised_value"] = df[outlier_weight].fillna(1) * df[target_variable_col]
+    df["winsorised_value"] = df[outlier_weight].fillna(0) * df[target_variable_col]
 
     post_winsorised_derived_questions = derive_questions(
         df,
@@ -290,17 +290,22 @@ def calculate_derived_outlier_weights(
         question_no,
         spp_form_id,
     )
+
     post_winsorised_derived_questions = post_winsorised_derived_questions.loc[post_winsorised_derived_questions["constrain_marker"].notna()]
+    post_winsorised_derived_questions = post_winsorised_derived_questions[[period,reference,question_no,spp_form_id,"winsorised_value"]]
 
-    df_merged = pd.concat([df_pre_winsorised,post_winsorised_derived_questions])
-    print("pre",df_merged.head())
+    # df_merged = pd.concat([df_pre_winsorised,post_winsorised_derived_questions])
 
-    df_merged = df_merged.groupby(
-        ["spp_form_id", "question_no", "period", "reference"]
-    ).aggregate("first")
-    print("post",df_merged.head())
+    print("pre",df_pre_winsorised)
+    # Issue is here removing all other data
+    # df_merged = df_merged.groupby(
+    #     [spp_form_id, question_no, period, reference]
+    # ).aggregate("first")
+    df_merged = pd.merge(df_pre_winsorised, post_winsorised_derived_questions, how = 'left',on = [period,reference,question_no,spp_form_id])
+    print("post",post_winsorised_derived_questions.columns)
 
     df_merged.reset_index(inplace=True)
+    print("merged",df_merged.columns)
     df_merged.loc[df_merged["constrain_marker"].notna(),"outlier_weight"] = df_merged["winsorised_value"] / df_merged[target] 
     df_merged.sort_values(by=[reference,period,question_no,spp_form_id],inplace=True)
 
@@ -312,12 +317,12 @@ if __name__ == "__main__":
         "tests/data/winsorisation/derived-questions-winsor.csv", index_col=False
     )
     df_input = df.drop(df[df["question_no"] == 40].index)
-    target_variable_col = "new_target_variable"
+    target_variable_col = "target_variable"
     df_input[target_variable_col] = df_input[target_variable_col].astype(float)
     df_input["outlier_weight"] = df_input["outlier_weight"].astype(float)
-    df_input["winsorised_value"] = (
-        df_input["outlier_weight"] * df_input[target_variable_col]
-    )
+    # df_input["winsorised_value"] = (
+    #     df_input["outlier_weight"] * df_input[target_variable_col]
+    # )
 
     df_output = calculate_derived_outlier_weights(
         df_input,
@@ -351,17 +356,21 @@ if __name__ == "__main__":
 # Need to check if business areas need to update outlier weight
 # Check 
 
-# What should happen if q42 has o weight and been winsorised, but q43 hasnt, assume o weight is 1 and use target variable?
+###  What should happen if q42 has o weight and been winsorised, but q43 hasnt, assume o weight is 1 and use target variable?
+
+
+
+
     large_df = pd.read_csv("tests/data/winsorisation/post_win.csv",index_col=False)
     form_13_subset = large_df.loc[(large_df["constrain_marker"].notna()) ]
     one_reference = large_df.loc[large_df["reference"] == 11000475087]
-    one_reference.to_csv('one_ref.csv')
+    # one_reference.to_csv('one_ref.csv')
     one_reference=one_reference[["question_no","period","reference","form_type_spp","adjusted_value","constrain_marker","outlier_weight","new_target_variable"]]
     
 
     target_variable_col = "adjusted_value"
     df_output = calculate_derived_outlier_weights(
-        one_reference,
+        large_df,
         "period",
         "reference",
         target_variable_col,
@@ -369,9 +378,9 @@ if __name__ == "__main__":
         "form_type_spp",
         "outlier_weight",
     )
-    # print(df_output.loc[df_output["winsorised_value"] != 0,["question_no","adjusted_value",target_variable_col,"winsorised_value","constrain_marker"]])
+    print(df_output.head())
     
-    one_ref = one_reference
-    print(one_ref.head())
-    one_ref = df_output.loc[(df_output["reference"] == 11323051017)  ]
-    print(one_ref.head())
+
+
+
+    # print(df_output.loc[df_output["winsorised_value"] != 0,["question_no","adjusted_value",target_variable_col,"winsorised_value","constrain_marker"]])
