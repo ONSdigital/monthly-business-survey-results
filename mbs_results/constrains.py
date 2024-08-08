@@ -190,7 +190,7 @@ def derive_questions(
         [spp_form_id, question_no, period, reference], verify_integrity=False
     )
     pre_derive_df = pre_derive_df[[target]].fillna(
-        value=0
+        value=1
     )  # Assuming default value of o-weight is 0
 
     derived_values = pd.concat(
@@ -260,13 +260,13 @@ def calculate_derived_outlier_weights(
     question_no: str,
     spp_form_id: str,
     outlier_weight: str,
+    winsorised_target: str
 ):
     
     
     # if constrain_marker exists in columns, then run second part. if not run first then second. 
     if "constrain_marker" not in df.columns:
-        # Handelling case where q40 has not been derived pre winsorisation
-
+        # Handling case where q40 has not been derived pre-winsorisation
         df_pre_winsorised = derive_questions(
             df,
             period,
@@ -277,53 +277,49 @@ def calculate_derived_outlier_weights(
         )
     else:
         df_pre_winsorised = df.copy()
-    # Deriving winsorised value from targert 
-    # print("inside_function:\n", df_pre_winsorised[target])
 
-    df["winsorised_value"] = df[outlier_weight].fillna(0) * df[target_variable_col]
-
-    post_winsorised_derived_questions = derive_questions(
+    post_win_derived = derive_questions(
         df,
         period,
         reference,
-        "winsorised_value",
+        winsorised_target,
         question_no,
         spp_form_id,
     )
 
-    post_winsorised_derived_questions = post_winsorised_derived_questions.loc[post_winsorised_derived_questions["constrain_marker"].notna()]
-    post_winsorised_derived_questions = post_winsorised_derived_questions[[period,reference,question_no,spp_form_id,"winsorised_value"]]
+    post_win_derived = post_win_derived.loc[post_win_derived["constrain_marker"].notna()]
+    post_win_derived = post_win_derived[[period,reference,question_no,spp_form_id,winsorised_target]]
+    
+    df_pre_winsorised.set_index([spp_form_id, question_no, period, reference],inplace=True)
+    post_win_derived.set_index([spp_form_id, question_no, period, reference],inplace=True)
+    print(df_pre_winsorised)
+    updated_o_weight_bool = df_pre_winsorised[winsorised_target].isna()
 
-    # df_merged = pd.concat([df_pre_winsorised,post_winsorised_derived_questions])
+    df_pre_winsorised.loc[updated_o_weight_bool,winsorised_target] = post_win_derived.loc[updated_o_weight_bool,winsorised_target]
+    df_pre_winsorised["post_wins_o_value"] = updated_o_weight_bool
+    print(df_pre_winsorised[[target,winsorised_target]])
 
     print("pre",df_pre_winsorised)
-    # Issue is here removing all other data
-    # df_merged = df_merged.groupby(
-    #     [spp_form_id, question_no, period, reference]
-    # ).aggregate("first")
-    df_merged = pd.merge(df_pre_winsorised, post_winsorised_derived_questions, how = 'left',on = [period,reference,question_no,spp_form_id])
-    print("post",post_winsorised_derived_questions.columns)
 
-    df_merged.reset_index(inplace=True)
-    print("merged",df_merged.columns)
-    df_merged.loc[df_merged["constrain_marker"].notna(),"outlier_weight"] = df_merged["winsorised_value"] / df_merged[target] 
-    df_merged.sort_values(by=[reference,period,question_no,spp_form_id],inplace=True)
+    df_pre_winsorised.reset_index(inplace=True)
+    df_pre_winsorised.loc[df_pre_winsorised["constrain_marker"].notna(),outlier_weight] = df_pre_winsorised[winsorised_target] / df_pre_winsorised[target] 
+    df_pre_winsorised.sort_values(by=[reference,period,question_no,spp_form_id],inplace=True)
 
-    return df_merged
+    return df_pre_winsorised
 
 
 if __name__ == "__main__":
     df = pd.read_csv(
         "tests/data/winsorisation/derived-questions-winsor.csv", index_col=False
     )
+
+
+
     df_input = df.drop(df[df["question_no"] == 40].index)
     target_variable_col = "target_variable"
     df_input[target_variable_col] = df_input[target_variable_col].astype(float)
     df_input["outlier_weight"] = df_input["outlier_weight"].astype(float)
-    # df_input["winsorised_value"] = (
-    #     df_input["outlier_weight"] * df_input[target_variable_col]
-    # )
-
+    print("input", df_input)
     df_output = calculate_derived_outlier_weights(
         df_input,
         "period",
@@ -332,9 +328,10 @@ if __name__ == "__main__":
         "question_no",
         "spp_form_id",
         "outlier_weight",
+        "new_target_variable"
     )
 
-    print(df_output)
+    print("output", df_output)
     # subset_output = df_output.loc[df_output["constrain_marker"].notna()]
     # subset_output1 = subset_output.groupby(
     #     ["spp_form_id", "question_no", "period", "reference"]
@@ -361,24 +358,24 @@ if __name__ == "__main__":
 
 
 
-    large_df = pd.read_csv("tests/data/winsorisation/post_win.csv",index_col=False)
-    form_13_subset = large_df.loc[(large_df["constrain_marker"].notna()) ]
-    one_reference = large_df.loc[large_df["reference"] == 11000475087]
-    # one_reference.to_csv('one_ref.csv')
-    one_reference=one_reference[["question_no","period","reference","form_type_spp","adjusted_value","constrain_marker","outlier_weight","new_target_variable"]]
+    # large_df = pd.read_csv("tests/data/winsorisation/post_win.csv",index_col=False)
+    # form_13_subset = large_df.loc[(large_df["constrain_marker"].notna()) ]
+    # one_reference = large_df.loc[large_df["reference"] == 11000475087]
+    # # one_reference.to_csv('one_ref.csv')
+    # one_reference=one_reference[["question_no","period","reference","form_type_spp","adjusted_value","constrain_marker","outlier_weight","new_target_variable"]]
     
 
-    target_variable_col = "adjusted_value"
-    df_output = calculate_derived_outlier_weights(
-        large_df,
-        "period",
-        "reference",
-        target_variable_col,
-        "question_no",
-        "form_type_spp",
-        "outlier_weight",
-    )
-    print(df_output.head())
+    # target_variable_col = "adjusted_value"
+    # df_output = calculate_derived_outlier_weights(
+    #     large_df,
+    #     "period",
+    #     "reference",
+    #     target_variable_col,
+    #     "question_no",
+    #     "form_type_spp",
+    #     "outlier_weight",
+    # )
+    # print(df_output.head())
     
 
 
