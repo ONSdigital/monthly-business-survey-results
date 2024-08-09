@@ -382,7 +382,11 @@ if __name__ == "__main__":
     target_variable_col = "target_variable"
     df_input[target_variable_col] = df_input[target_variable_col].astype(float)
     df_input["outlier_weight"] = df_input["outlier_weight"].astype(float)
-    print("input", df_input)
+    df_input.drop(
+        columns=["post_wins_marker", "constrain_marker", "default_o_weight"],
+        inplace=True,
+        errors="ignore",
+    )
     df_output = calculate_derived_outlier_weights(
         df_input,
         "period",
@@ -393,8 +397,6 @@ if __name__ == "__main__":
         "outlier_weight",
         "new_target_variable",
     )
-
-    print("output", df_output)
 
     df = pd.read_csv(
         "tests/data/winsorisation/derived-questions-winsor-missing.csv", index_col=False

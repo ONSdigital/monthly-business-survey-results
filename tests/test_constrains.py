@@ -54,13 +54,17 @@ class TestConstrains:
     def test_calculate_derived_outlier_weights(self):
         pd.set_option("display.max_columns", 10)
         df = pd.read_csv(
-            "tests/data/winsorisation/derived-questions-winsor.csv", index_col=False
+            "tests/data/winsorisation/derived-questions-winsor.csv",
+            index_col=False,
         )
         df["target_variable"] = df["target_variable"].astype(float)
         df["new_target_variable"] = df["new_target_variable"].astype(float)
         # Drop q40 rows
         df_input = df.drop(df[df["question_no"] == 40].index)
-        # enforce d types
+        df_input.drop(
+            columns=["post_wins_marker", "constrain_marker", "default_o_weight"],
+            inplace=True,
+        )
 
         df_output = calculate_derived_outlier_weights(
             df_input,
@@ -74,10 +78,10 @@ class TestConstrains:
         )
 
         # Dropping inter columns for unit test
-        df_output.drop(
-            columns=["post_wins_marker", "constrain_marker", "default_o_weight"],
-            inplace=True,
-        )
+        # df_output.drop(
+        #     columns=["post_wins_marker", "constrain_marker", "default_o_weight"],
+        #     inplace=True,
+        # )
 
         # Sorting col order and index order
         sorting_by = ["reference", "period", "question_no", "spp_form_id"]
@@ -86,5 +90,8 @@ class TestConstrains:
             df_output[input_col_order].sort_values(by=sorting_by).reset_index(drop=True)
         )
         df = df.sort_values(by=sorting_by).reset_index(drop=True)
+
+        print(df)
+        print(df_output)
 
         assert_frame_equal(df, df_output)
