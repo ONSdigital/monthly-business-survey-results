@@ -176,7 +176,7 @@ def derive_questions(
 ) -> pd.DataFrame:
     """
     Function to calculate new o-weights post winsorisation
-    This has same functionality has constraints, but doesn't not use
+    This has same functionality has constraints, but does not use
     two target variable columns, refactoring could be done to combine
     further down the line
     ASSUMES DEFAULT O-WEIGHT IS 1
