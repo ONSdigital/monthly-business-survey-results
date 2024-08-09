@@ -82,7 +82,6 @@ def sum_sub_df(df: pd.DataFrame, derive_from: List[int]) -> pd.DataFrame:
         A dataframe with sums, constain marker, and columns from index which the
         sum was based on.
     """
-    # print([df.loc[question_no] for question_no in derive_from if question_no in df.index])
     sums = sum(
         [df.loc[question_no] for question_no in derive_from if question_no in df.index]
     )
@@ -204,16 +203,12 @@ def derive_questions(
         Original dataframe with constrains.
     """
     derive_map = create_derive_map(df, spp_form_id)
-    # print(spp_form_id)
-    # df.rename(columns = {spp_form_id: "spp_form_id"},inplace=True)
-    # print(df.columns)
     pre_derive_df = df.set_index(
         [spp_form_id, question_no, period, reference], verify_integrity=False
     )
     # Assuming default value of o-weight is 1
     pre_derive_df = pre_derive_df[[target]].fillna(value=0)
 
-    # print(pre_derive_df.dtypes)
     derived_values = pd.concat(
         [
             sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
@@ -233,7 +228,6 @@ def derive_questions(
     elif [90, 40] in unique_q_numbers:
         replace_values_index_based(df, target, 90, ">=", 40)
     df.reset_index(inplace=True)
-    
 
     final_constrained = pd.concat([df, derived_values]).reset_index(drop=True)
     # final_constrained.rename(columns ={"spp_form_id": spp_form_id},inplace=True)
@@ -320,14 +314,13 @@ def calculate_derived_outlier_weights(
     df["default_o_weight"] = default_o_weight_bool
 
     # Assuming default value of o-weight is 1
-    df.loc[
-        default_o_weight_bool, winsorised_target
-    ] = df.loc[default_o_weight_bool, target]
+    df.loc[default_o_weight_bool, winsorised_target] = df.loc[
+        default_o_weight_bool, target
+    ]
 
     if "constrain_marker" not in df.columns:
         # Handling case where derived Q's not been
         # calculated pre-winsorisation
-        print("here")
         df_pre_winsorised = derive_questions(
             df,
             period,
@@ -337,10 +330,8 @@ def calculate_derived_outlier_weights(
             spp_form_id,
         )
     else:
-        print("else here")
         # Skipping calculating derived Q's
         df_pre_winsorised = df.copy()
-    # print(df_pre_winsorised.columns)
 
     post_win_derived = derive_questions(
         df,
@@ -364,8 +355,6 @@ def calculate_derived_outlier_weights(
     post_win_derived.set_index(
         [spp_form_id, question_no, period, reference], inplace=True
     )
-    # print(df_pre_winsorised.head())
-    # print(post_win_derived.head())
 
     updated_o_weight_bool = df_pre_winsorised[winsorised_target].isna()
     df_pre_winsorised.loc[
@@ -374,7 +363,6 @@ def calculate_derived_outlier_weights(
     df_pre_winsorised["post_wins_marker"] = updated_o_weight_bool
 
     df_pre_winsorised.reset_index(inplace=True)
-    # print()
     df_pre_winsorised.loc[
         df_pre_winsorised["constrain_marker"].notna(), outlier_weight
     ] = (df_pre_winsorised[winsorised_target] / df_pre_winsorised[target])
@@ -431,8 +419,8 @@ if __name__ == "__main__":
     print("output_missing \n", df_output)
 
     large_df = pd.read_csv("C:/Users/dayj1/Downloads/post_win.csv", index_col=False)
-    large_df.drop(columns=["constrain_marker"],inplace=True)
-    large_df.rename(columns = {"form_type_spp":"spp_form_id"},inplace=True)
+    large_df.drop(columns=["constrain_marker"], inplace=True)
+    large_df.rename(columns={"form_type_spp": "spp_form_id"}, inplace=True)
 
     target_variable_col = "adjusted_value"
 
@@ -444,9 +432,9 @@ if __name__ == "__main__":
         "question_no",
         "spp_form_id",
         "outlier_weight",
-        "new_target_variable"
+        "new_target_variable",
     )
     print(df_output)
 
-#  TO do, find reference where q40 is summed and both / either are winsorised 
+#  TO do, find reference where q40 is summed and both / either are winsorised
 # Maybe set o-weight to 1 where default_o_weight true?
