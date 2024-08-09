@@ -61,7 +61,7 @@ class TestConstrains:
         # Drop q40 rows
         df_input = df.drop(df[df["question_no"] == 40].index)
         df_input.drop(
-            columns=["post_wins_marker", "constrain_marker", "default_o_weight"],
+            columns=["default_o_weight", "constrain_marker", "post_wins_marker"],
             inplace=True,
         )
 
@@ -95,7 +95,7 @@ class TestConstrains:
         # Drop q40 rows
         df_input = df.drop(df[df["question_no"] == 40].index)
         df_input.drop(
-            columns=["post_wins_marker", "constrain_marker", "default_o_weight"],
+            columns=["default_o_weight", "constrain_marker", "post_wins_marker"],
             inplace=True,
         )
         # Manually change the input data to be missing one value in
