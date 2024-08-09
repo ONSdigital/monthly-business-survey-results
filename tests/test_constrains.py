@@ -1,7 +1,11 @@
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from mbs_results.constrains import replace_values_index_based, sum_sub_df
+from mbs_results.constrains import (
+    calculate_derived_outlier_weights,
+    replace_values_index_based,
+    sum_sub_df,
+)
 
 
 class TestConstrains:
@@ -46,3 +50,41 @@ class TestConstrains:
         )
 
         assert_frame_equal(actual_ouput, expected_output)
+
+    def test_calculate_derived_outlier_weights(self):
+        pd.set_option("display.max_columns", 10)
+        df = pd.read_csv(
+            "tests/data/winsorisation/derived-questions-winsor.csv", index_col=False
+        )
+        df["target_variable"] = df["target_variable"].astype(float)
+        df["new_target_variable"] = df["new_target_variable"].astype(float)
+        # Drop q40 rows
+        df_input = df.drop(df[df["question_no"] == 40].index)
+        # enforce d types
+
+        df_output = calculate_derived_outlier_weights(
+            df_input,
+            "period",
+            "reference",
+            "target_variable",
+            "question_no",
+            "spp_form_id",
+            "outlier_weight",
+            "new_target_variable",
+        )
+
+        # Dropping inter columns for unit test
+        df_output.drop(
+            columns=["post_wins_marker", "constrain_marker", "default_o_weight"],
+            inplace=True,
+        )
+
+        # Sorting col order and index order
+        sorting_by = ["reference", "period", "question_no", "spp_form_id"]
+        input_col_order = df.columns
+        df_output = (
+            df_output[input_col_order].sort_values(by=sorting_by).reset_index(drop=True)
+        )
+        df = df.sort_values(by=sorting_by).reset_index(drop=True)
+
+        assert_frame_equal(df, df_output)
