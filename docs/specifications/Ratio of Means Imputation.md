@@ -137,7 +137,7 @@ dataset if the corresponding functionality was used e.g., filtering.
 The imputation marker must be one of the following:
 
 * fir = Forwards imputation from response
-* fir = Forwards imputation from construction
+* fic = Forwards imputation from construction
 * fimc = Forwards imputation from manual construction
 * bir = Backwards imputation
 * c = Construction imputation from auxiliary variable
