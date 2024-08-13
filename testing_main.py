@@ -4,6 +4,7 @@ import numpy as np
 import json
 
 from testing_helpers import get_pre_impute_data, proccess_for_pre_impute, check_na_duplicates,map_form_type
+from qa_output_482 import get_qa_output_482
 
 # pip install git+https://github.com/ONSdigital/monthly-business-survey-results.git
 
@@ -114,4 +115,4 @@ if __name__ == "__main__":
     
     post_win.to_csv(config['out_path']+f"winsorisation_output_{FILE_VERSION}.csv",index=False)
 
-    
+    asap_482_df = get_qa_output_482(post_win)
