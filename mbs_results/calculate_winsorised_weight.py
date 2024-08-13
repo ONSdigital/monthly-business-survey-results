@@ -80,7 +80,7 @@ def calculate_winsorised_weight(
     return df
 
 
-def load_l_values(df: pd.DataFrame, reference, period, l_values_path, **config):
+def load_l_values(df: pd.DataFrame, strata, question_no, l_values_path, **config):
     """
     function to load the l values data and merge onto main df
 
@@ -89,8 +89,8 @@ def load_l_values(df: pd.DataFrame, reference, period, l_values_path, **config):
     df: pd.DataFrame
         dataframe with combined responses and contributors columns
         index is expected to be 'period' and 'reference'
-    reference: str
-        the name of the reference column
+    strata: str
+        the name of the strata column
     period: str
         the name of the period column
     l_values_path: str
@@ -104,45 +104,62 @@ def load_l_values(df: pd.DataFrame, reference, period, l_values_path, **config):
         dataframe with correctly formatted column datatypes.
     """
     l_values = pd.read_csv(l_values_path)
-    l_values[period] = convert_column_to_datetime(l_values[period])
-    l_values[reference] = l_values[reference].astype("str")
-    l_values.set_index([reference, period], inplace=True)
+    l_values[strata] = l_values[strata].astype("str")
+    # l_values.set_index([strata, question_no], inplace=True)
 
-    validate_manual_constructions(df, l_values)
+    validate_l_values(df, l_values, strata, question_no)
 
     return df.merge(
         l_values,
-        on=[reference, period],
+        on=[strata, question_no],
         how="outer",
     )
 
 
-def validate_l_values(df, l_values):
+def validate_l_values(df, l_values, strata, question_no):
     """
-    Checks that manual construction identifiers match those in the main dataset
+    Checks that all sic in df have matching l values 
+    in l values loaded data
 
     Parameters
     ----------
     df: pd.DataFrame
         the main dataframe after preprocessing
-    manual_constructions: pd.DataFrame
-        the manual constructions input read in as a dataframe
+    l_values: pd.DataFrame
+        the l values input read in as a dataframe
 
     Raises
     ------
     ValueError
-        ValueError if any combinations of period and reference appear in the manual
-        constructions input but not in the main dataframe
+        ValueError if any combinations of strata and question number appear in 
+        the main dataset but not in the l values dataframe
     """
+    df_temp = df.set_index([strata, question_no])
+    l_values_temp = l_values.set_index([strata, question_no])
 
-    incorrect_ids = set(l_values.index) - set(df.index)
+    # Checks if unmatched in df -  think this one what we want
+    incorrect_ids = set(df_temp.index) - set(l_values_temp.index) 
+    # checks if unmatched in l_values 
+    incorrect_ids_opp = set(l_values_temp.index) - set(df_temp.index) 
 
-    if len(incorrect_ids) > 1:
+    print(len(incorrect_ids) >= 1, len(incorrect_ids_opp) >= 1 )
+
+    if len(incorrect_ids) >= 1:
         string_ids = " ".join(
-            [f"\nreference: {str(i[0])}, period: {str(i[1])}" for i in incorrect_ids]
+            [f"\n strata: {str(i[0])}, question_no: {str(i[1])}" for i in incorrect_ids]
         )
 
         raise ValueError(
-            f"""There are reference and period combinations in the manual constructions
-      with no match: {string_ids}"""
+            f"""There are strata and question_no combinations with no matching 
+            l values: {string_ids}"""
         )
+
+
+if __name__ == "__main__":
+    l_values = pd.DataFrame(np.array([[1, 40, 0.5], [1, 42, 0.6], [2, 42, 0.1]]),
+                   columns=['strata', 'question_no', 'l_value'])
+    df = pd.DataFrame(np.array([[1, 40, 202001], [1, 42, 202001], [2, 42, 202001], [2, 40, 202001]]),
+                   columns=['strata', 'question_no', 'period'])
+    
+    validate_l_values(df, l_values, "strata", "question_no")
+    
