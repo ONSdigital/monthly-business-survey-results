@@ -25,7 +25,7 @@ def wrap_winsorised(df,l_values_path):
     
     l_values = l_values.drop_duplicates(['question_no','classification'])
     
-    
+    l_values = l_values.drop(columns=["period"])
     # Imputed values are in a seperate column 
     df["adjusted_value"] = df[["adjusted_value", "imputed_value"]].agg(
           sum, axis=1
@@ -36,15 +36,15 @@ def wrap_winsorised(df,l_values_path):
     df1 = winsorisation_flag(df,"design_weight","calibration_factor")
     
     
-    df2 = calculate_predicted_unit_value(df1,"frosic2007_3d","period","frotover_y","sampled","design_weight","adjusted_value",'nw_ag_flag')
+    df2 = calculate_predicted_unit_value(df1,"frosic2007_3d","period","frotover","sampled","design_weight","adjusted_value",'nw_ag_flag')
     
     df2 = pd.merge(df2,l_values,how="left",left_on=["question_no","frosic2007_3d"],right_on=["question_no","classification"])
 
     
-    df3 = calculate_ratio_estimation(df2,"frotover_y","sampled","design_weight","calibration_factor","adjusted_value","predicted_unit_value",
+    df3 = calculate_ratio_estimation(df2,"frotover","sampled","design_weight","calibration_factor","adjusted_value","predicted_unit_value",
                                      "l_value",'nw_ag_flag')
     
-    df4 = calculate_winsorised_weight(df3,"frosic2007_3d","period","frotover_y","sampled","design_weight","calibration_factor","adjusted_value","predicted_unit_value",
+    df4 = calculate_winsorised_weight(df3,"frosic2007_3d","period","frotover","sampled","design_weight","calibration_factor","adjusted_value","predicted_unit_value",
                                       "l_value","ratio_estimation_treshold","nw_ag_flag")
 
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     
     check_na_duplicates(pre_impute_df) #just basic check
     
-    pre_impute_df = create_imputation_class(pre_impute_df,"cell_no","class")
+    pre_impute_df = create_imputation_class(pre_impute_df,"cell_no","imp_class")
 
     post_impute = pre_impute_df.groupby("question_no").apply(
         lambda df:ratio_of_means(
@@ -76,7 +76,7 @@ if __name__ == "__main__":
             reference="reference",
             target="adjusted_value",
             period="period",
-            strata = "class",
+            strata = "imp_class",
             auxiliary="frotover"))
 
     post_impute['period']  =  post_impute['period'].dt.strftime('%Y%m').astype("int")
@@ -101,10 +101,13 @@ if __name__ == "__main__":
     # cell_no_x is original no changes, cell_no_y from estimation (some changes applied for NI and UK)
     # frotover_x has na for derived values frotover_y has original values
     
+    
+    estimate_df = estimate_df.drop(columns = ["cell_no","frotover"])
+
     post_estimate = pd.merge(post_constrain,estimate_df,how = "left",on = ["period","reference"])
             
-    estimate_out = post_estimate[["period","cell_no_y","calibration_group","design_weight","calibration_factor"]]
-    
+    estimate_out = post_estimate[["period","cell_no","calibration_group","design_weight","calibration_factor"]]
+        
     estimate_out.to_csv(config['out_path']+f"estimation_output_{FILE_VERSION}.csv",index=False)
                 
     post_win = wrap_winsorised(post_estimate,config['l_values_path'])

@@ -48,7 +48,9 @@ def proccess_for_pre_impute(df):
     df['period'] = convert_column_to_datetime(df['period'] )
     df.loc[(df["response_type"]==1) & (df['period']!=df['period'].min()),"adjusted_value"] = np.nan
     
-    df = df[['period', 'reference', 'question_no', 'adjusted_value',"cell_no","frotover","form_type"]]
+    df = df[[
+        'period', 'reference', 'question_no', 'adjusted_value',"cell_no",
+        "frotover","form_type","response_type","error_mkr","froempees"]]
 
     questions = [40, 42, 43, 46, 47, 49, 90, 110]
     
