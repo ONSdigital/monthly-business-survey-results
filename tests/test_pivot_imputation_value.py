@@ -54,17 +54,10 @@ class TestPivotImputationValue:
         actual_output = pivot_imputation_value(
             input_data,
             "identifier",
-            "date",
-            "sic",
-            "cell",
-            "forward",
-            "backward",
-            "construction",
-            "question",
+            ["date", "sic", "cell", "question"],
+            ["forward", "backward", "construction"],
+            ["f_count", "b_count", "c_count"],
             "imputed_value",
-            "f_count",
-            "b_count",
-            "c_count",
             [202001],
         )
 
@@ -82,17 +75,10 @@ class TestPivotImputationValue:
         actual_output = pivot_imputation_value(
             input_data,
             "identifier",
-            "date",
-            "sic",
-            "cell",
-            "forward",
-            "backward",
-            "construction",
-            "question",
+            ["date", "sic", "cell", "question"],
+            ["forward", "backward", "construction"],
+            ["f_count", "b_count", "c_count"],
             "imputed_value",
-            "f_count",
-            "b_count",
-            "c_count",
         )
 
         assert_frame_equal(actual_output, expected_output)

@@ -50,17 +50,10 @@ def merge_counts(
 def pivot_imputation_value(
     df: pd.DataFrame,
     identifier: str,
-    date: str,
-    sic: str,
-    cell: str,
-    forward: str,
-    backward: str,
-    construction: str,
-    question: str,
+    groups: list,
+    link_columns: list,
+    count_columns: list,
     imputed_value: str,
-    f_count: str,
-    b_count: str,
-    c_count: str,
     selected_periods: list = None,
 ) -> pd.DataFrame:
 
@@ -75,29 +68,15 @@ def pivot_imputation_value(
         by identifier, cell, date, and question
     identifier : str
         name of column in dataframe containing identifier variable
-    date : str
-        name of column in dataframe containing date variable
-    sic : str
-        name of column in dataframe containing sic variable
-    cell : str
-        name of column in dataframe containing cell variable
-    forward : str
-        name of column in dataframe containing forward link variable
-    backward : str
-        name of column in dataframe containing backward link variable
-    construction : str
-        name of column in dataframe containing construction link variable
-    question : str
-        name of column in dataframe containing question code variable
+    groups : list
+
+    link_columns : list
+
+    count_columns : list
+
     imputed_value: str
         name of column in dataframe containing imputed_value variable
-    f_count: str,
-        name of column in dataframe containing f_count variable
-    b_count: str,
-        name of column in dataframe containing b_count variable
-    c_count: str,
-        name of column in dataframe containing c_count variable
-    selected_periods: list,
+    selected_periods: list
         list containing periods to include in output
 
     Returns
@@ -107,58 +86,55 @@ def pivot_imputation_value(
 
     """
     if selected_periods is not None:
-        df = df.query("{} in {}".format(date, selected_periods))
+        df = df.query("{} in {}".format(groups[0], selected_periods))
 
     links_df = df.melt(
-        id_vars=[date, sic, cell, question, imputed_value],
-        value_vars=[forward, backward, construction],
+        id_vars=groups + [imputed_value],
+        value_vars=link_columns,
         var_name="link_type",
         value_name="imputation_link",
     )
 
-    link_type_map = {forward: "F", backward: "B", construction: "C"}
+    link_type_map = dict(zip(link_columns, ["F", "B", "C"]))
     links_df["link_type"] = links_df["link_type"].map(link_type_map)
 
     counts_df = df.melt(
-        id_vars=[date, sic, cell, question],
-        value_vars=[f_count, b_count, c_count],
+        id_vars=groups,
+        value_vars=count_columns,
         var_name="link_type_count",
         value_name="count",
     )
 
-    link_type_map_count = {f_count: "F", b_count: "B", c_count: "C"}
+    link_type_map_count = dict(zip(count_columns, ["F", "B", "C"]))
     counts_df["link_type_count"] = counts_df["link_type_count"].map(link_type_map_count)
 
     merged_df = pd.merge(
         links_df,
         counts_df,
         how="outer",
-        left_on=[date, sic, cell, question, "link_type"],
-        right_on=[date, sic, cell, question, "link_type_count"],
+        left_on=groups + ["link_type"],
+        right_on=groups + ["link_type_count"],
     )
 
     merged_df.drop_duplicates(inplace=True)
     merged_df.drop(["link_type_count"], axis=1, inplace=True)
 
-    merged_df = merged_df.groupby(
-        [date, sic, cell, question, "link_type"], as_index=False
-    ).agg({imputed_value: "sum", "count": "first", "imputation_link": "first"})
+    merged_df = merged_df.groupby(groups + ["link_type"], as_index=False).agg(
+        {imputed_value: "sum", "count": "first", "imputation_link": "first"}
+    )
 
     sorting_order = {"F": 1, "B": 2, "C": 3}
     merged_df["sort_column"] = merged_df["link_type"].map(sorting_order)
 
-    merged_df = merged_df.sort_values([date, sic, cell, question, "sort_column"])
+    merged_df = merged_df.sort_values(groups + ["sort_column"])
 
     merged_df.drop("sort_column", axis=1, inplace=True)
 
     merged_df.reset_index(drop=True, inplace=True)
 
     merged_df = merged_df[
-        [
-            date,
-            sic,
-            cell,
-            question,
+        groups
+        + [
             "imputation_link",
             "link_type",
             "count",
