@@ -137,12 +137,12 @@ def validate_l_values(df, l_values, strata, question_no):
     df_temp = df.set_index([strata, question_no])
     l_values_temp = l_values.set_index([strata, question_no])
 
-    # Checks if unmatched in df -  think this one what we want
-    incorrect_ids = set(df_temp.index) - set(l_values_temp.index) 
-    # checks if unmatched in l_values 
-    incorrect_ids_opp = set(l_values_temp.index) - set(df_temp.index) 
+    # Checks if unmatched in df -  think this one what we want for full dataset
+    # incorrect_ids = set(df_temp.index) - set(l_values_temp.index) 
+    # checks if unmatched in l_values this one for validation
+    incorrect_ids = set(l_values_temp.index) - set(df_temp.index) 
 
-    print(len(incorrect_ids) >= 1, len(incorrect_ids_opp) >= 1 )
+    # print(len(incorrect_ids) >= 1, len(incorrect_ids_opp) >= 1 )
 
     if len(incorrect_ids) >= 1:
         string_ids = " ".join(
@@ -158,8 +158,8 @@ def validate_l_values(df, l_values, strata, question_no):
 if __name__ == "__main__":
     l_values = pd.DataFrame(np.array([[1, 40, 0.5], [1, 42, 0.6], [2, 42, 0.1]]),
                    columns=['strata', 'question_no', 'l_value'])
-    df = pd.DataFrame(np.array([[1, 40, 202001], [1, 42, 202001], [2, 42, 202001], [2, 40, 202001]]),
-                   columns=['strata', 'question_no', 'period'])
+    df = pd.DataFrame(np.array([[1, 40, 202001,1], [1, 42, 202001,2], [2, 4, 202001,1], [2, 40, 202001,1]]),
+                   columns=['strata', 'question_no', 'period', 'l_value'])
     
     validate_l_values(df, l_values, "strata", "question_no")
     
