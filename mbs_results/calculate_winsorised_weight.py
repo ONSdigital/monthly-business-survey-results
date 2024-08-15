@@ -1,10 +1,6 @@
 import numpy as np
 import pandas as pd
 
-from mbs_results.data_cleaning import (
-    convert_column_to_datetime,
-    validate_manual_constructions,
-)
 
 
 def calculate_winsorised_weight(
@@ -21,7 +17,6 @@ def calculate_winsorised_weight(
     ratio_estimation_treshold,
     nw_ag_flag,
 ):
-
     """
     Calculate winsorised weight
 
@@ -80,69 +75,90 @@ def calculate_winsorised_weight(
     return df
 
 
-def load_l_values(df: pd.DataFrame, strata, question_no, l_values_path, **config):
+def overwrite_l_values(
+    df: pd.DataFrame,
+    strata,
+    question_no,
+    l_values_col,
+    l_values_overwrite_path,
+    **config,
+):
     """
-    function to load the l values data and merge onto main df
+    function to load the replacement l values data and overwrite
+    default l values on main df
 
     Parameters
     ----------
     df: pd.DataFrame
-        dataframe with combined responses and contributors columns
-        index is expected to be 'period' and 'reference'
+        dataframe with l value column
     strata: str
         the name of the strata column
-    period: str
-        the name of the period column
+    question_no: str
+        the name of the question number column
+    l_values_col: str
+        the name of the l value column
     l_values_path: str
-        the location of the l values data
+        the location of the l values data used to overwrite existing values
     **config: Dict
         main pipeline configuration. Can be used to input the entire config dictionary
 
     Returns
     -------
     pd.DataFrame
-        dataframe with correctly formatted column datatypes.
+        dataframe with l values replaced as outlined in l_values_overwrite_path
+        Additional flag column showing which values have been overwritten
     """
-    l_values = pd.read_csv(l_values_path)
-    l_values[strata] = l_values[strata].astype("str")
+    l_values_overwrite = pd.read_csv(l_values_overwrite_path)
+
+    l_values_overwrite[strata] = l_values_overwrite[strata].astype(int).astype(str)
+    l_values_overwrite[question_no] = (
+        l_values_overwrite[question_no].astype(int).astype(str)
+    )
+    # df[question_no] = df[question_no].astype('int')
+
     # l_values.set_index([strata, question_no], inplace=True)
 
-    validate_l_values(df, l_values, strata, question_no)
+    validate_l_values(df, l_values_overwrite, strata, question_no)
 
-    return df.merge(
-        l_values,
+    merged = df.merge(
+        l_values_overwrite,
         on=[strata, question_no],
         how="outer",
+        suffixes=["", "_overwrite"],
     )
 
+    l_values_overwrite = l_values_col + "_overwrite"
 
-def validate_l_values(df, l_values, strata, question_no):
+    merged["ovewrited_L_value"] = merged[l_values_overwrite].notna()
+    merged.loc[merged[l_values_overwrite].notna(), l_values_col] = merged[
+        l_values_overwrite
+    ]
+    merged.drop(columns=[l_values_overwrite], inplace=True)
+    return merged
+
+
+def validate_l_values(df, l_values_overwrite, strata, question_no):
     """
-    Checks that all sic in df have matching l values 
-    in l values loaded data
+    Checks that all strata and question numbers in l values overwrite
+    have values in the full dataframe
 
     Parameters
     ----------
     df: pd.DataFrame
         the main dataframe after preprocessing
-    l_values: pd.DataFrame
-        the l values input read in as a dataframe
+    l_values_overwrite: pd.DataFrame
+        the l values used to overwrite read in as a dataframe
 
     Raises
     ------
     ValueError
-        ValueError if any combinations of strata and question number appear in 
+        ValueError if any combinations of strata and question number appear in
         the main dataset but not in the l values dataframe
     """
     df_temp = df.set_index([strata, question_no])
-    l_values_temp = l_values.set_index([strata, question_no])
+    l_values_temp = l_values_overwrite.set_index([strata, question_no])
 
-    # Checks if unmatched in df -  think this one what we want for full dataset
-    # incorrect_ids = set(df_temp.index) - set(l_values_temp.index) 
-    # checks if unmatched in l_values this one for validation
-    incorrect_ids = set(l_values_temp.index) - set(df_temp.index) 
-
-    # print(len(incorrect_ids) >= 1, len(incorrect_ids_opp) >= 1 )
+    incorrect_ids = set(l_values_temp.index) - set(df_temp.index)
 
     if len(incorrect_ids) >= 1:
         string_ids = " ".join(
@@ -156,10 +172,22 @@ def validate_l_values(df, l_values, strata, question_no):
 
 
 if __name__ == "__main__":
-    l_values = pd.DataFrame(np.array([[1, 40, 0.5], [1, 42, 0.6], [2, 42, 0.1]]),
-                   columns=['strata', 'question_no', 'l_value'])
-    df = pd.DataFrame(np.array([[1, 40, 202001,1], [1, 42, 202001,2], [2, 4, 202001,1], [2, 40, 202001,1]]),
-                   columns=['strata', 'question_no', 'period', 'l_value'])
-    
-    validate_l_values(df, l_values, "strata", "question_no")
-    
+
+    df = pd.DataFrame(
+        np.array(
+            [
+                ["1", "40", 202001, 1],
+                ["1", "42", 202001, 2],
+                ["2", "46", 202001, 2],
+                ["2", "40", 202001, 1],
+                ["2", "40", 202002, 1],
+                ["2", "42", 202002, 1],
+            ]
+        ),
+        columns=["strata", "question_no", "period", "l_value"],
+    )
+    # validate_l_values(df, l_values_overwrite, "strata", "question_no")
+    output = overwrite_l_values(
+        df, "strata", "question_no", "l_value", "l_values_overwrite.csv"
+    )
+    print(output)
