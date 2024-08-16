@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def replace_l_values(
     df: pd.DataFrame,
     strata: str,
@@ -36,9 +37,7 @@ def replace_l_values(
     l_values_overwrite = pd.read_csv(l_values_overwrite_path)
 
     l_values_overwrite[strata] = l_values_overwrite[strata].astype(str)
-    l_values_overwrite[question_no] = (
-        l_values_overwrite[question_no].astype(str)
-    )
+    l_values_overwrite[question_no] = l_values_overwrite[question_no].astype(str)
 
     validate_l_values(df, l_values_overwrite, strata, question_no)
 
@@ -59,10 +58,11 @@ def replace_l_values(
     return merged
 
 
-def validate_l_values(df: pd.DataFrame, 
-                      l_values_overwrite: pd.DataFrame, 
-                      strata: str, 
-                      question_no: str,
+def validate_l_values(
+    df: pd.DataFrame,
+    l_values_overwrite: pd.DataFrame,
+    strata: str,
+    question_no: str,
 ):
     """
     Checks that all strata and question numbers in l values overwrite
@@ -95,9 +95,10 @@ def validate_l_values(df: pd.DataFrame,
             f"""There are strata and question_no combinations with no matching 
             l values: {string_ids}"""
         )
-    
+
+
 if __name__ == "__main__":
-    import numpy as np 
+    import numpy as np
 
     df = pd.DataFrame(
         np.array(
@@ -114,6 +115,10 @@ if __name__ == "__main__":
     )
     df.to_csv("input.csv")
     output = replace_l_values(
-        df, "strata", "question_no", "l_value", "tests/data/winsorisation/replace_l_values.csv"
+        df,
+        "strata",
+        "question_no",
+        "l_value",
+        "tests/data/winsorisation/replace_l_values.csv",
     )
     print(output)
