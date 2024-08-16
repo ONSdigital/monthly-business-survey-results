@@ -16,6 +16,8 @@ def replace_l_values_input_path():
 class TestReplaceLValue:
     def test_overwrite_l_values(self, replace_l_values_input_path):
         df = replace_l_values_input_path
+        df["strata"] = df["strata"].astype(str)
+        df["question_no"] = df["question_no"].astype(str)
         df_input = df[["strata","question_no","period","l_value_input"]]
         df_input.rename(columns = {"l_value_input" : "l_value"},inplace=True)
         df_expected_output = df[["strata","question_no","period","l_value_output","replaced_l_value"]]
