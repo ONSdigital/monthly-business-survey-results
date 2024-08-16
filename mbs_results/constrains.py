@@ -151,12 +151,12 @@ def constrain(
             for form_type, derives in derive_map.items()
         ]
     )
-
+    unique_q_numbers = df[question_no].unique()
     df.set_index([question_no, period, reference], inplace=True)
 
-    if 49 in df[question_no].unique():
+    if 49 in unique_q_numbers:
         replace_values_index_based(df, target_imputed, 49, ">", 40)
-    elif 90 in df[question_no].unique():
+    elif 90 in unique_q_numbers:
         replace_values_index_based(df, target_imputed, 90, ">=", 40)
 
     df.reset_index(inplace=True)
