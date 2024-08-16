@@ -92,33 +92,6 @@ def validate_l_values(
         )
 
         raise ValueError(
-            f"""There are strata and question_no combinations with no matching 
+            f"""There are strata and question_no combinations with no matching
             l values: {string_ids}"""
         )
-
-
-if __name__ == "__main__":
-    import numpy as np
-
-    df = pd.DataFrame(
-        np.array(
-            [
-                ["1", "40", 202001, 1],
-                ["1", "42", 202001, 2],
-                ["2", "46", 202001, 2],
-                ["2", "40", 202001, 1],
-                ["2", "40", 202002, 1],
-                ["2", "42", 202002, 1],
-            ]
-        ),
-        columns=["strata", "question_no", "period", "l_value"],
-    )
-    df.to_csv("input.csv")
-    output = replace_l_values(
-        df,
-        "strata",
-        "question_no",
-        "l_value",
-        "tests/data/winsorisation/replace_l_values.csv",
-    )
-    print(output)

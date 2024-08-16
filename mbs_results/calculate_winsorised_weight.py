@@ -1,6 +1,4 @@
 import numpy as np
-import pandas as pd
-
 
 
 def calculate_winsorised_weight(

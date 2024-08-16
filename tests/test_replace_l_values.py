@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import pandas as pd
 import pytest
 from helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
