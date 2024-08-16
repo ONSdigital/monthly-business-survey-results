@@ -1,0 +1,7 @@
+strata,question_no,period,l_value_input,l_value_output,replaced_l_value
+1,40,202001,1,1,False
+1,42,202001,2,0.6,True
+2,46,202001,2,2,False
+2,40,202001,1,0.1,True
+2,40,202002,1,0.1,True
+2,42,202002,1,1,False

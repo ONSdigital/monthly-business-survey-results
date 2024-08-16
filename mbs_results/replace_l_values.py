@@ -1,6 +1,6 @@
 import pandas as pd
 
-def overwrite_l_values(
+def replace_l_values(
     df: pd.DataFrame,
     strata: str,
     question_no: str,
@@ -35,13 +35,10 @@ def overwrite_l_values(
     """
     l_values_overwrite = pd.read_csv(l_values_overwrite_path)
 
-    l_values_overwrite[strata] = l_values_overwrite[strata].astype(int).astype(str)
+    l_values_overwrite[strata] = l_values_overwrite[strata].astype(str)
     l_values_overwrite[question_no] = (
-        l_values_overwrite[question_no].astype(int).astype(str)
+        l_values_overwrite[question_no].astype(str)
     )
-    # df[question_no] = df[question_no].astype('int')
-
-    # l_values.set_index([strata, question_no], inplace=True)
 
     validate_l_values(df, l_values_overwrite, strata, question_no)
 
@@ -54,7 +51,7 @@ def overwrite_l_values(
 
     l_values_overwrite = l_values_col + "_overwrite"
 
-    merged["ovewrited_L_value"] = merged[l_values_overwrite].notna()
+    merged["replaced_L_value"] = merged[l_values_overwrite].notna()
     merged.loc[merged[l_values_overwrite].notna(), l_values_col] = merged[
         l_values_overwrite
     ]
@@ -115,8 +112,8 @@ if __name__ == "__main__":
         ),
         columns=["strata", "question_no", "period", "l_value"],
     )
-    # validate_l_values(df, l_values_overwrite, "strata", "question_no")
-    output = overwrite_l_values(
-        df, "strata", "question_no", "l_value", "l_values_overwrite.csv"
+    df.to_csv("input.csv")
+    output = replace_l_values(
+        df, "strata", "question_no", "l_value", "tests/data/winsorisation/replace_l_values.csv"
     )
     print(output)
