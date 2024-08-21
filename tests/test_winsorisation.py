@@ -6,6 +6,7 @@ from pandas.testing import assert_frame_equal
 
 from mbs_results.winsorisation import winsorise
 
+
 @pytest.fixture(scope="class")
 def expected_output():
     return pd.read_csv(
@@ -16,14 +17,33 @@ def expected_output():
 
 
 class TestWinsorisedWeight:
-    def test_winsorised_weight(
-        self, expected_output):
+    def test_winsorised_weight(self, expected_output):
 
+        input_data = expected_output[
+            [
+                "group",
+                "period",
+                "aux",
+                "sampled",
+                "a_weight",
+                "g_weight",
+                "target_variable",
+                "l_value",
+            ]
+        ]
 
-        input_data = expected_output[['group', 'period', 'aux', 'sampled', 'a_weight', 'g_weight','target_variable', 'l_value']]
-          
-        actual_output = winsorise(input_data,'group', 'period', 'aux', 'sampled', 'a_weight', 'g_weight','target_variable', 'l_value')
+        actual_output = winsorise(
+            input_data,
+            "group",
+            "period",
+            "aux",
+            "sampled",
+            "a_weight",
+            "g_weight",
+            "target_variable",
+            "l_value",
+        )
 
-        actual_output = actual_output[expected_output.columns] 
+        actual_output = actual_output[expected_output.columns]
 
         assert_frame_equal(actual_output, expected_output)
