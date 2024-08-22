@@ -492,6 +492,3 @@ input for the second period, then do not backward impute from the manual constru
 #### Parts of the specification left out but can be found in the [PySpark method](https://github.com/ONSdigital/Statistical-Method-Specifications/blob/main/editing_and_imputation/imputation/ratio_of_means/methodological_specification.md).
 
 - Weighting
-                                        
-                                      
-                                
