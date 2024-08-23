@@ -26,7 +26,8 @@ def winsorise(
 
     The method uses a pre-calculated parameter, 'L-value' that must be
     supplied to calculate a threshold for each return. The threshold
-    calculated depends upon whether expansion or ratio estimation is used.
+    calculated depends upon whether expansion or ratio estimation is used in
+    this case.
 
     Parameters
     ----------
