@@ -182,33 +182,40 @@ class TestRatioOfMeans:
         assert_frame_equal(actual_output, expected_output, check_dtype=False)
 
 
+pytestmark = pytest.mark.parametrize(
+    "base_file_name", scenarios[len(scenarios) - 10 : len(scenarios)]
+)
 
-pytestmark = pytest.mark.parametrize("base_file_name", scenarios[len(scenarios)-10:len(scenarios)])
+
 class TestRatioOfMeansManConstruction:
-    def test_manual_construction_input(self,base_file_name):
-        df = pd.read_csv(scenario_path_prefix + "ratio_of_means/" + base_file_name + "_input.csv")
-        expected_output = pd.read_csv(scenario_path_prefix + "ratio_of_means/" + base_file_name + "_output.csv")
+    def test_manual_construction_input(self, base_file_name):
+        df = pd.read_csv(
+            scenario_path_prefix + "ratio_of_means/" + base_file_name + "_input.csv"
+        )
+        expected_output = pd.read_csv(
+            scenario_path_prefix + "ratio_of_means/" + base_file_name + "_output.csv"
+        )
 
         manual_constructions = df.copy()[["identifier", "date", "question_man"]]
-        manual_constructions.rename(columns={"question_man":"question"},inplace=True)
+        manual_constructions.rename(columns={"question_man": "question"}, inplace=True)
 
-        df.drop(columns = ["question_man"],inplace=True)
+        df.drop(columns=["question_man"], inplace=True)
         input_data = df
-        input_data["date"] = convert_column_to_datetime(
-        input_data["date"]
-    )
-        
-        manual_constructions["date"] = convert_column_to_datetime(manual_constructions["date"])
+        input_data["date"] = convert_column_to_datetime(input_data["date"])
+
+        manual_constructions["date"] = convert_column_to_datetime(
+            manual_constructions["date"]
+        )
 
         actual_output = ratio_of_means(
-                input_data,
-                target="question",
-                period="date",
-                reference="identifier",
-                strata="group",
-                auxiliary="other",
-                manual_constructions= manual_constructions
-            )
+            input_data,
+            target="question",
+            period="date",
+            reference="identifier",
+            strata="group",
+            auxiliary="other",
+            manual_constructions=manual_constructions,
+        )
         actual_output["question"] = actual_output[["question", "imputed_value"]].agg(
             sum, axis=1
         )
@@ -271,10 +278,15 @@ class TestRatioOfMeansManConstruction:
             "imputation_flags_question"
         ].str.lower()
         expected_output = expected_output.replace({"bi": "bir"})
-        
-        expected_output["f_match_question_pair_count"] = expected_output["f_match_question_pair_count"].astype(float)
-        expected_output["b_match_question_pair_count"] = expected_output["b_match_question_pair_count"].astype(float)
-        expected_output["flag_match_pair_count"] = expected_output["flag_match_pair_count"].astype(float)
+
+        expected_output["f_match_question_pair_count"] = expected_output[
+            "f_match_question_pair_count"
+        ].astype(float)
+        expected_output["b_match_question_pair_count"] = expected_output[
+            "b_match_question_pair_count"
+        ].astype(float)
+        expected_output["flag_match_pair_count"] = expected_output[
+            "flag_match_pair_count"
+        ].astype(float)
 
         assert_frame_equal(expected_output, actual_output)
-

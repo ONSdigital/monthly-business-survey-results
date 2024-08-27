@@ -181,8 +181,13 @@ def load_manual_constructions(
         manual_constructions, on=[reference, period], how="outer", suffixes=("", "_man")
     )
 
+
 def join_manual_constructions(
-    df: pd.DataFrame, manual_constructions:pd.DataFrame, reference:str, period:str, **config
+    df: pd.DataFrame,
+    manual_constructions: pd.DataFrame,
+    reference: str,
+    period: str,
+    **config
 ):
     """
     function to change datatypes of columns based on config file
@@ -210,10 +215,12 @@ def join_manual_constructions(
         manual_constructions[period] = convert_column_to_datetime(
             manual_constructions[period]
         )
-    
+
     if manual_constructions[reference].dtype != df[reference].dtype:
         reference_dtype = df[reference].dtype
-        manual_constructions[reference] = manual_constructions[reference].astype(reference_dtype)
+        manual_constructions[reference] = manual_constructions[reference].astype(
+            reference_dtype
+        )
 
     manual_constructions.set_index([reference, period], inplace=True)
     df.set_index([reference, period], inplace=True)
@@ -232,7 +239,6 @@ def run_live_or_frozen(
     state: str = "live",
     error_values: List[str] = ["E", "W"],
 ) -> pd.DataFrame:
-
     """
     For frozen, therefore target values are converted to null, hence responses
     in error are treated as non-response.
@@ -322,5 +328,3 @@ def create_imputation_class(
     )
 
     return df
-
-
