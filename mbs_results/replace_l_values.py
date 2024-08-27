@@ -23,7 +23,7 @@ def replace_l_values(
         the name of the question number column
     l_values_col: str
         the name of the l value column
-    l_values_path: str
+    l_values_overwrite_path: str
         the location of the l values data used to overwrite existing values
     **config: Dict
         main pipeline configuration. Can be used to input the entire config dictionary
@@ -74,6 +74,10 @@ def validate_l_values(
         the main dataframe after preprocessing
     l_values_overwrite: pd.DataFrame
         the l values used to overwrite read in as a dataframe
+    strata: str
+        the name of the strata column
+    question_no: str
+        the name of the question number column
 
     Raises
     ------
