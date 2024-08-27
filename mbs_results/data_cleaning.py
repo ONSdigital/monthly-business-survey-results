@@ -181,6 +181,49 @@ def load_manual_constructions(
         manual_constructions, on=[reference, period], how="outer", suffixes=("", "_man")
     )
 
+def join_manual_constructions(
+    df: pd.DataFrame, manual_constructions:pd.DataFrame, reference:str, period:str, **config
+):
+    """
+    function to change datatypes of columns based on config file
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        dataframe with combined responses and contributors columns
+        index is expected to be 'period' and 'reference'
+    manual_constructions_path: str
+        the manual construction dataframe
+    reference: str
+        the name of the reference column
+    period: str
+        the name of the period column
+    **config: Dict
+        main pipeline configuration. Can be used to input the entire config dictionary
+
+    Returns
+    -------
+    pd.DataFrame
+        dataframe with correctly formatted column datatypes.
+    """
+    if manual_constructions[period].dtype != df[period].dtype:
+        manual_constructions[period] = convert_column_to_datetime(
+            manual_constructions[period]
+        )
+    
+    if manual_constructions[reference].dtype != df[reference].dtype:
+        reference_dtype = df[reference].dtype
+        manual_constructions[reference] = manual_constructions[reference].astype(reference_dtype)
+
+    manual_constructions.set_index([reference, period], inplace=True)
+    df.set_index([reference, period], inplace=True)
+
+    validate_manual_constructions(df, manual_constructions)
+
+    return df.merge(
+        manual_constructions, on=[reference, period], how="outer", suffixes=("", "_man")
+    ).reset_index()
+
 
 def run_live_or_frozen(
     df: pd.DataFrame,
@@ -279,3 +322,5 @@ def create_imputation_class(
     )
 
     return df
+
+

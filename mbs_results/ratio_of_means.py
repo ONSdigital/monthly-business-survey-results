@@ -11,7 +11,7 @@ from mbs_results.flag_and_count_matched_pairs import flag_matched_pair
 from mbs_results.imputation_flags import generate_imputation_marker
 from mbs_results.link_filter import flag_rows_to_ignore
 from mbs_results.predictive_variable import shift_by_strata_period
-
+from mbs_results.data_cleaning import join_manual_constructions
 
 def wrap_flag_matched_pairs(
     df: pd.DataFrame, **default_columns: Dict[str, str]
@@ -224,6 +224,7 @@ def ratio_of_means(
     strata: str,
     auxiliary: str,
     filters: pd.DataFrame = None,
+    manual_constructions: pd.DataFrame = None,
     imputation_links: Dict[str, str] = {},
     **kwargs,
 ) -> pd.DataFrame:
@@ -253,6 +254,8 @@ def ratio_of_means(
         Column name containing auxiliary information (sic).
     filters : pd.DataFrame, optional
         Dataframe with values to exclude from imputation method.
+    manual_constructions : pd.DataFrame, optional
+        Dataframe with values which are used for manual construction
     imputation_links : dict, optional
         Dictionary of column name keys matching to their imputation link value
         ("f_link_question", "b_link_question", "construction_link").
@@ -299,6 +302,11 @@ def ratio_of_means(
             .pipe(wrap_shift_by_strata_period, **default_columns)
             .pipe(wrap_calculate_imputation_link, **default_columns)
         )
+
+    if manual_constructions is not None:
+        # Need to join mc dataframe to original df
+        df = join_manual_constructions(df, manual_constructions, reference, period)
+
 
     if f"{target}_man" in df.columns:
         # Manual Construction

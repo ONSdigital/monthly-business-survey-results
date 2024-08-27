@@ -4,6 +4,7 @@ from helper_functions import load_filter
 from pandas.testing import assert_frame_equal
 
 from mbs_results.ratio_of_means import ratio_of_means
+from mbs_results.utils import convert_column_to_datetime
 
 scenario_path_prefix = "tests/data/"
 
@@ -179,3 +180,101 @@ class TestRatioOfMeans:
         print(expected_output.columns)
 
         assert_frame_equal(actual_output, expected_output, check_dtype=False)
+
+
+
+pytestmark = pytest.mark.parametrize("base_file_name", scenarios[len(scenarios)-10:len(scenarios)])
+class TestRatioOfMeansManConstruction:
+    def test_manual_construction_input(self,base_file_name):
+        df = pd.read_csv(scenario_path_prefix + "ratio_of_means/" + base_file_name + "_input.csv")
+        expected_output = pd.read_csv(scenario_path_prefix + "ratio_of_means/" + base_file_name + "_output.csv")
+
+        manual_constructions = df.copy()[["identifier", "date", "question_man"]]
+        manual_constructions.rename(columns={"question_man":"question"},inplace=True)
+
+        df.drop(columns = ["question_man"],inplace=True)
+        input_data = df
+        input_data["date"] = convert_column_to_datetime(
+        input_data["date"]
+    )
+        
+        manual_constructions["date"] = convert_column_to_datetime(manual_constructions["date"])
+
+        actual_output = ratio_of_means(
+                input_data,
+                target="question",
+                period="date",
+                reference="identifier",
+                strata="group",
+                auxiliary="other",
+                manual_constructions= manual_constructions
+            )
+        actual_output["question"] = actual_output[["question", "imputed_value"]].agg(
+            sum, axis=1
+        )
+        expected_output["date"] = convert_column_to_datetime(expected_output["date"])
+        actual_output = actual_output.rename(
+            columns={
+                "default_link_b_match_question": "default_backward",
+                "default_link_f_match_question": "default_forward",
+                "default_link_flag_construction_matches": "default_construction",
+                "flag_construction_matches_pair_count": "flag_match_pair_count",
+            }
+        )
+
+        actual_output = actual_output.drop(columns=["imputed_value", "other"])
+
+        # if stays like this we need a function to load expected data
+        expected_output = expected_output.rename(
+            columns={
+                "output": "question",
+                "marker": "imputation_flags_question",
+                "forward": "f_link_question",
+                "backward": "b_link_question",
+                "construction": "construction_link",
+                "count_forward": "f_match_question_pair_count",
+                "count_backward": "b_match_question_pair_count",
+                "count_construction": "flag_match_pair_count",
+            }
+        )
+
+        actual_output.drop(columns=["question_man"], errors="ignore", inplace=True)
+        # Temp work around to drop mc column until its fully integrated
+        actual_output.drop(
+            columns=[
+                "b_match_filtered_question",
+                "b_predictive_filtered_question",
+                "b_link_filtered_question",
+                "f_predictive_filtered_question",
+                "f_link_filtered_question",
+                "filtered_question",
+                "cumulative_b_link_filtered_question",
+                "cumulative_f_link_filtered_question",
+            ],
+            errors="ignore",
+            inplace=True,
+        )
+        actual_output.drop(
+            columns=["forward", "backward", "construction"],
+            errors="ignore",
+            inplace=True,
+        )
+        expected_output = expected_output[actual_output.columns]
+
+        actual_output = actual_output.sort_values(by=["identifier", "date"])
+        expected_output = expected_output.sort_values(by=["identifier", "date"])
+
+        actual_output = actual_output.reset_index(drop=True)
+        expected_output = expected_output.reset_index(drop=True)
+
+        expected_output["imputation_flags_question"] = expected_output[
+            "imputation_flags_question"
+        ].str.lower()
+        expected_output = expected_output.replace({"bi": "bir"})
+        
+        expected_output["f_match_question_pair_count"] = expected_output["f_match_question_pair_count"].astype(float)
+        expected_output["b_match_question_pair_count"] = expected_output["b_match_question_pair_count"].astype(float)
+        expected_output["flag_match_pair_count"] = expected_output["flag_match_pair_count"].astype(float)
+
+        assert_frame_equal(expected_output, actual_output)
+
