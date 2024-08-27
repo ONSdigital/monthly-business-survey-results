@@ -15,7 +15,6 @@ def calculate_winsorised_weight(
     ratio_estimation_treshold,
     nw_ag_flag,
 ):
-
     """
     Calculate winsorised weight
 
