@@ -47,7 +47,7 @@ def replace_values_index_based(
     common_index = series_from_a.index.intersection(series_from_b.index)
 
     # Has format (period,reference)
-    index_to_replace = series_from_a[
+    index_to_replace = series_from_a[common_index][
         ops[compare](series_from_a[common_index], series_from_b[common_index])
     ].index
 
