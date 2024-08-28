@@ -147,7 +147,8 @@ def load_manual_constructions(
     df, reference, period, manual_constructions_path, **config
 ):
     """
-    function to change datatypes of columns based on config file
+    Loads manual construction data from given file path
+    performs validation checks and joins this to main dataframe
 
     Parameters
     ----------
@@ -190,7 +191,9 @@ def join_manual_constructions(
     **config
 ):
     """
-    function to change datatypes of columns based on config file
+    joins manual construction data from onto main dataframe
+    performs validation checks and converts datatypes of manual
+    construction dataframe to same d-types as main dataframe
 
     Parameters
     ----------
@@ -211,15 +214,14 @@ def join_manual_constructions(
     pd.DataFrame
         dataframe with correctly formatted column datatypes.
     """
-    if manual_constructions[period].dtype != df[period].dtype:
+    if not is_same_dtype(df, manual_constructions, period):
         manual_constructions[period] = convert_column_to_datetime(
             manual_constructions[period]
         )
 
-    if manual_constructions[reference].dtype != df[reference].dtype:
-        reference_dtype = df[reference].dtype
+    if not is_same_dtype(df, manual_constructions, reference):
         manual_constructions[reference] = manual_constructions[reference].astype(
-            reference_dtype
+            df[reference].dtype
         )
 
     manual_constructions.set_index([reference, period], inplace=True)
@@ -228,8 +230,30 @@ def join_manual_constructions(
     validate_manual_constructions(df, manual_constructions)
 
     return df.merge(
-        manual_constructions, on=[reference, period], how="outer", suffixes=("", "_man")
+        manual_constructions, on=[reference, period], how="left", suffixes=("", "_man")
     ).reset_index()
+
+
+def is_same_dtype(df: pd.DataFrame, df2: pd.DataFrame, col_name: str) -> bool:
+    """
+    checks if given column in two dataframes have same datatype
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        dataframe one to compare against
+    df2 : pd.DataFrame
+        dataframe two to compare against
+    col_name : str
+        column name to compare datatypes of
+
+    Returns
+    -------
+    bool
+        True if col_name in df and df2 have same datatype
+        False otherwise
+    """
+    return df[col_name].dtype == df2[col_name].dtype
 
 
 def run_live_or_frozen(
