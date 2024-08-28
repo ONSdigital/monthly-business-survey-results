@@ -47,7 +47,7 @@ def replace_values_index_based(
     common_index = series_from_a.index.intersection(series_from_b.index)
 
     # Has format (period,reference)
-    index_to_replace = series_from_a[
+    index_to_replace = series_from_a[common_index][
         ops[compare](series_from_a[common_index], series_from_b[common_index])
     ].index
 
@@ -146,17 +146,17 @@ def constrain(
     derived_values = pd.concat(
         [
             sum_sub_df(pre_derive_df.loc[form_type], derives["from"]).assign(
-                question_no=derives["derive"]
+                **{question_no: derives["derive"]}
             )
             for form_type, derives in derive_map.items()
         ]
     )
-
+    unique_q_numbers = df[question_no].unique()
     df.set_index([question_no, period, reference], inplace=True)
 
-    if 49 in df[question_no].unique():
+    if 49 in unique_q_numbers:
         replace_values_index_based(df, target_imputed, 49, ">", 40)
-    elif 90 in df[question_no].unique():
+    elif 90 in unique_q_numbers:
         replace_values_index_based(df, target_imputed, 90, ">=", 40)
 
     df.reset_index(inplace=True)
@@ -212,8 +212,8 @@ def derive_questions(
     derived_values = pd.concat(
         [
             sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
-            .assign(question_no=derives["derive"])
-            .assign(spp_form_id=form_type)
+            .assign(**{question_no: derives["derive"]})
+            .assign(**{spp_form_id: form_type})
             # Create a task on Backlog to fix this.
             for form_type, derives in derive_map.items()
         ]
