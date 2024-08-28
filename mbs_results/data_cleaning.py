@@ -147,7 +147,8 @@ def load_manual_constructions(
     df, reference, period, manual_constructions_path, **config
 ):
     """
-    function to change datatypes of columns based on config file
+    Loads manual construction data from given file path
+    performs validation checks and joins this to main dataframe
 
     Parameters
     ----------
@@ -182,6 +183,79 @@ def load_manual_constructions(
     )
 
 
+def join_manual_constructions(
+    df: pd.DataFrame,
+    manual_constructions: pd.DataFrame,
+    reference: str,
+    period: str,
+    **config
+):
+    """
+    joins manual construction data from onto main dataframe
+    performs validation checks and converts datatypes of manual
+    construction dataframe to same d-types as main dataframe
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        dataframe with combined responses and contributors columns
+        index is expected to be 'period' and 'reference'
+    manual_constructions_path: str
+        the manual construction dataframe
+    reference: str
+        the name of the reference column
+    period: str
+        the name of the period column
+    **config: Dict
+        main pipeline configuration. Can be used to input the entire config dictionary
+
+    Returns
+    -------
+    pd.DataFrame
+        dataframe with correctly formatted column datatypes.
+    """
+    if not is_same_dtype(df, manual_constructions, period):
+        manual_constructions[period] = convert_column_to_datetime(
+            manual_constructions[period]
+        )
+
+    if not is_same_dtype(df, manual_constructions, reference):
+        manual_constructions[reference] = manual_constructions[reference].astype(
+            df[reference].dtype
+        )
+
+    manual_constructions.set_index([reference, period], inplace=True)
+    df.set_index([reference, period], inplace=True)
+
+    validate_manual_constructions(df, manual_constructions)
+
+    return df.merge(
+        manual_constructions, on=[reference, period], how="left", suffixes=("", "_man")
+    ).reset_index()
+
+
+def is_same_dtype(df: pd.DataFrame, df2: pd.DataFrame, col_name: str) -> bool:
+    """
+    checks if given column in two dataframes have same datatype
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        dataframe one to compare against
+    df2 : pd.DataFrame
+        dataframe two to compare against
+    col_name : str
+        column name to compare datatypes of
+
+    Returns
+    -------
+    bool
+        True if col_name in df and df2 have same datatype
+        False otherwise
+    """
+    return df[col_name].dtype == df2[col_name].dtype
+
+
 def run_live_or_frozen(
     df: pd.DataFrame,
     target: str or list[str],
@@ -189,7 +263,6 @@ def run_live_or_frozen(
     state: str = "live",
     error_values: List[str] = ["E", "W"],
 ) -> pd.DataFrame:
-
     """
     For frozen, therefore target values are converted to null, hence responses
     in error are treated as non-response.
