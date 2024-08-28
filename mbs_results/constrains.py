@@ -146,7 +146,7 @@ def constrain(
     derived_values = pd.concat(
         [
             sum_sub_df(pre_derive_df.loc[form_type], derives["from"]).assign(
-                **{question_no : derives["derive"]}
+                **{question_no: derives["derive"]}
             )
             for form_type, derives in derive_map.items()
         ]
@@ -212,8 +212,8 @@ def derive_questions(
     derived_values = pd.concat(
         [
             sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
-            .assign(**{question_no:derives["derive"]})
-            .assign(**{spp_form_id:form_type})
+            .assign(**{question_no: derives["derive"]})
+            .assign(**{spp_form_id: form_type})
             # Create a task on Backlog to fix this.
             for form_type, derives in derive_map.items()
         ]
