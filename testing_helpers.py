@@ -150,4 +150,18 @@ def load_config():
             return json.load(f)
     
 
+def join_l_values(df,l_values_path): 
+    """Read l values and drop duplicates and period"""
+    
+    l_values = pd.read_csv(l_values_path)
+    
+    l_values = l_values.drop_duplicates(['question_no','classification'])
+    
+    l_values = l_values.drop(columns=["period"])
+    
+    df['frosic2007_3d'] = (pd.Series(np.floor(df['frosic2007']/100 )*100)).astype(int)
+    
+    df = pd.merge(df,l_values,how="left",left_on=["question_no","frosic2007_3d"],right_on=["question_no","classification"])
+
+    return df
 

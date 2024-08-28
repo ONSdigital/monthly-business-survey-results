@@ -1,6 +1,6 @@
 ## How to run
 1. clone this branch
-2. pip install git+https://github.com/ONSdigital/monthly-business-survey-results.git@v0.0.1
+2. pip install git+https://github.com/ONSdigital/monthly-business-survey-results.git@v0.0.2
 3. add paths in [json config](https://github.com/ONSdigital/monthly-business-survey-results/blob/testing_outputs/test_outputs_config.json)
    - `df_path`:  add folder path to cv qv files e.g.  `folder/subfolder/`
    - `l_values_path`: add whole path to calibration group e.g.  `folder/subfolder/mbs_l_values.csv`

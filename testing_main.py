@@ -4,7 +4,8 @@ import pandas as pd
 from testing_helpers import (
     get_pre_impute_data, proccess_for_pre_impute,
     check_na_duplicates,map_form_type,get_qa_output_482,
-    load_config
+    load_config,
+    join_l_values
     )
 
 # pip install git+https://github.com/ONSdigital/monthly-business-survey-results.git@0.0.2
@@ -65,9 +66,21 @@ if __name__ == "__main__":
     estimate_out = post_estimate[["period","cell_no","calibration_group","design_weight","calibration_factor"]]
         
     estimate_out.to_csv(config['out_path']+f"estimation_output_{FILE_VERSION}.csv",index=False)
-                
-    post_win = winsorise(post_estimate,config['l_values_path'])
     
+    post_win = join_l_values(post_estimate,config['l_values_path'])
+                
+    post_win = winsorise(
+            post_win,
+            "frosic2007_3d", #needs change ASAP-490
+            "period",
+            "frotover",
+            "sampled",
+            "design_weight",
+            "calibration_factor",
+            "adjusted_value",
+            "l_value",
+        )
+
     post_win.to_csv(config['out_path']+f"winsorisation_output_{FILE_VERSION}.csv",index=False)
 
     asap_482_df = get_qa_output_482(post_win)
