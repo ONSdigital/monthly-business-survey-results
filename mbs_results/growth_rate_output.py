@@ -50,6 +50,10 @@ def get_growth_rate_data(filepath):
 
     input_data.drop(columns=["cell_no_x"], inplace=True)
 
+    input_data.sort_values(
+        ["classification", "question_no", "sizeband", "period_x"], inplace=True
+    )
+
     growth_rate_output = input_data.pivot_table(
         columns="period_x",
         values="adjusted_value",
