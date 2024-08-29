@@ -188,6 +188,7 @@ def join_manual_constructions(
     manual_constructions: pd.DataFrame,
     reference: str,
     period: str,
+    question_no: str = "question_no",
     **config
 ):
     """
@@ -206,6 +207,8 @@ def join_manual_constructions(
         the name of the reference column
     period: str
         the name of the period column
+    period: str
+        the name of the question number column
     **config: Dict
         main pipeline configuration. Can be used to input the entire config dictionary
 
@@ -214,27 +217,42 @@ def join_manual_constructions(
     pd.DataFrame
         dataframe with correctly formatted column datatypes.
     """
-    if period not in df.columns or reference not in df.columns:
-        df = df.reset_index()
 
-    if not is_same_dtype(df, manual_constructions, period):
-        manual_constructions[period] = convert_column_to_datetime(
-            manual_constructions[period]
-        )
+    question_no_from_df = df[question_no].unique().tolist()
+    manual_constructions_filter = manual_constructions.loc[
+        manual_constructions[question_no].isin(question_no_from_df)
+    ]
 
-    if not is_same_dtype(df, manual_constructions, reference):
-        manual_constructions[reference] = manual_constructions[reference].astype(
-            df[reference].dtype
-        )
+    if manual_constructions_filter.empty:
+        # return original df as nothing present to use
+        # as manual construction
+        return df
+    else:
+        # manual_constructions = manual_constructions_filter
+        if period not in df.columns or reference not in df.columns:
+            df = df.reset_index()
 
-    manual_constructions.set_index([reference, period], inplace=True)
-    df.set_index([reference, period], inplace=True)
+        if not is_same_dtype(df, manual_constructions, period):
+            manual_constructions[period] = convert_column_to_datetime(
+                manual_constructions[period]
+            )
 
-    validate_manual_constructions(df, manual_constructions)
+        if not is_same_dtype(df, manual_constructions, reference):
+            manual_constructions[reference] = manual_constructions[reference].astype(
+                df[reference].dtype
+            )
 
-    return df.merge(
-        manual_constructions, on=[reference, period], how="left", suffixes=("", "_man")
-    ).reset_index()
+        manual_constructions.set_index([reference, period], inplace=True)
+        df.set_index([reference, period], inplace=True)
+
+        validate_manual_constructions(df, manual_constructions)
+
+        return df.merge(
+            manual_constructions,
+            on=[reference, period, question_no],
+            how="left",
+            suffixes=("", "_man"),
+        ).reset_index()
 
 
 def is_same_dtype(df: pd.DataFrame, df2: pd.DataFrame, col_name: str) -> bool:
@@ -355,3 +373,20 @@ def create_imputation_class(
     )
 
     return df
+
+
+if __name__ == "__main__":
+    df = pd.DataFrame(
+        np.array([[202401, 2, 3, 10], [202402, 5, 6, 30], [202403, 8, 9, 30]]),
+        columns=["period", "reference", "c","question_no"],
+    )
+    df2 = pd.DataFrame(
+        np.array([[202401, 2, 3, 10], [202402, 5, 6, 30], [202403, 8, 9, 20]]),
+        columns=["period", "reference", "c","question_no"],
+    )
+    # df2 = df2.loc[df2["period"] == 1]
+    # print(df2.empty)
+    df["period"] = convert_column_to_datetime(df["period"])
+    df.set_index(['period'],inplace=True)
+    output = join_manual_constructions(df, df2, period="period", reference="reference")
+    print(output)
