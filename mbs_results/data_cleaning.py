@@ -228,28 +228,28 @@ def join_manual_constructions(
         # as manual construction
         return df
     else:
-        # manual_constructions = manual_constructions_filter
+        manual_constructions_filter.drop(columns = [question_no],inplace=True)
         if period not in df.columns or reference not in df.columns:
             df = df.reset_index()
 
-        if not is_same_dtype(df, manual_constructions, period):
-            manual_constructions[period] = convert_column_to_datetime(
-                manual_constructions[period]
+        if not is_same_dtype(df, manual_constructions_filter, period):
+            manual_constructions_filter[period] = convert_column_to_datetime(
+                manual_constructions_filter[period]
             )
 
-        if not is_same_dtype(df, manual_constructions, reference):
-            manual_constructions[reference] = manual_constructions[reference].astype(
+        if not is_same_dtype(df, manual_constructions_filter, reference):
+            manual_constructions_filter[reference] = manual_constructions_filter[reference].astype(
                 df[reference].dtype
             )
 
-        manual_constructions.set_index([reference, period, question_no], inplace=True)
-        df.set_index([reference, period, question_no], inplace=True)
+        manual_constructions_filter.set_index([reference, period], inplace=True)
+        df.set_index([reference, period], inplace=True)
 
-        validate_manual_constructions(df, manual_constructions)
+        validate_manual_constructions(df, manual_constructions_filter)
 
         return df.merge(
-            manual_constructions,
-            on=[reference, period, question_no],
+            manual_constructions_filter,
+            on=[reference, period],
             how="left",
             suffixes=("", "_man"),
         ).reset_index()
