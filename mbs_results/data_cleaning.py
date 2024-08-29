@@ -242,8 +242,8 @@ def join_manual_constructions(
                 df[reference].dtype
             )
 
-        manual_constructions.set_index([reference, period], inplace=True)
-        df.set_index([reference, period], inplace=True)
+        manual_constructions.set_index([reference, period, question_no], inplace=True)
+        df.set_index([reference, period, question_no], inplace=True)
 
         validate_manual_constructions(df, manual_constructions)
 
