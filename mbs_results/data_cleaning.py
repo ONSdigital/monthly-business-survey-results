@@ -373,20 +373,3 @@ def create_imputation_class(
     )
 
     return df
-
-
-if __name__ == "__main__":
-    df = pd.DataFrame(
-        np.array([[202401, 2, 3, 10], [202402, 5, 6, 30], [202403, 8, 9, 30]]),
-        columns=["period", "reference", "c","question_no"],
-    )
-    df2 = pd.DataFrame(
-        np.array([[202401, 2, 3, 10], [202402, 5, 6, 30], [202403, 8, 9, 20]]),
-        columns=["period", "reference", "c","question_no"],
-    )
-    # df2 = df2.loc[df2["period"] == 1]
-    # print(df2.empty)
-    df["period"] = convert_column_to_datetime(df["period"])
-    df.set_index(['period'],inplace=True)
-    output = join_manual_constructions(df, df2, period="period", reference="reference")
-    print(output)
