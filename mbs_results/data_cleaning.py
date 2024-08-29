@@ -214,6 +214,9 @@ def join_manual_constructions(
     pd.DataFrame
         dataframe with correctly formatted column datatypes.
     """
+    if period not in df.columns or reference not in df.columns:
+        df = df.reset_index()
+
     if not is_same_dtype(df, manual_constructions, period):
         manual_constructions[period] = convert_column_to_datetime(
             manual_constructions[period]
