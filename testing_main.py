@@ -71,7 +71,7 @@ if __name__ == "__main__":
                 
     post_win = winsorise(
             post_win,
-            "frosic2007_3d", #needs change ASAP-490
+            "calibration_group",
             "period",
             "frotover",
             "sampled",
