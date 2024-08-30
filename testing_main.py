@@ -4,8 +4,7 @@ import pandas as pd
 from testing_helpers import (
     get_pre_impute_data, proccess_for_pre_impute,
     check_na_duplicates,map_form_type,get_qa_output_482,
-    load_config,
-    join_l_values
+    load_config,join_l_values,extract_mannual_constructed
     )
 
 # pip install git+https://github.com/ONSdigital/monthly-business-survey-results.git@0.0.2
@@ -14,7 +13,7 @@ from mbs_results.data_cleaning import create_imputation_class
 from mbs_results.ratio_of_means import ratio_of_means
 from mbs_results.constrains import constrain
 from mbs_results.apply_estimation import apply_estimation
-from mbs_results.winsorisation.py import winsorise
+from mbs_results.winsorisation import winsorise
 
     
 if __name__ == "__main__":
@@ -27,21 +26,24 @@ if __name__ == "__main__":
     pre_impute_df = get_pre_impute_data(
         config['df_path'],config['df_path'],config['sample_path'],config['sample_column_names'])
     
+    man_df = extract_mannual_constructed(pre_impute_df)
+
     pre_impute_df = proccess_for_pre_impute(pre_impute_df)
     
     check_na_duplicates(pre_impute_df) #just basic check
     
     pre_impute_df = create_imputation_class(pre_impute_df,"cell_no","imputation_class")
-
+    
     post_impute = pre_impute_df.groupby("question_no").apply(
         lambda df:ratio_of_means(
             df = df,
+            manual_constructions = man_df,
             reference="reference",
             target="adjusted_value",
             period="period",
             strata = "imputation_class",
             auxiliary="frotover"))
-
+    
     post_impute['period']  =  post_impute['period'].dt.strftime('%Y%m').astype("int")
 
     post_impute = post_impute.reset_index(drop=True) #remove groupby leftovers

@@ -92,6 +92,7 @@ def proccess_for_pre_impute(df):
         df.loc[df["adjusted_value"].isin([np.nan,0])].groupby(["response_type","type"])["adjusted_value"].unique())
     
     return df
+        
 
     
 def check_na_duplicates(df):
@@ -164,4 +165,17 @@ def join_l_values(df,l_values_path):
     df = pd.merge(df,l_values,how="left",left_on=["question_no","frosic2007_3d"],right_on=["question_no","classification"])
 
     return df
+
+
+def extract_mannual_constructed(df):
+    """Get data which were mannual constructed"""
+    
+    df_man = df.loc[((df["response_type"]==1) & (df["type"]==5))]
+    
+    df_man = df_man[['period', 'reference', 'question_no','adjusted_value']]
+    
+    return df_man
+        
+    
+
 
