@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
+from utils import convert_column_to_datetime
 
 
-def get_growth_rate_data(filepath):
+def get_growth_rate_data(filepath: str) -> pd.DataFrame:
     """
     Filters and pivots wider winsorisation data on period to return growth rate data.
 
@@ -14,7 +15,7 @@ def get_growth_rate_data(filepath):
     Returns
     -------
     pandas.Data.Frame
-        Dataframe containing classification, question number, cell number, and pivoted
+        Dataframe containing classification, question number, and cell number, pivoted
         wider on period with adjusted values.
     """
 
@@ -37,7 +38,7 @@ def get_growth_rate_data(filepath):
     )
 
     input_data["period_x"] = (
-        pd.to_datetime(input_data["period_x"], format="%Y%m")
+        convert_column_to_datetime(input_data["period_x"])
         .dt.strftime("%Y%b")
         .str.upper()
     )
