@@ -1,0 +1,4 @@
+sic92,cell_no,reference,entname1,adjusted_value,type,curr_grossed_value,outlier_weight,error_mkr,error_res_code,frotover,froempment,returned_value
+1,32,101,NAME 1,4205.4,1,4625.94,1.0,O,0,594,4593,5940.0
+2,6,102,NAME 2,448.0,2,448.0,1.0,C,0,43,62,448.0
+2,19,103,NAME 3,84205.9,3,378926.55,1.5,E,0,509,394,75940.0
