@@ -7,34 +7,39 @@ def create_turnover_output(
     qv_df: str,
     finalsel_df: str,
     winsorisation_df: str,
-    period: str,
+    winsorisation_period: str,
     selected_period: int,
 ) -> pd.DataFrame:
     """
-    Returning standardising factor summed by domain for questions 40 and 49.
-    Standardising factor estimated using a_weights, o_weights and g_weights.
+    Creating output for turnover analysis tool.
 
     Parameters
     ----------
     cp_df : pd.DataFrame
-        Reference dataframe with adjusted_value, a_weights, o_weights, and g_weights
+        cp input dataframe containing reference, sic and error_mkr
     qv_df : pd.DataFrame
-        Reference dataframe with adjusted_value, a_weights, o_weights, and g_weights
+        qv input dataframe containing reference, question_no, adjusted_value and
+        returned_value
     finalsel_df : pd.DataFrame
-        Reference dataframe with adjusted_value, a_weights, o_weights, and g_weights
+        finalsel input dataframe containing reference, froempment, frotover, cell_no
+        and entname1
     winsorisation_df : pd.DataFrame
-        Reference dataframe with adjusted_value, a_weights, o_weights, and g_weights
+        winsorisation input dataframe containing question_no, period, reference,
+        imputation_marker, design_weight, calibration_factor and outlier_weight
+    winsorisation_period : str
+        Name of column displaying period in winsorisation
+    selected_period : int
+        Period to output results for in the format YYYYMM
 
     Returns
     -------
     pd.DataFrame
-        dataframe with estimated_value and without a_weight and g_weight as these are
-        not in the turnover analysis output.
+        dataframe in correct format for populating turnover analysis tool.
     """
 
     qv_df = qv_df.query("question_no == 40")
     winsorisation_df = winsorisation_df.query(
-        "{} == {} and question_no == 40".format(period, selected_period)
+        "{} == {} and question_no == 40".format(winsorisation_period, selected_period)
     )
 
     turnover_df = (
