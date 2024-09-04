@@ -196,7 +196,7 @@ class TestRatioOfMeansManConstruction:
             scenario_path_prefix + "ratio_of_means/" + base_file_name + "_output.csv"
         )
 
-        manual_constructions = df.copy()[["identifier", "date", "question_man"]]
+        manual_constructions = df.copy()[["identifier", "date", "question_man","question_no"]]
         manual_constructions.rename(columns={"question_man": "question"}, inplace=True)
 
         df.drop(columns=["question_man"], inplace=True)
