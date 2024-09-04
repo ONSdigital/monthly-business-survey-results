@@ -3,10 +3,10 @@ import pandas as pd
 
 
 def create_turnover_output(
-    cp_df: str,
-    qv_df: str,
-    finalsel_df: str,
-    winsorisation_df: str,
+    cp_df: pd.DataFrame,
+    qv_df: pd.DataFrame,
+    finalsel_df: pd.DataFrame,
+    winsorisation_df: pd.DataFrame,
     winsorisation_period: str,
     selected_period: int,
 ) -> pd.DataFrame:
