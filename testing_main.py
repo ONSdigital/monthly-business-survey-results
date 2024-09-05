@@ -87,4 +87,4 @@ if __name__ == "__main__":
 
     asap_482_df = get_qa_output_482(post_win)
     
-    asap_482_df.to_csv(config['out_path']+f"asap_482_df{FILE_VERSION}.csv",index=False)
+    asap_482_df.to_csv(config['out_path']+f"asap_482_df_{FILE_VERSION}.csv",index=False)
