@@ -60,10 +60,10 @@ def proccess_for_pre_impute(df):
     df.loc[df['reference']==15399057545,"response_type"] = 1
     
     zero_to_null_rules = (
-         (df["adjusted_value"]==0) 
-         & ((df["response_type"]>4)  #response_type >4 leave 0 
+         ((df["adjusted_value"]==0) 
+         & ((df["response_type"]>=4)  #response_type >=4 leave 0 
         | ((df["response_type"]==2) & (df["type"]==1)) # or response_type 2 and type 1 leave 0
-            )        
+            )) & (df["period"]!=df["period"].min()) # Avoiding overwriting first period records as this will cause some business not to forward impute
         )
     
     convert_to_null_rules = (
@@ -87,7 +87,7 @@ def proccess_for_pre_impute(df):
           )
     
     print("Selecting all the nas and zeros of adjusted value\n",
-        "The below must not have 0 for response_type 2 type 1 and response_type >4\n",
+        "The below must not have 0 for response_type 2 type 1 and response_type >=4\n",
         "Also for response type 1 and type 5 must have only nans (mannual costructed)\n",
         df.loc[df["adjusted_value"].isin([np.nan,0])].groupby(["response_type","type"])["adjusted_value"].unique())
     
