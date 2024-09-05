@@ -188,6 +188,7 @@ def join_manual_constructions(
     manual_constructions: pd.DataFrame,
     reference: str,
     period: str,
+    question_no: str = "question_no",
     **config
 ):
     """
@@ -206,6 +207,8 @@ def join_manual_constructions(
         the name of the reference column
     period: str
         the name of the period column
+    period: str
+        the name of the question number column
     **config: Dict
         main pipeline configuration. Can be used to input the entire config dictionary
 
@@ -214,24 +217,42 @@ def join_manual_constructions(
     pd.DataFrame
         dataframe with correctly formatted column datatypes.
     """
-    if not is_same_dtype(df, manual_constructions, period):
-        manual_constructions[period] = convert_column_to_datetime(
-            manual_constructions[period]
-        )
 
-    if not is_same_dtype(df, manual_constructions, reference):
-        manual_constructions[reference] = manual_constructions[reference].astype(
-            df[reference].dtype
-        )
+    question_no_from_df = df[question_no].unique().tolist()
+    manual_constructions_filter = manual_constructions.loc[
+        manual_constructions[question_no].isin(question_no_from_df)
+    ]
 
-    manual_constructions.set_index([reference, period], inplace=True)
-    df.set_index([reference, period], inplace=True)
+    if manual_constructions_filter.empty:
+        # return original df as nothing present to use
+        # as manual construction
+        return df
+    else:
+        manual_constructions_filter.drop(columns=[question_no], inplace=True)
+        if period not in df.columns or reference not in df.columns:
+            df = df.reset_index()
 
-    validate_manual_constructions(df, manual_constructions)
+        if not is_same_dtype(df, manual_constructions_filter, period):
+            manual_constructions_filter[period] = convert_column_to_datetime(
+                manual_constructions_filter[period]
+            )
 
-    return df.merge(
-        manual_constructions, on=[reference, period], how="left", suffixes=("", "_man")
-    ).reset_index()
+        if not is_same_dtype(df, manual_constructions_filter, reference):
+            manual_constructions_filter[reference] = manual_constructions_filter[
+                reference
+            ].astype(df[reference].dtype)
+
+        manual_constructions_filter.set_index([reference, period], inplace=True)
+        df.set_index([reference, period], inplace=True)
+
+        validate_manual_constructions(df, manual_constructions_filter)
+
+        return df.merge(
+            manual_constructions_filter,
+            on=[reference, period],
+            how="left",
+            suffixes=("", "_man"),
+        ).reset_index()
 
 
 def is_same_dtype(df: pd.DataFrame, df2: pd.DataFrame, col_name: str) -> bool:
