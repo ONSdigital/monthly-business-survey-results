@@ -22,6 +22,7 @@
         "cell_no","formtype","cso_tel","currency"
     ],
     "calibration_group_map": "replace_with_calibration_path",
+    "classification_values_path": "replace_with_classification_values_path",
     "period": "period",
     "reference": "reference",
     "cell_number": "cell_no",

@@ -8,6 +8,7 @@
    - `sample_path`: add path to universe with wildcard for glob e.g.  `folder/subfolder/finalsel*`
    - `calibration_group_map`: add whole path to calibration group e.g.  `folder/subfolder/calibration_group_map.csv`
    - `out_path`: add folder path to save the outputs e.g. `D:/`
+   - `classification_path` : add path to classification file e.g. `folder/subfolder/classification_sic_map.csv`
 
 5. run [testing_main](https://github.com/ONSdigital/monthly-business-survey-results/blob/480-testing-outputs/testing_main.py)
 

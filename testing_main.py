@@ -69,7 +69,7 @@ if __name__ == "__main__":
         
     estimate_out.to_csv(config['out_path']+f"estimation_output_{FILE_VERSION}.csv",index=False)
     
-    post_win = join_l_values(post_estimate,config['l_values_path'])
+    post_win = join_l_values(post_estimate,config['l_values_path'],config["classification_values_path"])
                 
     post_win = winsorise(
             post_win,
