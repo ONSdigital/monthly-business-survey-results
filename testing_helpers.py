@@ -131,7 +131,7 @@ def get_qa_output_482(post_win_df):
         'froempees', 'form_type', 'response_type', 'question_no','adjusted_value',
         'error_mkr', 'design_weight','calibration_factor', 'outlier_weight',
         'total weight (A*G*O)','weighted adjusted value', 'imputation_flags_adjusted_value',
-        'imp_class','f_link_adjusted_value', 'f_match_adjusted_value_pair_count',
+        'imputation_class','f_link_adjusted_value', 'f_match_adjusted_value_pair_count',
         'default_link_f_match_adjusted_value','b_link_adjusted_value',
         'b_match_adjusted_value_pair_count','default_link_b_match_adjusted_value',
         'construction_link', 'flag_construction_matches_pair_count','default_link_flag_construction_matches',
