@@ -2,7 +2,7 @@ import pytest
 from helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
-from mbs_results.calculate_imputation_link import calculate_imputation_link
+from mbs_results.imputation.calculate_imputation_link import calculate_imputation_link
 
 
 @pytest.fixture(scope="class")

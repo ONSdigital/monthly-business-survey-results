@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from mbs_results.flag_and_count_matched_pairs import count_matches
+from mbs_results.imputation.flag_and_count_matched_pairs import count_matches
 
 
 def calculate_imputation_link(
