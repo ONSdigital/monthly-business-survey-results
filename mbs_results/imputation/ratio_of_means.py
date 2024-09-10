@@ -3,15 +3,15 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 
-from mbs_results.imputation.apply_imputation_link import create_and_merge_imputation_values
+from mbs_results.estimation.apply_imputation_link import create_and_merge_imputation_values
 from mbs_results.imputation.calculate_imputation_link import calculate_imputation_link
-from mbs_results.construction_matches import flag_construction_matches
+from mbs_results.construction.construction_matches import flag_construction_matches
 from mbs_results.imputation.cumulative_imputation_links import get_cumulative_links
-from mbs_results.data_cleaning import join_manual_constructions
+from mbs_results.utilities.data_cleaning import join_manual_constructions
 from mbs_results.imputation.flag_and_count_matched_pairs import flag_matched_pair
-from mbs_results.imputation_flags import generate_imputation_marker
-from mbs_results.link_filter import flag_rows_to_ignore
-from mbs_results.predictive_variable import shift_by_strata_period
+from mbs_results.imputation.imputation_flags import generate_imputation_marker
+from mbs_results.imputation.link_filter import flag_rows_to_ignore
+from mbs_results.imputation.predictive_variable import shift_by_strata_period
 
 
 def wrap_flag_matched_pairs(
