@@ -10,7 +10,7 @@ def get_growth_rate_data(filepath: str) -> pd.DataFrame:
     Parameters
     ----------
     filepath : str
-        filepath to the winsorisation output.
+        filepath to the asap output.
 
     Returns
     -------
@@ -26,14 +26,14 @@ def get_growth_rate_data(filepath: str) -> pd.DataFrame:
             "question_no",
             "cell_no_x",
             "period_x",
-            "adjusted_value",
+            "weighted_adjusted_value",
         ],
         dtype={
             "classification": "Int32",
             "question_no": "Int8",
             "cell_no_x": "Int16",
             "period_x": "Int32",
-            "adjusted_value": "float64",
+            "weighted_adjusted_value": "float64",
         },
     )
 
@@ -59,7 +59,7 @@ def get_growth_rate_data(filepath: str) -> pd.DataFrame:
         columns="period_x",
         values="adjusted_value",
         index=["classification", "question_no", "sizeband"],
-        aggfunc="mean",
+        aggfunc="sum",
         dropna=False,
     ).reset_index()
 
