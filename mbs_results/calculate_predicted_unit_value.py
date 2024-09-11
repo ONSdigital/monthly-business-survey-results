@@ -1,29 +1,20 @@
-import pandas as pd
+import numpy as np
 
 
 def calculate_predicted_unit_value(
-    df: pd.DataFrame,
-    period: str,
-    strata: str,
-    aux: str,
-    sampled: str,
-    a_weight: str,
-    target_variable: str,
-    nw_ag_flag: str,
-) -> pd.DataFrame:
+    df, group, period, aux, sampled, a_weight, target_variable, nw_ag_flag
+):
     """
-    Calculate link between target_variable and predictive_variable by strata,
-    a match_col must be supplied which indicates if target_variable
-    and predictive_variable can be linked.
+    Calculate predicted unit value
 
     Parameters
     ----------
     df : pd.Dataframe
         Original dataframe.
+    group : str
+        Column name containing group information (sic).
     period : str
         Column name containing time period.
-    strata : str
-        Column name containing strata information (sic).
     aux : str
         Column name containing auxiliary variable (x).
     sampled : str
@@ -34,22 +25,55 @@ def calculate_predicted_unit_value(
         Column name of the predicted target variable.
     nw_ag_flag: str
         column name indicating whether it can't be winsorised-
-        boolean (1 means it can't be winsorised, 0 means it can).
+        boolean (True means it can't be winsorised, False means it can).
     Returns
     -------
     df : pd.DataFrame
         A pandas DataFrame with a new column containing the predicted unit value.
     """
 
-    df = df.loc[(df["sampled"] == 1) & (df["nw_ag_flag"] == 0)]
-    df = df.reset_index(drop=True)
-    # check if reset index creates problems down the line
+    winsorised = (df[sampled] == 1) & (df[nw_ag_flag] == False)  # noqa: E712
+    filtered_df = df.loc[winsorised]
 
-    sum_weighted_target_values = (df["a_weight"] * df["target_variable"]).sum()
-    sum_weighted_auxiliary_values = (df["a_weight"] * df["aux"]).sum()
+    filtered_df["weighted_target_values"] = (
+        filtered_df[a_weight] * filtered_df[target_variable]
+    )
+    filtered_df["weighted_auxiliary_values"] = filtered_df[a_weight] * filtered_df[aux]
 
-    df["predicted_unit_value"] = df["aux"].apply(
-        lambda x: x * (sum_weighted_target_values / sum_weighted_auxiliary_values)
+    sum_weighted_target_values = (
+        filtered_df.groupby([group, period])["weighted_target_values"]
+        .sum()
+        .to_frame(name="sum_weighted_target_values")
+        .reset_index()
+    )
+    sum_weighted_auxiliary_values = (
+        filtered_df.groupby([group, period])["weighted_auxiliary_values"]
+        .sum()
+        .to_frame(name="sum_weighted_auxiliary_values")
+        .reset_index()
     )
 
-    return df
+    total_sum_weighted = sum_weighted_target_values.merge(
+        sum_weighted_auxiliary_values, on=[group, period], how="left"
+    )
+
+    final_df = df.merge(total_sum_weighted, on=[group, period], how="left")
+
+    final_df["predicted_unit_value"] = (
+        final_df[aux]
+        * final_df["sum_weighted_target_values"]
+        / final_df["sum_weighted_auxiliary_values"]
+    )
+
+    final_df = final_df.drop(
+        ["sum_weighted_target_values", "sum_weighted_auxiliary_values"], axis=1
+    )
+
+    non_winsorised = (final_df[sampled] == 0) | (
+        final_df[nw_ag_flag] == True  # noqa: E712
+    )
+    final_df["predicted_unit_value"] = final_df["predicted_unit_value"].mask(
+        non_winsorised, np.nan
+    )
+
+    return final_df

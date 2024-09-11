@@ -1,0 +1,6 @@
+strata,auxiliary,region,sampled,no_missing,one_missing,zeros
+5001,10,AA,1,1.0,1.0,0
+5001,10,AA,1,1.0,,0
+7001,10,YY,1,1.0,1.0,0
+5001,0,AA,0,1.0,1.0,0
+5002,10,AA,0,1.0,1.0,0

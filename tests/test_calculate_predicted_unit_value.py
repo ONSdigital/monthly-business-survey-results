@@ -10,7 +10,7 @@ from mbs_results.calculate_predicted_unit_value import calculate_predicted_unit_
 @pytest.fixture(scope="class")
 def predicted_unit_value_test_data():
     return pd.read_csv(
-        Path("tests") / "data" / "winsorisation" / "predicted_unit_value.csv",
+        Path("tests") / "data" / "winsorisation" / "predicted_unit_value_data.csv",
         low_memory=False,
         usecols=lambda c: not c.startswith("Unnamed:"),
     )
@@ -27,12 +27,12 @@ def predicted_unit_value_test_output():
 
 class TestPredictedUnitValue:
     def test_calculate_predicted_unit_value(
-        self, predicted_unit_value_test_output, predicted_unit_value_test_data
+        self, predicted_unit_value_test_data, predicted_unit_value_test_output
     ):
         expected_output = predicted_unit_value_test_output[
             [
+                "group",
                 "period",
-                "strata",
                 "aux",
                 "sampled",
                 "a_weight",
@@ -43,25 +43,24 @@ class TestPredictedUnitValue:
         ]
         input_data = predicted_unit_value_test_data[
             [
+                "group",
                 "period",
-                "strata",
                 "aux",
                 "sampled",
                 "a_weight",
                 "target_variable",
                 "nw_ag_flag",
-                "predicted_unit_value",
             ]
         ]
-        input_data = input_data.drop(columns=["predicted_unit_value"])
+
         actual_output = calculate_predicted_unit_value(
             input_data,
+            "group",
             "period",
-            "strata",
             "aux",
             "sampled",
             "a_weight",
-            "target_variale",
+            "target_variable",
             "nw_ag_flag",
         )
 

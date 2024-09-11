@@ -1,3 +1,6 @@
+from typing import List
+
+import numpy as np
 import pandas as pd
 
 from mbs_results.utils import convert_column_to_datetime
@@ -144,7 +147,8 @@ def load_manual_constructions(
     df, reference, period, manual_constructions_path, **config
 ):
     """
-    function to change datatypes of columns based on config file
+    Loads manual construction data from given file path
+    performs validation checks and joins this to main dataframe
 
     Parameters
     ----------
@@ -177,3 +181,174 @@ def load_manual_constructions(
     return df.merge(
         manual_constructions, on=[reference, period], how="outer", suffixes=("", "_man")
     )
+
+
+def join_manual_constructions(
+    df: pd.DataFrame,
+    manual_constructions: pd.DataFrame,
+    reference: str,
+    period: str,
+    **config
+):
+    """
+    joins manual construction data from onto main dataframe
+    performs validation checks and converts datatypes of manual
+    construction dataframe to same d-types as main dataframe
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        dataframe with combined responses and contributors columns
+        index is expected to be 'period' and 'reference'
+    manual_constructions_path: str
+        the manual construction dataframe
+    reference: str
+        the name of the reference column
+    period: str
+        the name of the period column
+    **config: Dict
+        main pipeline configuration. Can be used to input the entire config dictionary
+
+    Returns
+    -------
+    pd.DataFrame
+        dataframe with correctly formatted column datatypes.
+    """
+    if not is_same_dtype(df, manual_constructions, period):
+        manual_constructions[period] = convert_column_to_datetime(
+            manual_constructions[period]
+        )
+
+    if not is_same_dtype(df, manual_constructions, reference):
+        manual_constructions[reference] = manual_constructions[reference].astype(
+            df[reference].dtype
+        )
+
+    manual_constructions.set_index([reference, period], inplace=True)
+    df.set_index([reference, period], inplace=True)
+
+    validate_manual_constructions(df, manual_constructions)
+
+    return df.merge(
+        manual_constructions, on=[reference, period], how="left", suffixes=("", "_man")
+    ).reset_index()
+
+
+def is_same_dtype(df: pd.DataFrame, df2: pd.DataFrame, col_name: str) -> bool:
+    """
+    checks if given column in two dataframes have same datatype
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        dataframe one to compare against
+    df2 : pd.DataFrame
+        dataframe two to compare against
+    col_name : str
+        column name to compare datatypes of
+
+    Returns
+    -------
+    bool
+        True if col_name in df and df2 have same datatype
+        False otherwise
+    """
+    return df[col_name].dtype == df2[col_name].dtype
+
+
+def run_live_or_frozen(
+    df: pd.DataFrame,
+    target: str or list[str],
+    error_marker: str,
+    state: str = "live",
+    error_values: List[str] = ["E", "W"],
+) -> pd.DataFrame:
+    """
+    For frozen, therefore target values are converted to null, hence responses
+    in error are treated as non-response.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    target : str or list[str]
+        Column(s) to treat as non-response.
+    error_marker : str
+        Column name with error values.
+    state : str, optional
+        Function config parameter. The default is "live". "live" state won't do
+        anyting, "frozen" will convert to null the error_values within error_marker
+    error_values : list[str], optional
+        Values to ignore. The default is ['E', 'W'].
+
+    Returns
+    -------
+    Original dataframe.
+
+    """
+
+    if state not in ["frozen", "live"]:
+        raise ValueError(
+            """{} is not an accepted state status, use either frozen or live """.format(
+                state
+            )
+        )
+
+    if state == "frozen":
+
+        df.loc[df[error_marker].isin(error_values), target] = np.nan
+
+    return df
+
+
+def convert_annual_thousands(df: pd.DataFrame, col: str) -> pd.DataFrame:
+    """Convert values from annual £000s to monthly £.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    col : str
+        Col name of df.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Original dataframe.
+
+    """
+
+    df[col] = df[col] * 1000 / 12
+
+    return df
+
+
+def create_imputation_class(
+    df: pd.DataFrame, cell_no_col: str, new_col: str
+) -> pd.DataFrame:
+    """
+    Replaces the first character '7' with '5' and removes the last character in
+    all values in a column.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    cell_no_col : str
+        Column name of df.
+    new_col : str
+        Column name to save the results.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Original dataframe with new_col.
+    """
+    df[new_col] = (
+        df[cell_no_col]
+        .astype(str)
+        .map(lambda x: str(5) + x[1:-1] if x[0] == str(7) else x[:-1])
+        .astype(int)
+    )
+
+    return df
