@@ -7,6 +7,7 @@ exclude = ["test"]
 
 [project]
 name = "monthly-business-survey-results"
+version = '0.0.1'
 authors = [
   {name = "Analysis Standards and Pipelines", email = "ASAP@ons.gov.uk"}
 ]
