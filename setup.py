@@ -18,8 +18,5 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=requirements,
-    extras_require={
-    'dev': requirements_dev
-    
-}
+    extras_require={"dev": requirements_dev},
 )

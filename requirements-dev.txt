@@ -13,4 +13,3 @@ nbstripout
 nbqa
 pre_commit_hooks
 flake8
-
