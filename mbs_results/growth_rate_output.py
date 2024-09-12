@@ -55,12 +55,16 @@ def get_growth_rate_data(filepath: str) -> pd.DataFrame:
         ["classification", "question_no", "sizeband", "period_x"], inplace=True
     )
 
-    growth_rate_output = input_data.pivot_table(
-        columns="period_x",
-        values="adjusted_value",
-        index=["classification", "question_no", "sizeband"],
-        aggfunc="sum",
-        dropna=False,
-    ).reset_index()
+    growth_rate_output = (
+        input_data.pivot_table(
+            columns="period_x",
+            values="adjusted_value",
+            index=["classification", "question_no", "sizeband"],
+            aggfunc="sum",
+            dropna=False,
+        )
+        .reset_index()
+        .dropna(how="any")
+    )
 
     return growth_rate_output
