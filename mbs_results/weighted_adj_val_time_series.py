@@ -3,9 +3,10 @@ import pandas as pd
 from utils import convert_column_to_datetime
 
 
-def get_growth_rate_data(filepath: str) -> pd.DataFrame:
+def get_weighted_adj_val_time_series(filepath: str) -> pd.DataFrame:
     """
-    Filters and pivots wider winsorisation data on period to return growth rate data.
+    Time series of weighted adjusted values by classification, question number,
+    and cell number.
 
     Parameters
     ----------
