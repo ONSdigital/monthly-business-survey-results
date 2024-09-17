@@ -28,6 +28,11 @@ To install the Python requirements, open your terminal and enter:
 ```shell
 pip install -r requirements.txt
 ```
+or for installing in development mode:
+
+```shell
+pip install .[dev]
+```
 
 ## Required secrets and credentials
 

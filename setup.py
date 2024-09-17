@@ -5,6 +5,9 @@ from setuptools import find_packages, setup
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
+with open("requirements-dev.txt") as f:
+    requirements_dev = f.read().splitlines()
+
 setup(
     name="monthly-business-survey-results",
     version="0.0.2",
@@ -15,4 +18,5 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=requirements,
+    extras_require={"dev": requirements_dev},
 )
