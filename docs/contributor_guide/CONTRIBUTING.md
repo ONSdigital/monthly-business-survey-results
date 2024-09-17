@@ -17,6 +17,7 @@ and [pre-commit hooks][pre-commit] using:
 
 ```shell
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
 pre-commit install
 ```
 
