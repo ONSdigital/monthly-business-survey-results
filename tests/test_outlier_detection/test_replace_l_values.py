@@ -4,7 +4,7 @@ import pytest
 from helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
-from mbs_results.replace_l_values import replace_l_values
+from mbs_results.outlier_detection.replace_l_values import replace_l_values
 
 
 @pytest.fixture(scope="class")

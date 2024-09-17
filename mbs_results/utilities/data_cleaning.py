@@ -3,8 +3,8 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from mbs_results.utils import convert_column_to_datetime
-from mbs_results.validation_checks import (
+from mbs_results.utilities.utils import convert_column_to_datetime
+from mbs_results.unsorted.validation_checks import (
     validate_indices,
     validate_manual_constructions,
 )

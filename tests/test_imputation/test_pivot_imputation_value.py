@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from mbs_results.pivot_imputation_value import merge_counts, pivot_imputation_value
+from mbs_results.imputation.pivot_imputation_value import merge_counts, pivot_imputation_value
 
 
 @pytest.fixture(scope="class")

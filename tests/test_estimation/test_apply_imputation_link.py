@@ -4,7 +4,7 @@ import pytest
 from helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
-from mbs_results.imputation.apply_imputation_link import create_and_merge_imputation_values
+from mbs_results.estimation.apply_imputation_link import create_and_merge_imputation_values
 
 
 @pytest.fixture(scope="class")

@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from mbs_results.calculate_ratio_estimation import calculate_ratio_estimation
+from mbs_results.outlier_detection.calculate_ratio_estimation import calculate_ratio_estimation
 
 
 @pytest.fixture(scope="class")

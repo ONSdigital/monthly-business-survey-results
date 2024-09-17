@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from mbs_results.validation_checks import (
+from mbs_results.unsorted.validation_checks import (
     colnames_clash,
     period_and_reference_not_given,
     validate_config_datatype_input,

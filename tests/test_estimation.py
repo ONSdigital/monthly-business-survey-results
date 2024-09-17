@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from mbs_results.calculate_estimation_weights import (
+from mbs_results.estimation.calculate_estimation_weights import (
     calculate_calibration_factor,
     calculate_design_weight,
 )

@@ -4,7 +4,7 @@ import pytest
 from helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
-from mbs_results.imputation_flags import generate_imputation_marker
+from mbs_results.imputation.imputation_flags import generate_imputation_marker
 
 
 @pytest.fixture(scope="class")

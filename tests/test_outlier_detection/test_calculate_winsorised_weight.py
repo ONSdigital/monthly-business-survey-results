@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from mbs_results.calculate_winsorised_weight import calculate_winsorised_weight
+from mbs_results.outlier_detection.calculate_winsorised_weight import calculate_winsorised_weight
 
 
 @pytest.fixture(scope="class")

@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from helper_functions import does_not_raise
 
-from mbs_results.validate_imputation import validate_imputation
+from mbs_results.imputation.validate_imputation import validate_imputation
 
 
 @pytest.fixture(scope="class")

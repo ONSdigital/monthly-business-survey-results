@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from mbs_results.data_cleaning import (
+from mbs_results.utilities.data_cleaning import (
     clean_and_merge,
     create_imputation_class,
     enforce_datatypes,

@@ -1,4 +1,4 @@
-from mbs_results.utils import read_colon_separated_file
+from mbs_results.utilities.utils import read_colon_separated_file
 
 
 def get_estimation_data(

@@ -4,7 +4,7 @@ import pytest
 from helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
-from mbs_results.pre_processing_estimation import derive_estimation_variables
+from mbs_results.estimation.pre_processing_estimation import derive_estimation_variables
 
 
 @pytest.fixture(scope="class")

@@ -1,7 +1,7 @@
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from mbs_results.utils import read_colon_separated_file
+from mbs_results.utilities.utils import read_colon_separated_file
 
 
 def test_read_colon_separated_file():

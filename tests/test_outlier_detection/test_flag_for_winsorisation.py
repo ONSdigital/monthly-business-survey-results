@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from mbs_results.flag_for_winsorisation import winsorisation_flag
+from mbs_results.outlier_detection.flag_for_winsorisation import winsorisation_flag
 
 
 @pytest.fixture(scope="class")

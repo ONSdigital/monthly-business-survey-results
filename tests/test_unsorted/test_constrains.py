@@ -1,7 +1,7 @@
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from mbs_results.constrains import (
+from mbs_results.unsorted.constrains import (
     calculate_derived_outlier_weights,
     replace_values_index_based,
     sum_sub_df,

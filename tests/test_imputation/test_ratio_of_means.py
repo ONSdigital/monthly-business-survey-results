@@ -3,8 +3,8 @@ import pytest
 from helper_functions import load_filter
 from pandas.testing import assert_frame_equal
 
-from mbs_results.ratio_of_means import ratio_of_means
-from mbs_results.utils import convert_column_to_datetime
+from mbs_results.imputation.ratio_of_means import ratio_of_means
+from mbs_results.utilities.utils import convert_column_to_datetime
 
 scenario_path_prefix = "tests/data/"
 

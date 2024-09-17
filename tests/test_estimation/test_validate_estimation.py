@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from helper_functions import does_not_raise
 
-from mbs_results.validate_estimation import validate_estimation
+from mbs_results.estimation.validate_estimation import validate_estimation
 
 
 @pytest.fixture()

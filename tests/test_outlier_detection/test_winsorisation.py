@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from mbs_results.winsorisation import winsorise
+from mbs_results.outlier_detection.winsorisation import winsorise
 
 
 @pytest.fixture(scope="class")
