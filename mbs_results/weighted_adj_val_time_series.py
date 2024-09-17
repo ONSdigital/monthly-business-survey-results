@@ -11,7 +11,8 @@ def get_weighted_adj_val_time_series(filepath: str) -> pd.DataFrame:
     Parameters
     ----------
     filepath : str
-        filepath to the asap output.
+        filepath to csv containing classification, question number, cell number,
+        period, and weighted adjusted value.
 
     Returns
     -------
@@ -54,7 +55,7 @@ def get_weighted_adj_val_time_series(filepath: str) -> pd.DataFrame:
         ["classification", "question_no", "sizeband", "period"], inplace=True
     )
 
-    growth_rate_output = (
+    weighted_adj_val_time_series = (
         input_data.pivot_table(
             columns="period",
             values="weighted adjusted value",
@@ -66,4 +67,4 @@ def get_weighted_adj_val_time_series(filepath: str) -> pd.DataFrame:
         .dropna(how="any")
     )
 
-    return growth_rate_output
+    return weighted_adj_val_time_series
