@@ -34,7 +34,7 @@ mbs_results/
 ├── winsorisation.py
 └── `__init__.py`
 
-# New Proposed Module Structure 
+# New Proposed Module Structure
 
 mbs_results/
 ├── `__init__.py`
@@ -45,7 +45,7 @@ mbs_results/
 │   ├── cumulative_imputation_links.py
 │   ├── flag_and_count_matched_pairs.py
 │   ├── imputation_flags.pyk
-│   ├── link_filter.py          #1 function but 2 TODOs 
+│   ├── link_filter.py          #1 function but 2 TODOs
 │   ├── pivot_imputation_value.py
 │   ├── predictive_variable.py
 │   ├── ratio_of_means.py       # alot of commented out lines and TODOs
@@ -91,4 +91,4 @@ test/
 │   ├── pivot_imputation_value.py
 │   ├── predictive_variable.py
 │   ├── ratio_of_means.py
-│   └── validate_imputation.py   
+│   └── validate_imputation.py
