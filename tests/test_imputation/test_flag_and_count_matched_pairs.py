@@ -5,7 +5,10 @@ import pytest
 from helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
-from mbs_results.imputation.flag_and_count_matched_pairs import count_matches, flag_matched_pair
+from mbs_results.imputation.flag_and_count_matched_pairs import (
+    count_matches,
+    flag_matched_pair,
+)
 
 match_inputs = [
     load_and_format(

@@ -12,7 +12,6 @@ def calculate_ratio_estimation(
     l_values,
     nw_ag_flag,
 ):
-
     """
     Calculate ratio estimation threshold
     Parameters

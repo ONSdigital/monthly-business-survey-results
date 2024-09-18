@@ -1,5 +1,4 @@
 def winsorisation_flag(df, a_weight, g_weight):
-
     """
     Function to create a column to flag whether or not a row should have
     winsorisation applied.

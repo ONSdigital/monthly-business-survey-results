@@ -1,8 +1,14 @@
 import pandas as pd
 
-from mbs_results.outlier_detection.calculate_predicted_unit_value import calculate_predicted_unit_value
-from mbs_results.outlier_detection.calculate_ratio_estimation import calculate_ratio_estimation
-from mbs_results.outlier_detection.calculate_winsorised_weight import calculate_winsorised_weight
+from mbs_results.outlier_detection.calculate_predicted_unit_value import (
+    calculate_predicted_unit_value,
+)
+from mbs_results.outlier_detection.calculate_ratio_estimation import (
+    calculate_ratio_estimation,
+)
+from mbs_results.outlier_detection.calculate_winsorised_weight import (
+    calculate_winsorised_weight,
+)
 from mbs_results.outlier_detection.flag_for_winsorisation import winsorisation_flag
 
 
@@ -17,7 +23,6 @@ def winsorise(
     target_variable: str,
     l_values,
 ) -> pd.DataFrame:
-
     """
     Applies a technique known as one-sided Winsorisation. The objective of the
     method is to introduce a small bias, while reducing the variance. This is

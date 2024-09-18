@@ -56,7 +56,6 @@ def pivot_imputation_value(
     imputed_value: str,
     selected_periods: list = None,
 ) -> pd.DataFrame:
-
     """
     Returning dataframe containing imputation_value, filtered by date, pivoted by
     imputation type and grouped by sic, cell, question and imputation type.
