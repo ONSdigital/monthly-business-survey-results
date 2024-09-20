@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from mbs_results.selective_editing import create_standardising_factor
+from mbs_results.unsorted.selective_editing import create_standardising_factor
 
 
 @pytest.fixture(scope="class")
