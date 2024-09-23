@@ -4,7 +4,10 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from mbs_results.unsorted.selective_editing import create_standardising_factor, calculate_predicted_value
+from mbs_results.unsorted.selective_editing import (
+    calculate_predicted_value,
+    create_standardising_factor,
+)
 
 
 @pytest.fixture(scope="class")
@@ -21,11 +24,9 @@ def create_standardising_factor_data(filepath):
 
 @pytest.fixture(scope="class")
 def calculate_predicted_value_data(filepath):
-    return pd.read_csv(
-        filepath / "calculate_predicted_value_data.csv", index_col=False
-    )
-  
-  
+    return pd.read_csv(filepath / "calculate_predicted_value_data.csv", index_col=False)
+
+
 class TestSelectiveEditing:
     def test_create_standardising_factor(
         self,
@@ -67,19 +68,14 @@ class TestSelectiveEditing:
         )
 
         assert_frame_equal(actual_output, expected_output)
-        
-      
-    def test_calculate_predicted_value(
-        self,
-        calculate_predicted_value_data
-    ):
+
+    def test_calculate_predicted_value(self, calculate_predicted_value_data):
         input_data = calculate_predicted_value_data.drop(columns="predicted_value")
-        
+
         actual_output = calculate_predicted_value(
             input_data,
             "adjusted_value",
             "imputed_value",
         )
-        
+
         assert_frame_equal(actual_output, calculate_predicted_value_data)
-          
