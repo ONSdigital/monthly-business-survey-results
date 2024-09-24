@@ -4,27 +4,44 @@ import pandas as pd
 
 # Missing reporting unit RU and name
 # Should SIC be frozenSIC or SIC)5_digit
-
-
-def split_func(my_string: str):
-    return my_string.split(sep=("_"))[-1]
-
-
 # Missing RU, name, enterprise group, status? start and end date questions removed?
+# Waiting on Local Unit data as well?
+
+
+def split_func(my_string: str) -> str:
+    """
+    splitting strings used to sort columns when two levels of columns
+    are combined. Selects the final part of string to sort by
+
+    Parameters
+    ----------
+    my_string : str
+        any string with underscores, typically column names
+
+    Returns
+    -------
+    str
+        final part of string once separated on underscores
+    """
+    return my_string.split(sep=("_"))[-1]
 
 
 def devolved_outputs(
     df: pd.DataFrame,
     question_dictionary: dict,
     devolved_questions: list = [40, 110, 49, 11, 12],
+    agg_function: str = "sum",
+    local_unit_data: pd.DataFrame = 0,
 ) -> pd.DataFrame:
-    # Temp sample to reduce comp
-    df = df.sample(n=10000, random_state=1)
+    """
+    Run to produce devolved outputs (ex GB-NIR)
+    Produced a pivot table and converts question numbers into
+    """
 
     devolved_dict = dict(
-        (k, question_no_plaintext[k])
+        (k, question_dictionary[k])
         for k in devolved_questions
-        if k in question_no_plaintext
+        if k in question_dictionary
     )
     df["text_question"] = df["question_no"].map(devolved_dict)
 
@@ -37,24 +54,27 @@ def devolved_outputs(
         "froempees",
     ]
 
-    df_pivot_numeric = pd.pivot_table(
-        df,
-        values=["adjusted_value", "new_target_variable", "response_type", "error_mkr"],
-        index=pivot_index,
-        columns=["text_question"],
-        aggfunc="sum",
-    )
+    pivot_values = [
+        "adjusted_value",
+        "new_target_variable",
+        "response_type",
+        "error_mkr",
+    ]
+    # Can use any agg function on numerical values, have to use lambda func for str cols
+    pivot_agg_functions = [
+        agg_function,
+        agg_function,
+        agg_function,
+        lambda x: " ".join(x),
+    ]
+    dict_agg_funcs = dict(zip(pivot_values, pivot_agg_functions))
 
-    df_pivot_char = pd.pivot_table(
+    df_pivot = pd.pivot_table(
         df,
         values=["adjusted_value", "new_target_variable", "response_type", "error_mkr"],
         index=pivot_index,
         columns=["text_question"],
-        aggfunc=lambda x: " ".join(x),
-    )
-    print(df_pivot_numeric.index.names)
-    df_pivot = pd.merge(
-        df_pivot_numeric, df_pivot_char, on=df_pivot_numeric.index.names
+        aggfunc=dict_agg_funcs,
     )
 
     df_pivot.columns = ["_".join(col).strip() for col in df_pivot.columns.values]
@@ -64,6 +84,7 @@ def devolved_outputs(
 
 
 if __name__ == "__main__":
+
     data_path = Path(r"D:\temp_outputs_new_env")
     df = pd.read_csv(data_path / "winsorisation_output_0.0.2.csv")
     print(df.shape)
@@ -83,4 +104,3 @@ if __name__ == "__main__":
     devolved_questions = [40, 110, 49, 11, 12]
     df_pivot = devolved_outputs(df, question_no_plaintext)
     print(df_pivot)
-    df_pivot.to_csv("pivot.csv")
