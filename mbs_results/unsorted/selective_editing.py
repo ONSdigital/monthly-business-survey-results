@@ -1,4 +1,41 @@
+import numpy as np
 import pandas as pd
+
+
+def calculate_predicted_value(
+    dataframe: pd.DataFrame,
+    adjusted_value: str,
+    imputed_value: str,
+) -> pd.DataFrame:
+    """
+    Calculate predicted value given a data frame with adjusted and imputed value.
+    Predicted value is defined as adjusted_value if adjusted_value is not NaN.
+    If adjusted_value is NaN then predicted value is imputed_value.
+
+    Parameters
+      ----------
+      dataframe : pd.DataFrame
+          Dataframe with adjusted_value and imputed_value
+      adjusted_value : str
+          name of column in dataframe containing adjusted_value variable
+      imputed_value : str
+          name of column in dataframe containing imputed_value variable
+
+      Returns
+      -------
+      pd.DataFrame
+          dataframe containing predicted_value column, calculated from adjusted_value
+          and imputed_value
+
+    """
+
+    dataframe["predicted_value"] = np.where(
+        dataframe[adjusted_value].isna(),
+        dataframe[imputed_value],
+        dataframe[adjusted_value],
+    )
+
+    return dataframe
 
 
 def create_standardising_factor(
