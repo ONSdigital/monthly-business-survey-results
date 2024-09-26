@@ -13,14 +13,16 @@ def get_additional_outputs(config: dict, function_mapper: dict) -> None:
         Additional_outputs accepts ["all"] or [] or list of functions to run.
 
     function_mapper : dict
-        Links outputs from user config the with the relevant functions.
+        Links functions to get the output with an output name which can be
+        defined in config additional_outputs field from a user.
+
         Keys are functions names of the outputs which the user will handle.
-        Values are the functions in the source code
+        Values are the functions in the source code.
 
     Raises
     ------
     ValueError
-        Raises error if additional_outputs doesn't contain a list or it contains
+        Raises error if additional_outputs doesn't contain a list or contains
         a function which is not defined in function_mapper.
 
     Returns

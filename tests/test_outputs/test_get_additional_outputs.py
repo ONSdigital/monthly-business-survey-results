@@ -26,12 +26,15 @@ def function_mapper():
     ],
 )
 def test_output(capsys, function_mapper, inp, expected):
+    """Test that the right functions were run"""
     get_additional_outputs(inp, function_mapper)
     out, err = capsys.readouterr()
     assert out == expected
 
 
 def test_raise_errors(function_mapper):
+    """Test if error is raised when user doesn't pass a list or passes a
+    function which does not link to a function"""
 
     with pytest.raises(ValueError):
         get_additional_outputs({"additional_outputs": "not_a_list"}, function_mapper)
