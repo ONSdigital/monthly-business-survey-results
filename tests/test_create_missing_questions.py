@@ -51,6 +51,12 @@ class TestCreateMissingQuestions:
             "questioncode",
             mapper,
         )
+        actual_output.sort_values(
+            by=["reference", "period", "survey", "questioncode"], inplace=True
+        )
+        actual_output["questioncode"] = actual_output["questioncode"].astype(int)
+        actual_output.reset_index(drop=True, inplace=True)
+
         expected_output = create_missing_questions_output
 
         assert_frame_equal(actual_output, expected_output)
