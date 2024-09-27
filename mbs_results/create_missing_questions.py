@@ -11,7 +11,7 @@ def create_missing_questions(
     mapper: dict,
 ) -> pd.DataFrame:
     """
-    Adds missing questions to responses data by comparing indices.
+    Adds missing questions to responses data by comparing dataframes.
     Reference, period, formid and question_no uniquely identify rows in responses data.
     Reference, period and formid to uniquely identify rows in contributors data.
     Uses mapper to create all expected questions which should be present in the
@@ -41,23 +41,24 @@ def create_missing_questions(
 
     """
 
-    responses_df = responses_df.set_index([reference, period, formid, question_no])
+    actual_responses_df = responses_df.filter([reference, period, formid, question_no])
 
-    expected_responses_idx = (
+    expected_responses = (
         contributors_df.filter([reference, period, formid])  # Select needed fields
         .assign(
             **{question_no: contributors_df[formid].map(mapper)}
         )  # Create new column with list of questions as value
         .loc[lambda df: df[question_no].str.len() > 0]
         .explode(question_no)  # Convert questions to rows
-        .set_index([reference, period, formid, question_no])
-    ).index
-
-    responses_idx = responses_df.index
-    missing_responses_idx = expected_responses_idx.difference(responses_idx)
-
-    responses_reindexed = responses_df.reindex(
-        responses_df.index.union(missing_responses_idx)
     )
 
-    return responses_reindexed.reset_index()
+    anti_join_df = expected_responses.merge(
+        actual_responses_df, how="left", indicator=True
+    )
+    anti_join_df = anti_join_df[anti_join_df["_merge"] == "left_only"].drop(
+        columns="_merge"
+    )
+
+    concatenated_responses = pd.concat([responses_df, anti_join_df], ignore_index=True)
+
+    return concatenated_responses
