@@ -48,6 +48,7 @@ def create_missing_questions(
         .assign(
             **{question_no: contributors_df[formid].map(mapper)}
         )  # Create new column with list of questions as value
+        .loc[lambda df: df[question_no].str.len() > 0]
         .explode(question_no)  # Convert questions to rows
         .set_index([reference, period, formid, question_no])
     ).index
