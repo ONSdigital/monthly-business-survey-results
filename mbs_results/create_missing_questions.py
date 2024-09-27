@@ -37,7 +37,7 @@ def create_missing_questions(
 
     Returns
     -------
-    Responses datafame with missing questions.
+    Responses dataframe with missing questions.
 
     """
 
