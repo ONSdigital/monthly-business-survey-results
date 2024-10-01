@@ -33,7 +33,8 @@ class TestSelectiveEditing:
         create_standardising_factor_data,
     ):
         expected_output = create_standardising_factor_data[
-            create_standardising_factor_data["standardising_factor"].notna()
+            (create_standardising_factor_data["period"] == 202401)
+            & (create_standardising_factor_data["question_code"].isin([40, 49]))
         ]
         expected_output = expected_output[
             [
