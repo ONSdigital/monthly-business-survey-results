@@ -12,4 +12,3 @@ group,period,aux,sampled,a_weight,g_weight,target_variable,nw_ag_flag,predicted_
 104,202401,20,0,,0.004,90,False,,,,,1
 104,202401,30,0,,0.004,90,False,,,,,1
 104,202401,30,1,1,0.004,90,True,,,,,1
-
