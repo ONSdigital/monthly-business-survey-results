@@ -43,7 +43,7 @@ def create_standardising_factor(
     reference: str,
     period: str,
     domain: str,
-    question_code: str,
+    question_no: str,
     predicted_value: str,
     imputation_marker: str,
     a_weight: str,
@@ -92,8 +92,8 @@ def create_standardising_factor(
 
     """
     previous_df = dataframe[(dataframe[period] == previous_period)]
-    previous_df = previous_df[previous_df[question_code].isin([40, 49])]
-
+    previous_df = previous_df[previous_df[question_no].isin([40, 49])]
+    print(previous_df)
     # The standardising factor is created for each record before summing for each
     # domain-question grouping.
     previous_df["unit_standardising_factor"] = (
@@ -102,8 +102,9 @@ def create_standardising_factor(
         * previous_df[o_weight]
         * previous_df[g_weight]
     )
+    print(previous_df["unit_standardising_factor"])
 
-    previous_df["standardising_factor"] = previous_df.groupby([domain, question_code])[
+    previous_df["standardising_factor"] = previous_df.groupby([domain, question_no])[
         "unit_standardising_factor"
     ].transform("sum")
 
@@ -111,7 +112,7 @@ def create_standardising_factor(
         [
             period,
             reference,
-            question_code,
+            question_no,
             "standardising_factor",
             predicted_value,
             imputation_marker,
@@ -120,3 +121,4 @@ def create_standardising_factor(
     ]
 
     return output_df.reset_index(drop=True)
+

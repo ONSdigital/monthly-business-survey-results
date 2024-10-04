@@ -39,9 +39,9 @@ def derive_sic_domain_mapping(
     )
 
     # Outputting matched and unmatched files to sharepoint
-    sic_domain_map.to_csv(output_path + "sic_domain_mapping.csv")
-    unmatched_sic.to_csv(output_path + "sic_domain_unmatched_sic.csv")
-    unmatched_domain.to_csv(output_path + "sic_domain_unmatched_domain.csv")
+    sic_domain_map.to_csv(output_path + "sic_domain_mapping.csv", index=False)
+    unmatched_sic.to_csv(output_path + "sic_domain_unmatched_sic.csv", index=False)
+    unmatched_domain.to_csv(output_path + "sic_domain_unmatched_domain.csv", index=False)
 
 
 if __name__ == "__main__":
