@@ -3,6 +3,10 @@ import pandas as pd
 # Run this file to re derive the sic to domain mapping file from sharepoint.
 
 
+# To Do, check that Lukes code will run and then produce the outputs before monday
+# QA check with team on Monday
+
+
 def derive_sic_domain_mapping(
     classification_sic_mapping_path: str,
     classification_domain_mapping_path: str,
@@ -41,12 +45,12 @@ def derive_sic_domain_mapping(
     # Outputting matched and unmatched files to sharepoint
     sic_domain_map.to_csv(output_path + "sic_domain_mapping.csv", index=False)
     unmatched_sic.to_csv(output_path + "sic_domain_unmatched_sic.csv", index=False)
-    unmatched_domain.to_csv(output_path + "sic_domain_unmatched_domain.csv", index=False)
+    unmatched_domain.to_csv(
+        output_path + "sic_domain_unmatched_domain.csv", index=False
+    )
 
 
 if __name__ == "__main__":
-    from pathlib import Path
-
     sharepoint_path = ""
     classification_sic_mapping_path = sharepoint_path + "classification_sic_mapping.csv"
     classification_domain_mapping_path = (

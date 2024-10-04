@@ -121,4 +121,3 @@ def create_standardising_factor(
     ]
 
     return output_df.reset_index(drop=True)
-
