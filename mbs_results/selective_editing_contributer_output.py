@@ -4,7 +4,10 @@ from mbs_results.merge_domain import merge_domain
 
 
 def get_selective_editing_contributer_output(
-    input_filepath: str, domain_filepath: str, sic_input: str, sic_mapping: str, s
+    input_filepath: str,
+    domain_filepath: str,
+    sic_input: str,
+    sic_mapping: str,
 ) -> pd.DataFrame:
     """
         Returns a dataframe containing period, reference, domain_group, and
@@ -39,14 +42,14 @@ def get_selective_editing_contributer_output(
         ],
     )
 
-    domain_data = pd.read_csv(domain_filepath, usecols=[sic_mapping, "domain_group"])
+    domain_data = pd.read_csv(domain_filepath)
 
     selective_editing_contributer_output = merge_domain(
         input_data, domain_data, sic_input, sic_mapping
     )
 
     selective_editing_contributer_output = selective_editing_contributer_output.rename(
-        columns={"reference": "ruref"}
-    ).drop(["sic_5_digit"], axis=1)
+        columns={"reference": "ruref", "domain": "domain_group"}
+    )
 
     return selective_editing_contributer_output
