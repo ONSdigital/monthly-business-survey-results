@@ -87,7 +87,8 @@ def create_selective_editing_question_output(
     )
     return standardising_factor
 
-def validation_checks_selective_editing(df:pd.DataFrame):
+
+def validation_checks_selective_editing(df: pd.DataFrame):
     """
     validation checks for duplicate rows and number of NaNs
     Currently prints to console.
@@ -96,13 +97,14 @@ def validation_checks_selective_editing(df:pd.DataFrame):
     ----------
     df : pd.DataFrame
         dataframe output from `create_selective_editing_question_output`
-    """    
-    print('Number of duplicates, (checking period, question_no, and reference:',
-    df.duplicated(subset=['period',"question_no","reference"]).sum())
+    """
+    print(
+        "Number of duplicates, (checking period, question_no, and reference:",
+        df.duplicated(subset=["period", "question_no", "reference"]).sum(),
+    )
     predicted_na = df.loc[df["predicted_value"].isna()]
     number_nans = predicted_na.count()[0]
     print(f"predicted_values has {number_nans} NaNs")
-
 
 
 if __name__ == "__main__":
