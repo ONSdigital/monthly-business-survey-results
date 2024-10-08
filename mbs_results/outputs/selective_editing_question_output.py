@@ -24,7 +24,6 @@ def create_selective_editing_question_output(
     imputed_value,
     adjusted_value: str,
     output_path: str,
-    version: str,
     previous_period: int,
 ):
     """
@@ -79,12 +78,19 @@ def create_selective_editing_question_output(
     standardising_factor["survey_code"] = "009"
 
     # TODO Update file name
-    standardising_factor.to_csv(
-        output_path
-        + "selective_editing_outputs/"
-        + f"selective_editing_question_output_{previous_period}_{version}.csv",
-        index=False,
+    standardising_factor["imputation_flags_adjusted_value"] = standardising_factor[
+        "imputation_flags_adjusted_value"
+    ].str.upper()
+    standardising_factor = standardising_factor.rename(
+        columns={
+            "reference": "ruref",
+            "domain": "domain_group",
+            aux: "auxiliary_value",
+            "imputation_flags_adjusted_value": "imputation_marker",
+            question_no: "question_code",
+        }
     )
+
     return standardising_factor
 
 
@@ -100,7 +106,7 @@ def validation_checks_selective_editing(df: pd.DataFrame):
     """
     print(
         "Number of duplicates, (checking period, question_no, and reference:",
-        df.duplicated(subset=["period", "question_no", "reference"]).sum(),
+        df.duplicated(subset=["period", "question_code", "ruref"]).sum(),
     )
     predicted_na = df.loc[df["predicted_value"].isna()]
     number_nans = predicted_na.count()[0]
@@ -108,6 +114,7 @@ def validation_checks_selective_editing(df: pd.DataFrame):
 
 
 if __name__ == "__main__":
+    from datetime import datetime
 
     version = metadata.metadata("monthly-business-survey-results")["version"]
     output_path = (
@@ -116,7 +123,7 @@ if __name__ == "__main__":
     wins_output = pd.read_csv(
         output_path + f"winsorisation/winsorisation_output_{version}.csv"
     )
-
+    previous_period = 202302
     output = create_selective_editing_question_output(
         df=wins_output,
         reference="reference",
@@ -132,7 +139,15 @@ if __name__ == "__main__":
         imputed_value="imputed_value",
         adjusted_value="adjusted_value",
         output_path=output_path,
-        version=version,
-        previous_period=202302,
+        previous_period=previous_period,
     )
     validation_checks_selective_editing(output)
+    formatted_date = datetime.today().strftime("%Y-%m-%d")
+    output_file_name = (
+        f"sopp_mbs_{formatted_date}_selective_editing"
+        + f"_contributor_{previous_period}_{version}.csv"
+    )
+    output.to_csv(
+        output_path + "selective_editing_outputs/" + output_file_name,
+        index=False,
+    )
