@@ -8,6 +8,34 @@ def derive_sic_domain_mapping(
     classification_domain_mapping_path: str,
     output_path: str,
 ):
+    """
+    Run function to create a new SIC to domain mapping file, this is then saved in
+    the output_path.
+
+    Parameters
+    ----------
+    classification_sic_mapping_path : str
+        path to classification_sic_mapping csv
+    classification_domain_mapping_path : str
+        path to classification_domain_mapping csv
+    output_path : str
+        path to save the created sic_domain_mapping.csv
+
+    Examples
+    --------
+    >>    sharepoint_path = ""
+    >>    classification_sic_mapping_path = sharepoint_path +
+    >>                                      "classification_sic_mapping.csv"
+    >>    classification_domain_mapping_path = (sharepoint_path +
+    >>                                      "classification_domain_mapping.csv")
+    >>    output_path = sharepoint_path
+    >>    derive_sic_domain_mapping(
+    >>            classification_sic_mapping_path,
+    >>            classification_domain_mapping_path,
+    >>            output_path
+    >>    )
+
+    """
     classification_sic_map = pd.read_csv(classification_sic_mapping_path).astype("int")
     class_domain_map = pd.read_csv(classification_domain_mapping_path).astype("int")
 
@@ -43,16 +71,4 @@ def derive_sic_domain_mapping(
     unmatched_sic.to_csv(output_path + "sic_domain_unmatched_sic.csv", index=False)
     unmatched_domain.to_csv(
         output_path + "sic_domain_unmatched_domain.csv", index=False
-    )
-
-
-if __name__ == "__main__":
-    sharepoint_path = ""
-    classification_sic_mapping_path = sharepoint_path + "classification_sic_mapping.csv"
-    classification_domain_mapping_path = (
-        sharepoint_path + "classification_domain_mapping.csv"
-    )
-    output_path = sharepoint_path
-    derive_sic_domain_mapping(
-        classification_sic_mapping_path, classification_domain_mapping_path, output_path
     )
