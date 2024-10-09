@@ -1,7 +1,5 @@
 import pandas as pd
 
-# Run this file to re derive the sic to domain mapping file from sharepoint.
-
 
 def derive_sic_domain_mapping(
     classification_sic_mapping_path: str,
