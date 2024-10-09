@@ -91,8 +91,9 @@ def create_standardising_factor(
         each reference.
 
     """
+    questions_selected = [40, 49]
     previous_df = dataframe[(dataframe[period] == period_selected)]
-    previous_df = previous_df[previous_df[question_no].isin([40, 49])]
+    previous_df = previous_df[previous_df[question_no].isin(questions_selected)]
     # The standardising factor is created for each record before summing for each
     # domain-question grouping.
     previous_df["unit_standardising_factor"] = (
