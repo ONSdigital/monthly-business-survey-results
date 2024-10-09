@@ -80,7 +80,7 @@ def create_selective_editing_question_output(
      >>            imputed_value="imputed_value",
      >>            adjusted_value="adjusted_value",
      >>            sic_domain_mapping_path="mapping_files/sic_domain_mapping.csv",
-     >>            period_selected=previous_period,
+     >>            period_selected=202201,
      >>            )
     """
     sic_domain_mapping = pd.read_csv(sic_domain_mapping_path).astype(int)

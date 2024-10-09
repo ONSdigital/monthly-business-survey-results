@@ -12,28 +12,39 @@ def get_selective_editing_contributer_output(
     period_selected: int,
 ) -> pd.DataFrame:
     """
-        Returns a dataframe containing period, reference, domain_group, and
-        design_weight.
+    Returns a dataframe containing period, reference, domain_group, and
+    design_weight.
+    survey_code is fixed at 009 for MBS
 
-        Parameters
-        ----------
-        input_filepath : str
-            Filepath to csv file containing reference, imp_class, period and
-            SIC columns.
-        domain_filepath : str
-            Filepath to csv file containing SIC and domain columns.
-        threshold_filepath : str
-            Filepath to csv file containing form type, domain and threshold columns.
-        sic_input : str
-            Name of column in input_filepath csv file containing SIC variable.
-        sic_mapping : str
-            Name of column in domain_filepath csv file containing SIC variable.
+    Parameters
+    ----------
+    input_filepath : str
+        Filepath to csv file containing reference, imp_class, period and
+        SIC columns.
+    domain_filepath : str
+        Filepath to csv file containing SIC and domain columns.
+    threshold_filepath : str
+        Filepath to csv file containing form type, domain and threshold columns.
+    sic_input : str
+        Name of column in input_filepath csv file containing SIC variable.
+    sic_mapping : str
+        Name of column in domain_filepath csv file containing SIC variable.
 
-        Returns
-        -------
-        pd.DataFrame
-            Dataframe with SIC and domain columns merged.
-    `
+    Returns
+    -------
+    pd.DataFrame
+        Dataframe with SIC and domain columns merged.
+    
+    Examples
+    --------
+    >> get_selective_editing_contributer_output(
+    >>        input_filepath=input_filepath,
+    >>        domain_filepath=domain_filepath, 
+    >>        threshold_filepath=threshold_filepath, 
+    >>        sic_input="sic_5_digit", 
+    >>        sic_mapping="sic_5_digit", 
+    >>        period_selected=202201
+    >> )
     """
 
     input_data = pd.read_csv(
@@ -60,39 +71,10 @@ def get_selective_editing_contributer_output(
     selective_editing_contributer_output = selective_editing_contributer_output.rename(
         columns={"reference": "ruref", "domain": "domain_group"}
     )
+    
+    # Survey code is requested on this output, 009 is MBS code
     selective_editing_contributer_output["survey_code"] = "009"
 
     return selective_editing_contributer_output.loc[
         selective_editing_contributer_output["period"] == period_selected
     ]
-
-
-if __name__ == "__main__":
-    from datetime import datetime
-    from importlib import metadata
-
-    version = metadata.metadata("monthly-business-survey-results")["version"]
-    output_path = (
-        "C:/Users/dayj1/Office for National Statistics/Legacy Uplift - MBS (1)/"
-    )
-
-    input_filepath = output_path + f"winsorisation/winsorisation_output_{version}.csv"
-    domain_filepath = output_path + "mapping_files/sic_domain_mapping.csv"
-    threshold_filepath = output_path + "mapping_files/form_domain_threshold_mapping.csv"
-    period_selected = 202201
-    output = get_selective_editing_contributer_output(
-        input_filepath,
-        domain_filepath,
-        threshold_filepath,
-        "sic_5_digit",
-        "sic_5_digit",
-        period_selected,
-    )
-    formatted_date = datetime.today().strftime("%Y-%m-%d")
-    output_file_name = (
-        f"sopp_mbs_{formatted_date}_selective_editing"
-        + f"_contributor_{period_selected}_{version}.csv"
-    )
-    output.to_csv(
-        output_path + "selective_editing_outputs/" + output_file_name, index=False
-    )
