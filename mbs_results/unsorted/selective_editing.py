@@ -43,14 +43,14 @@ def create_standardising_factor(
     reference: str,
     period: str,
     domain: str,
-    question_code: str,
+    question_no: str,
     predicted_value: str,
     imputation_marker: str,
     a_weight: str,
     o_weight: str,
     g_weight: str,
     auxiliary_value: str,
-    previous_period: int,
+    period_selected: int,
 ) -> pd.DataFrame:
     """
     Returning standardising factor summed by domain for questions 40 and 49.
@@ -91,9 +91,9 @@ def create_standardising_factor(
         each reference.
 
     """
-    previous_df = dataframe[(dataframe[period] == previous_period)]
-    previous_df = previous_df[previous_df[question_code].isin([40, 49])]
-
+    questions_selected = [40, 49]
+    previous_df = dataframe[(dataframe[period] == period_selected)]
+    previous_df = previous_df[previous_df[question_no].isin(questions_selected)]
     # The standardising factor is created for each record before summing for each
     # domain-question grouping.
     previous_df["unit_standardising_factor"] = (
@@ -103,7 +103,7 @@ def create_standardising_factor(
         * previous_df[g_weight]
     )
 
-    previous_df["standardising_factor"] = previous_df.groupby([domain, question_code])[
+    previous_df["standardising_factor"] = previous_df.groupby([domain, question_no])[
         "unit_standardising_factor"
     ].transform("sum")
 
@@ -111,7 +111,7 @@ def create_standardising_factor(
         [
             period,
             reference,
-            question_code,
+            question_no,
             "standardising_factor",
             predicted_value,
             imputation_marker,
