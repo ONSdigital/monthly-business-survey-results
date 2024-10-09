@@ -24,7 +24,7 @@ def create_selective_editing_question_output(
     imputed_value,
     adjusted_value: str,
     output_path: str,
-    previous_period: int,
+    period_selected: int,
 ):
     """
     creates and saves the selective editing question output to the output_path folder
@@ -72,7 +72,7 @@ def create_selective_editing_question_output(
         o_weight=o_weight,
         g_weight=g_weight,
         auxiliary_value=aux,
-        previous_period=previous_period,
+        period_selected=period_selected,
     )
 
     standardising_factor["survey_code"] = "009"
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     wins_output = pd.read_csv(
         output_path + f"winsorisation/winsorisation_output_{version}.csv"
     )
-    previous_period = 202302
+    previous_period = 202201
     output = create_selective_editing_question_output(
         df=wins_output,
         reference="reference",
@@ -139,7 +139,7 @@ if __name__ == "__main__":
         imputed_value="imputed_value",
         adjusted_value="adjusted_value",
         output_path=output_path,
-        previous_period=previous_period,
+        period_selected=previous_period,
     )
     validation_checks_selective_editing(output)
     formatted_date = datetime.today().strftime("%Y-%m-%d")

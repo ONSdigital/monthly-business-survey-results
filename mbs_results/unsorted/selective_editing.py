@@ -50,7 +50,7 @@ def create_standardising_factor(
     o_weight: str,
     g_weight: str,
     auxiliary_value: str,
-    previous_period: int,
+    period_selected: int,
 ) -> pd.DataFrame:
     """
     Returning standardising factor summed by domain for questions 40 and 49.
@@ -91,7 +91,7 @@ def create_standardising_factor(
         each reference.
 
     """
-    previous_df = dataframe[(dataframe[period] == previous_period)]
+    previous_df = dataframe[(dataframe[period] == period_selected)]
     previous_df = previous_df[previous_df[question_no].isin([40, 49])]
     # The standardising factor is created for each record before summing for each
     # domain-question grouping.

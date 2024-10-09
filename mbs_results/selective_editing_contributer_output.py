@@ -9,7 +9,7 @@ def get_selective_editing_contributer_output(
     threshold_filepath: str,
     sic_input: str,
     sic_mapping: str,
-    previous_period: int,
+    period_selected: int,
 ) -> pd.DataFrame:
     """
         Returns a dataframe containing period, reference, domain_group, and
@@ -63,7 +63,7 @@ def get_selective_editing_contributer_output(
     selective_editing_contributer_output["survey_code"] = "009"
 
     return selective_editing_contributer_output.loc[
-        selective_editing_contributer_output["period"] == previous_period
+        selective_editing_contributer_output["period"] == period_selected
     ]
 
 
@@ -79,19 +79,19 @@ if __name__ == "__main__":
     input_filepath = output_path + f"winsorisation/winsorisation_output_{version}.csv"
     domain_filepath = output_path + "mapping_files/sic_domain_mapping.csv"
     threshold_filepath = output_path + "mapping_files/form_domain_threshold_mapping.csv"
-    previous_period = 202302
+    period_selected = 202201
     output = get_selective_editing_contributer_output(
         input_filepath,
         domain_filepath,
         threshold_filepath,
         "sic_5_digit",
         "sic_5_digit",
-        previous_period,
+        period_selected,
     )
     formatted_date = datetime.today().strftime("%Y-%m-%d")
     output_file_name = (
         f"sopp_mbs_{formatted_date}_selective_editing"
-        + f"_contributor_{previous_period}_{version}.csv"
+        + f"_contributor_{period_selected}_{version}.csv"
     )
     output.to_csv(
         output_path + "selective_editing_outputs/" + output_file_name, index=False
