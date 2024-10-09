@@ -34,15 +34,15 @@ def get_selective_editing_contributer_output(
     -------
     pd.DataFrame
         Dataframe with SIC and domain columns merged.
-    
+
     Examples
     --------
     >> get_selective_editing_contributer_output(
     >>        input_filepath=input_filepath,
-    >>        domain_filepath=domain_filepath, 
-    >>        threshold_filepath=threshold_filepath, 
-    >>        sic_input="sic_5_digit", 
-    >>        sic_mapping="sic_5_digit", 
+    >>        domain_filepath=domain_filepath,
+    >>        threshold_filepath=threshold_filepath,
+    >>        sic_input="sic_5_digit",
+    >>        sic_mapping="sic_5_digit",
     >>        period_selected=202201
     >> )
     """
@@ -71,7 +71,7 @@ def get_selective_editing_contributer_output(
     selective_editing_contributer_output = selective_editing_contributer_output.rename(
         columns={"reference": "ruref", "domain": "domain_group"}
     )
-    
+
     # Survey code is requested on this output, 009 is MBS code
     selective_editing_contributer_output["survey_code"] = "009"
 
