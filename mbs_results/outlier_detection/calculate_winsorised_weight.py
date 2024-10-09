@@ -66,8 +66,16 @@ def calculate_winsorised_weight(
 
     df = df.drop(["w", "new_target"], axis=1)
 
-    non_winsorised = (df[sampled] == 0) | (df[nw_ag_flag] == True)  # noqa: E712
-    df["outlier_weight"] = df["outlier_weight"].mask(non_winsorised, 1)
-    df["new_target_variable"] = df["new_target_variable"].mask(non_winsorised, np.nan)
+    non_winsorised = (df[sampled] == 0) | (df[nw_ag_flag])
+
+    division_with_0 = ~non_winsorised & (df[target_variable] == 0)
+
+    df["outlier_weight"] = df["outlier_weight"].mask(
+        non_winsorised | division_with_0, 1
+    )
+
+    df["new_target_variable"] = df["new_target_variable"].mask(
+        non_winsorised | division_with_0, np.nan
+    )
 
     return df
