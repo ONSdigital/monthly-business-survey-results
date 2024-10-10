@@ -2,11 +2,11 @@ import glob
 
 import pandas as pd
 
-from mbs_results.calculate_estimation_weights import (
+from mbs_results.estimation.calculate_estimation_weights import (
     calculate_calibration_factor,
     calculate_design_weight,
 )
-from mbs_results.pre_processing_estimation import get_estimation_data
+from mbs_results.estimation.pre_processing_estimation import get_estimation_data
 
 # from mbs_results.validate_estimation import validate_estimation
 
