@@ -54,7 +54,7 @@ def proccess_for_pre_impute(df):
     # has 60 columns, selecting only the ones we need for tidyness
     df = df[[
         'period', 'reference', 'question_no', 'adjusted_value',"cell_no",
-        "frotover","form_type","response_type","type","error_mkr","froempees"]]
+        "frotover","form_type","response_type","type","error_mkr","froempment"]]
     
     # Updating response_type to 1 for 15399057545 , this is a known error check ASAP-492 for details
     df.loc[df['reference']==15399057545,"response_type"] = 1
