@@ -82,8 +82,17 @@ def sum_sub_df(df: pd.DataFrame, derive_from: List[int]) -> pd.DataFrame:
         A dataframe with sums, constain marker, and columns from index which the
         sum was based on.
     """
+    # difference between using sum or agg RE NaNs
+    # Temp fix, fillna with 0.
+    # Add info the backlog ticket to replace this temp fix after combining columns
+    df_temp = df.fillna(0)
+
     sums = sum(
-        [df.loc[question_no] for question_no in derive_from if question_no in df.index]
+        [
+            df_temp.loc[question_no]
+            for question_no in derive_from
+            if question_no in df_temp.index
+        ]
     )
 
     return sums.assign(constrain_marker=f"sum{derive_from}").reset_index()
@@ -138,8 +147,20 @@ def constrain(
     derive_map = create_derive_map(df, spp_form_id)
 
     # pre_derive_df has dimenesions as index, columns the values to be used when derived
+    # Hard coded columns are from finalsel files,
     pre_derive_df = df.set_index(
-        [spp_form_id, question_no, period, reference], verify_integrity=False
+        [
+            spp_form_id,
+            question_no,
+            period,
+            reference,
+            "cell_no",
+            "frotover",
+            "froempment",
+            "form_type",
+            "response_type",
+        ],
+        verify_integrity=False,
     )
     pre_derive_df = pre_derive_df[[target, target_imputed]]
 
@@ -223,9 +244,9 @@ def derive_questions(
     df.set_index([question_no, period, reference], inplace=True)
 
     # This would replace 49 with 40, but might have been winsorised independently
-    if [40, 49] in unique_q_numbers:
+    if all(num in unique_q_numbers for num in [40, 49]):
         replace_values_index_based(df, target, 49, ">", 40)
-    elif [90, 40] in unique_q_numbers:
+    elif all(num in unique_q_numbers for num in [40, 90]):
         replace_values_index_based(df, target, 90, ">=", 40)
     df.reset_index(inplace=True)
 
@@ -357,9 +378,9 @@ def calculate_derived_outlier_weights(
     )
 
     updated_o_weight_bool = df_pre_winsorised[winsorised_target].isna()
-    df_pre_winsorised.loc[
-        updated_o_weight_bool, winsorised_target
-    ] = post_win_derived.loc[updated_o_weight_bool, winsorised_target]
+    df_pre_winsorised.loc[updated_o_weight_bool, winsorised_target] = (
+        post_win_derived.loc[updated_o_weight_bool, winsorised_target]
+    )
     df_pre_winsorised["post_wins_marker"] = updated_o_weight_bool
 
     df_pre_winsorised.reset_index(inplace=True)
