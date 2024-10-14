@@ -54,8 +54,8 @@ def proccess_for_pre_impute(df):
     # has 60 columns, selecting only the ones we need for tidyness
     df = df[[
         'period', 'reference', 'question_no', 'adjusted_value',"cell_no",
-        "frotover","form_type","response_type","type","error_mkr","froempees","froempment"]]
-    
+        "frotover","form_type","response_type","type","error_mkr","froempment"]]
+
     # Updating response_type to 1 for 15399057545 , this is a known error check ASAP-492 for details
     df.loc[df['reference']==15399057545,"response_type"] = 1
     
@@ -132,16 +132,35 @@ def get_qa_output_482(post_win_df):
     """For ASAP-482"""
     
     requested_columns = [
-        'reference',"period","frosic2007",'classification','cell_no','frotover',
-        'froempees', 'form_type', 'response_type', 'question_no','adjusted_value',
-        'error_mkr', 'design_weight','calibration_factor', 'outlier_weight',
-        'total weight (A*G*O)','weighted adjusted value', 'imputation_flags_adjusted_value',
-        'imputation_class','f_link_adjusted_value', 'f_match_adjusted_value_pair_count',
-        'default_link_f_match_adjusted_value','b_link_adjusted_value',
-        'b_match_adjusted_value_pair_count','default_link_b_match_adjusted_value',
-        'construction_link', 'flag_construction_matches_pair_count','default_link_flag_construction_matches',
-        "constrain_marker","l_value" # these not requested but usefull
-        ]
+        'reference',
+        'period',
+        'frosic2007',
+        'classification',
+        'cell_no',
+        'frotover',
+        'froempment', 
+        'form_type', 
+        'response_type', 
+        'question_no',
+        'adjusted_value',
+        'error_mkr', 
+        'design_weight',
+        'calibration_factor', 
+        'outlier_weight',
+        'total weight (A*G*O)',
+        'weighted adjusted value', 
+        'imputation_flags_adjusted_value',
+        'imputation_class',
+        'f_link_adjusted_value', 
+        'f_match_adjusted_value_pair_count',
+        'default_link_f_match_adjusted_value',
+        'b_link_adjusted_value',
+        'b_match_adjusted_value_pair_count',
+        'default_link_b_match_adjusted_value',
+        'construction_link', 
+        'flag_construction_matches_pair_count',
+        'default_link_flag_construction_matches',
+        'constrain_marker' # these not requested but usefull
 
     # not part of the pipeline the below
     post_win_df['total weight (A*G*O)'] = post_win_df['design_weight']*post_win_df['calibration_factor']*post_win_df['outlier_weight']
