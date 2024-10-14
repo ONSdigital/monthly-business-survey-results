@@ -9,7 +9,7 @@ import json
 
 	
 # pip install git+https://github.com/ONSdigital/monthly-business-survey-results.git
-from mbs_results.utils import read_colon_separated_file, convert_column_to_datetime
+from mbs_results.utilities.utils import read_colon_separated_file, convert_column_to_datetime
 
 
 def get_patern_df(filepath, pattern):
@@ -55,7 +55,7 @@ def proccess_for_pre_impute(df):
     df = df[[
         'period', 'reference', 'question_no', 'adjusted_value',"cell_no",
         "frotover","form_type","response_type","type","error_mkr","froempment"]]
-    
+
     # Updating response_type to 1 for 15399057545 , this is a known error check ASAP-492 for details
     df.loc[df['reference']==15399057545,"response_type"] = 1
     
@@ -70,11 +70,16 @@ def proccess_for_pre_impute(df):
         ((df["response_type"]==1) & (df["type"]==5)) #response_type 1 type 5 remove values
         )
     
-    remove_values_rules = (
-        (df["type"]==2) # drop type 2    
+    df["form_type"] = df["form_type"].str.strip() #remove whitespace
+
+    remove_derived_rules = (
+          ((df["form_type"].isin(["T117G","T167G","T123G","T173G"])) & (df["question_no"]==40))    
+         | ((df["form_type"].isin(["T817G", "T867G"])) & (df["question_no"]==46))
+         | ((df["form_type"].isin(["T823G","T873G" ])) & (df["question_no"]==42))
+
         )
     
-    df.drop(df[remove_values_rules].index, inplace=True)
+    df.drop(df[remove_derived_rules].index, inplace=True)
     
     df.loc[zero_to_null_rules,"adjusted_value"] = np.nan
     df.loc[convert_to_null_rules,"adjusted_value"] = np.nan
@@ -156,7 +161,6 @@ def get_qa_output_482(post_win_df):
         'flag_construction_matches_pair_count',
         'default_link_flag_construction_matches',
         'constrain_marker' # these not requested but usefull
-        ]
 
     # not part of the pipeline the below
     post_win_df['total weight (A*G*O)'] = post_win_df['design_weight']*post_win_df['calibration_factor']*post_win_df['outlier_weight']
@@ -176,12 +180,14 @@ def join_l_values(df,l_values_path, classification_values_path):
     
     l_values = pd.read_csv(l_values_path)
     
-    l_values = l_values.drop_duplicates(['question_no','classification'])
+   # l_values = l_values.drop_duplicates(['question_no','classification'])
     
-    l_values = l_values.drop(columns=["period"])
+   # l_values = l_values.drop(columns=["period"])
 
     ## Merge on classification SIC map (merge on SIC to get classsificaion on df -> )
     classification_values = pd.read_csv(classification_values_path)
+    
+    print(list(classification_values))
     df = pd.merge(df, classification_values, left_on="frosic2007", right_on="sic_5_digit", how="left")
     # left on question frocsic .-> Change to left on question_no and classication from above 
     df = pd.merge(df,l_values,how="left",left_on=["question_no","classification"],right_on=["question_no","classification"])
@@ -198,6 +204,3 @@ def extract_mannual_constructed(df):
     
     return df_man
         
-    
-
-
