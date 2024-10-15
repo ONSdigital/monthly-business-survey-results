@@ -80,7 +80,7 @@ if __name__ == "__main__":
      
     post_win = pre_win.groupby("question_no").apply(
         lambda df:winsorise(
-            pre_win,
+            df,
             "calibration_group",
             "period",
             "frotover",
