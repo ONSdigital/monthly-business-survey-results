@@ -150,6 +150,7 @@ def get_qa_output_482(post_win_df):
         'flag_construction_matches_pair_count',
         'default_link_flag_construction_matches',
         'constrain_marker' # these not requested but usefull
+        ]
 
     # not part of the pipeline the below
     post_win_df['total weight (A*G*O)'] = post_win_df['design_weight']*post_win_df['calibration_factor']*post_win_df['outlier_weight']
