@@ -26,7 +26,7 @@ pipeline {
         ARTIFACTORY_CREDS = "ARTIFACTORY_CREDENTIALS"
         ARTIFACTORY_PYPI_REPO = "LR_mbs-results"
         BUILD_BRANCH = "main"
-        BUILD_TAG = "*-release"
+        BUILD_TAG = "v*,"
     }
 
     // Don't use default checkout process, as we define it as a stage below
