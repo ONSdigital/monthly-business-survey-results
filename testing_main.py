@@ -76,10 +76,12 @@ if __name__ == "__main__":
         
     estimate_out.to_csv(config['out_path']+f"estimation_output_{FILE_VERSION}.csv",index=False)
     
-    post_win = join_l_values(post_estimate,config['l_values_path'],config["classification_values_path"])
-                
-    post_win = winsorise(
-            post_win,
+    pre_win = join_l_values(post_estimate,config['l_values_path'],config["classification_values_path"])
+    
+     
+    post_win = pre_win.groupby("question_no").apply(
+        lambda df:winsorise(
+            pre_win,
             "calibration_group",
             "period",
             "frotover",
@@ -88,7 +90,7 @@ if __name__ == "__main__":
             "calibration_factor",
             "adjusted_value",
             "l_value",
-        )
+        ))
 
     post_win.to_csv(config['out_path']+f"winsorisation_output_{FILE_VERSION}.csv",index=False)
 
