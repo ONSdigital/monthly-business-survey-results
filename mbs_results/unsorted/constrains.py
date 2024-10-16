@@ -375,9 +375,9 @@ def calculate_derived_outlier_weights(
     )
 
     updated_o_weight_bool = df_pre_winsorised[winsorised_target].isna()
-    df_pre_winsorised.loc[updated_o_weight_bool, winsorised_target] = (
-        post_win_derived.loc[updated_o_weight_bool, winsorised_target]
-    )
+    df_pre_winsorised.loc[
+        updated_o_weight_bool, winsorised_target
+    ] = post_win_derived.loc[updated_o_weight_bool, winsorised_target]
     df_pre_winsorised["post_wins_marker"] = updated_o_weight_bool
 
     df_pre_winsorised.reset_index(inplace=True)
