@@ -103,7 +103,6 @@ def constrain(
     period: str,
     reference: str,
     target: str,
-    target_imputed: str,
     question_no: str,
     spp_form_id: str,
 ) -> pd.DataFrame:
@@ -130,9 +129,7 @@ def constrain(
     reference : str
         Column name containing reference.
     target : str
-        Column name containing target value.
-    target_imputed : str
-        Column name containing imputed target value.
+        Column name containing target value and imputed values.
     question_no : str
         Column name containing question number.
     spp_form_id : str
@@ -156,19 +153,19 @@ def constrain(
             reference,
             "cell_no",
             "frotover",
-            "froempment",
+            "froempees",
             "form_type",
             "response_type",
         ],
         verify_integrity=False,
     )
-    pre_derive_df = pre_derive_df[[target, target_imputed]]
+    pre_derive_df = pre_derive_df[[target]]
 
     derived_values = pd.concat(
         [
-            sum_sub_df(pre_derive_df.loc[form_type], derives["from"]).assign(
-                **{question_no: derives["derive"]}
-            )
+            sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
+            .assign(**{question_no: derives["derive"]})
+            .assign(**{spp_form_id: form_type})
             for form_type, derives in derive_map.items()
         ]
     )
@@ -176,9 +173,9 @@ def constrain(
     df.set_index([question_no, period, reference], inplace=True)
 
     if 49 in unique_q_numbers:
-        replace_values_index_based(df, target_imputed, 49, ">", 40)
+        replace_values_index_based(df, target, 49, ">", 40)
     elif 90 in unique_q_numbers:
-        replace_values_index_based(df, target_imputed, 90, ">=", 40)
+        replace_values_index_based(df, target, 90, ">=", 40)
 
     df.reset_index(inplace=True)
 
