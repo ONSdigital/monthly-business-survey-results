@@ -53,11 +53,12 @@ if __name__ == "__main__":
     
     post_constrain = constrain(post_impute,"period","reference","adjusted_value","imputed_value","question_no","form_type_spp")
 
+    # Removing for now as this should be addressed in main package now 
     # Winsorise and outputs expect return value and impute to be on same column
-    post_constrain["adjusted_value"] = post_constrain[["adjusted_value", "imputed_value"]].agg(
-            sum, axis=1) 
+    # post_constrain["adjusted_value"] = post_constrain[["adjusted_value", "imputed_value"]].agg(
+    #         sum, axis=1) 
             
-    post_constrain.drop(columns=["imputed_value"], inplace=True)
+    # post_constrain.drop(columns=["imputed_value"], inplace=True)
 
 
     check_na_duplicates(post_constrain) #just basic check
