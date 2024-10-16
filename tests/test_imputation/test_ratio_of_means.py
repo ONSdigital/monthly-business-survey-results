@@ -114,7 +114,7 @@ class TestRatioOfMeans:
             }
         )
 
-        actual_output = actual_output.drop(columns=["imputed_value", "other"])
+        actual_output = actual_output.drop(columns=["other"])
 
         # if stays like this we need a function to load expected data
         expected_output = expected_output.rename(
@@ -217,7 +217,7 @@ class TestRatioOfMeansManConstruction:
             }
         )
 
-        actual_output = actual_output.drop(columns=["imputed_value", "other"])
+        actual_output = actual_output.drop(columns=["other"])
 
         # if stays like this we need a function to load expected data
         expected_output = expected_output.rename(
