@@ -25,8 +25,8 @@ pipeline {
         PROXY = credentials("PROXY")  // Http proxy address, set in Jenkins Credentials
         ARTIFACTORY_CREDS = "ARTIFACTORY_CREDENTIALS"
         ARTIFACTORY_PYPI_REPO = "LR_mbs-results"
-        BUILD_BRANCH = "main"
-        BUILD_TAG = "v*.*.*"
+        BUILD_BRANCH = "main" // only deploy from this/these branches
+        BUILD_TAG = "v*.*.*" // only deploy with a commit message tagged like v0.0.1
     }
 
     // Don't use default checkout process, as we define it as a stage below
