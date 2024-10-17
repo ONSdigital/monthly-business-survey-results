@@ -3,7 +3,7 @@
 // Global scope required for multi-stage persistence
 def artServer = Artifactory.server "art-p-01"
 def buildInfo = Artifactory.newBuildInfo()
-def agentPython3Version = 'python_3.6.1'
+def agentPython3Version = 'python_3.10'
 
 
 def pushToPyPiArtifactoryRepo(String projectName, String sourceDist = 'dist/*', String artifactoryHost = 'art-p-01') {
@@ -25,8 +25,8 @@ pipeline {
         PROXY = credentials("PROXY")  // Http proxy address, set in Jenkins Credentials
         ARTIFACTORY_CREDS = "ARTIFACTORY_CREDENTIALS"
         ARTIFACTORY_PYPI_REPO = "LR_mbs-results"
-        BUILD_BRANCH = "main"
-        BUILD_TAG = "v*"
+        BUILD_BRANCH = "main" // only deploy from this/these branches
+        BUILD_TAG = "v*.*.*" // only deploy with a commit message tagged like v0.0.1
     }
 
     // Don't use default checkout process, as we define it as a stage below
@@ -60,7 +60,8 @@ pipeline {
             steps {
                 unstash name: 'Checkout'
                 colourText('info', "Building package")
-                sh 'pip3 install wheel==0.29.0'
+                sh 'pip3 install setuptools'
+                sh 'pip3 install wheel'
                 sh 'python3 setup.py build bdist_wheel'
                 stash name: "Build", useDefaultExcludes: false
             }
