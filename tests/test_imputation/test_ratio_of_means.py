@@ -105,10 +105,6 @@ class TestRatioOfMeans:
                 filters=filter_df,
             )
 
-        # imputed_value is in a separate column, remove this if otherwise
-        actual_output["question"] = actual_output[["question", "imputed_value"]].agg(
-            sum, axis=1
-        )
         actual_output = actual_output.rename(
             columns={
                 "default_link_b_match_question": "default_backward",
@@ -118,7 +114,7 @@ class TestRatioOfMeans:
             }
         )
 
-        actual_output = actual_output.drop(columns=["imputed_value", "other"])
+        actual_output = actual_output.drop(columns=["other"])
 
         # if stays like this we need a function to load expected data
         expected_output = expected_output.rename(
@@ -133,14 +129,6 @@ class TestRatioOfMeans:
                 "count_construction": "flag_match_pair_count",
             }
         )
-
-        # expected_output = expected_output.drop(
-        #     columns=[
-        #         "f_matched_pair_count",
-        #         "b_matched_pair_count",
-        #         "flag_matched_pair_count",
-        #     ]
-        # )
 
         actual_output.drop(columns=["question_man"], errors="ignore", inplace=True)
         # Temp work around to drop mc column until its fully integrated
@@ -218,9 +206,7 @@ class TestRatioOfMeansManConstruction:
             auxiliary="other",
             manual_constructions=manual_constructions,
         )
-        actual_output["question"] = actual_output[["question", "imputed_value"]].agg(
-            sum, axis=1
-        )
+
         expected_output["date"] = convert_column_to_datetime(expected_output["date"])
         actual_output = actual_output.rename(
             columns={
@@ -231,7 +217,7 @@ class TestRatioOfMeansManConstruction:
             }
         )
 
-        actual_output = actual_output.drop(columns=["imputed_value", "other"])
+        actual_output = actual_output.drop(columns=["other"])
 
         # if stays like this we need a function to load expected data
         expected_output = expected_output.rename(

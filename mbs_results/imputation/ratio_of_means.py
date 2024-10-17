@@ -379,6 +379,9 @@ def ratio_of_means(
         errors="ignore",
     )
 
+    df[target] = df[[target, "imputed_value"]].agg(sum, axis=1)
+    df.drop(columns="imputed_value", inplace=True)
+
     # TODO: Missing extra columns, default values and if filter was applied, all bool
 
     return df

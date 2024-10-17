@@ -1,10 +1,7 @@
 import pandas as pd
 
 from mbs_results.merge_domain import merge_domain
-from mbs_results.unsorted.selective_editing import (
-    calculate_predicted_value,
-    create_standardising_factor,
-)
+from mbs_results.unsorted.selective_editing import create_standardising_factor
 
 
 def create_selective_editing_question_output(
@@ -18,7 +15,6 @@ def create_selective_editing_question_output(
     a_weight: str,
     o_weight: str,
     g_weight: str,
-    imputed_value: str,
     adjusted_value: str,
     sic_domain_mapping_path: str,
     period_selected: int,
@@ -49,10 +45,9 @@ def create_selective_editing_question_output(
          column name containing the outlier weight.
      g_weight : str
          column name containing the g weight.
-     imputed_value : str
-         name of column in dataframe containing imputed_value variable
      adjusted_value : str
-         name of column in dataframe containing adjusted_value variable
+         name of column in dataframe containing adjusted_value variable combined
+         with imputed_values as outputted from Ratio of Means script
     sic_domain_mapping_path : str
          path to the sic domain mapping file
      period_selected : int
@@ -77,7 +72,6 @@ def create_selective_editing_question_output(
      >>            a_weight="design_weight",
      >>            o_weight="outlier_weight",
      >>            g_weight="calibration_factor",
-     >>            imputed_value="imputed_value",
      >>            adjusted_value="adjusted_value",
      >>            sic_domain_mapping_path="mapping_files/sic_domain_mapping.csv",
      >>            period_selected=202201,
@@ -92,19 +86,13 @@ def create_selective_editing_question_output(
         sic_mapping="sic_5_digit",
     )
 
-    df_with_domain = calculate_predicted_value(
-        dataframe=df_with_domain,
-        imputed_value=imputed_value,
-        adjusted_value=adjusted_value,
-    )
-
     standardising_factor = create_standardising_factor(
         dataframe=df_with_domain,
         reference=reference,
         period=period,
         domain=domain,
         question_no=question_no,
-        predicted_value="predicted_value",
+        predicted_value=adjusted_value,
         imputation_marker="imputation_flags_adjusted_value",
         a_weight=a_weight,
         o_weight=o_weight,
