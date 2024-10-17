@@ -9,8 +9,8 @@ def mapping_validation(
 ):
     """
     validation function to check mapping file against a column within a given dataframe
-    Only works with mapping files which two columns. Mapping files containing three
-    columns will produce an error
+    Only works with 'true' mapping files which two columns. Mapping files containing
+    three columns will produce an error.
 
     Parameters
     ----------
@@ -48,7 +48,7 @@ def mapping_validation(
     ].to_list()
 
     if unmatched:
-        unmatched = list(set(unmatched))
+        unmatched = set(unmatched)
         mapping_file_name = mapping_path.split("/")[-1]
         raise Warning(
             f"The following values from {df_column_name} in input dataframe "
