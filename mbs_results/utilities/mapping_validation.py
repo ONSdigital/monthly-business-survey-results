@@ -1,4 +1,45 @@
+import warnings
+
 import pandas as pd
+
+
+def wrap_mapping_validations(df: pd.DataFrame, mapping_folder: str):
+    """
+    wrapper to loop over the specified mapping files in file_and_column_names dict.
+    Calls mapping_validation for the specified files
+    Probably could move the files and column names to the config if needed.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        input data to test against mapping files
+    mapping_folder : str
+        folder where the mapping files can be located.
+    """
+    files_and_column_names = {
+        "sic_sut_mapping.csv": {
+            "df_column_name": "sic_5_digit",
+            "mapping_file_col_name": "sic",
+        },
+        "classification_sic_mapping.csv": {
+            "df_column_name": "sic_5_digit",
+            "mapping_file_col_name": "sic_5_digit",
+        },
+        "sic_domain_mapping.csv": {
+            "df_column_name": "sic_5_digit",
+            "mapping_file_col_name": "sic_5_digit",
+        },
+    }
+
+    for i in files_and_column_names:
+        mapping_path = mapping_folder + i
+        column_dict = files_and_column_names[i]
+        mapping_validation(
+            df,
+            mapping_path,
+            column_dict["df_column_name"],
+            column_dict["mapping_file_col_name"],
+        )
 
 
 def mapping_validation(
@@ -50,7 +91,7 @@ def mapping_validation(
     if unmatched:
         unmatched = set(unmatched)
         mapping_file_name = mapping_path.split("/")[-1]
-        raise Warning(
-            f"The following values from {df_column_name} in input dataframe "
+        warnings.warn(
+            f"\n \n The following values from {df_column_name} in input dataframe "
             + f"are not mapped using {mapping_file_name}: \n {unmatched}"
         )
