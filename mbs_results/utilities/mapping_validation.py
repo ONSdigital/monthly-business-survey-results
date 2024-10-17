@@ -4,9 +4,31 @@ import pandas as pd
 def mapping_validation(
     df: pd.DataFrame,
     mapping_path: str,
-    df_column_name: list,
-    mapping_file_column_name: list,
+    df_column_name: str,
+    mapping_file_column_name: str,
 ):
+    """
+    validation function to check mapping file against a column within a given dataframe
+    Only works with mapping files which two columns. Mapping files containing three
+    columns will produce an error
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        input dataframe containing the data used in pipeline
+    mapping_path : str
+        path to mapping file to validate
+    df_column_name : str
+        column name of column to join on in df
+    mapping_file_column_name : str
+        column name of column to join on from mapping file
+
+    Raises
+    ------
+    Warning
+        Warns if data within the original dataframe has not been mapped using
+        the mapping file supplied
+    """
 
     mapping_df = pd.read_csv(mapping_path)
     df_subset = df[df_column_name]
