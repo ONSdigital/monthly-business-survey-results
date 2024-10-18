@@ -15,6 +15,7 @@ jobs:
              echo "$PWD"
              docker build -t cml_3.9 -f 'pbj-workbench-python3.9-standard.Dockerfile' .
              docker image ls
+             ls
              docker run -i -t cml_3.9
              pip install .[dev]
              pytest
