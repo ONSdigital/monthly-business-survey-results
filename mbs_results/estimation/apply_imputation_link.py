@@ -4,7 +4,6 @@ def create_and_merge_imputation_values(
     reference,
     period,
     marker,
-    combined_imputation,
     target,
     cumulative_forward_link,
     cumulative_backward_link,
@@ -103,7 +102,7 @@ def create_and_merge_imputation_values(
             # if manual construction imputation is done
             "intermediate_column": "fic",
             "marker": "fic",
-            "fill_column": "imputed_value",
+            "fill_column": target,
             "fill_method": "ffill",
             "link_column": cumulative_forward_link,
         },
@@ -117,9 +116,7 @@ def create_and_merge_imputation_values(
         df = create_impute(
             df, [imputation_class, reference], imputation_config[imp_type]
         )
-        df = merge_imputation_type(
-            df, imputation_config[imp_type], marker, combined_imputation
-        )
+        df = merge_imputation_type(df, imputation_config[imp_type], marker, target)
 
         intermediate_columns.append(imputation_config[imp_type]["intermediate_column"])
 
@@ -154,7 +151,7 @@ def create_impute(df, group, imputation_spec):
     return df
 
 
-def merge_imputation_type(df, imputation_spec, marker, combined_imputation):
+def merge_imputation_type(df, imputation_spec, marker, target):
     """
     Uses an existing column of imputed values and a imputation marker to merge values
     into a single column
@@ -178,5 +175,5 @@ def merge_imputation_type(df, imputation_spec, marker, combined_imputation):
     imputation_marker = imputation_spec["marker"]
     imputation_column = imputation_spec["intermediate_column"]
 
-    df.loc[df[marker] == imputation_marker, combined_imputation] = df[imputation_column]
+    df.loc[df[marker] == imputation_marker, target] = df[imputation_column]
     return df
