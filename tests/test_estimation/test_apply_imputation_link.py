@@ -34,7 +34,6 @@ class TestApplyImputationLink:
             "reference",
             "period",
             "imputation_marker",
-            "imputed_value",
             "target",
             "cumulative_forward_link",
             "cumulative_backward_link",
@@ -42,6 +41,10 @@ class TestApplyImputationLink:
             "construction_link",
             imputation_types=("c", "fir", "bir", "fic"),
         )
+        expected_output["target"] = expected_output[["target", "imputed_value"]].agg(
+            sum, axis=1
+        )
+        expected_output.drop(columns="imputed_value", inplace=True)
 
         assert_frame_equal(actual_output, expected_output)
 
@@ -56,7 +59,6 @@ class TestApplyImputationLink:
             "reference",
             "period",
             "imputation_marker",
-            "imputed_value",
             "target",
             "cumulative_forward_link",
             "cumulative_backward_link",
@@ -65,5 +67,9 @@ class TestApplyImputationLink:
             imputation_types=("c", "mc", "fir", "bir", "fimc", "fic"),
         )
         actual_output.drop(columns=["man_link"], inplace=True)
+        expected_output["target"] = expected_output[["target", "imputed_value"]].agg(
+            sum, axis=1
+        )
+        expected_output.drop(columns="imputed_value", inplace=True)
 
         assert_frame_equal(actual_output, expected_output)

@@ -331,7 +331,6 @@ def ratio_of_means(
             **default_columns,
             imputation_class=strata,
             marker=f"imputation_flags_{target}",
-            combined_imputation="imputed_value",
             cumulative_forward_link="cumulative_f_link_" + target,
             cumulative_backward_link="cumulative_b_link_" + target,
             construction_link="construction_link",
@@ -378,9 +377,6 @@ def ratio_of_means(
         axis=1,
         errors="ignore",
     )
-
-    df[target] = df[[target, "imputed_value"]].agg(sum, axis=1)
-    df.drop(columns="imputed_value", inplace=True)
 
     # TODO: Missing extra columns, default values and if filter was applied, all bool
 
