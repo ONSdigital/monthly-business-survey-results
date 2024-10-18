@@ -331,7 +331,6 @@ def ratio_of_means(
             **default_columns,
             imputation_class=strata,
             marker=f"imputation_flags_{target}",
-            combined_imputation="imputed_value",
             cumulative_forward_link="cumulative_f_link_" + target,
             cumulative_backward_link="cumulative_b_link_" + target,
             construction_link="construction_link",
