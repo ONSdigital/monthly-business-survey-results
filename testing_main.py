@@ -51,14 +51,7 @@ if __name__ == "__main__":
 
     post_impute = map_form_type(post_impute)
     
-    post_constrain = constrain(post_impute,"period","reference","adjusted_value","imputed_value","question_no","form_type_spp")
-
-    # Winsorise and outputs expect return value and impute to be on same column
-    post_constrain["adjusted_value"] = post_constrain[["adjusted_value", "imputed_value"]].agg(
-            sum, axis=1) 
-            
-    post_constrain.drop(columns=["imputed_value"], inplace=True)
-
+    post_constrain = constrain(post_impute,"period","reference","adjusted_value","question_no","form_type_spp")
 
     check_na_duplicates(post_constrain) #just basic check
 
