@@ -25,9 +25,14 @@ def mc_fimc_test_data():
 
 class TestApplyImputationLink:
     def test_all_imputation_types(self, fir_bir_c_fic_test_data):
-        expected_output = fir_bir_c_fic_test_data
+        loaded_data = fir_bir_c_fic_test_data
 
-        input_data = expected_output.drop(columns=["imputed_value"])
+        input_data = loaded_data.drop(columns=["expected_target"])
+        expected_output = loaded_data.drop(columns="target").rename(
+            columns={"expected_target": "target"}
+        )
+        expected_output["target"] = expected_output["target"].astype(float)
+
         actual_output = create_and_merge_imputation_values(
             input_data,
             "imputation_class",
@@ -41,18 +46,22 @@ class TestApplyImputationLink:
             "construction_link",
             imputation_types=("c", "fir", "bir", "fic"),
         )
-        expected_output["target"] = expected_output[["target", "imputed_value"]].agg(
-            sum, axis=1
-        )
-        expected_output.drop(columns="imputed_value", inplace=True)
 
+        actual_output = actual_output.sort_index(axis=1)
+        expected_output = expected_output.sort_index(axis=1)
         assert_frame_equal(actual_output, expected_output)
 
     def test_mc_imputation_types(self, mc_fimc_test_data):
-        expected_output = mc_fimc_test_data
+        loaded_data = mc_fimc_test_data
 
-        input_data = expected_output.drop(columns=["imputed_value"])
+        input_data = loaded_data.drop(columns=["expected_target"])
         input_data["man_link"] = 1
+
+        expected_output = loaded_data.drop(columns="target").rename(
+            columns={"expected_target": "target"}
+        )
+        expected_output["target"] = expected_output["target"].astype(float)
+
         actual_output = create_and_merge_imputation_values(
             input_data,
             "imputation_class",
@@ -67,9 +76,8 @@ class TestApplyImputationLink:
             imputation_types=("c", "mc", "fir", "bir", "fimc", "fic"),
         )
         actual_output.drop(columns=["man_link"], inplace=True)
-        expected_output["target"] = expected_output[["target", "imputed_value"]].agg(
-            sum, axis=1
-        )
-        expected_output.drop(columns="imputed_value", inplace=True)
+
+        actual_output = actual_output.sort_index(axis=1)
+        expected_output = expected_output.sort_index(axis=1)
 
         assert_frame_equal(actual_output, expected_output)
