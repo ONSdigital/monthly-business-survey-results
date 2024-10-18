@@ -10,10 +10,7 @@ jobs:
     - name: test docker
       run:  |
              git clone https://github.com/cloudera/ml-runtimes.git
-             cd ml-runtimes
-             ls
-             echo "$PWD"
-             docker build -t cml_3.9 -f 'pbj-workbench-python3.9-standard.Dockerfile' .
+             docker build -t cml_3.9 -f 'ml-runtimes/pbj-workbench-python3.9-standard.Dockerfile' .
              docker image ls
              ls
              docker run -i -t cml_3.9
