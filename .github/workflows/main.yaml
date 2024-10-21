@@ -12,7 +12,7 @@ jobs:
     steps:
     - name: clone runtimes
       run:   git clone https://github.com/cloudera/ml-runtimes.git
-    - name: buid cml_${{matix.cml_version}}
+    - name: buid cml_${{matrix.cml_version}}
       run: |  
              cd ml-runtimes
              docker build -t cml_${{matrix.cml_version}} -f 'pbj-workbench-python${{matrix.cml_version}}-standard.Dockerfile' .
