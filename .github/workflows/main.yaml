@@ -6,27 +6,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cml_version: [3.8,3.9,3.10]
     steps:
-    - name: get runtimes
+    - name: clone runtimes
       run:   git clone https://github.com/cloudera/ml-runtimes.git
-    - name: build cml_3.9
+    - name: buid cml_${{matix.cml_version}}
       run: |  
              cd ml-runtimes
-             docker build -t cml_3.9 -f 'pbj-workbench-python3.9-standard.Dockerfile' .
+             docker build -t cml_${{matix.cml_version}} -f 'pbj-workbench-python${{matix.cml_version}}-standard.Dockerfile' .
              
     - name: run image
-      run:  docker run -i cml_3.9
-                      
-    - name: get project
-      run:  git clone https://github.com/ONSdigital/monthly-business-survey-results.git
-
-    - name: build
-      run: |    
+      run: |              
+             docker run -i cml_${{matix.cml_version}}
+             git clone https://github.com/ONSdigital/monthly-business-survey-results.git
              cd monthly-business-survey-results
              pip install .[dev]
-    - name: test
-      run: pytest        
-             
-             
-        
-         
+             pytest
+             echo end
+             exit
