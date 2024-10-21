@@ -7,23 +7,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: clone runtimes
+    - name: get runtimes
       run:   git clone https://github.com/cloudera/ml-runtimes.git
-    - name: buid cml_3.9
+    - name: build cml_3.9
       run: |  
              cd ml-runtimes
              docker build -t cml_3.9 -f 'pbj-workbench-python3.9-standard.Dockerfile' .
              
     - name: run image
-      run: |              
-             docker run -i cml_3.9
-             git clone https://github.com/ONSdigital/monthly-business-survey-results.git
-             dir
+      run:  docker run -i cml_3.9
+                      
+    - name: get project
+      run:  git clone https://github.com/ONSdigital/monthly-business-survey-results.git
+
+    - name: build
+      run: |    
              cd monthly-business-survey-results
-             dir
              pip install .[dev]
-             pytest
-             echo this is the end
-             exit
-           
+    - name: test
+      run: pytest        
+             
+             
+        
+         
