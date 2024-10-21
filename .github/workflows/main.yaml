@@ -15,7 +15,10 @@ jobs:
              echo "$PWD"
              docker build -t cml_3.9 -f 'pbj-workbench-python3.9-standard.Dockerfile' .
              docker image ls
-             docker run -t cml_3.9
+             docker run -dt --name test1 cml_3.9
+             docker exec -it test1 bash
+             echo hello world
+             ls
              git clone https://github.com/ONSdigital/monthly-business-survey-results.git
              ls
              cd monthly-business-survey-results
