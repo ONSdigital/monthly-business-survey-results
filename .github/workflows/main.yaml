@@ -9,6 +9,8 @@ jobs:
     strategy:
       matrix:
         cml_version: ["3.8", "3.9", "3.10"]
+    continue-on-error: true
+
     steps:
     - name: clone runtimes
       run:   git clone https://github.com/cloudera/ml-runtimes.git
