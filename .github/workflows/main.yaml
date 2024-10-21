@@ -15,11 +15,11 @@ jobs:
     - name: buid cml_${{matix.cml_version}}
       run: |  
              cd ml-runtimes
-             docker build -t cml_${{matix.cml_version}} -f 'pbj-workbench-python${{matix.cml_version}}-standard.Dockerfile' .
+             docker build -t cml_${{matrix.cml_version}} -f 'pbj-workbench-python${{matrix.cml_version}}-standard.Dockerfile' .
              
     - name: run image
       run: |              
-             docker run -i cml_${{matix.cml_version}}
+             docker run -i cml_${{matrix.cml_version}}
              git clone https://github.com/ONSdigital/monthly-business-survey-results.git
              cd monthly-business-survey-results
              pip install .[dev]
