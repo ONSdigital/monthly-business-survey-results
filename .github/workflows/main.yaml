@@ -1,18 +1,20 @@
 name: test_docker
+
 on:
   push:
-    branches: [ "623-CI-with-CML-runtimes" ]
+    branches: [ "master" ]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
     - name: test docker
       run:  |
              git clone https://github.com/cloudera/ml-runtimes.git
-             docker build -t cml_3.9 -f 'ml-runtimes/pbj-workbench-python3.9-standard.Dockerfile' .
-             docker image ls
+             cd ml-runtimes
              ls
+             echo "$PWD"
+             docker build -t cml_3.9 -f 'pbj-workbench-python3.9-standard.Dockerfile' .
              docker run -i -t cml_3.9
+             git clone https://github.com/ONSdigital/monthly-business-survey-results.git
              pip install .[dev]
              pytest
