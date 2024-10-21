@@ -2,7 +2,7 @@ name: test_docker
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "623-CI-with-CML-runtimes" ]
 jobs:
   build:
     runs-on: ubuntu-latest
