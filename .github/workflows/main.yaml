@@ -16,5 +16,6 @@ jobs:
              docker build -t cml_3.9 -f 'pbj-workbench-python3.9-standard.Dockerfile' .
              docker run -i -t cml_3.9
              git clone https://github.com/ONSdigital/monthly-business-survey-results.git
+             cd monthly-business-survey-results
              pip install .[dev]
              pytest
