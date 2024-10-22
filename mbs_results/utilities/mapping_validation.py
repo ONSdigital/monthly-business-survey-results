@@ -15,7 +15,10 @@ def wrap_mapping_validations(df: pd.DataFrame, mapping_folder: str):
         input data to test against mapping files
     mapping_folder : str
         folder where the mapping files can be located.
+        String must end with a '/' as we need this to be a folder where other mapping
+        files are located
     """
+    # Might be best to refactor this down the line and put into config if used
     files_and_column_names = {
         "sic_sut_mapping.csv": {
             "df_column_name": "sic_5_digit",
