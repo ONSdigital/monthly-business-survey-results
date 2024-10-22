@@ -1,30 +1,33 @@
-name: test_docker
+name: cml_runtimes
 
 on:
   push:
     branches: [ "623-CI-with-CML-runtimes" ]
 jobs:
-  build:
+  CML:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cml_version: ["3.8", "3.9", "3.10"]
+        cml_version: ["3.8", "3.9", "3.10","3.11"]
     continue-on-error: true
 
     steps:
     - name: clone runtimes
       run:   git clone https://github.com/cloudera/ml-runtimes.git
-    - name: buid cml_${{matrix.cml_version}}
+    - name: build runtime cml_${{matrix.cml_version}}
       run: |  
              cd ml-runtimes
-             docker build -t cml_${{matrix.cml_version}} -f 'pbj-workbench-python${{matrix.cml_version}}-standard.Dockerfile' .
+             docker build -t cml:${{matrix.cml_version}} -f 'pbj-workbench-python${{matrix.cml_version}}-standard.Dockerfile' .          
+    - name: create container
+      run:  docker run -id --name container_${{matrix.cml_version}} cml:${{matrix.cml_version}}
+    - name: check python version
+      run: docker exec container_${{matrix.cml_version}} python --version
+    - name: clone project
+      run: docker exec container_${{matrix.cml_version}} git clone https://github.com/ONSdigital/monthly-business-survey-results.git
+    - name: build in dev mode
+      run: docker exec -w /home/cdsw/monthly-business-survey-results container_${{matrix.cml_version}}  pip install ."[dev]"
+    - name: test
+      run: docker exec container_${{matrix.cml_version}} pytest
+
              
-    - name: run image
-      run: |              
-             docker run -i cml_${{matrix.cml_version}}
-             git clone https://github.com/ONSdigital/monthly-business-survey-results.git
-             cd monthly-business-survey-results
-             pip install .[dev]
-             pytest
-             echo end
-             exit
+       
