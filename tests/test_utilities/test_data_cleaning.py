@@ -6,6 +6,7 @@ from pandas.testing import assert_frame_equal
 
 from mbs_results.utilities.data_cleaning import (
     clean_and_merge,
+    correct_values,
     create_imputation_class,
     enforce_datatypes,
     run_live_or_frozen,
@@ -116,3 +117,20 @@ def test_run_live_or_frozen_exception():
 
     with pytest.raises(ValueError):
         run_live_or_frozen(df, "target", "error", "love")
+
+
+def test_correct_values():
+
+    df = pd.read_csv(Path("tests") / "test_correct_values.csv")
+
+    df_in = df[["band_no", "value_1", "value_2", "value_3"]]
+
+    expected_output = df[
+        ["band_no", "expected_value_1", "expected_value_2", "expected_value_3"]
+    ]
+
+    expected_output.columns = df_in.columns
+
+    actual_output = correct_values(df_in, ["value_1", "value_2"], "band_no", [4, 5], 1)
+
+    assert_frame_equal(actual_output, expected_output)
