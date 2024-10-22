@@ -27,7 +27,7 @@ jobs:
     - name: build in dev mode
       run: docker exec -w /home/cdsw/monthly-business-survey-results container_${{matrix.cml_version}}  pip install ."[dev]"
     - name: test
-      run: docker exec container_${{matrix.cml_version}} pytest
+      run: docker exec -w /home/cdsw/monthly-business-survey-results container_${{matrix.cml_version}} pytest
 
              
        
