@@ -317,7 +317,7 @@ def run_live_or_frozen(
 
     if state == "frozen":
 
-        df.loc[df[error_marker].isin(error_values), target] = np.nan
+        df['adjusted_values_errors'] = df.loc[df[error_marker].isin(error_values), target]
 
     return df
 
