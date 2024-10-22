@@ -28,6 +28,9 @@ jobs:
       run: docker exec -w /home/cdsw/monthly-business-survey-results container_${{matrix.cml_version}}  pip install ."[dev]"
     - name: test
       run: docker exec -w /home/cdsw/monthly-business-survey-results container_${{matrix.cml_version}} pytest
+    - name: pre commit hooks
+      run: docker exec -w /home/cdsw/monthly-business-survey-results container_${{matrix.cml_version}} pre-commit run --all-files
+      
 
              
        
