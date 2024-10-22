@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from mbs_results.unsorted.validation_checks import (
+from mbs_results.utilities.validation_checks import (
     validate_indices,
     validate_manual_constructions,
 )

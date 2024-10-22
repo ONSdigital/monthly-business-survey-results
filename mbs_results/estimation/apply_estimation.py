@@ -8,7 +8,7 @@ from mbs_results.estimation.calculate_estimation_weights import (
 )
 from mbs_results.estimation.pre_processing_estimation import get_estimation_data
 
-# from mbs_results.validate_estimation import validate_estimation
+# from mbs_results.estimation.validate_estimation import validate_estimation
 
 
 def apply_estimation(population_path, sample_path, period, **config):
