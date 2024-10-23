@@ -12,7 +12,7 @@ from mbs_results.outlier_detection.calculate_ratio_estimation import (
 @pytest.fixture(scope="class")
 def ratio_estimation_test_data():
     return pd.read_csv(
-        Path("tests") / "data" / "winsorisation" / "ratio_estimation_data.csv",
+        Path("tests") / "data" / "outlier_detection" / "calculate_ratio_estimation" / "ratio_estimation_data.csv",
         low_memory=False,
         usecols=lambda c: not c.startswith("Unnamed:"),
     )
@@ -21,7 +21,7 @@ def ratio_estimation_test_data():
 @pytest.fixture(scope="class")
 def ratio_estimation_test_output():
     return pd.read_csv(
-        Path("tests") / "data" / "winsorisation" / "ratio_estimation_data_output.csv",
+        Path("tests") / "data" / "outlier_detection" / "calculate_ratio_estimation" / "ratio_estimation_data_output.csv",
         low_memory=False,
         usecols=lambda c: not c.startswith("Unnamed:"),
     )

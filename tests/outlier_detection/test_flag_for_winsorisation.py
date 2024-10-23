@@ -8,7 +8,7 @@ from mbs_results.outlier_detection.flag_for_winsorisation import winsorisation_f
 @pytest.fixture(scope="class")
 def winsorisation_flag_test_data():
     return pd.read_csv(
-        "tests/data/winsorisation/flag_data.csv",
+        "tests/data/outlier_detection/flag_for_winsorisation/flag_data.csv",
         low_memory=False,
         usecols=lambda c: not c.startswith("Unnamed:"),
     )
