@@ -2,14 +2,14 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-from helper_functions import does_not_raise
+from tests.helper_functions import does_not_raise
 
 from mbs_results.imputation.validate_imputation import validate_imputation
 
 
 @pytest.fixture(scope="class")
 def filepath():
-    return Path("tests/data/validate_imputation")
+    return Path("tests/data/imputation/validate_imputation")
 
 
 @pytest.fixture(scope="class")

@@ -1,12 +1,12 @@
 import pandas as pd
 import pytest
-from helper_functions import load_filter
+from tests.helper_functions import load_filter
 from pandas.testing import assert_frame_equal
 
 from mbs_results.imputation.ratio_of_means import ratio_of_means
 from mbs_results.utilities.utils import convert_column_to_datetime
 
-scenario_path_prefix = "tests/data/"
+scenario_path_prefix = "tests/data/imputation/ratio_of_means/"
 
 scenarios = [
     "01_C",
@@ -64,10 +64,10 @@ class TestRatioOfMeans:
     def test_ratio_of_means(self, base_file_name):
 
         input_data = pd.read_csv(
-            scenario_path_prefix + "ratio_of_means/" + base_file_name + "_input.csv"
+            scenario_path_prefix + base_file_name + "_input.csv"
         )
         expected_output = pd.read_csv(
-            scenario_path_prefix + "ratio_of_means/" + base_file_name + "_output.csv"
+            scenario_path_prefix + base_file_name + "_output.csv"
         )
 
         filter_df = load_filter(
@@ -165,8 +165,6 @@ class TestRatioOfMeans:
         ].str.lower()
         expected_output = expected_output.replace({"bi": "bir"})
 
-        print(expected_output.columns)
-
         assert_frame_equal(actual_output, expected_output, check_dtype=False)
 
 
@@ -178,10 +176,10 @@ pytestmark = pytest.mark.parametrize(
 class TestRatioOfMeansManConstruction:
     def test_manual_construction_input(self, base_file_name):
         df = pd.read_csv(
-            scenario_path_prefix + "ratio_of_means/" + base_file_name + "_input.csv"
+            scenario_path_prefix + base_file_name + "_input.csv"
         )
         expected_output = pd.read_csv(
-            scenario_path_prefix + "ratio_of_means/" + base_file_name + "_output.csv"
+            scenario_path_prefix + base_file_name + "_output.csv"
         )
 
         manual_constructions = df.copy()[

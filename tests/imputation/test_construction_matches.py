@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from helper_functions import load_and_format
+from tests.helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
 from mbs_results.imputation.construction_matches import flag_construction_matches
@@ -9,7 +9,7 @@ from mbs_results.imputation.construction_matches import flag_construction_matche
 
 @pytest.fixture(scope="class")
 def construction_test_data():
-    return load_and_format(Path("tests") / "construction_matches.csv")
+    return load_and_format(Path("tests/data/imputation/construction_matches/construction_matches.csv"))
 
 
 class TestConstructionMatches:

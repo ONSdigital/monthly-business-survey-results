@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from helper_functions import load_and_format
+from tests.helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
 from mbs_results.imputation.cumulative_imputation_links import get_cumulative_links
@@ -9,7 +9,7 @@ from mbs_results.imputation.cumulative_imputation_links import get_cumulative_li
 
 @pytest.fixture(scope="class")
 def cumulative_links_test_data():
-    return load_and_format(Path("tests") / "cumulative_links.csv")
+    return load_and_format(Path("tests/data/imputation/cumulative_imputation_links/cumulative_links.csv"))
 
 
 class TestCumulativeLinks:

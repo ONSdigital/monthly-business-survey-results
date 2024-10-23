@@ -1,5 +1,5 @@
 import pytest
-from helper_functions import load_and_format
+from tests.helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
 from mbs_results.imputation.calculate_imputation_link import calculate_imputation_link
@@ -7,12 +7,12 @@ from mbs_results.imputation.calculate_imputation_link import calculate_imputatio
 
 @pytest.fixture(scope="class")
 def forward_backward_test_data():
-    return load_and_format("tests/data/calculate_imputation_link/forward_backward.csv")
+    return load_and_format("tests/data/imputation/calculate_imputation_link/forward_backward.csv")
 
 
 @pytest.fixture(scope="class")
 def construction_test_data():
-    return load_and_format("tests/data/calculate_imputation_link/construction.csv")
+    return load_and_format("tests/data/imputation/calculate_imputation_link/construction.csv")
 
 
 class TestLinks:

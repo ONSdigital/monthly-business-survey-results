@@ -11,9 +11,9 @@ class TestFilters:
     def test_basic_filter(self, scenario, filters):
         """Test ignore_from_link is correct"""
 
-        df_output_expected = pd.read_csv("tests/" + scenario + ".csv")
+        df_output_expected = pd.read_csv("tests/data/imputation/link_filter/" + scenario + ".csv")
 
-        df_filters = pd.read_csv("tests/" + filters + ".csv")
+        df_filters = pd.read_csv("tests/data/imputation/link_filter/" + filters + ".csv")
 
         df_input = df_output_expected.drop(columns=["ignore_from_link"])
 
@@ -25,9 +25,9 @@ class TestFilters:
         """Test if function raises an exception when the columns in filters
         do not exist in scenario."""
 
-        df_output_expected = pd.read_csv("tests/" + scenario + ".csv")
+        df_output_expected = pd.read_csv("tests/data/imputation/link_filter/" + scenario + ".csv")
 
-        df_filters = pd.read_csv("tests/" + filters + ".csv")
+        df_filters = pd.read_csv("tests/data/imputation/link_filter/" + filters + ".csv")
 
         df_input = df_output_expected.drop(columns=["ignore_from_link"])
 

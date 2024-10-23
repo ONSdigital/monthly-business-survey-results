@@ -1,31 +1,21 @@
 from pathlib import Path
 
 import pytest
-from helper_functions import load_and_format
+from tests.helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
-from mbs_results.estimation.apply_imputation_link import (
+from mbs_results.imputation.apply_imputation_link import (
     create_and_merge_imputation_values,
 )
 
-
 @pytest.fixture(scope="class")
-def fir_bir_c_fic_test_data():
-    return load_and_format(
-        Path("tests") / "data" / "apply_imputation_link" / "FIR_BIR_C_FIC.csv"
-    )
-
-
-@pytest.fixture(scope="class")
-def mc_fimc_test_data():
-    return load_and_format(
-        Path("tests") / "data" / "apply_imputation_link" / "MC_FIMC.csv"
-    )
-
-
+def filepath():
+    return Path("tests/data/imputation/apply_imputation_link")
+        
+       
 class TestApplyImputationLink:
-    def test_all_imputation_types(self, fir_bir_c_fic_test_data):
-        loaded_data = fir_bir_c_fic_test_data
+    def test_all_imputation_types(self, filepath):
+        loaded_data = load_and_format(filepath /  "FIR_BIR_C_FIC.csv")
 
         input_data = loaded_data.drop(columns=["expected_target"])
         expected_output = loaded_data.drop(columns="target").rename(
@@ -51,8 +41,8 @@ class TestApplyImputationLink:
         expected_output = expected_output.sort_index(axis=1)
         assert_frame_equal(actual_output, expected_output)
 
-    def test_mc_imputation_types(self, mc_fimc_test_data):
-        loaded_data = mc_fimc_test_data
+    def test_mc_imputation_types(self, filepath):
+        loaded_data = load_and_format(filepath /  "MC_FIMC.csv")
 
         input_data = loaded_data.drop(columns=["expected_target"])
         input_data["man_link"] = 1

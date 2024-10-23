@@ -1,7 +1,7 @@
 from pathlib import Path
 
 import pytest
-from helper_functions import load_and_format
+from tests.helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
 from mbs_results.imputation.imputation_flags import generate_imputation_marker
@@ -9,13 +9,13 @@ from mbs_results.imputation.imputation_flags import generate_imputation_marker
 
 @pytest.fixture(scope="class")
 def imputation_flag_test_data():
-    return load_and_format(Path("tests") / "imputation_flag_data.csv")
+    return load_and_format(Path("tests/data/imputation") / "imputation_flags/imputation_flag_data.csv")
 
 
 @pytest.fixture(scope="class")
 def imputation_flag_test_data_manual():
     return load_and_format(
-        Path("tests") / "imputation_flag_data_manual_construction.csv"
+        Path("tests/data/imputation") / "imputation_flags/imputation_flag_data_manual_construction.csv"
     )
 
 
