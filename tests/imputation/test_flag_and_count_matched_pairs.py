@@ -2,17 +2,18 @@ from pathlib import Path
 
 import pandas as pd  # noqa F401
 import pytest
-from tests.helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
 from mbs_results.imputation.flag_and_count_matched_pairs import (
     count_matches,
     flag_matched_pair,
 )
+from tests.helper_functions import load_and_format
 
 match_inputs = [
     load_and_format(
-        Path("tests/data/imputation") / "flag_and_count_matched_pairs/flag_pairs_2_groups_expected_output.csv"
+        Path("tests/data/imputation")
+        / "flag_and_count_matched_pairs/flag_pairs_2_groups_expected_output.csv"
     ),
     load_and_format(
         Path("tests/data/imputation")
@@ -24,14 +25,16 @@ match_inputs = [
 @pytest.fixture(scope="class")
 def count_test_data():
     return load_and_format(
-        Path("tests/data/imputation") / "flag_and_count_matched_pairs/count_matches_input.csv"
+        Path("tests/data/imputation")
+        / "flag_and_count_matched_pairs/count_matches_input.csv"
     )
 
 
 @pytest.fixture(scope="class")
 def count_expected_output():
     return load_and_format(
-        Path("tests/data/imputation") / "flag_and_count_matched_pairs/count_matches_expected_output.csv"
+        Path("tests/data/imputation")
+        / "flag_and_count_matched_pairs/count_matches_expected_output.csv"
     )
 
 

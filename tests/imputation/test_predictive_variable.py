@@ -1,15 +1,17 @@
 from pathlib import Path
 
 import pytest
-from tests.helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
 from mbs_results.imputation.predictive_variable import shift_by_strata_period
+from tests.helper_functions import load_and_format
 
 
 @pytest.fixture(scope="class")
 def predictive_variable_test_data():
-    return load_and_format(Path("tests/data/imputation/predictive_variable") / "predictive_variable.csv")
+    return load_and_format(
+        Path("tests/data/imputation/predictive_variable") / "predictive_variable.csv"
+    )
 
 
 class TestPredictiveVariable:

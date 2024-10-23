@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-from tests.helper_functions import does_not_raise
 
 from mbs_results.estimation.validate_estimation import validate_estimation
+from tests.helper_functions import does_not_raise
 
 
 @pytest.fixture()

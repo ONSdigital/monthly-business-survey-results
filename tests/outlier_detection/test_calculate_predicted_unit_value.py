@@ -12,7 +12,11 @@ from mbs_results.outlier_detection.calculate_predicted_unit_value import (
 @pytest.fixture(scope="class")
 def predicted_unit_value_test_data():
     return pd.read_csv(
-        Path("tests") / "data" / "outlier_detection" / "calculate_predicted_unit_value"/ "predicted_unit_value_data.csv",
+        Path("tests")
+        / "data"
+        / "outlier_detection"
+        / "calculate_predicted_unit_value"
+        / "predicted_unit_value_data.csv",
         low_memory=False,
         usecols=lambda c: not c.startswith("Unnamed:"),
     )
@@ -21,7 +25,11 @@ def predicted_unit_value_test_data():
 @pytest.fixture(scope="class")
 def predicted_unit_value_test_output():
     return pd.read_csv(
-        Path("tests") / "data" /"outlier_detection" / "calculate_predicted_unit_value"/"predicted_unit_value_output.csv",
+        Path("tests")
+        / "data"
+        / "outlier_detection"
+        / "calculate_predicted_unit_value"
+        / "predicted_unit_value_output.csv",
         low_memory=False,
         usecols=lambda c: not c.startswith("Unnamed:"),
     )

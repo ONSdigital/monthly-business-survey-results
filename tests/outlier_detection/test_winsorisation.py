@@ -10,7 +10,11 @@ from mbs_results.outlier_detection.winsorisation import winsorise
 @pytest.fixture(scope="class")
 def expected_output():
     return pd.read_csv(
-        Path("tests") / "data" / "outlier_detection"/ "test_winsorisation" / "winsorised_weight_data_output.csv",
+        Path("tests")
+        / "data"
+        / "outlier_detection"
+        / "test_winsorisation"
+        / "winsorised_weight_data_output.csv",
         low_memory=False,
         usecols=lambda c: not c.startswith("Unnamed:"),
     )

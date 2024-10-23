@@ -12,7 +12,11 @@ from mbs_results.outlier_detection.calculate_winsorised_weight import (
 @pytest.fixture(scope="class")
 def winsorised_weight_test_data():
     return pd.read_csv(
-        Path("tests") / "data" / "outlier_detection" / "calculate_winsorised_weight" / "winsorised_weight_data.csv",
+        Path("tests")
+        / "data"
+        / "outlier_detection"
+        / "calculate_winsorised_weight"
+        / "winsorised_weight_data.csv",
         low_memory=False,
         usecols=lambda c: not c.startswith("Unnamed:"),
     )
@@ -21,7 +25,11 @@ def winsorised_weight_test_data():
 @pytest.fixture(scope="class")
 def winsorised_weight_test_output():
     return pd.read_csv(
-        Path("tests") / "data" / "outlier_detection" / "calculate_winsorised_weight"  / "winsorised_weight_data_output.csv",
+        Path("tests")
+        / "data"
+        / "outlier_detection"
+        / "calculate_winsorised_weight"
+        / "winsorised_weight_data_output.csv",
         low_memory=False,
         usecols=lambda c: not c.startswith("Unnamed:"),
     )

@@ -1,21 +1,22 @@
 from pathlib import Path
 
 import pytest
-from tests.helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
 from mbs_results.imputation.apply_imputation_link import (
     create_and_merge_imputation_values,
 )
+from tests.helper_functions import load_and_format
+
 
 @pytest.fixture(scope="class")
 def filepath():
     return Path("tests/data/imputation/apply_imputation_link")
-        
-       
+
+
 class TestApplyImputationLink:
     def test_all_imputation_types(self, filepath):
-        loaded_data = load_and_format(filepath /  "FIR_BIR_C_FIC.csv")
+        loaded_data = load_and_format(filepath / "FIR_BIR_C_FIC.csv")
 
         input_data = loaded_data.drop(columns=["expected_target"])
         expected_output = loaded_data.drop(columns="target").rename(
@@ -42,7 +43,7 @@ class TestApplyImputationLink:
         assert_frame_equal(actual_output, expected_output)
 
     def test_mc_imputation_types(self, filepath):
-        loaded_data = load_and_format(filepath /  "MC_FIMC.csv")
+        loaded_data = load_and_format(filepath / "MC_FIMC.csv")
 
         input_data = loaded_data.drop(columns=["expected_target"])
         input_data["man_link"] = 1

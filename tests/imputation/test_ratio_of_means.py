@@ -1,10 +1,10 @@
 import pandas as pd
 import pytest
-from tests.helper_functions import load_filter
 from pandas.testing import assert_frame_equal
 
 from mbs_results.imputation.ratio_of_means import ratio_of_means
 from mbs_results.utilities.utils import convert_column_to_datetime
+from tests.helper_functions import load_filter
 
 scenario_path_prefix = "tests/data/imputation/ratio_of_means/"
 
@@ -63,9 +63,7 @@ pytestmark = pytest.mark.parametrize("base_file_name", scenarios)
 class TestRatioOfMeans:
     def test_ratio_of_means(self, base_file_name):
 
-        input_data = pd.read_csv(
-            scenario_path_prefix + base_file_name + "_input.csv"
-        )
+        input_data = pd.read_csv(scenario_path_prefix + base_file_name + "_input.csv")
         expected_output = pd.read_csv(
             scenario_path_prefix + base_file_name + "_output.csv"
         )
@@ -175,9 +173,7 @@ pytestmark = pytest.mark.parametrize(
 
 class TestRatioOfMeansManConstruction:
     def test_manual_construction_input(self, base_file_name):
-        df = pd.read_csv(
-            scenario_path_prefix + base_file_name + "_input.csv"
-        )
+        df = pd.read_csv(scenario_path_prefix + base_file_name + "_input.csv")
         expected_output = pd.read_csv(
             scenario_path_prefix + base_file_name + "_output.csv"
         )

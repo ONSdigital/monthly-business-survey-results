@@ -29,7 +29,7 @@ def create_missing_questions_input_res(filepath):
 @pytest.fixture(scope="class")
 def create_missing_questions_output(filepath):
     return pd.read_csv(
-        filepath  / "create_missing_questions_output.csv", index_col=False
+        filepath / "create_missing_questions_output.csv", index_col=False
     )
 
 

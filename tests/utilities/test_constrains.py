@@ -1,13 +1,15 @@
-import pandas as pd
-from pandas.testing import assert_frame_equal
-import pytest
 from pathlib import Path
+
+import pandas as pd
+import pytest
+from pandas.testing import assert_frame_equal
 
 from mbs_results.utilities.constrains import (
     calculate_derived_outlier_weights,
     replace_values_index_based,
     sum_sub_df,
 )
+
 
 @pytest.fixture(scope="class")
 def filepath():
@@ -32,6 +34,7 @@ def test_replace_values_index_base(filepath):
 
     assert_frame_equal(df_in, df_expected)
 
+
 def test_sum_sub_df_46_47(filepath):
 
     df = pd.read_csv(filepath / "test_sum_sub_df.csv", index_col=False)
@@ -49,12 +52,11 @@ def test_sum_sub_df_46_47(filepath):
     )
 
     actual_ouput = (
-        sum_sub_df(df_in, [46, 47])
-        .sort_values(by="reference")
-        .reset_index(drop=True)
+        sum_sub_df(df_in, [46, 47]).sort_values(by="reference").reset_index(drop=True)
     )
 
     assert_frame_equal(actual_ouput, expected_output)
+
 
 def test_calculate_derived_outlier_weights(filepath):
     df = pd.read_csv(
@@ -89,6 +91,7 @@ def test_calculate_derived_outlier_weights(filepath):
     df = df.sort_values(by=sorting_by).reset_index(drop=True)
 
     assert_frame_equal(df, df_output)
+
 
 def test_calculate_derived_outlier_weights_missing(filepath):
     df = pd.read_csv(

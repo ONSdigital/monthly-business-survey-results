@@ -12,6 +12,7 @@ from mbs_results.staging.data_cleaning import (
     run_live_or_frozen,
 )
 
+
 @pytest.fixture(scope="class")
 def filepath():
     return Path("tests/data/staging/data_cleaning")
@@ -117,7 +118,7 @@ def test_run_live_or_frozen(filepath):
 
 def test_run_live_or_frozen_exception(filepath):
 
-    df = pd.read_csv(filepath/ "test_run_live_or_frozen.csv")
+    df = pd.read_csv(filepath / "test_run_live_or_frozen.csv")
 
     with pytest.raises(ValueError):
         run_live_or_frozen(df, "target", "error", "love")

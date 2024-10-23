@@ -15,6 +15,8 @@ def test_read_colon_separated_file():
         }
     )
 
-    actual = read_colon_separated_file("tests/data/utilities/read_colon_separated_file/colon_sep_202401", headers)
+    actual = read_colon_separated_file(
+        "tests/data/utilities/read_colon_separated_file/colon_sep_202401", headers
+    )
 
     assert_frame_equal(actual, expected)

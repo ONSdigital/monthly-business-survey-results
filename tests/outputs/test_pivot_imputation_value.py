@@ -17,7 +17,7 @@ def filepath():
 
 @pytest.fixture(scope="class")
 def count_data_input(filepath):
-    return pd.read_csv(filepath /  "count_data_input.csv", index_col=False)
+    return pd.read_csv(filepath / "count_data_input.csv", index_col=False)
 
 
 @pytest.fixture(scope="class")
@@ -27,9 +27,7 @@ def merge_counts_output(filepath):
 
 @pytest.fixture(scope="class")
 def pivot_imputation_value_output(filepath):
-    return pd.read_csv(
-        filepath / "pivot_imputation_value_output.csv", index_col=False
-    )
+    return pd.read_csv(filepath / "pivot_imputation_value_output.csv", index_col=False)
 
 
 class TestMergeCounts:
