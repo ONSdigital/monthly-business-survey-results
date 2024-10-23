@@ -4,12 +4,12 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from mbs_results.unsorted.turnover_analysis import create_turnover_output
+from mbs_results.outputs.turnover_analysis import create_turnover_output
 
 
 @pytest.fixture(scope="class")
 def filepath():
-    return Path("tests/data/turnover_analysis")
+    return Path("tests/data/outputs/turnover_analysis")
 
 
 @pytest.fixture(scope="class")

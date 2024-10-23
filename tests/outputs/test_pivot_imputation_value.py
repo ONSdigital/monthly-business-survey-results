@@ -12,7 +12,7 @@ from mbs_results.outputs.pivot_imputation_value import (
 
 @pytest.fixture(scope="class")
 def filepath():
-    return Path("tests/data/imputation/pivot_imputation_value")
+    return Path("tests/data/outputs/pivot_imputation_value")
 
 
 @pytest.fixture(scope="class")

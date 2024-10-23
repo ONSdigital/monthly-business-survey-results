@@ -4,7 +4,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from mbs_results.unsorted.selective_editing import (
+from mbs_results.outputs.selective_editing import (
     calculate_predicted_value,
     create_standardising_factor,
 )
@@ -12,7 +12,7 @@ from mbs_results.unsorted.selective_editing import (
 
 @pytest.fixture(scope="class")
 def filepath():
-    return Path("tests")
+    return Path("tests/data/outputs/selective_editing")
 
 
 @pytest.fixture(scope="class")
