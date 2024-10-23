@@ -1,6 +1,6 @@
 # `tests` folder overview
 
-tests follow mbs_results file structure 
+tests follow mbs_results file structure
 
 data follow tests structure, the lowest level folder is the testing function with test cases within
 
