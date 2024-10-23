@@ -1,7 +1,8 @@
 from pathlib import Path
 
 import pytest
-from helper_functions import load_and_format
+
+from tests.helper_functions import load_and_format
 from pandas.testing import assert_frame_equal
 
 from mbs_results.estimation.pre_processing_estimation import derive_estimation_variables
@@ -9,7 +10,7 @@ from mbs_results.estimation.pre_processing_estimation import derive_estimation_v
 
 @pytest.fixture(scope="class")
 def filepath():
-    return Path("tests") / "data" / "pre_processing_estimation"
+    return Path("tests/data/estimation/pre_processing_estimation")
 
 
 @pytest.fixture(scope="class")

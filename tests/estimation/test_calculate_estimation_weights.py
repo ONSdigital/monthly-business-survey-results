@@ -12,7 +12,7 @@ from mbs_results.estimation.calculate_estimation_weights import (
 
 @pytest.fixture(scope="class")
 def filepath():
-    return Path("tests") / "data" / "estimation"
+    return Path("tests") / "data" / "estimation" / "calculate_estimation_weights"
 
 
 class TestEstimation:
