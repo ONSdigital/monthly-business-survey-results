@@ -21,6 +21,9 @@ jobs:
              docker build -t cml:${{matrix.cml_version}} -f 'pbj-workbench-python${{matrix.cml_version}}-standard.Dockerfile' .          
     - name: create container
       run:  docker run -id --name container_${{matrix.cml_version}} cml:${{matrix.cml_version}}
+    - name: copy files to container
+      run: docker cp $(pwd)/. container_${{matrix.cml_version}}:/
+    - name: check env 
     - name: build in dev mode
       run: docker exec container_${{matrix.cml_version}}  pip install ."[dev]"
     - name: check env 
