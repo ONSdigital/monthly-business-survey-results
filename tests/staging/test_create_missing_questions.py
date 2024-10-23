@@ -4,32 +4,32 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from mbs_results.create_missing_questions import create_missing_questions
+from mbs_results.staging.create_missing_questions import create_missing_questions
 
 
 @pytest.fixture(scope="class")
 def filepath():
-    return Path("tests")
+    return Path("tests/data/staging/create_missing_questions")
 
 
 @pytest.fixture(scope="class")
 def create_missing_questions_input_con(filepath):
     return pd.read_csv(
-        filepath / "data" / "create_missing_questions_contributors.csv", index_col=False
+        filepath / "create_missing_questions_contributors.csv", index_col=False
     )
 
 
 @pytest.fixture(scope="class")
 def create_missing_questions_input_res(filepath):
     return pd.read_csv(
-        filepath / "data" / "create_missing_questions_responses.csv", index_col=False
+        filepath / "create_missing_questions_responses.csv", index_col=False
     )
 
 
 @pytest.fixture(scope="class")
 def create_missing_questions_output(filepath):
     return pd.read_csv(
-        filepath / "data" / "create_missing_questions_output.csv", index_col=False
+        filepath  / "create_missing_questions_output.csv", index_col=False
     )
 
 

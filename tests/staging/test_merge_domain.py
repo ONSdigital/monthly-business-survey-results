@@ -4,12 +4,12 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from mbs_results.merge_domain import merge_domain
+from mbs_results.staging.merge_domain import merge_domain
 
 
 @pytest.fixture(scope="class")
 def filepath():
-    return Path("tests")
+    return Path("tests/data/staging/merge_domain")
 
 
 @pytest.fixture(scope="class")

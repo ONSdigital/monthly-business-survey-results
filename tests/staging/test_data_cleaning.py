@@ -4,13 +4,17 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
-from mbs_results.utilities.data_cleaning import (
+from mbs_results.staging.data_cleaning import (
     clean_and_merge,
     correct_values,
     create_imputation_class,
     enforce_datatypes,
     run_live_or_frozen,
 )
+
+@pytest.fixture(scope="class")
+def filepath():
+    return Path("tests/data/staging/data_cleaning")
 
 
 def correct_types(df):
@@ -25,8 +29,8 @@ def correct_types(df):
     return df_expected_out
 
 
-def test_enforce_datatypes():
-    df = pd.read_csv(Path("tests") / "imputation_flag_data.csv")
+def test_enforce_datatypes(filepath):
+    df = pd.read_csv(filepath / "imputation_flag_data.csv")
     df_subset = df[["period", "strata", "reference", "target_variable"]]
     expected_output = correct_types(df_subset)
     df_subset = df_subset.set_index(["reference", "period"])
@@ -84,9 +88,9 @@ def test_clean_and_merge():
     assert_frame_equal(actual_output, expected_output)
 
 
-def test_create_imputation_class():
+def test_create_imputation_class(filepath):
 
-    expected_output = pd.read_csv(Path("tests") / "test_create_imputation_class.csv")
+    expected_output = pd.read_csv(filepath / "test_create_imputation_class.csv")
 
     df_in = expected_output.drop(columns=["expected"])
 
@@ -95,9 +99,9 @@ def test_create_imputation_class():
     assert_frame_equal(actual_output, expected_output)
 
 
-def test_run_live_or_frozen():
+def test_run_live_or_frozen(filepath):
 
-    df = pd.read_csv(Path("tests") / "test_run_live_or_frozen.csv")
+    df = pd.read_csv(filepath / "test_run_live_or_frozen.csv")
 
     df_in = df.drop(columns=["frozen"])
 
@@ -111,17 +115,17 @@ def test_run_live_or_frozen():
     assert_frame_equal(live_ouput, df_in)
 
 
-def test_run_live_or_frozen_exception():
+def test_run_live_or_frozen_exception(filepath):
 
-    df = pd.read_csv(Path("tests") / "test_run_live_or_frozen.csv")
+    df = pd.read_csv(filepath/ "test_run_live_or_frozen.csv")
 
     with pytest.raises(ValueError):
         run_live_or_frozen(df, "target", "error", "love")
 
 
-def test_correct_values():
+def test_correct_values(filepath):
 
-    df = pd.read_csv(Path("tests") / "test_correct_values.csv")
+    df = pd.read_csv(filepath / "test_correct_values.csv")
 
     df_in = df[["band_no", "value_1", "value_2", "value_3"]]
 

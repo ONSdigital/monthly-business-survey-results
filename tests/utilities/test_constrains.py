@@ -1,129 +1,134 @@
 import pandas as pd
 from pandas.testing import assert_frame_equal
+import pytest
+from pathlib import Path
 
-from mbs_results.unsorted.constrains import (
+from mbs_results.utilities.constrains import (
     calculate_derived_outlier_weights,
     replace_values_index_based,
     sum_sub_df,
 )
 
+@pytest.fixture(scope="class")
+def filepath():
+    return Path("tests/data/utilities/constrains")
 
-class TestConstrains:
-    def test_replace_values_index_base(self):
 
-        df = pd.read_csv("tests/test_replace_values_index_based.csv", index_col=False)
+def test_replace_values_index_base(filepath):
 
-        df = df.set_index(["question_no", "period", "reference"])
+    df = pd.read_csv(filepath / "test_replace_values_index_based.csv", index_col=False)
 
-        df_in = df[["target"]].copy()
+    df = df.set_index(["question_no", "period", "reference"])
 
-        df_expected = df[["expected", "constrain_marker"]].rename(
-            columns={"expected": "target"}
-        )
-        df_expected.sort_index(inplace=True)
+    df_in = df[["target"]].copy()
 
-        replace_values_index_based(df_in, "target", 49, ">", 40)
-        replace_values_index_based(df_in, "target", 90, ">=", 40)
+    df_expected = df[["expected", "constrain_marker"]].rename(
+        columns={"expected": "target"}
+    )
+    df_expected.sort_index(inplace=True)
 
-        assert_frame_equal(df_in, df_expected)
+    replace_values_index_based(df_in, "target", 49, ">", 40)
+    replace_values_index_based(df_in, "target", 90, ">=", 40)
 
-    def test_sum_sub_df_46_47(self):
+    assert_frame_equal(df_in, df_expected)
 
-        df = pd.read_csv("tests/test_sum_sub_df.csv", index_col=False)
+def test_sum_sub_df_46_47(filepath):
 
-        df_in = (
-            df.loc[df["question_no"] != 40]
-            .drop(columns=["constrain_marker"])
-            .set_index(["question_no", "period", "reference"])
-        )
+    df = pd.read_csv(filepath / "test_sum_sub_df.csv", index_col=False)
 
-        expected_output = (
-            df.loc[df["question_no"] == 40]
-            .drop(columns=["question_no"])
-            .reset_index(drop=True)
-        )
+    df_in = (
+        df.loc[df["question_no"] != 40]
+        .drop(columns=["constrain_marker"])
+        .set_index(["question_no", "period", "reference"])
+    )
 
-        actual_ouput = (
-            sum_sub_df(df_in, [46, 47])
-            .sort_values(by="reference")
-            .reset_index(drop=True)
-        )
+    expected_output = (
+        df.loc[df["question_no"] == 40]
+        .drop(columns=["question_no"])
+        .reset_index(drop=True)
+    )
 
-        assert_frame_equal(actual_ouput, expected_output)
+    actual_ouput = (
+        sum_sub_df(df_in, [46, 47])
+        .sort_values(by="reference")
+        .reset_index(drop=True)
+    )
 
-    def test_calculate_derived_outlier_weights(self):
-        df = pd.read_csv(
-            "tests/data/winsorisation/derived-questions-winsor.csv",
-            index_col=False,
-        )
-        df["target_variable"] = df["target_variable"].astype(float)
-        df["new_target_variable"] = df["new_target_variable"].astype(float)
-        # Drop q40 rows
-        df_input = df.drop(df[df["question_no"] == 40].index)
-        df_input.drop(
-            columns=["default_o_weight", "constrain_marker", "post_wins_marker"],
-            inplace=True,
-        )
+    assert_frame_equal(actual_ouput, expected_output)
 
-        df_output = calculate_derived_outlier_weights(
-            df_input,
-            "period",
-            "reference",
-            "target_variable",
-            "question_no",
-            "spp_form_id",
-            "outlier_weight",
-            "new_target_variable",
-        )
+def test_calculate_derived_outlier_weights(filepath):
+    df = pd.read_csv(
+        filepath / "derived-questions-winsor.csv",
+        index_col=False,
+    )
+    df["target_variable"] = df["target_variable"].astype(float)
+    df["new_target_variable"] = df["new_target_variable"].astype(float)
+    # Drop q40 rows
+    df_input = df.drop(df[df["question_no"] == 40].index)
+    df_input.drop(
+        columns=["default_o_weight", "constrain_marker", "post_wins_marker"],
+        inplace=True,
+    )
 
-        sorting_by = ["reference", "period", "question_no", "spp_form_id"]
-        input_col_order = df.columns
-        df_output = (
-            df_output[input_col_order].sort_values(by=sorting_by).reset_index(drop=True)
-        )
-        df = df.sort_values(by=sorting_by).reset_index(drop=True)
+    df_output = calculate_derived_outlier_weights(
+        df_input,
+        "period",
+        "reference",
+        "target_variable",
+        "question_no",
+        "spp_form_id",
+        "outlier_weight",
+        "new_target_variable",
+    )
 
-        assert_frame_equal(df, df_output)
+    sorting_by = ["reference", "period", "question_no", "spp_form_id"]
+    input_col_order = df.columns
+    df_output = (
+        df_output[input_col_order].sort_values(by=sorting_by).reset_index(drop=True)
+    )
+    df = df.sort_values(by=sorting_by).reset_index(drop=True)
 
-    def test_calculate_derived_outlier_weights_missing(self):
-        df = pd.read_csv(
-            "tests/data/winsorisation/derived-questions-winsor-missing.csv",
-            index_col=False,
-        )
-        df["target_variable"] = df["target_variable"].astype(float)
-        df["new_target_variable"] = df["new_target_variable"].astype(float)
-        # Drop q40 rows
-        df_input = df.drop(df[df["question_no"] == 40].index)
-        df_input.drop(
-            columns=["default_o_weight", "constrain_marker", "post_wins_marker"],
-            inplace=True,
-        )
-        # Manually change the input data to be missing one value in
-        # new_target_variable . data is present in dataset to compare against
-        df_input.loc[
-            (df_input["reference"] == 101)
-            & (df_input["period"] == 202401)
-            & (df_input["question_no"] == 46)
-            & (df_input["spp_form_id"] == 13),
-            "new_target_variable",
-        ] = None
+    assert_frame_equal(df, df_output)
 
-        df_output = calculate_derived_outlier_weights(
-            df_input,
-            "period",
-            "reference",
-            "target_variable",
-            "question_no",
-            "spp_form_id",
-            "outlier_weight",
-            "new_target_variable",
-        )
+def test_calculate_derived_outlier_weights_missing(filepath):
+    df = pd.read_csv(
+        filepath / "derived-questions-winsor-missing.csv",
+        index_col=False,
+    )
+    df["target_variable"] = df["target_variable"].astype(float)
+    df["new_target_variable"] = df["new_target_variable"].astype(float)
+    # Drop q40 rows
+    df_input = df.drop(df[df["question_no"] == 40].index)
+    df_input.drop(
+        columns=["default_o_weight", "constrain_marker", "post_wins_marker"],
+        inplace=True,
+    )
+    # Manually change the input data to be missing one value in
+    # new_target_variable . data is present in dataset to compare against
+    df_input.loc[
+        (df_input["reference"] == 101)
+        & (df_input["period"] == 202401)
+        & (df_input["question_no"] == 46)
+        & (df_input["spp_form_id"] == 13),
+        "new_target_variable",
+    ] = None
 
-        sorting_by = ["reference", "period", "question_no", "spp_form_id"]
-        input_col_order = df.columns
-        df_output = (
-            df_output[input_col_order].sort_values(by=sorting_by).reset_index(drop=True)
-        )
-        df = df.sort_values(by=sorting_by).reset_index(drop=True)
+    df_output = calculate_derived_outlier_weights(
+        df_input,
+        "period",
+        "reference",
+        "target_variable",
+        "question_no",
+        "spp_form_id",
+        "outlier_weight",
+        "new_target_variable",
+    )
 
-        assert_frame_equal(df, df_output)
+    sorting_by = ["reference", "period", "question_no", "spp_form_id"]
+    input_col_order = df.columns
+    df_output = (
+        df_output[input_col_order].sort_values(by=sorting_by).reset_index(drop=True)
+    )
+    df = df.sort_values(by=sorting_by).reset_index(drop=True)
+
+    assert_frame_equal(df, df_output)
