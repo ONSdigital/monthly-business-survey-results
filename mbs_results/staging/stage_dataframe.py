@@ -6,6 +6,19 @@ from mbs_results.staging.dfs_from_spp import dfs_from_spp
 from mbs_results.utilities.utils import read_colon_separated_file
 
 
+def create_mapper() -> dict:
+    """
+    placeholder function to create question and form mapping dict
+
+    Returns
+    -------
+    dict
+        dictionary containing question numebers and form id
+    """
+    mapper = {9: [40, 49], 10: [110]}
+    return mapper
+
+
 def stage_dataframe(config: dict) -> pd.DataFrame:
     """
     wrapper function to stage and pre process the dataframe, ready to be passed onto the
