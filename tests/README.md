@@ -8,12 +8,6 @@ data follow tests structure, the lowest level folder is the testing function wit
 Tests tree:
 ```
 +---data
-|   +---archive
-|   |       apply_imputation_link.csv
-|   |       BIR.csv
-|   |       C_FIC.csv
-|   |       FIR.csv
-|   |
 |   +---estimation
 |   |   +---calculate_estimation_weights
 |   |   |       calibration_factor_combined.csv
