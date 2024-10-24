@@ -1,3 +1,8 @@
+import warnings
+
+import pandas as pd
+
+
 def validate_config(config):
     """
     Run validation checks on the main config dictionary
@@ -222,3 +227,19 @@ def validate_manual_constructions(df, manual_constructions):
             f"""There are reference and period combinations in the manual constructions
       with no match: {string_ids}"""
         )
+
+
+def validate_staging(df: pd.DataFrame):
+    warnings.warn("A placeholder function for validating dataframe post staging")
+
+
+def validate_imputation(df: pd.DataFrame):
+    warnings.warn("A placeholder function for validating dataframe post staging")
+
+
+def validate_estimation(df: pd.DataFrame):
+    warnings.warn("A placeholder function for validating dataframe post staging")
+
+
+def validate_outlier_detection(df: pd.DataFrame):
+    warnings.warn("A placeholder function for validating dataframe post staging")
