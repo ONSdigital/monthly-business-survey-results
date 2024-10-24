@@ -25,5 +25,7 @@
         "5661", "5662", "5663"
     ],
     "current_period" : 202401,
-    "previous_period" : 202312
+    "previous_period" : 202312,
+    "platform" : "",
+    "bucket" : ""
 }
