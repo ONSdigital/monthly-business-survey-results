@@ -1,4 +1,0 @@
-imputation_class,reference,target,period,forward_imputation_link,cumulative_forward_imputation_link,imputation_marker,imputed_value
-100,100000,200,202402,1,,R,
-100,100000,,202403,2,2,FIR,400
-100,100000,,202404,3,6,FIR,1200
