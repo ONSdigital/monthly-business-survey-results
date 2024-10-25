@@ -1,16 +1,16 @@
 name: cml_runtimes
 
 on:
-  push:
-    branches: [ "623-CI-with-CML-runtimes" ]
+  # Triggers the workflow on pull requests to main branch
+  pull_request:
+    branches: [ main ]
+
 jobs:
   CML:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         cml_version: ["3.8", "3.9", "3.10","3.11"]
-    #continue-on-error: true
-
     steps:
     - name: checkout ml-runtimes  #https://github.com/cloudera/ml-runtimes
       uses: actions/checkout@master
