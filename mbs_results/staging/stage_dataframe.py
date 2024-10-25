@@ -4,6 +4,7 @@ import pandas as pd
 
 from mbs_results.staging.convert_ni_uk import convert_ni_uk
 from mbs_results.staging.create_missing_questions import create_missing_questions
+from mbs_results.staging.data_cleaning import run_live_or_frozen
 from mbs_results.staging.dfs_from_spp import dfs_from_spp
 from mbs_results.utilities.utils import (
     convert_column_to_datetime,
@@ -85,6 +86,8 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     )
     df = responses_with_missing.merge(contributors, on=[reference, period])
     df = convert_ni_uk(df, "cellnumber")
+    # Add run live or frozen
+    df = run_live_or_frozen(df, ...)
     print("Staging Completed")
 
     return df
