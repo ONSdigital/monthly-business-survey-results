@@ -2,11 +2,16 @@
     "folder_path" : "/dapsen/workspace_zone/mbs-results/",
     "mbs_file_name" : "snapshot-202212-002-2156d36b-e61f-42f1-a0f1-61d1f8568b8e.json",
     "manual_constructions_path": "data/manual_constructions.csv",
-    "target" : "return",
-    "period" : "period",
-    "strata" : "group",
-    "reference" : "reference",
-    "auxiliary": "auxiliary",
+    "period": "period",
+    "reference": "reference",
+    "cell_number": "cell_no",
+    "auxiliary": "frotover",
+    "strata": "cell_no",
+    "group": "calibration_group",
+    "sampled": "sampled",
+    "design_weight": "design_weight",
+    "calibration_factor": "calibration_factor",
+    "region": "region",
     "responses_keep_cols" : {
                 "reference" : "str",
                 "period": "date",
@@ -26,6 +31,31 @@
     ],
     "current_period" : 202401,
     "previous_period" : 202312,
-    "platform" : "",
-    "bucket" : ""
+    "platform" : "network",
+    "bucket" : "",
+    "sample_path": "",
+    "sample_column_names": [
+        "reference","checkletter","frosic2003","rusic2003","frosic2007",
+        "rusic2007","froempees","employees","froempment","employment","froFTEempt",
+        "FTEempt","frotover","turnover","entref","wowentref","vatref","payeref",
+        "crn","live_lu","live_vat","live_paye","legalstatus","entrepmkr","region",
+        "birthdate","entname1","entname2","entname3","runame1","runame2","runame3",
+        "ruaddr1","ruaddr2","ruaddr3","ruaddr4","ruaddr5","rupostcode","tradstyle1",
+        "tradstyle2","tradstyle3","contact","telephone","fax","seltype","inclexcl",
+        "cell_no","formtype","cso_tel","currency"
+    ],
+    "population_path": "",
+    "population_column_names": [
+        "reference", "checkletter", "inqcode", "entref", "wowentref", "frosic2003",
+        "rusic2003", "frosic2007", "rusic2007", "froempees", "employees",
+        "froempment", "employment", "froFTEempt", "FTEempt", "frotover",
+        "turnover", "entrepmkr", "legalstatus", "inqstop", "entzonemkr", "region",
+        "live_lu", "live_vat", "live_paye", "immfoc", "ultfoc", "cell_no",
+        "selmkr", "inclexcl"
+    ],
+    "population_keep_columns": [
+        "reference", "region", "frotover", "cell_no", "period", "frosic2007"
+    ],
+    "sample_keep_columns": ["reference", "period"],
+    "calibration_group_map": ""
 }
