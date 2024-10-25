@@ -307,18 +307,18 @@ def run_live_or_frozen(
     Original dataframe.
 
     """
-
+    
+ 
     if state not in ["frozen", "live"]:
         raise ValueError(
             """{} is not an accepted state status, use either frozen or live """.format(
                 state
             )
         )
-
     if state == "frozen":
-
-        df['adjusted_values_errors'] = df.loc[df[error_marker].isin(error_values), target]
-
+        df['frozen_error'] = df.apply(lambda x: x[target] if x[error_marker] in (error_values) else '', axis=1)
+        df.loc[df[error_marker].isin(error_values), target] = np.nan
+    
     return df
 
 
