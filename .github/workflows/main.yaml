@@ -9,20 +9,19 @@ jobs:
     strategy:
       matrix:
         cml_version: ["3.8", "3.9", "3.10","3.11"]
-    continue-on-error: true
+    #continue-on-error: true
 
     steps:
-    - uses: actions/checkout@v3
-    - name: clone runtimes
-      run:   git clone https://github.com/cloudera/ml-runtimes.git
+    - name: checkout ml-runtimes  #https://github.com/cloudera/ml-runtimes
+      uses: actions/checkout@master
+      with:
+        repository: cloudera/ml-runtimes
     - name: build runtime cml_${{matrix.cml_version}}
-      run: |  
-             cd ml-runtimes
-             docker build -t cml:${{matrix.cml_version}} -f 'pbj-workbench-python${{matrix.cml_version}}-standard.Dockerfile' .          
+      run: docker build -t cml:${{matrix.cml_version}} -f 'pbj-workbench-python${{matrix.cml_version}}-standard.Dockerfile' .          
     - name: create container
       run:  docker run -id --name container_${{matrix.cml_version}} cml:${{matrix.cml_version}}
-    - name: copy files to container
-      run: docker cp $(pwd)/. container_${{matrix.cml_version}}:/
+    - name: checkout to repository
+      uses: actions/checkout@v3
     - name: build in dev mode
       run: docker exec container_${{matrix.cml_version}}  pip install ."[dev]"
     - name: check env 
