@@ -1,6 +1,6 @@
 {
-    "folder_path" : "/dapsen/workspace_zone/mbs-results/",
-    "mbs_file_name" : "snapshot-202212-002-2156d36b-e61f-42f1-a0f1-61d1f8568b8e.json",
+    "folder_path" : "C:/Users/dayj1/Office for National Statistics/Legacy Uplift - MBS/MBS_Anonymised-Adjusted_Responses-Disclosive_Contributor_List_Applied-20240813T1530Z/",
+    "mbs_file_name" : "snapshot_009_202303_1.json",
     "manual_constructions_path": "data/manual_constructions.csv",
     "period": "period",
     "reference": "reference",
@@ -12,6 +12,8 @@
     "design_weight": "design_weight",
     "calibration_factor": "calibration_factor",
     "region": "region",
+    "form_id": "formid",
+    "question_no": "questioncode",
     "responses_keep_cols" : {
                 "reference" : "str",
                 "period": "date",
@@ -33,7 +35,7 @@
     "previous_period" : 202312,
     "platform" : "network",
     "bucket" : "",
-    "sample_path": "",
+    "sample_path": "C:/Users/dayj1/Office for National Statistics/Legacy Uplift - MBS/MBS_Anonymised-Adjusted_Responses-Disclosive_Contributor_List_Applied-20240813T1530Z/finalsel009_202303",
     "sample_column_names": [
         "reference","checkletter","frosic2003","rusic2003","frosic2007",
         "rusic2007","froempees","employees","froempment","employment","froFTEempt",

@@ -28,15 +28,19 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
     pre_impute_dataframe = create_imputation_class(
         dataframe, "cellnumber", "imputation_class"
     )
+    question_no = config["question_no"]
 
     # Two options for loading MC:
-    manual_constructions = pd.read_csv(config["manual_constructions_path"])
-    if manual_constructions.empty:
+    try:
+        manual_constructions = pd.read_csv(config["manual_constructions_path"])
+        if manual_constructions.empty:
+            manual_constructions = None
+        # We could implement above, or the other method of loading mc:
+        load_manual_constructions(df=pre_impute_dataframe, **config)
+    except FileNotFoundError:
         manual_constructions = None
-    # We could implement above, or the other method of loading mc:
-    load_manual_constructions(df=pre_impute_dataframe, **config)
 
-    post_impute = pre_impute_dataframe.groupby("question_no").apply(
+    post_impute = pre_impute_dataframe.groupby(question_no).apply(
         lambda df: ratio_of_means(
             df=df,
             manual_constructions=manual_constructions,
@@ -55,7 +59,7 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
         "period",
         "reference",
         "adjusted_value",
-        "question_no",
+        question_no,
         "form_type_spp",
     )
 
