@@ -19,11 +19,9 @@ jobs:
     - name: build runtime cml_${{matrix.cml_version}}
       run: docker build -t cml:${{matrix.cml_version}} -f 'pbj-workbench-python${{matrix.cml_version}}-standard.Dockerfile' .          
     - name: create container
-      run:  docker run -id --name container_${{matrix.cml_version}} cml:${{matrix.cml_version}}
+      run:  docker run -id --name container_${{matrix.cml_version}} -v"$(pwd)"://home/cdsw cml:${{matrix.cml_version}}
     - name: checkout to repository
       uses: actions/checkout@v3
-    - name: copy repo to container
-      run:  docker cp $(pwd)/. container_${{matrix.cml_version}}:/
     - name: build in dev mode
       run: docker exec container_${{matrix.cml_version}}  pip install ."[dev]"
     - name: check env 
