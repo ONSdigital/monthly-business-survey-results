@@ -307,6 +307,8 @@ def run_live_or_frozen(
     Original dataframe.
 
     """
+    
+    df = df.copy()
 
     if state not in ["frozen", "live"]:
         raise ValueError(
@@ -316,8 +318,9 @@ def run_live_or_frozen(
         )
 
     if state == "frozen":
-
-        df.loc[df[error_marker].isin(error_values), target] = np.nan
+        df['frozen_error'] = df.apply(lambda x: x[target] if x[error_marker] in (error_values) else '', axis=1)
+        df = df.fillna('')
+        
 
     return df
 
