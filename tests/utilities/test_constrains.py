@@ -33,8 +33,8 @@ def test_replace_values_index_base(filepath):
     replace_values_index_based(df_in, "target", 90, ">=", 40)
 
     # Enforce dtypes, otherwise null==null fails
-    df_in['constrain_marker'] = df_in['constrain_marker'].astype(str)
-    df_expected['constrain_marker'] = df_expected['constrain_marker'].astype(str)   
+    df_in["constrain_marker"] = df_in["constrain_marker"].astype(str)
+    df_expected["constrain_marker"] = df_expected["constrain_marker"].astype(str)
 
     assert_frame_equal(df_in, df_expected)
 

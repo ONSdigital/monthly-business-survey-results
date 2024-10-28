@@ -67,7 +67,9 @@ def clean_and_merge(
 
     responses = filter_responses(responses, reference, period, "lastupdateddate")
     responses = responses[list(responses_keep_cols)].set_index([reference, period])
-    contributors = contributors[list(contributors_keep_cols)].set_index([reference, period])
+    contributors = contributors[list(contributors_keep_cols)].set_index(
+        [reference, period]
+    )
 
     validate_indices(responses, contributors)
     return responses.merge(contributors, on=[reference, period])
@@ -439,8 +441,8 @@ def correct_values(
     # Update value only if columns exist
     if set(check_columns).issubset(df.columns):
 
-        df_temp.loc[
-            df[condition_column].isin(condition_values), columns_to_correct
-        ] = replace_with
+        df_temp.loc[df[condition_column].isin(condition_values), columns_to_correct] = (
+            replace_with
+        )
 
     return df_temp
