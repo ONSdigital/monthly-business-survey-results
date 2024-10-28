@@ -66,8 +66,8 @@ def clean_and_merge(
     responses = pd.DataFrame(snapshot["responses"])
 
     responses = filter_responses(responses, reference, period, "lastupdateddate")
-    responses = responses[responses_keep_cols].set_index([reference, period])
-    contributors = contributors[contributors_keep_cols].set_index([reference, period])
+    responses = responses[list(responses_keep_cols)].set_index([reference, period])
+    contributors = contributors[list(contributors_keep_cols)].set_index([reference, period])
 
     validate_indices(responses, contributors)
     return responses.merge(contributors, on=[reference, period])
