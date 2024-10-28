@@ -6,7 +6,14 @@ on:
     branches: [ main ]
 
 jobs:
-  CML:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v3
+    - uses: pre-commit/action@v3.0.1
+
+  testing-cml:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -28,9 +35,3 @@ jobs:
       run: docker exec container_${{matrix.cml_version}} pip list
     - name: test
       run: docker exec container_${{matrix.cml_version}} pytest
-    - name: pre commit hooks
-      run: docker exec container_${{matrix.cml_version}} pre-commit run --all-files
-      
-
-             
-       
