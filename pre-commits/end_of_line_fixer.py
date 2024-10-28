@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Pre commit hook to ensure single blank line at end of python file."""
 import argparse
 import os

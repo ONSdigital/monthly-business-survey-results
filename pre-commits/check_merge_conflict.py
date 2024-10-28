@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Pre commit hook to check for merge conflict flags in file."""
 import argparse
 import os.path

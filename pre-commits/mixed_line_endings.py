@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Pre commit hook to ensure all EOL characters are the same."""
 import argparse
 import collections
