@@ -121,8 +121,10 @@ def enforce_datatypes(
 
     for key in keep_columns:
         type_from_dict = keep_columns[key]
-        if type_from_dict in ["str", "float", "int", "bool", "category", "int64"]:
+        if type_from_dict in ["str", "float", "bool", "category"]:
             df_convert[key] = df_convert[key].astype(type_from_dict)
+        elif type_from_dict == "int":
+            df_convert[key] = df_convert[key].astype("int64")
         elif type_from_dict == "date":
             df_convert[key] = convert_column_to_datetime(df_convert[key])
     # Re-set the index back to reference and period
