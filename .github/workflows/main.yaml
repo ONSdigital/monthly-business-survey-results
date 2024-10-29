@@ -1,53 +1,11 @@
-name: Build and run tests
+name: cml_runtimes
 
-# Controls when the action will run.
 on:
-  # Triggers the workflow on push events for the main branch
-  push:
-    branches: [ main ]
-
   # Triggers the workflow on pull requests to main branch
   pull_request:
     branches: [ main ]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
 jobs:
-  build:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Python 3.6.8
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.6.8
-
-      - name: Check package build
-        run: |
-          python -m pip install --upgrade pip
-
-  test:
-    runs-on: ubuntu-20.04
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE
-      - uses: actions/checkout@v3
-
-      - uses: actions/setup-python@v3
-        with:
-          python-version: 3.6.8
-          cache: 'pip'
-
-      - name: Install Python dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install .[dev]
-
-      - name: Run pytest
-        run: |
-          pytest -v
-
   commit-hooks:
     runs-on: ubuntu-20.04
     steps:
@@ -55,7 +13,7 @@ jobs:
 
       - uses: actions/setup-python@v3
         with:
-          python-version: 3.6.8
+          python-version: 3.10.13
           cache: 'pip'
 
       - name: Install Python dependencies
@@ -66,3 +24,26 @@ jobs:
       - name: Check commit hooks
         run: |
           pre-commit run --all-files
+
+  testing-cml:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cml_version: ["3.8", "3.9", "3.10","3.11"]
+    steps:
+    - name: checkout ml-runtimes  #https://github.com/cloudera/ml-runtimes
+      uses: actions/checkout@master
+      with:
+        repository: cloudera/ml-runtimes
+    - name: build runtime cml_${{matrix.cml_version}}
+      run: docker build -t cml:${{matrix.cml_version}} -f 'pbj-workbench-python${{matrix.cml_version}}-standard.Dockerfile' .
+    - name: checkout to repository
+      uses: actions/checkout@v3
+    - name: create container
+      run:  docker run -id --name container_${{matrix.cml_version}} -v"$(pwd)"://home/cdsw cml:${{matrix.cml_version}}
+    - name: build in dev mode
+      run: docker exec container_${{matrix.cml_version}}  pip install ."[dev]"
+    - name: check env
+      run: docker exec container_${{matrix.cml_version}} pip list
+    - name: test
+      run: docker exec container_${{matrix.cml_version}} pytest
