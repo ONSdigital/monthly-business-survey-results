@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Pre commit hook to ensure large files aren't added to repo."""
 import argparse
 import json
