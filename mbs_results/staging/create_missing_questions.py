@@ -41,13 +41,14 @@ def create_missing_questions(
 
     """
 
-    actual_responses_df = responses_df.filter([reference, period, formid, question_no])
+    actual_responses_df = responses_df.filter([reference, period, question_no])
 
     expected_responses = (
         contributors_df.filter([reference, period, formid])  # Select needed fields
         .assign(
             **{question_no: contributors_df[formid].map(mapper)}
         )  # Create new column with list of questions as value
+        .drop(columns=formid)
         .loc[lambda df: df[question_no].str.len() > 0]
         .explode(question_no)  # Convert questions to rows
     )
@@ -61,4 +62,4 @@ def create_missing_questions(
 
     concatenated_responses = pd.concat([responses_df, anti_join_df], ignore_index=True)
 
-    return concatenated_responses
+    return concatenated_responses  # .drop(columns = "formid")
