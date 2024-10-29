@@ -9,6 +9,16 @@ from mbs_results.staging.dfs_from_spp import dfs_from_spp
 from mbs_results.utilities.utils import read_colon_separated_file
 
 
+def create_form_type_spp_column(
+    contributors: pd.DataFrame, config: dict
+) -> pd.DataFrame:
+    idbr_to_spp_mapping = config["idbr_to_spp"]
+    contributors["form_type_spp"] = contributors[config["form_id"]].map(
+        idbr_to_spp_mapping
+    )
+    return contributors
+
+
 def create_mapper() -> dict:
     """
     placeholder function to create question and form mapping dict
@@ -54,30 +64,24 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         config["bucket"],
     )
     # TODO filter responses and contributors df to columns in config
-
     contributors = contributors[config["contributors_keep_cols"].keys()]
     contributors = enforce_datatypes(
         contributors, keep_columns=config["contributors_keep_cols"], **config
-    )  # BROKEN
+    )
 
     responses = responses[config["responses_keep_cols"].keys()]
     responses = enforce_datatypes(
         responses, keep_columns=config["responses_keep_cols"], **config
-    )  # BROKEN
+    )
 
     finalsel = read_colon_separated_file(
         config["sample_path"], config["sample_column_names"], period=config[period]
     )
-    # Temp convert d types while enforce datatypes is broken
+
     finalsel = finalsel[config["finalsel_keep_cols"].keys()]
     finalsel = enforce_datatypes(
         finalsel, keep_columns=config["finalsel_keep_cols"], **config
     )
-    print("responses:", responses.columns)
-    print(finalsel.columns)
-    # finalsel[period] = convert_column_to_datetime(finalsel[period])
-    # finalsel[reference] = finalsel[reference].astype("Int64")
-
     # Filter contributors files here to temp fix this overlap
 
     contributors = pd.merge(
@@ -87,9 +91,9 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         suffixes=["_spp", "_finalsel"],
     )
     warnings.warn("Duplicate columns are created in this join, need to fix this")
-    print("contributors:", contributors.columns)
     # TODO map on SPP form type
     #
+    contributors = create_form_type_spp_column(contributors, config)
     mapper = create_mapper()  # Needs to be defined
 
     responses_with_missing = create_missing_questions(
@@ -101,14 +105,11 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         question_no=config["question_no"],
         mapper=mapper,
     )
-    print("responses:", responses_with_missing.columns)
-    print("contributors:", contributors.columns)
 
     df = responses_with_missing.merge(
         contributors, on=[reference, period], suffixes=["_res", "_con"]
     )
     print()
-    # df = convert_ni_uk(df, "cellnumber")
     # Add run live or frozen
     # df = run_live_or_frozen(df, ...)
     print("Staging Completed")
@@ -122,12 +123,11 @@ if __name__ == "__main__":
 
     config = load_config()
     df = stage_dataframe(config)
-    print(df.dtypes)
+    # print(df[["formtype","form_type_spp"]])
     impute(df, config)
-    print(df)
-    filter_col_spp = [col for col in df if col.endswith("_res")]
-    filter_col_finalsel = [col for col in df if col.endswith("_con")]
-
-    for i in filter_col_spp:
-        col_start = i.split("_")[0]
-        print(col_start, df[i].equals(df[col_start + "_con"]))
+    # filter_col_spp = [col for col in df if col.endswith("_res")]
+    # filter_col_finalsel = [col for col in df if col.endswith("_con")]
+    # print(df.head())
+    # for i in filter_col_spp:
+    #     col_start = i.split("_")[0]
+    #     print(col_start, df[i].equals(df[col_start + "_con"]))
