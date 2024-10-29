@@ -12,21 +12,22 @@
     "design_weight": "design_weight",
     "calibration_factor": "calibration_factor",
     "region": "region",
-    "form_id": "formid",
+    "form_id": "formtype",
     "question_no": "questioncode",
     "responses_keep_cols" : {
-                "reference" : "int64",
+                "reference" : "int",
                 "period": "date",
                 "response" : "str",
-                "questioncode":"int"},
+                "questioncode":"int",
+                "adjustedresponse" : "float"},
     "contributors_keep_cols" : {
-                "reference" : "int64",
+                "reference" : "int",
                 "period" : "date",
                 "frozensic" : "str",
                 "frozenemployees" : "int",
                 "frozenturnover" : "float",
                 "cellnumber" : "int",
-                "formid":"str"},
+                "formtype":"str"},
     "temporarily_remove_cols": [],
     "non_sampled_strata": [
         "5141", "5142", "5143",
@@ -49,7 +50,7 @@
         "cell_no","formtype","cso_tel","currency"
     ],
     "finalsel_keep_cols" : {
-                "reference" : "int64",
+                "reference" : "int",
                 "period": "date",
                 "frosic2007": "str",
                 "froempment" : "int",
@@ -69,6 +70,20 @@
         "reference", "region", "frotover", "cell_no", "period", "frosic2007"
     ],
     "calibration_group_map": "",
-    "idbr_to_spp": {"0111":10,
-                    "0112":11}
+    "idbr_to_spp": {"0201":9,
+                    "0202":9,
+                    "0203":10,
+                    "0204":10,
+                    "0205":11,
+                    "0216":11,
+                    "0106":12,
+                    "0111":12,
+                    "0117":13,
+                    "0167":13,
+                    "0123":14,
+                    "0173":14,
+                    "0817":13,
+                    "0867":13,         
+                    "0823":13,
+                    "0873":13}
 }
