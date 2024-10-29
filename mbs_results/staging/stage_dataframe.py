@@ -123,7 +123,7 @@ if __name__ == "__main__":
     config = load_config()
     df = stage_dataframe(config)
     print(df.dtypes)
-    impute(df,config)
+    impute(df, config)
     print(df)
     filter_col_spp = [col for col in df if col.endswith("_res")]
     filter_col_finalsel = [col for col in df if col.endswith("_con")]

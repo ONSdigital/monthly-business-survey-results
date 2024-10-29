@@ -28,7 +28,7 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
         imputation
     """
     warnings.warn("Check what will happen if we try and apply RoM to q146 - Comments")
-    # If this is an issue, we could filter to remove 146 and 
+    # If this is an issue, we could filter to remove 146 and
     # add back after, or escape from Rom if q==146...
     pre_impute_dataframe = create_imputation_class(
         dataframe, "cellnumber", "imputation_class"
