@@ -21,8 +21,9 @@ def estimate(df: pd.DataFrame, config):
     _type_
         _description_
     """
-    warnings.warn("Apply estimation loads data using universe files")
-    # Temp fix to change c group mapping path to dataframe to feed into apply estimation
+    warnings.warn(
+        "temp fix is applied to convert calibration group map into" + "df in config"
+    )
     config["calibration_group_map"] = pd.read_csv(config["calibration_group_map"])
     estimate_df = apply_estimation(**config)
     estimate_df = estimate_df.drop(columns=["cell_no", "frotover"])

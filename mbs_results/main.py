@@ -24,11 +24,11 @@ if __name__ == "__main__":
     validate_imputation(imputation_output)
 
     # Estimation Wrapper
-    estimation_output = estimate()
+    estimation_output = estimate(imputation_output, config)
     validate_estimation(estimation_output)
 
     # Outlier Wrapper
-    outlier_output = detect_outlier()
+    outlier_output = detect_outlier(estimation_output, config)
     validate_outlier_detection(outlier_output)
 
     produce_outputs(outlier_output, "output_path/")

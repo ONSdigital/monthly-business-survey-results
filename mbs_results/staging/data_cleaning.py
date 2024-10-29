@@ -74,13 +74,7 @@ def clean_and_merge(
 
 
 def enforce_datatypes(
-    df,
-    reference,
-    period,
-    responses_keep_cols,
-    contributors_keep_cols,
-    temporarily_remove_cols,
-    **config
+    df: pd.DataFrame, keep_columns: dict, temporarily_remove_cols: list, **config
 ):
     """
     function to change datatypes of columns based on config file
@@ -90,10 +84,8 @@ def enforce_datatypes(
     df : pd.DataFrame
         dataframe with combined responses and contributors columns
         index is expected to be 'period' and 'reference'
-    responses_keep_cols : dict
-        dictionary containing response columns to keep and datatypes
-    contributors_keep_cols : dict
-        dictionary containing contributors columns to keep and datatypes
+    keep_columns : dict
+        dictionary containing columns to keep and datatypes
     temporarily_remove_cols : list
         list containing column names to drop.
         Implemented to remove columns while not removing datatypes
@@ -104,8 +96,6 @@ def enforce_datatypes(
         dataframe with correctly formatted column datatypes.
     """
     # Resetting to easily change datatypes
-    response_dict = responses_keep_cols
-    contributors_dict = contributors_keep_cols
 
     df_convert = df.copy()
     df_convert = df_convert.reset_index()
@@ -114,10 +104,7 @@ def enforce_datatypes(
 
     # Joining Dicts will overwrite first dict if values are different.
     # check for this is carried out in 'validate_config_repeated_datatypes'
-    joint_dictionary = {
-        **response_dict,
-        **contributors_dict,
-    }
+    keep_columns
 
     try:
         temp_remove_cols = temporarily_remove_cols
@@ -130,16 +117,15 @@ def enforce_datatypes(
     for key1 in temp_remove_cols:
         # Deletes key and value for any column in temp_remove_cols
         # None handles cases when key is not included in joint_dict
-        joint_dictionary.pop(key1, None)
+        keep_columns.pop(key1, None)
 
-    for key in joint_dictionary:
-        type_from_dict = joint_dictionary[key]
-        if type_from_dict in ["str", "float", "int", "bool", "category"]:
+    for key in keep_columns:
+        type_from_dict = keep_columns[key]
+        if type_from_dict in ["str", "float", "int", "bool", "category", "int64"]:
             df_convert[key] = df_convert[key].astype(type_from_dict)
         elif type_from_dict == "date":
             df_convert[key] = convert_column_to_datetime(df_convert[key])
     # Re-set the index back to reference and period
-    df_convert = df_convert.set_index([reference, period])
     return df_convert
 
 
@@ -439,8 +425,8 @@ def correct_values(
     # Update value only if columns exist
     if set(check_columns).issubset(df.columns):
 
-        df_temp.loc[
-            df[condition_column].isin(condition_values), columns_to_correct
-        ] = replace_with
+        df_temp.loc[df[condition_column].isin(condition_values), columns_to_correct] = (
+            replace_with
+        )
 
     return df_temp

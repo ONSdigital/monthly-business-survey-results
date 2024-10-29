@@ -65,5 +65,4 @@ def detect_outlier(df, config):
         "outlier_weight",
         "new_target_variable",
     )
-    # TODO Add constrains post winsorised
     return post_win

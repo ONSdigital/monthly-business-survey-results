@@ -1,5 +1,5 @@
 {
-    "folder_path" : "C:/Users/dayj1/Office for National Statistics/Legacy Uplift - MBS/MBS_Anonymised-Adjusted_Responses-Disclosive_Contributor_List_Applied-20240813T1530Z/",
+    "folder_path" : "",
     "mbs_file_name" : "snapshot_009_202303_1.json",
     "manual_constructions_path": "data/manual_constructions.csv",
     "period": "period",
@@ -15,16 +15,18 @@
     "form_id": "formid",
     "question_no": "questioncode",
     "responses_keep_cols" : {
-                "reference" : "str",
+                "reference" : "int64",
                 "period": "date",
-                "response" : "str"},
+                "response" : "str",
+                "questioncode":"int"},
     "contributors_keep_cols" : {
-                "reference" : "str",
+                "reference" : "int64",
                 "period" : "date",
                 "frozensic" : "str",
                 "frozenemployees" : "int",
                 "frozenturnover" : "float",
-                "cellnumber" : "int"},
+                "cellnumber" : "int",
+                "formid":"str"},
     "temporarily_remove_cols": [],
     "non_sampled_strata": [
         "5141", "5142", "5143",
@@ -35,7 +37,7 @@
     "previous_period" : 202312,
     "platform" : "network",
     "bucket" : "",
-    "sample_path": "C:/Users/dayj1/Office for National Statistics/Legacy Uplift - MBS/MBS_Anonymised-Adjusted_Responses-Disclosive_Contributor_List_Applied-20240813T1530Z/finalsel009_202303",
+    "sample_path": "",
     "sample_column_names": [
         "reference","checkletter","frosic2003","rusic2003","frosic2007",
         "rusic2007","froempees","employees","froempment","employment","froFTEempt",
@@ -46,6 +48,14 @@
         "tradstyle2","tradstyle3","contact","telephone","fax","seltype","inclexcl",
         "cell_no","formtype","cso_tel","currency"
     ],
+    "finalsel_keep_cols" : {
+                "reference" : "int64",
+                "period": "date",
+                "frosic2007": "str",
+                "froempment" : "int",
+                "frotover": "float",
+                "cell_no": "int"}, 
+    "sample_keep_columns": ["reference", "period"],
     "population_path": "",
     "population_column_names": [
         "reference", "checkletter", "inqcode", "entref", "wowentref", "frosic2003",
@@ -58,6 +68,7 @@
     "population_keep_columns": [
         "reference", "region", "frotover", "cell_no", "period", "frosic2007"
     ],
-    "sample_keep_columns": ["reference", "period"],
-    "calibration_group_map": ""
+    "calibration_group_map": "",
+    "idbr_to_spp": {"0111":10,
+                    "0112":11}
 }

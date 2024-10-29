@@ -1,3 +1,5 @@
+import warnings
+
 import pandas as pd
 
 from mbs_results.imputation.ratio_of_means import ratio_of_means
@@ -25,6 +27,9 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
         post imputation dataframe, values have been derived and constrained following
         imputation
     """
+    warnings.warn("Check what will happen if we try and apply RoM to q146 - Comments")
+    # If this is an issue, we could filter to remove 146 and 
+    # add back after, or escape from Rom if q==146...
     pre_impute_dataframe = create_imputation_class(
         dataframe, "cellnumber", "imputation_class"
     )
@@ -39,13 +44,12 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
         load_manual_constructions(df=pre_impute_dataframe, **config)
     except FileNotFoundError:
         manual_constructions = None
-
     post_impute = pre_impute_dataframe.groupby(question_no).apply(
         lambda df: ratio_of_means(
             df=df,
             manual_constructions=manual_constructions,
             reference="reference",
-            target="adjusted_value",
+            target="adjustedresponse",
             period="period",
             strata="imputation_class",
             auxiliary="frotover",
