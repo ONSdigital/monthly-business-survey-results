@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 """Pre commit hook to remove any trailing whitespace."""
 import argparse
 import os
