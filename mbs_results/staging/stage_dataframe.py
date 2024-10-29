@@ -28,8 +28,17 @@ def create_mapper() -> dict:
     dict
         dictionary containing question numbers and form id.
     """
-    mapper = {9: [40, 49], 10: [110]}
-    warnings.warn("create_mapper is a placeholder function and needs to be defined")
+    mapper = {
+        9: [40, 49],
+        10: [110],
+        11: [40, 49, 90],
+        12: [40],
+        13: [46, 47],
+        14: [42, 43],
+        15: [40],
+        16: [40],
+    }
+    warnings.warn("create_mapper needs to be fully defined")
     return mapper
 
 
