@@ -55,7 +55,7 @@
                 "frosic2007": "str",
                 "froempment" : "int",
                 "frotover": "float",
-                "cell_no": "int"}, 
+                "cell_no": "int"},
     "sample_keep_columns": ["reference", "period"],
     "population_path": "",
     "population_column_names": [
@@ -83,7 +83,7 @@
                     "0123":14,
                     "0173":14,
                     "0817":13,
-                    "0867":13,         
+                    "0867":13,
                     "0823":13,
                     "0873":13}
 }
