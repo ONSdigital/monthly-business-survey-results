@@ -1,6 +1,5 @@
 from typing import List
 
-import numpy as np
 import pandas as pd
 
 from mbs_results.utilities.utils import convert_column_to_datetime
@@ -310,6 +309,8 @@ def run_live_or_frozen(
 
     """
 
+    df = df.copy()
+
     if state not in ["frozen", "live"]:
         raise ValueError(
             """{} is not an accepted state status, use either frozen or live """.format(
@@ -318,8 +319,10 @@ def run_live_or_frozen(
         )
 
     if state == "frozen":
-
-        df.loc[df[error_marker].isin(error_values), target] = np.nan
+        df["frozen_error"] = df.apply(
+            lambda x: x[target] if x[error_marker] in (error_values) else "", axis=1
+        )
+        df = df.fillna("")
 
     return df
 

@@ -104,13 +104,16 @@ def test_run_live_or_frozen(filepath):
 
     df = pd.read_csv(filepath / "test_run_live_or_frozen.csv")
 
-    df_in = df.drop(columns=["frozen"])
+    df_in = df.drop(columns=["frozen", "frozen_error"])
 
     live_ouput = run_live_or_frozen(df_in, "target", "error", "live")
+
     frozen_output = run_live_or_frozen(df_in, "target", "error", "frozen")
 
-    expected_output_frozen = df_in.copy()
-    expected_output_frozen["target"] = df["frozen"]
+    expected_output_frozen = df.copy()
+
+    expected_output_frozen.drop(columns=["frozen"], inplace=True)
+    expected_output_frozen = expected_output_frozen.fillna("")
 
     assert_frame_equal(frozen_output, expected_output_frozen)
     assert_frame_equal(live_ouput, df_in)
