@@ -22,11 +22,10 @@ def correct_types(df):
     df_expected_out = df.copy()
     df_expected_out["period"] = pd.to_datetime(df["period"], format="%Y%m")
     df_expected_out["strata"] = df_expected_out["strata"].astype("str")
-    df_expected_out["reference"] = df_expected_out["reference"].astype("int")
+    df_expected_out["reference"] = df_expected_out["reference"].astype("int64")
     df_expected_out["target_variable"] = df_expected_out["target_variable"].astype(
         "float"
     )
-    df_expected_out = df_expected_out.set_index(["reference", "period"])
     return df_expected_out
 
 
@@ -38,12 +37,21 @@ def test_enforce_datatypes(filepath):
     test_setup_config = {
         "period": "period",
         "reference": "reference",
-        "responses_keep_cols": {"period": "date", "strata": "str"},
-        "contributors_keep_cols": {"reference": "int", "target_variable": "float"},
+        "responses_keep_cols": {
+            "period": "date",
+            "strata": "str",
+            "reference": "int",
+            "target_variable": "float",
+        },
         "temporarily_remove_cols": [],
     }
-    actual_output = enforce_datatypes(df_subset, **test_setup_config)
-
+    actual_output = enforce_datatypes(
+        df_subset,
+        keep_columns=test_setup_config["responses_keep_cols"],
+        **test_setup_config
+    )
+    actual_output = actual_output.reindex(sorted(actual_output.columns), axis=1)
+    expected_output = expected_output.reindex(sorted(expected_output.columns), axis=1)
     assert_frame_equal(actual_output, expected_output)
 
 
