@@ -115,7 +115,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         mapper=mapper,
     )
 
-    df = responses_with_missing.merge(
+    df = responses_with_missing.drop(columns=config["form_id"]).merge(
         contributors, on=[reference, period], suffixes=["_res", "_con"]
     )
     print()
@@ -134,9 +134,9 @@ if __name__ == "__main__":
     df = stage_dataframe(config)
     # print(df[["formtype","form_type_spp"]])
     impute(df, config)
-    # filter_col_spp = [col for col in df if col.endswith("_res")]
-    # filter_col_finalsel = [col for col in df if col.endswith("_con")]
-    # print(df.head())
-    # for i in filter_col_spp:
-    #     col_start = i.split("_")[0]
-    #     print(col_start, df[i].equals(df[col_start + "_con"]))
+    filter_col_spp = [col for col in df if col.endswith("_res")]
+    filter_col_finalsel = [col for col in df if col.endswith("_con")]
+    print(df.head())
+    for i in filter_col_spp:
+        col_start = i.split("_")[0]
+        print(col_start, df[i].equals(df[col_start + "_con"]))
