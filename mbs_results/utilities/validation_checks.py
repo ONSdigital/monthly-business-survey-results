@@ -1,4 +1,5 @@
 import warnings
+from importlib import metadata
 
 import pandas as pd
 
@@ -229,17 +230,32 @@ def validate_manual_constructions(df, manual_constructions):
         )
 
 
-def validate_staging(df: pd.DataFrame):
+def validate_staging(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post staging")
 
 
-def validate_imputation(df: pd.DataFrame):
+def validate_imputation(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post imputation")
+    output_path = config["output_path"]
+    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
+    snapshot_name = config["mbs_file_name"].split(".")[0]
+    imputation_filename = f"imputation_output_v{file_version_mbs}_{snapshot_name}.csv"
+    df.to_csv(output_path + imputation_filename)
 
 
-def validate_estimation(df: pd.DataFrame):
+def validate_estimation(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post estimation")
+    output_path = config["output_path"]
+    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
+    snapshot_name = config["mbs_file_name"].split(".")[0]
+    estimate_filename = f"estimation_output_v{file_version_mbs}_{snapshot_name}.csv"
+    df.to_csv(output_path + estimate_filename)
 
 
-def validate_outlier_detection(df: pd.DataFrame):
+def validate_outlier_detection(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post outliering")
+    output_path = config["output_path"]
+    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
+    snapshot_name = config["mbs_file_name"].split(".")[0]
+    outlier_filename = f"outlier_output_v{file_version_mbs}_{snapshot_name}.csv"
+    df.to_csv(output_path + outlier_filename)

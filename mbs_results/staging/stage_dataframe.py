@@ -1,9 +1,10 @@
+import glob
 import warnings
 
 import pandas as pd
 
 from mbs_results.staging.create_missing_questions import create_missing_questions
-from mbs_results.staging.data_cleaning import enforce_datatypes  # run_live_or_frozen
+from mbs_results.staging.data_cleaning import enforce_datatypes, run_live_or_frozen
 from mbs_results.staging.dfs_from_spp import dfs_from_spp
 from mbs_results.utilities.utils import read_colon_separated_file
 
@@ -41,6 +42,17 @@ def create_mapper() -> dict:
     return mapper
 
 
+def read_and_combine_colon_sep_files(folder_path, column_names, config):
+    df = pd.concat(
+        [
+            read_colon_separated_file(f, column_names, period=config["period"])
+            for f in glob.glob(folder_path)
+        ],
+        ignore_index=True,
+    )
+    return df
+
+
 def stage_dataframe(config: dict) -> pd.DataFrame:
     """
     wrapper function to stage and pre process the dataframe, ready to be passed onto the
@@ -55,11 +67,8 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     -------
     _type_
         Combined dataframe containing response and contributor data. Missing questions
-        have been created, data types enforced***. NI cell number have been converted
+        have been created, data types enforced. NI cell number have been converted
         to uk.
-
-        *** current functionality broken but with refactoring this will be implemented
-        Mapping function needs to be defined but is used in other functions
     """
 
     print("Staging started")
@@ -71,7 +80,8 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         config["platform"],
         config["bucket"],
     )
-    # TODO filter responses and contributors df to columns in config
+
+    # Filter columns and set data types
     contributors = contributors[config["contributors_keep_cols"].keys()]
     contributors = enforce_datatypes(
         contributors, keep_columns=config["contributors_keep_cols"], **config
@@ -82,8 +92,8 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         responses, keep_columns=config["responses_keep_cols"], **config
     )
 
-    finalsel = read_colon_separated_file(
-        config["sample_path"], config["sample_column_names"], period=config[period]
+    finalsel = read_and_combine_colon_sep_files(
+        config["sample_path"], config["sample_column_names"], config
     )
 
     finalsel = finalsel[config["finalsel_keep_cols"].keys()]
@@ -97,9 +107,8 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         right=finalsel,
         on=[period, reference],
         suffixes=["_spp", "_finalsel"],
+        how="left",
     )
-    warnings.warn("Duplicate columns are created in this join, need to fix this")
-    # TODO map on SPP form type
     #
     contributors = create_form_type_spp_column(contributors, config)
     mapper = create_mapper()  # Needs to be defined
@@ -115,27 +124,16 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     )
 
     df = responses_with_missing.drop(columns=config["form_id"]).merge(
-        contributors, on=[reference, period], suffixes=["_res", "_con"]
+        contributors, on=[reference, period], suffixes=["_res", "_con"], how="left"
     )
-    print()
-    # Add run live or frozen
-    # df = run_live_or_frozen(df, ...)
+    warnings.warn("add live or frozen after fixing error marker column in config")
+    df = run_live_or_frozen(
+        df,
+        config["target"],
+        error_marker=config["errormarker"],
+        state=config["state"],
+        error_values=[201],
+    )
     print("Staging Completed")
 
     return df
-
-
-if __name__ == "__main__":
-    from mbs_results.imputation.impute import impute
-    from mbs_results.utilities.inputs import load_config
-
-    config = load_config()
-    df = stage_dataframe(config)
-    # print(df[["formtype","form_type_spp"]])
-    impute(df, config)
-    filter_col_spp = [col for col in df if col.endswith("_res")]
-    filter_col_finalsel = [col for col in df if col.endswith("_con")]
-    print(df.head())
-    for i in filter_col_spp:
-        col_start = i.split("_")[0]
-        print(col_start, df[i].equals(df[col_start + "_con"]))

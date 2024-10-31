@@ -12,23 +12,28 @@ from mbs_results.utilities.validation_checks import (
     validate_staging,
 )
 
-if __name__ == "__main__":
+
+def run_mbs_main():
     config = load_config()
     validate_config(config)
 
     staged_data = stage_dataframe(config)
-    validate_staging(staged_data)
+    validate_staging(staged_data, config)
 
     # imputation: RoM wrapper -> Rename wrapper to apply_imputation
     imputation_output = impute(staged_data, config)
-    validate_imputation(imputation_output)
+    validate_imputation(imputation_output, config)
 
     # Estimation Wrapper
     estimation_output = estimate(imputation_output, config)
-    validate_estimation(estimation_output)
+    validate_estimation(estimation_output, config)
 
     # Outlier Wrapper
     outlier_output = detect_outlier(estimation_output, config)
-    validate_outlier_detection(outlier_output)
+    validate_outlier_detection(outlier_output, config)
 
     produce_outputs(outlier_output, "output_path/")
+
+
+if __name__ == "__main__":
+    run_mbs_main()

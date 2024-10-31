@@ -62,7 +62,7 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
         post_impute,
         "period",
         "reference",
-        "adjusted_value",
+        "adjustedresponse",
         question_no,
         "form_type_spp",
     )

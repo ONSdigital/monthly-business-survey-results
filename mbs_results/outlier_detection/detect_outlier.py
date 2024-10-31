@@ -8,6 +8,8 @@ def join_l_values(df, l_values_path, classification_values_path):
     """Read l values, classifications and drop duplicates and period"""
 
     l_values = pd.read_csv(l_values_path)
+    l_values["classification"] = l_values["classification"].astype(str)
+    l_values["question_no"] = l_values["question_no"].astype("int64")
 
     # l_values = l_values.drop_duplicates(['question_no','classification'])
 
@@ -15,8 +17,13 @@ def join_l_values(df, l_values_path, classification_values_path):
 
     # Merge on classification SIC map (merge on SIC to get classsificaion on df -> )
     classification_values = pd.read_csv(classification_values_path)
+    classification_values["sic_5_digit"] = classification_values["sic_5_digit"].astype(
+        str
+    )
+    classification_values["classification"] = classification_values[
+        "classification"
+    ].astype(str)
 
-    print(list(classification_values))
     df = pd.merge(
         df,
         classification_values,
@@ -30,7 +37,7 @@ def join_l_values(df, l_values_path, classification_values_path):
         df,
         l_values,
         how="left",
-        left_on=["question_no", "classification"],
+        left_on=["questioncode", "classification"],
         right_on=["question_no", "classification"],
     )
 
@@ -51,17 +58,17 @@ def detect_outlier(df, config):
             "sampled",
             "design_weight",
             "calibration_factor",
-            "adjusted_value",
+            "adjustedresponse",
             "l_value",
         )
     )
     post_win = calculate_derived_outlier_weights(
-        df,
+        post_win,
         "period",
         "reference",
-        "adjusted_value",
-        "question_no",
-        "spp_form_id",
+        "adjustedresponse",
+        "questioncode",
+        "form_type_spp",
         "outlier_weight",
         "new_target_variable",
     )
