@@ -234,12 +234,12 @@ def validate_staging(df: pd.DataFrame):
 
 
 def validate_imputation(df: pd.DataFrame):
-    warnings.warn("A placeholder function for validating dataframe post staging")
+    warnings.warn("A placeholder function for validating dataframe post imputation")
 
 
 def validate_estimation(df: pd.DataFrame):
-    warnings.warn("A placeholder function for validating dataframe post staging")
+    warnings.warn("A placeholder function for validating dataframe post estimation")
 
 
 def validate_outlier_detection(df: pd.DataFrame):
-    warnings.warn("A placeholder function for validating dataframe post staging")
+    warnings.warn("A placeholder function for validating dataframe post outliering")
