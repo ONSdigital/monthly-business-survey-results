@@ -11,12 +11,18 @@ def create_missing_questions(
     mapper: dict,
 ) -> pd.DataFrame:
     """
-    Adds missing questions to responses data by comparing dataframes.
-    Reference, period, formid and question_no uniquely identify rows in responses data.
-    Reference, period and formid to uniquely identify rows in contributors data.
-    Uses mapper to create all expected questions which should be present in the
-    responses dataframe.
+    Adds missing questions to responses data by checking which question numbers
+    are expected in contributors_df.
 
+    A mapper dictionary needs to be passed which maps form id with expected
+    question numbers, the function will then check which question numbers
+    (per reference,period) exist in responses_df and will add empty rows
+    if it does not exist.
+
+    Note:
+
+    Reference, period and question_no uniquely identify rows in responses data.
+    Reference, period and formid to uniquely identify rows in contributors data.
 
     Parameters
     ----------
@@ -41,9 +47,9 @@ def create_missing_questions(
 
     """
 
-    actual_responses_df = responses_df.filter([reference, period, formid, question_no])
+    question_no_in_responses = responses_df.filter([reference, period, question_no])
 
-    expected_responses = (
+    expected_question_no = (
         contributors_df.filter([reference, period, formid])  # Select needed fields
         .assign(
             **{question_no: contributors_df[formid].map(mapper)}
@@ -52,13 +58,19 @@ def create_missing_questions(
         .explode(question_no)  # Convert questions to rows
     )
 
-    anti_join_df = expected_responses.merge(
-        actual_responses_df, how="left", indicator=True
-    )
-    anti_join_df = anti_join_df[anti_join_df["_merge"] == "left_only"].drop(
-        columns="_merge"
+    joined_question_no = expected_question_no.merge(
+        question_no_in_responses,
+        how="left",
+        on=[reference, period, question_no],
+        indicator=True,
     )
 
-    concatenated_responses = pd.concat([responses_df, anti_join_df], ignore_index=True)
+    missing_responses = joined_question_no[
+        joined_question_no["_merge"] == "left_only"
+    ].drop(columns="_merge")
+
+    concatenated_responses = pd.concat(
+        [responses_df, missing_responses], ignore_index=True
+    )
 
     return concatenated_responses
