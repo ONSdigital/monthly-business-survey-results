@@ -31,6 +31,8 @@ def estimate(df: pd.DataFrame, config):
     estimate_df = apply_estimation(**config)
     # estimate_df = correct_values()
     estimate_df = estimate_df.drop(columns=["cell_no", "frotover", "frosic2007"])
-    post_estimate = pd.merge(df, estimate_df, how="left", on=["period", "reference"])
+    post_estimate = pd.merge(
+        df, estimate_df, how="left", on=[config["period"], config["reference"]]
+    )
 
     return post_estimate
