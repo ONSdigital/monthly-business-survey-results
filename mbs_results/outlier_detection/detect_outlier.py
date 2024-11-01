@@ -4,7 +4,7 @@ from mbs_results.outlier_detection.winsorisation import winsorise
 from mbs_results.utilities.constrains import calculate_derived_outlier_weights
 
 
-def join_l_values(df, l_values_path, classification_values_path):
+def join_l_values(df, l_values_path, classification_values_path, config):
     """Read l values, classifications and drop duplicates and period"""
 
     l_values = pd.read_csv(l_values_path)
@@ -37,7 +37,7 @@ def join_l_values(df, l_values_path, classification_values_path):
         df,
         l_values,
         how="left",
-        left_on=["questioncode", "classification"],
+        left_on=[config["question_no"], "classification"],
         right_on=["question_no", "classification"],
     )
 
@@ -46,28 +46,28 @@ def join_l_values(df, l_values_path, classification_values_path):
 
 def detect_outlier(df, config):
     pre_win = join_l_values(
-        df, config["l_values_path"], config["classification_values_path"]
+        df, config["l_values_path"], config["classification_values_path"], config
     )
 
     post_win = pre_win.groupby("question_no").apply(
         lambda df: winsorise(
             df,
             "calibration_group",
-            "period",
-            "frotover",
-            "sampled",
+            config["period"],
+            config["auxiliary"],
+            config["sampled"],
             "design_weight",
             "calibration_factor",
-            "adjustedresponse",
+            config["target"],
             "l_value",
         )
     )
     post_win = calculate_derived_outlier_weights(
         post_win,
-        "period",
-        "reference",
-        "adjustedresponse",
-        "questioncode",
+        config["period"],
+        config["reference"],
+        config["target"],
+        config["question_no"],
         "form_type_spp",
         "outlier_weight",
         "new_target_variable",
