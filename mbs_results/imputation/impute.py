@@ -31,9 +31,8 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
     # If this is an issue, we could filter to remove 146 and
     # add back after, or escape from Rom if q==146...
     pre_impute_dataframe = create_imputation_class(
-        dataframe, "cellnumber", "imputation_class"
+        dataframe, config["cell_number"], "imputation_class"
     )
-    question_no = config["question_no"]
 
     # Two options for loading MC:
     try:
@@ -44,27 +43,27 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
         load_manual_constructions(df=pre_impute_dataframe, **config)
     except FileNotFoundError:
         manual_constructions = None
-    post_impute = pre_impute_dataframe.groupby(question_no).apply(
+    post_impute = pre_impute_dataframe.groupby(config["question_no"]).apply(
         lambda df: ratio_of_means(
             df=df,
             manual_constructions=manual_constructions,
-            reference="reference",
-            target="adjustedresponse",
-            period="period",
+            reference=config["reference"],
+            target=config["target"],
+            period=config["period"],
             strata="imputation_class",
-            auxiliary="frotover",
+            auxiliary=config["auxiliary"],
         )
     )
 
     post_impute["period"] = post_impute["period"].dt.strftime("%Y%m").astype("int")
     post_impute = post_impute.reset_index(drop=True)  # remove groupby leftovers
     post_constrain = constrain(
-        post_impute,
-        "period",
-        "reference",
-        "adjustedresponse",
-        question_no,
-        "form_type_spp",
+        df=post_impute,
+        period=config["period"],
+        reference=config["reference"],
+        target=config["target"],
+        question_no=config["question_no"],
+        spp_form_id="form_type_spp",
     )
 
     return post_constrain
