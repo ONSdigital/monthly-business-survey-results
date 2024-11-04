@@ -99,20 +99,3 @@ def csw_to_spp(
     qv_and_cp = qv_and_cp[column_map.keys()].rename(columns=column_map)
         
     qv_and_cp.to_json(f"{output_path}_{period.strftime('%Y%m')}_{period_range}.json")
-
-col_mapping = {
-        "reference": "reference",
-        "period": "period",
-        "error_mkr": "status",
-        "question_no": "questioncode",
-        "returned_value": "response",
-        "adjusted_value": "adjustedresponse",
-    }
-
-filepath = "C:/Users/daviel9/Office for National Statistics/Legacy Uplift - MBS/MBS_Anonymised-Adjusted_Responses-Disclosive_Contributor_List_Applied-20240813T1530Z"
-
-csw_to_spp(filepath, filepath, "D:/test", col_mapping, "2023-03-01", 3)
-
-df = pd.read_json("D:/test_202303_3.json")
-print(df.head())
-print(df.tail())
