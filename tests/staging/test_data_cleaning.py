@@ -37,11 +37,18 @@ def test_enforce_datatypes(filepath):
     test_setup_config = {
         "period": "period",
         "reference": "reference",
-        "responses_keep_cols": {
+        "responses_keep_cols" : [
+            "period",
+            "strata",
+            "reference",
+            "target_variable"
+        ],
+        "master_column_type_dict": {
             "period": "date",
             "strata": "str",
             "reference": "int",
             "target_variable": "float",
+            "unused_col": "float"
         },
         "temporarily_remove_cols": [],
     }
