@@ -17,22 +17,22 @@
     "region": "region",
     "form_id": "formtype",
     "question_no": "questioncode",
-    "responses_keep_cols" : {
-                "reference" : "int",
-                "period": "date",
-                "response" : "str",
-                "questioncode":"int",
-                "adjustedresponse" : "float"},
-    "contributors_keep_cols" : {
-                "reference" : "int",
-                "period" : "date",
-                "frozensic" : "str",
-                "frozenemployees" : "int",
-                "frozenturnover" : "float",
-                "cellnumber" : "int",
-                "formtype":"str",
-                "status": "str",
-                "statusencoded":"int"},
+    "responses_keep_cols" : [
+                "reference",
+                "period",
+                "response",
+                "questioncode",
+                "adjustedresponse"],
+    "contributors_keep_cols" : [
+                "reference",
+                "period",
+                "frozensic",
+                "frozenemployees",
+                "frozenturnover",
+                "cellnumber",
+                "formtype",
+                "status",
+                "statusencoded"],
     "temporarily_remove_cols": [],
     "non_sampled_strata": [
         "5141", "5142", "5143",
@@ -54,13 +54,13 @@
         "tradstyle2","tradstyle3","contact","telephone","fax","seltype","inclexcl",
         "cell_no","formtype","cso_tel","currency"
     ],
-    "finalsel_keep_cols" : {
-                "reference" : "int",
-                "period": "date",
-                "frosic2007": "str",
-                "froempment" : "int",
-                "frotover": "float",
-                "cell_no": "int"},
+    "finalsel_keep_cols" : [
+                "reference",
+                "period",
+                "frosic2007",
+                "froempment",
+                "frotover",
+                "cell_no"],
     "sample_keep_columns": ["reference", "period"],
     "population_path": "",
     "population_column_names": [
@@ -93,5 +93,22 @@
                     "0873":16},
     "l_values_path":"",
     "classification_values_path": "",
-    "output_path": ""
+    "output_path": "",
+    "master_column_type_dict" : {
+        "reference": "int",
+        "period": "date",
+        "response": "str",
+        "questioncode": "int",
+        "adjustedresponse": "float",
+        "frozensic": "str",
+        "frozenemployees": "int",
+        "frozenturnover": "float",
+        "cellnumber": "int",
+        "formtype": "str",
+        "status": "str",
+        "statusencoded": "int",
+        "frosic2007": "str",
+        "froempment": "int",
+        "frotover": "float",
+        "cell_no": "int"}
 }

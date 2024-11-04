@@ -26,9 +26,6 @@ def validate_config(config):
              and/or contributors_keep_cols (main config). """
         )
 
-    validate_config_datatype_input(**config)
-    validate_config_repeated_datatypes(**config)
-
 
 def colnames_clash(
     reference, period, responses_keep_cols, contributors_keep_cols, **config

@@ -76,7 +76,11 @@ def clean_and_merge(
 
 
 def enforce_datatypes(
-    df: pd.DataFrame, keep_columns: dict, temporarily_remove_cols: list, **config
+    df: pd.DataFrame,
+    keep_columns: list,
+    master_column_type_dict: dict,
+    temporarily_remove_cols: list,
+    **config
 ):
     """
     function to change datatypes of columns based on config file
@@ -97,6 +101,12 @@ def enforce_datatypes(
     pd.DataFrame
         dataframe with correctly formatted column datatypes.
     """
+    subset_dict = dict(
+        (k, master_column_type_dict[k])
+        for k in keep_columns
+        if k in master_column_type_dict
+    )
+
     # Resetting to easily change datatypes
 
     df_convert = df.copy()
@@ -106,7 +116,6 @@ def enforce_datatypes(
 
     # Joining Dicts will overwrite first dict if values are different.
     # check for this is carried out in 'validate_config_repeated_datatypes'
-    keep_columns
 
     try:
         temp_remove_cols = temporarily_remove_cols
@@ -121,8 +130,8 @@ def enforce_datatypes(
         # None handles cases when key is not included in joint_dict
         keep_columns.pop(key1, None)
 
-    for key in keep_columns:
-        type_from_dict = keep_columns[key]
+    for key in subset_dict:
+        type_from_dict = subset_dict[key]
         if type_from_dict in ["str", "float", "bool", "category"]:
             df_convert[key] = df_convert[key].astype(type_from_dict)
         elif type_from_dict == "int":
