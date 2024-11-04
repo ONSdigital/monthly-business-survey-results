@@ -7,7 +7,7 @@
     "target": "adjustedresponse",
     "period": "period",
     "reference": "reference",
-    "cell_number": "cellnumber",
+    "cell_number": "cell_no",
     "auxiliary": "frotover",
     "strata": "cell_no",
     "group": "calibration_group",
