@@ -1,68 +1,89 @@
 {
-    "folder_path" : "",
-    "mbs_file_name" : "",
+    "platform" : "network",
+    "bucket" : "",
+
+    "calibration_group_map": "",
+    "classification_values_path": "",
+    "folder_path": "",
+    "l_values_path": "",
     "manual_constructions_path": "",
-    "state": "frozen",
-    "errormarker": "statusencoded",
-    "target": "adjustedresponse",
-    "period": "period",
-    "reference": "reference",
-    "cell_number": "cell_no",
+    "mbs_file_name": "",
+    "output_path": "",
+    "population_path": "",
+    "sample_path": "",
+
+    "current_period" : 202303,
+    "previous_period" : 202302,
+
     "auxiliary": "frotover",
-    "strata": "cell_no",
-    "group": "calibration_group",
-    "sampled": "sampled",
-    "design_weight": "design_weight",
     "calibration_factor": "calibration_factor",
-    "region": "region",
+    "cell_number": "cell_no",
+    "design_weight": "design_weight",
+    "errormarker": "statusencoded",
     "form_id": "formtype",
+    "group": "calibration_group",
+    "period": "period",
     "question_no": "questioncode",
-    "responses_keep_cols" : {
-                "reference" : "int",
-                "period": "date",
-                "response" : "str",
-                "questioncode":"int",
-                "adjustedresponse" : "float"},
-    "contributors_keep_cols" : {
-                "reference" : "int",
-                "period" : "date",
-                "frozensic" : "str",
-                "frozenemployees" : "int",
-                "frozenturnover" : "float",
-                "cellnumber" : "int",
-                "formtype":"str",
-                "status": "str",
-                "statusencoded":"int"},
+    "reference": "reference",
+    "region": "region",
+    "sampled": "sampled",
+    "state": "frozen",
+    "strata": "cell_no",
+    "target": "adjustedresponse",
+
+    "master_column_type_dict" : {
+        "reference": "int",
+        "period": "date",
+        "response": "str",
+        "questioncode": "int",
+        "adjustedresponse": "float",
+        "frozensic": "str",
+        "frozenemployees": "int",
+        "frozenturnover": "float",
+        "cellnumber": "int",
+        "formtype": "str",
+        "status": "str",
+        "statusencoded": "int",
+        "frosic2007": "str",
+        "froempment": "int",
+        "frotover": "float",
+        "cell_no": "int"},
+
+    "contributors_keep_cols": [
+        "cellnumber",
+        "formtype",
+        "frozenemployees",
+        "frozensic",
+        "frozenturnover",
+        "period",
+        "reference",
+        "status",
+        "statusencoded"
+    ],
+
+    "responses_keep_cols": [
+        "adjustedresponse",
+        "period",
+        "questioncode",
+        "reference",
+        "response"
+    ],
+
+    "finalsel_keep_cols": [
+        "cell_no",
+        "froempment",
+        "frosic2007",
+        "frotover",
+        "period",
+        "reference"
+    ],
+
     "temporarily_remove_cols": [],
     "non_sampled_strata": [
         "5141", "5142", "5143",
         "5371", "5372", "5373",
         "5661", "5662", "5663"
     ],
-    "current_period" : 202303,
-    "previous_period" : 202302,
-    "platform" : "network",
-    "bucket" : "",
-    "sample_path": "",
-    "sample_column_names": [
-        "reference","checkletter","frosic2003","rusic2003","frosic2007",
-        "rusic2007","froempees","employees","froempment","employment","froFTEempt",
-        "FTEempt","frotover","turnover","entref","wowentref","vatref","payeref",
-        "crn","live_lu","live_vat","live_paye","legalstatus","entrepmkr","region",
-        "birthdate","entname1","entname2","entname3","runame1","runame2","runame3",
-        "ruaddr1","ruaddr2","ruaddr3","ruaddr4","ruaddr5","rupostcode","tradstyle1",
-        "tradstyle2","tradstyle3","contact","telephone","fax","seltype","inclexcl",
-        "cell_no","formtype","cso_tel","currency"
-    ],
-    "finalsel_keep_cols" : {
-                "reference" : "int",
-                "period": "date",
-                "frosic2007": "str",
-                "froempment" : "int",
-                "frotover": "float",
-                "cell_no": "int"},
-    "sample_keep_columns": ["reference", "period"],
-    "population_path": "",
     "population_column_names": [
         "reference", "checkletter", "inqcode", "entref", "wowentref", "frosic2003",
         "rusic2003", "frosic2007", "rusic2007", "froempees", "employees",
@@ -74,7 +95,19 @@
     "population_keep_columns": [
         "reference", "region", "frotover", "cell_no", "period", "frosic2007"
     ],
-    "calibration_group_map": "",
+
+    "sample_column_names": [
+        "reference","checkletter","frosic2003","rusic2003","frosic2007",
+        "rusic2007","froempees","employees","froempment","employment","froFTEempt",
+        "FTEempt","frotover","turnover","entref","wowentref","vatref","payeref",
+        "crn","live_lu","live_vat","live_paye","legalstatus","entrepmkr","region",
+        "birthdate","entname1","entname2","entname3","runame1","runame2","runame3",
+        "ruaddr1","ruaddr2","ruaddr3","ruaddr4","ruaddr5","rupostcode","tradstyle1",
+        "tradstyle2","tradstyle3","contact","telephone","fax","seltype","inclexcl",
+        "cell_no","formtype","cso_tel","currency"
+    ],
+    "sample_keep_columns": ["reference", "period"],
+
     "idbr_to_spp": {"0201":9,
                     "0202":9,
                     "0203":10,
@@ -90,8 +123,5 @@
                     "0817":15,
                     "0867":15,
                     "0823":16,
-                    "0873":16},
-    "l_values_path":"",
-    "classification_values_path": "",
-    "output_path": ""
+                    "0873":16}
 }

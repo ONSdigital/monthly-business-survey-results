@@ -82,12 +82,12 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     )
 
     # Filter columns and set data types
-    contributors = contributors[config["contributors_keep_cols"].keys()]
+    contributors = contributors[config["contributors_keep_cols"]]
     contributors = enforce_datatypes(
         contributors, keep_columns=config["contributors_keep_cols"], **config
     )
 
-    responses = responses[config["responses_keep_cols"].keys()]
+    responses = responses[config["responses_keep_cols"]]
     responses = enforce_datatypes(
         responses, keep_columns=config["responses_keep_cols"], **config
     )
@@ -96,7 +96,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         config["sample_path"], config["sample_column_names"], config
     )
 
-    finalsel = finalsel[config["finalsel_keep_cols"].keys()]
+    finalsel = finalsel[config["finalsel_keep_cols"]]
     finalsel = enforce_datatypes(
         finalsel, keep_columns=config["finalsel_keep_cols"], **config
     )
