@@ -7,21 +7,21 @@ from mbs_results.estimation.apply_estimation import apply_estimation
 # from mbs_results.staging.data_cleaning import correct_values
 
 
-def estimate(df: pd.DataFrame, config):
+def estimate(df: pd.DataFrame, config: dict) -> pd.DataFrame:
     """
-    Applys the estimation method to the given dataframe
+    Apply the estimation method to the given dataframe
 
     Parameters
     ----------
     df : pd.DataFrame
-        _description_
-    config : _type_
-        _description_
+        post imputation dataframe
+    config : dict
+        main config file
 
     Returns
     -------
-    _type_
-        _description_
+    pd.DataFrame
+        returns post estimation dataframe
     """
     warnings.warn("Estimate is slowest stage")
     warnings.warn(
