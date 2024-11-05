@@ -300,7 +300,7 @@ def run_live_or_frozen(
         anyting, "frozen" will convert to null the error_values within error_marker
     error_values : list[str], optional
         Values to ignore. The default is ['E', 'W'].
-        Mapping: 
+        Mapping:
         E -> 'Check needed' : '201',
             'Clear' : '210',
             'Clear - overridden' : '211'

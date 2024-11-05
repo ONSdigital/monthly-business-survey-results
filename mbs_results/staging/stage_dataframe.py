@@ -38,7 +38,7 @@ def create_mapper() -> dict:
         15: [40],
         16: [40],
     }
-    warnings.warn("create_mapper needs to be fully defined")
+    warnings.warn("create_mapper needs to be fully defined and moved to config")
     return mapper
 
 
@@ -107,9 +107,11 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         right=finalsel,
         on=[period, reference],
         suffixes=["_spp", "_finalsel"],
-        how="left",
+        how="outer",
     )
+    # Should raise warning for left only or right only joins (missing in other df)
     #
+
     contributors = create_form_type_spp_column(contributors, config)
     mapper = create_mapper()  # Needs to be defined
 
@@ -126,6 +128,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     df = responses_with_missing.drop(columns=config["form_id"]).merge(
         contributors, on=[reference, period], suffixes=["_res", "_con"], how="left"
     )
+
     warnings.warn("add live or frozen after fixing error marker column in config")
     df = run_live_or_frozen(
         df,
