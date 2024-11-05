@@ -12,6 +12,21 @@ from mbs_results.utilities.utils import read_colon_separated_file
 def create_form_type_spp_column(
     contributors: pd.DataFrame, config: dict
 ) -> pd.DataFrame:
+    """
+    maps IDBR form types to SPP and creates column named "form_type_spp"
+
+    Parameters
+    ----------
+    contributors : pd.DataFrame
+        contributors dataframe from JSON snapshot
+    config : dict
+        main pipeline config containing "idbr_to_spp" mapping
+
+    Returns
+    -------
+    pd.DataFrame
+        contributors dataframe with "form_type_spp" column added
+    """
     idbr_to_spp_mapping = config["idbr_to_spp"]
     contributors["form_type_spp"] = contributors[config["form_id"]].map(
         idbr_to_spp_mapping
@@ -42,7 +57,26 @@ def create_mapper() -> dict:
     return mapper
 
 
-def read_and_combine_colon_sep_files(folder_path, column_names, config):
+def read_and_combine_colon_sep_files(
+    folder_path: str, column_names: list, config: dict
+) -> pd.DataFrame:
+    """
+    reads in and combined colon separated files from the specified folder path
+
+    Parameters
+    ----------
+    folder_path : str
+        folder path containing the colon separated files
+    column_names : list
+        list of column names in colon separated file
+    config : dict
+        main pipeline config containing period column name
+
+    Returns
+    -------
+    pd.DataFrame
+        combined colon separated files returned as one dataframe.
+    """
     df = pd.concat(
         [
             read_colon_separated_file(f, column_names, period=config["period"])
@@ -65,7 +99,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
 
     Returns
     -------
-    _type_
+    pd.DataFrame
         Combined dataframe containing response and contributor data. Missing questions
         have been created, data types enforced. NI cell number have been converted
         to uk.
