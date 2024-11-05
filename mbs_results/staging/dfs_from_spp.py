@@ -6,7 +6,7 @@ import raz_client
 from rdsa_utils.cdp.helpers.s3_utils import load_json
 
 
-def dfs_from_spp(
+def get_dfs_from_spp(
     filepath: str,
     import_platform: str,
     bucket_name: str = None,

@@ -5,7 +5,7 @@ import pandas as pd
 
 from mbs_results.staging.create_missing_questions import create_missing_questions
 from mbs_results.staging.data_cleaning import enforce_datatypes, run_live_or_frozen
-from mbs_results.staging.dfs_from_spp import dfs_from_spp
+from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.utils import read_colon_separated_file
 
 
@@ -109,7 +109,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     period = config["period"]
     reference = config["reference"]
 
-    contributors, responses = dfs_from_spp(
+    contributors, responses = get_dfs_from_spp(
         config["folder_path"] + config["mbs_file_name"],
         config["platform"],
         config["bucket"],
