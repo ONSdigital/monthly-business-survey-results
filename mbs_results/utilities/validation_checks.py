@@ -1,3 +1,9 @@
+import warnings
+from importlib import metadata
+
+import pandas as pd
+
+
 def validate_config(config):
     """
     Run validation checks on the main config dictionary
@@ -19,9 +25,6 @@ def validate_config(config):
             """Period and/or Reference is not given in responses_keep_cols
              and/or contributors_keep_cols (main config). """
         )
-
-    validate_config_datatype_input(**config)
-    validate_config_repeated_datatypes(**config)
 
 
 def colnames_clash(
@@ -222,3 +225,34 @@ def validate_manual_constructions(df, manual_constructions):
             f"""There are reference and period combinations in the manual constructions
       with no match: {string_ids}"""
         )
+
+
+def validate_staging(df: pd.DataFrame, config: dict):
+    warnings.warn("A placeholder function for validating dataframe post staging")
+
+
+def validate_imputation(df: pd.DataFrame, config: dict):
+    warnings.warn("A placeholder function for validating dataframe post imputation")
+    output_path = config["output_path"]
+    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
+    snapshot_name = config["mbs_file_name"].split(".")[0]
+    imputation_filename = f"imputation_output_v{file_version_mbs}_{snapshot_name}.csv"
+    df.to_csv(output_path + imputation_filename)
+
+
+def validate_estimation(df: pd.DataFrame, config: dict):
+    warnings.warn("A placeholder function for validating dataframe post estimation")
+    output_path = config["output_path"]
+    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
+    snapshot_name = config["mbs_file_name"].split(".")[0]
+    estimate_filename = f"estimation_output_v{file_version_mbs}_{snapshot_name}.csv"
+    df.to_csv(output_path + estimate_filename)
+
+
+def validate_outlier_detection(df: pd.DataFrame, config: dict):
+    warnings.warn("A placeholder function for validating dataframe post outliering")
+    output_path = config["output_path"]
+    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
+    snapshot_name = config["mbs_file_name"].split(".")[0]
+    outlier_filename = f"outlier_output_v{file_version_mbs}_{snapshot_name}.csv"
+    df.to_csv(output_path + outlier_filename)
