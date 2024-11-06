@@ -381,13 +381,12 @@ def create_imputation_class(
     return df
 
 
-def is_census(calibration_group: pd.Series) -> pd.Series:
+def is_census(calibration_group: pd.Series, extra_bands: List) -> pd.Series:
     """
     Returns a bool series indicating if calibration group is considered cencus
     or not.
 
-    Calibration groups 5043, 5113, 5123, 5203, 5233, 5403, 5643, 5763, 5783,
-    5903, 6073 are considered cencus groups.
+    Calibration groups in extra_bands list are considered cencus groups.
 
     Calibration groups ending with 4 or 5 are considered cencus groups.
 
@@ -396,17 +395,14 @@ def is_census(calibration_group: pd.Series) -> pd.Series:
     ----------
     calibration_group : pd.Series
         Series with calibration groups
+    extra_bands: List
+        Extra calibration groups which are cencus
 
     Returns
     -------
     pd.Series
         A bool series, TRUE if calibration group is cencus
     """
-
-    # TODO: extra_bands should go to config ?
-
-    # Assumes calibration_group has been enforced to int
-    extra_bands = [5043, 5113, 5123, 5203, 5233, 5403, 5643, 5763, 5783, 5903, 6073]
 
     rule_band_4_5 = calibration_group.astype(str).map(lambda x: x.endswith(("4", "5")))
 

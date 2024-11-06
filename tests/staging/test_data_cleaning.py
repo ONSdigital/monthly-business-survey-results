@@ -141,11 +141,25 @@ def test_is_census(filepath):
 
     df = pd.read_csv(filepath / "test_is_cencus.csv")
 
+    extra_cal_groups = [
+        5043,
+        5113,
+        5123,
+        5203,
+        5233,
+        5403,
+        5643,
+        5763,
+        5783,
+        5903,
+        6073,
+    ]
+
     input_series = df["calibration_group"]
     expected_output = df["is_census"]
 
     # By default takes name of input series
-    actual_output = is_census(input_series)
+    actual_output = is_census(input_series, extra_cal_groups)
     actual_output.name = "is_census"
 
     assert_series_equal(actual_output, expected_output)
