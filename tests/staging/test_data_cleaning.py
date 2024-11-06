@@ -2,13 +2,13 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-from pandas.testing import assert_frame_equal
+from pandas.testing import assert_frame_equal, assert_series_equal
 
 from mbs_results.staging.data_cleaning import (
     clean_and_merge,
-    correct_values,
     create_imputation_class,
     enforce_datatypes,
+    is_census,
     run_live_or_frozen,
 )
 
@@ -137,18 +137,15 @@ def test_run_live_or_frozen_exception(filepath):
         run_live_or_frozen(df, "target", "error", "love")
 
 
-def test_correct_values(filepath):
+def test_is_census(filepath):
 
-    df = pd.read_csv(filepath / "test_correct_values.csv")
+    df = pd.read_csv(filepath / "test_is_cencus.csv")
 
-    df_in = df[["band_no", "value_1", "value_2", "value_3"]]
+    input_series = df["calibration_group"]
+    expected_output = df["is_census"]
 
-    expected_output = df[
-        ["band_no", "expected_value_1", "expected_value_2", "expected_value_3"]
-    ]
+    # By default takes name of input series
+    actual_output = is_census(input_series)
+    actual_output.name = "is_census"
 
-    expected_output.columns = df_in.columns
-
-    actual_output = correct_values(df_in, ["value_1", "value_2"], "band_no", [4, 5], 1)
-
-    assert_frame_equal(actual_output, expected_output)
+    assert_series_equal(actual_output, expected_output)
