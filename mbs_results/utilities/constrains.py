@@ -154,8 +154,6 @@ def constrain(
             "cell_no",
             "frotover",
             "froempment",
-            "form_type",
-            "response_type",
         ],
         verify_integrity=False,
     )

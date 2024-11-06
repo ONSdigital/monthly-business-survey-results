@@ -1,29 +1,127 @@
 {
-    "folder_path" : "/dapsen/workspace_zone/mbs-results/",
-    "mbs_file_name" : "snapshot-202212-002-2156d36b-e61f-42f1-a0f1-61d1f8568b8e.json",
-    "manual_constructions_path": "data/manual_constructions.csv",
-    "target" : "return",
-    "period" : "period",
-    "strata" : "group",
-    "reference" : "reference",
-    "auxiliary": "auxiliary",
-    "responses_keep_cols" : {
-                "reference" : "str",
-                "period": "date",
-                "response" : "str"},
-    "contributors_keep_cols" : {
-                "reference" : "str",
-                "period" : "date",
-                "frozensic" : "str",
-                "frozenemployees" : "int",
-                "frozenturnover" : "float",
-                "cellnumber" : "int"},
+    "platform" : "network",
+    "bucket" : "",
+
+    "calibration_group_map": "",
+    "classification_values_path": "",
+    "folder_path": "",
+    "l_values_path": "",
+    "manual_constructions_path": "",
+    "mbs_file_name": "",
+    "output_path": "",
+    "population_path": "",
+    "sample_path": "",
+
+    "current_period" : 202303,
+    "previous_period" : 202302,
+
+    "auxiliary": "frotover",
+    "calibration_factor": "calibration_factor",
+    "cell_number": "cell_no",
+    "design_weight": "design_weight",
+    "errormarker": "statusencoded",
+    "form_id": "formtype",
+    "group": "calibration_group",
+    "period": "period",
+    "question_no": "questioncode",
+    "reference": "reference",
+    "region": "region",
+    "sampled": "sampled",
+    "state": "frozen",
+    "strata": "cell_no",
+    "target": "adjustedresponse",
+
+    "master_column_type_dict" : {
+        "reference": "int",
+        "period": "date",
+        "response": "str",
+        "questioncode": "int",
+        "adjustedresponse": "float",
+        "frozensic": "str",
+        "frozenemployees": "int",
+        "frozenturnover": "float",
+        "cellnumber": "int",
+        "formtype": "str",
+        "status": "str",
+        "statusencoded": "int",
+        "frosic2007": "str",
+        "froempment": "int",
+        "frotover": "float",
+        "cell_no": "int"},
+
+    "contributors_keep_cols": [
+        "cellnumber",
+        "formtype",
+        "frozenemployees",
+        "frozensic",
+        "frozenturnover",
+        "period",
+        "reference",
+        "status",
+        "statusencoded"
+    ],
+
+    "responses_keep_cols": [
+        "adjustedresponse",
+        "period",
+        "questioncode",
+        "reference",
+        "response"
+    ],
+
+    "finalsel_keep_cols": [
+        "cell_no",
+        "froempment",
+        "frosic2007",
+        "frotover",
+        "period",
+        "reference"
+    ],
+
     "temporarily_remove_cols": [],
     "non_sampled_strata": [
         "5141", "5142", "5143",
         "5371", "5372", "5373",
         "5661", "5662", "5663"
     ],
-    "current_period" : 202401,
-    "previous_period" : 202312
+    "population_column_names": [
+        "reference", "checkletter", "inqcode", "entref", "wowentref", "frosic2003",
+        "rusic2003", "frosic2007", "rusic2007", "froempees", "employees",
+        "froempment", "employment", "froFTEempt", "FTEempt", "frotover",
+        "turnover", "entrepmkr", "legalstatus", "inqstop", "entzonemkr", "region",
+        "live_lu", "live_vat", "live_paye", "immfoc", "ultfoc", "cell_no",
+        "selmkr", "inclexcl"
+    ],
+    "population_keep_columns": [
+        "reference", "region", "frotover", "cell_no", "period", "frosic2007"
+    ],
+
+    "sample_column_names": [
+        "reference","checkletter","frosic2003","rusic2003","frosic2007",
+        "rusic2007","froempees","employees","froempment","employment","froFTEempt",
+        "FTEempt","frotover","turnover","entref","wowentref","vatref","payeref",
+        "crn","live_lu","live_vat","live_paye","legalstatus","entrepmkr","region",
+        "birthdate","entname1","entname2","entname3","runame1","runame2","runame3",
+        "ruaddr1","ruaddr2","ruaddr3","ruaddr4","ruaddr5","rupostcode","tradstyle1",
+        "tradstyle2","tradstyle3","contact","telephone","fax","seltype","inclexcl",
+        "cell_no","formtype","cso_tel","currency"
+    ],
+    "sample_keep_columns": ["reference", "period"],
+
+    "idbr_to_spp": {"0201":9,
+                    "0202":9,
+                    "0203":10,
+                    "0204":10,
+                    "0205":11,
+                    "0216":11,
+                    "0106":12,
+                    "0111":12,
+                    "0117":13,
+                    "0167":13,
+                    "0123":14,
+                    "0173":14,
+                    "0817":15,
+                    "0867":15,
+                    "0823":16,
+                    "0873":16}
 }
