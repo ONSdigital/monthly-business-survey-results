@@ -12,7 +12,14 @@ from mbs_results.staging.data_cleaning import is_census
 # from mbs_results.estimation.validate_estimation import validate_estimation
 
 
-def apply_estimation(population_path, sample_path, calibration_group, period, **config):
+def apply_estimation(
+    population_path,
+    sample_path,
+    calibration_group,
+    census_extra_calibration_group,
+    period,
+    **config
+):
     """
     Read population frame and sample, merge key variables onto df then derive
     and validate estimation weights.
@@ -25,6 +32,8 @@ def apply_estimation(population_path, sample_path, calibration_group, period, **
         filepath for sample data
     calibration_group: str
         column name of dimension contaning calibration group values
+    census_extra_calibration_group: list
+        calibration groups which are census but not band 4 or 5
     period : str
         name of column containing period
 
@@ -48,14 +57,22 @@ def apply_estimation(population_path, sample_path, calibration_group, period, **
             population_file, sample_file, period, **config
         )
 
-        census_df = estimation_data[is_census(estimation_data[calibration_group])]
+        census_df = estimation_data[
+            is_census(
+                estimation_data[calibration_group], census_extra_calibration_group
+            )
+        ]
 
         census_df["design_weight"] = 1
         census_df["calibration_factor"] = 1
         census_df["sampled"] = 0
 
         non_census_df = estimation_data[
-            ~(is_census(estimation_data[calibration_group]))
+            ~(
+                is_census(
+                    estimation_data[calibration_group], census_extra_calibration_group
+                )
+            )
         ]
 
         non_census_df = calculate_design_weight(non_census_df, period, **config)
