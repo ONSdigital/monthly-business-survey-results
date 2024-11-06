@@ -48,14 +48,14 @@ def apply_estimation(population_path, sample_path, calibration_group, period, **
             population_file, sample_file, period, **config
         )
 
-        census_df = estimation_data[is_census(estimation_data, calibration_group)]
+        census_df = estimation_data[is_census(estimation_data[calibration_group])]
 
         census_df["design_weight"] = 1
         census_df["calibration_factor"] = 1
         census_df["sampled"] = 0
 
         non_census_df = estimation_data[
-            ~(is_census(estimation_data, calibration_group))
+            ~(is_census(estimation_data[calibration_group]))
         ]
 
         non_census_df = calculate_design_weight(non_census_df, period, **config)
