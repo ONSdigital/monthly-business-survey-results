@@ -22,6 +22,7 @@
     "errormarker": "statusencoded",
     "form_id": "formtype",
     "group": "calibration_group",
+    "calibration_group": "calibration_group",
     "period": "period",
     "question_no": "questioncode",
     "reference": "reference",
