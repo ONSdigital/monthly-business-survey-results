@@ -381,72 +381,31 @@ def create_imputation_class(
     return df
 
 
-# TODO: Can be used when we set defaults in other parts of the pipeline
-def correct_values(
-    df: pd.DataFrame,
-    columns_to_correct: List[str] or str,
-    condition_column: str,
-    condition_values: List[int],
-    replace_with: int,
-) -> pd.DataFrame:
+def is_census(calibration_group: pd.Series, extra_bands: List) -> pd.Series:
     """
-    Sets values in a dataframe column(s) based on a condition, checks if
-    columns exists prior to correction to avoid creating them.
+    Returns a bool series indicating if calibration group is considered cencus
+    or not.
+
+    Calibration groups in extra_bands list are considered cencus groups.
+
+    Calibration groups ending with 4 or 5 are considered cencus groups.
+
 
     Parameters
     ----------
-    df : pd.DataFrame
-        Original dataframe to apply the correction.
-    columns_to_correct : List(str) or str
-        Column(s) to set values.
-    condition_column : str
-        Column for the condition.
-    condition_values : List(int)
-        Values which exist in condition_column.
-    replace_with : int
-        Value to set if condition is met.
+    calibration_group : pd.Series
+        Series with calibration groups
+    extra_bands: List
+        Extra calibration groups which are cencus
 
     Returns
     -------
-    df : pd.DataFrame
-        Dataframe with values replaced.
-
-    Examples
-    --------
-    >>> df = pd.DataFrame({'a': [0, 1, 2, 3, 4],
-            'b': [5, 6, 7, 8, 9],
-            'band': [1,2,3,4,5]})
-    >>> df
-        a  b  band
-    0  0  5     1
-    1  1  6     2
-    2  2  7     3
-    3  3  8     4
-    4  4  9     5
-
-    >>> df2 = correct_values(df,["a","b"],"band",[4,5],1)
-    >>> df2
-        a  b  band
-    0  0  5     1
-    1  1  6     2
-    2  2  7     3
-    3  1  1     4
-    4  1  1     5
+    pd.Series
+        A bool series, TRUE if calibration group is cencus
     """
 
-    df_temp = df.copy()  # to avoid changing input df
+    rule_band_4_5 = calibration_group.astype(str).map(lambda x: x.endswith(("4", "5")))
 
-    check_columns = (
-        columns_to_correct + [condition_column]  # list + list(str)
-        if pd.api.types.is_list_like(columns_to_correct)
-        else [columns_to_correct, condition_column]
-    )
+    rule_extra_bands = calibration_group.isin(extra_bands)
 
-    # Update value only if columns exist
-    if set(check_columns).issubset(df.columns):
-
-        df_temp.loc[df[condition_column].isin(condition_values), columns_to_correct] = (
-            replace_with
-        )
-
-    return df_temp
+    return rule_band_4_5 | rule_extra_bands
