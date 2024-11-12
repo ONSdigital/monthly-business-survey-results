@@ -20,7 +20,7 @@
     "cell_number": "cell_no",
     "design_weight": "design_weight",
     "errormarker": "statusencoded",
-    "form_id": "formtype",
+    "form_id_idbr": "formtype",
     "group": "calibration_group",
     "period": "period",
     "question_no": "questioncode",
@@ -30,6 +30,7 @@
     "state": "frozen",
     "strata": "cell_no",
     "target": "adjustedresponse",
+    "form_id_spp": "form_type_spp",
 
     "master_column_type_dict" : {
         "reference": "int",
