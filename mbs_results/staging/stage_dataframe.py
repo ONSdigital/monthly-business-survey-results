@@ -28,7 +28,7 @@ def create_form_type_spp_column(
         contributors dataframe with "form_type_spp" column added
     """
     idbr_to_spp_mapping = config["idbr_to_spp"]
-    contributors[config["form_type_spp"]] = contributors[config["form_id_idbr"]].map(
+    contributors[config["form_id_spp"]] = contributors[config["form_id_idbr"]].map(
         idbr_to_spp_mapping
     )
     return contributors
@@ -159,7 +159,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         mapper=mapper,
     )
 
-    df = responses_with_missing.drop(columns=config["form_id_idbr"]).merge(
+    df = responses_with_missing.drop(columns=config["form_id_spp"]).merge(
         contributors, on=[reference, period], suffixes=["_res", "_con"], how="left"
     )
 
