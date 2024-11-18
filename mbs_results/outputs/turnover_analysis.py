@@ -9,6 +9,7 @@ def create_turnover_output(
     winsorisation_df: pd.DataFrame,
     winsorisation_period: str,
     selected_period: int,
+    **config
 ) -> pd.DataFrame:
     """
     Creating output for turnover analysis tool.
@@ -30,6 +31,8 @@ def create_turnover_output(
         Name of column displaying period in winsorisation
     selected_period : int
         Period to output results for in the format YYYYMM
+    **config: Dict
+          main pipeline configuration. Can be used to input the entire config dictionary
 
     Returns
     -------

@@ -1,7 +1,7 @@
 import pandas as pd
 
-from mbs_results.merge_domain import merge_domain
-from mbs_results.unsorted.selective_editing import create_standardising_factor
+from mbs_results.outputs.selective_editing import create_standardising_factor
+from mbs_results.staging.merge_domain import merge_domain
 
 
 def create_selective_editing_question_output(
@@ -18,6 +18,7 @@ def create_selective_editing_question_output(
     adjusted_value: str,
     sic_domain_mapping_path: str,
     period_selected: int,
+    **config,
 ) -> pd.DataFrame:
     """
      creates the selective editing question output.
@@ -48,11 +49,13 @@ def create_selective_editing_question_output(
      adjusted_value : str
          name of column in dataframe containing adjusted_value variable combined
          with imputed_values as outputted from Ratio of Means script
-    sic_domain_mapping_path : str
+     sic_domain_mapping_path : str
          path to the sic domain mapping file
      period_selected : int
          previous period to take the weights for estimation of standardising factor in
          the format yyyymm
+    **config: Dict
+          main pipeline configuration. Can be used to input the entire config dictionary
 
      Returns
      -------

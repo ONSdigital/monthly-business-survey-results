@@ -1,6 +1,6 @@
 import pandas as pd
 
-from mbs_results.merge_domain import merge_domain
+from mbs_results.staging.merge_domain import merge_domain
 
 
 def get_selective_editing_contributer_output(
@@ -10,6 +10,7 @@ def get_selective_editing_contributer_output(
     sic_input: str,
     sic_mapping: str,
     period_selected: int,
+    **config
 ) -> pd.DataFrame:
     """
     Returns a dataframe containing period, reference, domain_group, and
@@ -29,6 +30,10 @@ def get_selective_editing_contributer_output(
         Name of column in input_filepath csv file containing SIC variable.
     sic_mapping : str
         Name of column in domain_filepath csv file containing SIC variable.
+    period_selected : int
+        period to include in outputs
+    **config: Dict
+          main pipeline configuration. Can be used to input the entire config dictionary
 
     Returns
     -------

@@ -3,7 +3,7 @@ import pandas as pd
 from utilities.utils import convert_column_to_datetime
 
 
-def get_weighted_adj_val_time_series(filepath: str) -> pd.DataFrame:
+def get_weighted_adj_val_time_series(filepath: str, **config) -> pd.DataFrame:
     """
     Time series of weighted adjusted values by classification, question number,
     and cell number.
@@ -13,6 +13,8 @@ def get_weighted_adj_val_time_series(filepath: str) -> pd.DataFrame:
     filepath : str
         filepath to csv containing classification, question number, cell number,
         period, and weighted adjusted value.
+    **config: Dict
+          main pipeline configuration. Can be used to input the entire config dictionary
 
     Returns
     -------
