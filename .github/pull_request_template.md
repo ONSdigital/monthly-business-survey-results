@@ -20,12 +20,6 @@ Please select the type of change that applies to this pull request.
 - [ ] Documentation update
 - [ ] Other (please describe):
 
-# Motivation and Context
-
-<!--
-Please provide a brief description of the motivation and context for this change.
--->
-
 
 # Checklists
 
