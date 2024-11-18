@@ -45,14 +45,13 @@ This pull request meets the following requirements:
 - [ ] Unit tests have been updated to cover essential functionality for a reasonable range of inputs and conditions
 - [ ] Other forms of testing such as end-to-end and user-interface testing have been considered and updated as required
 
+If you feel some of these conditions do not apply for this pull request, please
+add a comment to explain why.
+
 ## Reviewer Checklist
 
 - [ ] Test suite passes (locally as a minimum)
 - [ ] Peer reviewed with review recorded
-
-If you feel some of these conditions do not apply for this pull request, please
-add a comment to explain why.
-
 
 # Additional Information
 
