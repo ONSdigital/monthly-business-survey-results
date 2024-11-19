@@ -49,7 +49,7 @@ def detect_outlier(df, config):
         df, config["l_values_path"], config["classification_values_path"], config
     )
 
-    post_win = pre_win.groupby("question_no").apply(
+    post_win = pre_win.groupby(config["question_no"]).apply(
         lambda df: winsorise(
             df,
             "calibration_group",
