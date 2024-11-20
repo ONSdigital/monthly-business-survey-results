@@ -123,7 +123,6 @@ def test_run_live_or_frozen(filepath):
     expected_output_frozen = df.copy()
 
     expected_output_frozen.drop(columns=["frozen"], inplace=True)
-    expected_output_frozen = expected_output_frozen.fillna("")
 
     assert_frame_equal(frozen_output, expected_output_frozen)
     assert_frame_equal(live_ouput, df_in)
