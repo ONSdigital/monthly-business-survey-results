@@ -66,5 +66,7 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
         question_no=config["question_no"],
         spp_form_id="form_type_spp",
     )
+    
+    post_constrain["imputed_and_derived_flag"] = post_constrain["imputation_flags_adjusted_value"].fillna("d")
 
     return post_constrain
