@@ -40,6 +40,7 @@ def join_l_values(df, l_values_path, classification_values_path, config):
         left_on=[config["question_no"], "classification"],
         right_on=["question_no", "classification"],
     )
+    df.drop(columns=["question_no"], inplace=True)
 
     return df
 
@@ -49,7 +50,7 @@ def detect_outlier(df, config):
         df, config["l_values_path"], config["classification_values_path"], config
     )
 
-    post_win = pre_win.groupby("question_no").apply(
+    post_win = pre_win.groupby(config["question_no"]).apply(
         lambda df: winsorise(
             df,
             "calibration_group",

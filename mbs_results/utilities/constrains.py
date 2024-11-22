@@ -154,6 +154,7 @@ def constrain(
             "cell_no",
             "frotover",
             "froempment",
+            "frosic2007",
         ],
         verify_integrity=False,
     )
@@ -220,7 +221,17 @@ def derive_questions(
     """
     derive_map = create_derive_map(df, spp_form_id)
     pre_derive_df = df.set_index(
-        [spp_form_id, question_no, period, reference], verify_integrity=False
+        [
+            spp_form_id,
+            question_no,
+            period,
+            reference,
+            "cell_no",
+            "frotover",
+            "froempment",
+            "frosic2007",
+        ],
+        verify_integrity=False,
     )
     # Assuming default value of o-weight is 1
     pre_derive_df = pre_derive_df[[target]].fillna(value=0)
@@ -234,7 +245,7 @@ def derive_questions(
             for form_type, derives in derive_map.items()
         ]
     )
-    unique_q_numbers = df.question_no.unique()
+    unique_q_numbers = df[question_no].unique()
 
     df.set_index([question_no, period, reference], inplace=True)
 

@@ -3,7 +3,8 @@ from os import listdir
 from os.path import isfile, join
 
 import pandas as pd
-from utils import convert_column_to_datetime
+
+from mbs_results.utilities.utils import convert_column_to_datetime
 
 
 def get_patern_df(filepath: str, pattern: str) -> pd.DataFrame:

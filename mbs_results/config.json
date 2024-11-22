@@ -20,7 +20,7 @@
     "cell_number": "cell_no",
     "design_weight": "design_weight",
     "errormarker": "statusencoded",
-    "form_id": "formtype",
+    "form_id_idbr": "formtype",
     "group": "calibration_group",
     "calibration_group": "calibration_group",
     "period": "period",
@@ -31,6 +31,7 @@
     "state": "frozen",
     "strata": "cell_no",
     "target": "adjustedresponse",
+    "form_id_spp": "form_type_spp",
 
     "master_column_type_dict" : {
         "reference": "int",
@@ -127,5 +128,7 @@
                     "0873":16},
 
     "census_extra_calibration_group": [5043, 5113, 5123, 5203, 5233,
-     5403, 5643, 5763, 5783, 5903, 6073]
+     5403, 5643, 5763, 5783, 5903, 6073],
+
+    "calibration_group" : "calibration_group"
 }
