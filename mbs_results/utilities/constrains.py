@@ -234,7 +234,7 @@ def derive_questions(
             for form_type, derives in derive_map.items()
         ]
     )
-    unique_q_numbers = df.question_no.unique()
+    unique_q_numbers = df[question_no].unique()
 
     df.set_index([question_no, period, reference], inplace=True)
 
