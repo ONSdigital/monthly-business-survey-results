@@ -1,6 +1,25 @@
+# Pull Request Title
+
+<!--
+Please provide a descriptive title for the pull request.
+-->
+
 # Summary
 
 Add your summary here - keep it brief, to the point, and in plain English.
+
+# Type of Change
+
+<!--
+Please select the type of change that applies to this pull request.
+-->
+
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+- [ ] Other (please describe):
+
 
 # Checklists
 
@@ -15,16 +34,29 @@ the reviewers' discretion.
 
 This pull request meets the following requirements:
 
-- [ ] installable with all dependencies recorded
-- [ ] runs without error
-- [ ] follows PEP8 and project specific conventions
-- [ ] appropriate use of comments, for example no descriptive comments
-- [ ] functions documented using Numpy style docstings
-- [ ] assumptions and decisions log considered and updated if appropriate
-- [ ] unit tests have been updated to cover essential functionality for a reasonable range of inputs and conditions
-- [ ] other forms of testing such as end-to-end and user-interface testing have been considered and updated as required
-- [ ] tests suite passes (locally as a minimum)
-- [ ] peer reviewed with review recorded
+## Creator Checklist
+
+- [ ] Installable with all dependencies recorded
+- [ ] Runs without error
+- [ ] Follows PEP8 and project-specific conventions
+- [ ] Appropriate use of comments, for example, no descriptive comments
+- [ ] Functions documented using Numpy style docstrings
+- [ ] Assumptions and decisions log considered and updated if appropriate
+- [ ] Unit tests have been updated to cover essential functionality for a reasonable range of inputs and conditions
+- [ ] Other forms of testing such as end-to-end and user-interface testing have been considered and updated as required
 
 If you feel some of these conditions do not apply for this pull request, please
 add a comment to explain why.
+
+## Reviewer Checklist
+
+- [ ] Test suite passes (locally as a minimum)
+- [ ] Peer reviewed with review recorded
+
+# Additional Information
+
+Please provide any additional information or context that would help the reviewer understand the changes in this pull request.
+
+# Related Issues
+
+Link any related issues or pull requests here.
