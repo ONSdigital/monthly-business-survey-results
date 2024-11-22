@@ -41,7 +41,7 @@ def join_l_values(df, l_values_path, classification_values_path, config):
         right_on=["question_no", "classification"],
     )
     df.drop(columns=["question_no"], inplace=True)
-    
+
     return df
 
 
