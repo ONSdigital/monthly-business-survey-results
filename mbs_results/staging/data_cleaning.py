@@ -321,9 +321,8 @@ def run_live_or_frozen(
 
     if state == "frozen":
         df["frozen_error"] = df.apply(
-            lambda x: x[target] if x[error_marker] in (error_values) else "", axis=1
+            lambda x: x[target] if x[error_marker] in (error_values) else None, axis=1
         )
-        df = df.fillna("")
 
     return df
 

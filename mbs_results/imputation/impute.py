@@ -64,7 +64,7 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
         reference=config["reference"],
         target=config["target"],
         question_no=config["question_no"],
-        spp_form_id="form_type_spp",
+        spp_form_id=config["form_id_spp"],
     )
 
     return post_constrain
