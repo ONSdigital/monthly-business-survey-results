@@ -6,3 +6,7 @@ requires = ["setuptools", "wheel"]  # PEP 508 specifications.
 [tool.bandit]
 exclude_dirs = ["tests", "docs"]
 skips = []
+
+# `isort` configurations
+[tool.isort]
+profile = "black"
