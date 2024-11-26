@@ -67,6 +67,6 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
         spp_form_id="form_type_spp",
     )
     
-    post_constrain["imputed_and_derived_flag"] = post_constrain["imputation_flags_adjusted_value"].fillna("d")
+    post_constrain["imputed_and_derived_flag"] = post_constrain.apply(lambda row: "d" if "sum" in str(row["constrain_marker"]).lower() else row["imputation_flags_adjusted_value"], axis=1)
 
     return post_constrain
