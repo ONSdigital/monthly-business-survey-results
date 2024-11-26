@@ -232,14 +232,10 @@ def flag_rolling_impute(
     ).cumsum()
 
     boolean_column = (
-        df.groupby([strata, reference, "fill_group"])[target]
+        df.groupby(["fill_group"])[target]
         .fillna(method=fillmethod)
         .notnull()
-        .mul(
-            df[period] - pd.DateOffset(months=time_difference)
-            == df.shift(time_difference)[period]
-        )
-        .mul(df[strata] == df.shift(time_difference)[strata])
+        .mul(df["fill_group"] == df.shift(time_difference)["fill_group"])
     )
     df.drop(columns="fill_group", inplace=True)
 
