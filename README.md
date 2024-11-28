@@ -26,7 +26,7 @@ To be added.
 To install the Python requirements, open your terminal and enter:
 
 ```shell
-pip install -r requirements.txt
+pip install .
 ```
 or for installing in development mode:
 
