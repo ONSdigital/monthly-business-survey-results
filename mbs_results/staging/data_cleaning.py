@@ -408,3 +408,43 @@ def is_census(calibration_group: pd.Series, extra_bands: List) -> pd.Series:
     rule_extra_bands = calibration_group.isin(extra_bands)
 
     return rule_band_4_5 | rule_extra_bands
+
+
+def filter_out_questions(
+    df: pd.DataFrame, column: str, questions_to_filter: List[int], save_full_path: str
+) -> pd.DataFrame:
+    """
+    Removes questions defined in `questions_to_filter` from df. The removed
+    questions are saved in `save_full_path`.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    column : str
+        Column name to search for questions.
+    questions_to_filter : List(int)
+        List of questions to removes.
+    save_full_path : str
+        Full path to save removeed values, e.g. `folder1/folder2/mydata.csv`.
+
+    Returns
+    -------
+    keep_questions_df : pd.DataFrame
+        Original dataframe without questions_to_filter questions.
+
+    """
+    if not save_full_path.endswith(".csv"):
+        raise ValueError(
+            "Function argument {} is not a csv file.".format(save_full_path)
+        )
+
+    filter_out_questions_df = df[df[column].isin(questions_to_filter)]
+
+    keep_questions_df = df[~df[column].isin(questions_to_filter)]
+
+    filter_out_questions_df.to_csv(save_full_path, index=False)
+
+    keep_questions_df.reset_index(drop=True, inplace=True)
+
+    return keep_questions_df
