@@ -4,7 +4,11 @@ import warnings
 import pandas as pd
 
 from mbs_results.staging.create_missing_questions import create_missing_questions
-from mbs_results.staging.data_cleaning import enforce_datatypes, run_live_or_frozen
+from mbs_results.staging.data_cleaning import (
+    enforce_datatypes,
+    filter_out_questions,
+    run_live_or_frozen,
+)
 from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.utils import read_colon_separated_file
 
@@ -161,6 +165,15 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
 
     df = responses_with_missing.drop(columns=config["form_id_spp"]).merge(
         contributors, on=[reference, period], suffixes=["_res", "_con"], how="left"
+    )
+
+    df = filter_out_questions(
+        df=df,
+        column=config["question_no"],
+        questions_to_filter=config["filter_out_questions"],
+        save_full_path=config["output_path"]
+        + config["mbs_file_name"]
+        + "filter_out_questions.csv",
     )
 
     warnings.warn("add live or frozen after fixing error marker column in config")
