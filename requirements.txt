@@ -1,5 +1,0 @@
-pandas
-numpy
-# rdsa-utils
-# raz-client
-# boto3
