@@ -1,7 +1,10 @@
 from mbs_results.estimation.estimate import estimate
 from mbs_results.imputation.impute import impute
 from mbs_results.outlier_detection.detect_outlier import detect_outlier
-from mbs_results.outputs.produce_outputs import produce_outputs
+from mbs_results.outputs.produce_additional_outputs import (
+    get_additional_outputs_df,
+    produce_additional_outputs,
+)
 from mbs_results.staging.stage_dataframe import stage_dataframe
 from mbs_results.utilities.inputs import load_config
 from mbs_results.utilities.validation_checks import (
@@ -32,7 +35,8 @@ def run_mbs_main():
     outlier_output = detect_outlier(estimation_output, config)
     validate_outlier_detection(outlier_output, config)
 
-    produce_outputs(outlier_output, "output_path/")
+    additional_outputs_df = get_additional_outputs_df(estimation_output, outlier_output)
+    produce_additional_outputs(config, additional_outputs_df)
 
 
 if __name__ == "__main__":
