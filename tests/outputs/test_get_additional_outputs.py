@@ -1,4 +1,5 @@
 import pytest
+import pandas as pd
 
 from mbs_results.outputs.get_additional_outputs import get_additional_outputs
 
@@ -27,7 +28,7 @@ def function_mapper():
 )
 def test_output(capsys, function_mapper, inp, expected):
     """Test that the right functions were run"""
-    get_additional_outputs(inp, function_mapper)
+    get_additional_outputs(inp, function_mapper, pd.DataFrame())
     out, err = capsys.readouterr()
     assert out == expected
 
@@ -37,7 +38,7 @@ def test_raise_errors(function_mapper):
     function which does not link to a function"""
 
     with pytest.raises(ValueError):
-        get_additional_outputs({"additional_outputs": "not_a_list"}, function_mapper)
+        get_additional_outputs({"additional_outputs": "not_a_list"}, function_mapper, pd.DataFrame())
 
     with pytest.raises(ValueError):
-        get_additional_outputs({"additional_outputs": ["test3"]}, function_mapper)
+        get_additional_outputs({"additional_outputs": ["test3"]}, function_mapper, pd.DataFrame())

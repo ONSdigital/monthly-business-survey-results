@@ -1,4 +1,9 @@
-def get_additional_outputs(config: dict, function_mapper: dict) -> None:
+import pandas as pd
+
+
+def get_additional_outputs(
+    config: dict, function_mapper: dict, additional_outputs_df: pd.DataFrame
+) -> dict:
     """
     Runs a set of functions as defined in additional_outputs from the config,
     the function names must exist in function_mapper which also has the relevant
@@ -76,7 +81,9 @@ def get_additional_outputs(config: dict, function_mapper: dict) -> None:
 
         if function in function_mapper:
 
-            additional_outputs[function] = function_mapper[function](**config)
+            additional_outputs[function] = function_mapper[function](
+                additional_outputs_df=additional_outputs_df, **config
+            )
 
         else:
             raise ValueError(
