@@ -1,5 +1,5 @@
-import pytest
 import pandas as pd
+import pytest
 
 from mbs_results.outputs.get_additional_outputs import get_additional_outputs
 
@@ -38,7 +38,11 @@ def test_raise_errors(function_mapper):
     function which does not link to a function"""
 
     with pytest.raises(ValueError):
-        get_additional_outputs({"additional_outputs": "not_a_list"}, function_mapper, pd.DataFrame())
+        get_additional_outputs(
+            {"additional_outputs": "not_a_list"}, function_mapper, pd.DataFrame()
+        )
 
     with pytest.raises(ValueError):
-        get_additional_outputs({"additional_outputs": ["test3"]}, function_mapper, pd.DataFrame())
+        get_additional_outputs(
+            {"additional_outputs": ["test3"]}, function_mapper, pd.DataFrame()
+        )
