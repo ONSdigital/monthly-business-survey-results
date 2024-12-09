@@ -3,6 +3,7 @@ import warnings
 
 import pandas as pd
 
+from mbs_results.staging.back_data import append_back_data
 from mbs_results.staging.create_missing_questions import create_missing_questions
 from mbs_results.staging.data_cleaning import (
     enforce_datatypes,
@@ -138,6 +139,11 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     finalsel = enforce_datatypes(
         finalsel, keep_columns=config["finalsel_keep_cols"], **config
     )
+
+    back_data = pd.read_csv(config["responses_keep_cols"])
+    back_data = enforce_datatypes(
+        back_data, keep_columns=config["responses_keep_cols"], **config
+    )
     # Filter contributors files here to temp fix this overlap
 
     contributors = pd.merge(
@@ -184,6 +190,8 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         state=config["state"],
         error_values=[201],
     )
+
+    df = append_back_data(df, back_data, period)
     print("Staging Completed")
 
     return df
