@@ -1,42 +1,55 @@
 import numpy as np
 import pandas as pd
+from staging.merge_domain import merge_domain
 from utilities.utils import convert_column_to_datetime
 
 
-def get_weighted_adj_val_time_series(filepath: str) -> pd.DataFrame:
+def get_weighted_adj_val_time_series(
+    additional_outputs_df: pd.DataFrame, sic_class_mapping: str, **config
+) -> pd.DataFrame:
     """
     Time series of weighted adjusted values by classification, question number,
     and cell number.
 
     Parameters
     ----------
-    filepath : str
-        filepath to csv containing classification, question number, cell number,
+    additional_outputs_df : pd.DataFrame
+        dataframe containing classification, question code, cell number,
         period, and weighted adjusted value.
+    sic_class_mapping : str
+        filepath to mapping between SIC and classification
+    **config: Dict
+          main pipeline configuration. Can be used to input the entire config dictionary
 
     Returns
     -------
-    pandas.Data.Frame
+    pd.DataFrame
         Dataframe containing classification, question number, and cell number, pivoted
         wider on period with adjusted values.
     """
 
-    input_data = pd.read_csv(
-        filepath,
-        usecols=[
+    additional_outputs_df = merge_domain(
+        additional_outputs_df, sic_class_mapping, "frosic2007", "sic_5_digit"
+    )
+
+    # TODO: Find out calculation of weighted adjusted value and derive as necessary
+    # in function
+    input_data = additional_outputs_df[
+        [
             "classification",
-            "question_no",
+            "questioncode",
             "cell_no",
             "period",
             "weighted adjusted value",
-        ],
-        dtype={
+        ]
+    ].astype(
+        {
             "classification": "Int32",
             "question_no": "Int8",
             "cell_no": "Int16",
             "period": "Int32",
             "weighted adjusted value": "float64",
-        },
+        }
     )
 
     input_data["period"] = (

@@ -1,4 +1,9 @@
-def get_additional_outputs(config: dict, function_mapper: dict) -> None:
+import pandas as pd
+
+
+def get_additional_outputs(
+    config: dict, function_mapper: dict, additional_outputs_df: pd.DataFrame
+) -> dict:
     """
     Runs a set of functions as defined in additional_outputs from the config,
     the function names must exist in function_mapper which also has the relevant
@@ -27,25 +32,37 @@ def get_additional_outputs(config: dict, function_mapper: dict) -> None:
 
     Returns
     -------
-    None
+    dict
+        Dictionary of additional outputs, with the keys being the names
+        of the outputs and the values being the outputs to be exported.
 
     Examples
     --------
-    >> example_function = print("Hello world)
-    >> config = {additional_outputs:["output_name"]}
-    >> function_mapper = {output_name : example_function}
-    >> get_additional_outputs(config,function_mapper)
+    >> example_function = print("Hello world")
+    >> config = {"additional_outputs" : ["output_name"]}
+    >> function_mapper = {"output_name" : example_function}
+    >> get_additional_outputs(config, function_mapper)
+    >>
+    >>
+    >> example_function = function(argA, argB)
+    >> config = {"additional_outputs" : ["example_output"],
+    >>           "argA": "valueA",
+    >>           "argB": "valueB"}
+    >> function_mapper = {"example_output" : example_function}
+    >> get_additional_outputs(config, function_mapper)
 
     """
+
+    additional_outputs = dict()
 
     if not isinstance(config["additional_outputs"], list):
 
         raise ValueError(
             """
-In config file additional_outputs must be a list, please use:\n
-["all"] to get all outputs\n
-[] to get no outputs\n
-or a list with the outputs, e.g. ["output_1","output_2"]
+            In config file additional_outputs must be a list, please use:\n
+            ["all"] to get all outputs\n
+            [] to get no outputs\n
+            or a list with the outputs, e.g. ["output_1","output_2"]
                     """
         )
 
@@ -64,12 +81,16 @@ or a list with the outputs, e.g. ["output_1","output_2"]
 
         if function in function_mapper:
 
-            function_mapper[function](**config)
+            additional_outputs[function] = function_mapper[function](
+                additional_outputs_df=additional_outputs_df, **config
+            )
 
         else:
             raise ValueError(
                 f"""
-    The function {function} is not registerd, check spelling.\n
-    Currently the registered functions are:\n {function_mapper}
+                The function {function} is not registered, check spelling.\n
+                Currently the registered functions are:\n {function_mapper}
                     """
             )
+
+    return additional_outputs
