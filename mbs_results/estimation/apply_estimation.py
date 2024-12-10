@@ -52,9 +52,15 @@ def apply_estimation(
 
     estimation_df_list = []
 
+    calibration_group_map = pd.read_csv(config["calibration_group_map_path"])
+
     for population_file, sample_file in zip(population_files, sample_files):
         estimation_data = get_estimation_data(
-            population_file, sample_file, period, **config
+            population_file,
+            sample_file,
+            period,
+            calibration_group_map=calibration_group_map,
+            **config
         )
 
         census_df = estimation_data[

@@ -24,10 +24,6 @@ def estimate(df: pd.DataFrame, config: dict) -> pd.DataFrame:
         returns post estimation dataframe
     """
     warnings.warn("Estimate is slowest stage")
-    warnings.warn(
-        "temp fix is applied to convert calibration group map into df in config"
-    )
-    config["calibration_group_map"] = pd.read_csv(config["calibration_group_map"])
     estimate_df = apply_estimation(**config)
     # estimate_df = correct_values()
     estimate_df = estimate_df.drop(columns=["cell_no", "frotover", "frosic2007"])

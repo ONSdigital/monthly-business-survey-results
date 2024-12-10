@@ -2,7 +2,7 @@
     "platform" : "network",
     "bucket" : "",
 
-    "calibration_group_map": "",
+    "calibration_group_map_path": "",
     "classification_values_path": "",
     "folder_path": "",
     "l_values_path": "",
