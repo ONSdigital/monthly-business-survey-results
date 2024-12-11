@@ -140,10 +140,6 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         finalsel, keep_columns=config["finalsel_keep_cols"], **config
     )
 
-    back_data = pd.read_csv(config["responses_keep_cols"])
-    back_data = enforce_datatypes(
-        back_data, keep_columns=config["responses_keep_cols"], **config
-    )
     # Filter contributors files here to temp fix this overlap
 
     contributors = pd.merge(
@@ -173,6 +169,8 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         contributors, on=[reference, period], suffixes=["_res", "_con"], how="left"
     )
 
+    df = append_back_data(df, config)
+
     df = filter_out_questions(
         df=df,
         column=config["question_no"],
@@ -191,7 +189,6 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         error_values=[201],
     )
 
-    df = append_back_data(df, back_data, period)
     print("Staging Completed")
 
     return df
