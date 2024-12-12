@@ -1,15 +1,14 @@
 import pandas as pd
 
-from mbs_results.merge_domain import merge_domain
+from mbs_results.staging.merge_domain import merge_domain
 
 
 def get_selective_editing_contributer_output(
-    input_filepath: str,
-    domain_filepath: str,
+    additional_outputs_df: pd.DataFrame,
+    sic_domain_mapping_path: str,
     threshold_filepath: str,
-    sic_input: str,
-    sic_mapping: str,
     period_selected: int,
+    **config
 ) -> pd.DataFrame:
     """
     Returns a dataframe containing period, reference, domain_group, and
@@ -18,17 +17,16 @@ def get_selective_editing_contributer_output(
 
     Parameters
     ----------
-    input_filepath : str
-        Filepath to csv file containing reference, imp_class, period and
-        SIC columns.
-    domain_filepath : str
+    additional_outputs_df : pd.DataFrame
+        Dataframe containing reference, design_weight, formtype, period and SIC columns.
+    sic_domain_mapping_path : str
         Filepath to csv file containing SIC and domain columns.
     threshold_filepath : str
         Filepath to csv file containing form type, domain and threshold columns.
-    sic_input : str
-        Name of column in input_filepath csv file containing SIC variable.
-    sic_mapping : str
-        Name of column in domain_filepath csv file containing SIC variable.
+    period_selected : int
+        period to include in outputs
+    **config: Dict
+          main pipeline configuration. Can be used to input the entire config dictionary
 
     Returns
     -------
@@ -41,32 +39,29 @@ def get_selective_editing_contributer_output(
     >>        input_filepath=input_filepath,
     >>        domain_filepath=domain_filepath,
     >>        threshold_filepath=threshold_filepath,
-    >>        sic_input="sic_5_digit",
-    >>        sic_mapping="sic_5_digit",
     >>        period_selected=202201
     >> )
     """
 
-    input_data = pd.read_csv(
-        input_filepath,
-        usecols=["period", "reference", "design_weight", sic_input, "form_type"],
-    )
+    input_data = additional_outputs_df[
+        ["period", "reference", "design_weight", "frosic2007", "formtype"]
+    ]
 
-    domain_data = pd.read_csv(domain_filepath)
+    domain_data = pd.read_csv(sic_domain_mapping_path).astype(str)
 
-    threshold_mapping = pd.read_csv(threshold_filepath)
+    threshold_mapping = pd.read_csv(threshold_filepath).astype(str)
 
     selective_editing_contributer_output = merge_domain(
-        input_data, domain_data, sic_input, sic_mapping
+        input_data, domain_data, "frosic2007", "sic_5_digit"
     )
 
     selective_editing_contributer_output = pd.merge(
         selective_editing_contributer_output,
         threshold_mapping,
-        left_on=["form_type", "domain"],
+        left_on=["formtype", "domain"],
         right_on=["form", "domain"],
         how="left",
-    ).drop(columns=["form", "form_type"])
+    ).drop(columns=["form", "formtype"])
 
     selective_editing_contributer_output = selective_editing_contributer_output.rename(
         columns={"reference": "ruref", "domain": "domain_group"}
