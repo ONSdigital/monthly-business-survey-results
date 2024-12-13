@@ -49,7 +49,7 @@ def is_back_data_date_ok(
     if len(back_data_period.unique()) != 1:
         raise ValueError("Too many dates in back data, must have only 1")
 
-    if period_0 != current_period - pd.DateOffset(months=revision_period + 1):
+    if period_0 != current_period - pd.DateOffset(months=revision_period):
         raise ValueError("Back data period doesn't match the revision period")
 
     if first_period != period_0 + pd.DateOffset(months=1):
