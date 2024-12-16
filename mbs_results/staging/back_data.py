@@ -22,7 +22,7 @@ def is_back_data_date_ok(
     ----------
     back_data_period : pd.Series
         All dates in back data.
-    first_period : pd.Datetime
+    first_period : pd.Timestamp
         First period in staged data.
     current_period : int
         Period of pipeline run.
