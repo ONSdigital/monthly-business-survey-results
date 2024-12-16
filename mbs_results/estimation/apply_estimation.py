@@ -72,6 +72,8 @@ def apply_estimation(
         census_df["design_weight"] = 1
         census_df["calibration_factor"] = 1
         census_df["sampled"] = 0
+        # "census" is true ... census: bool, if census dont apply winsorisation
+        # update sampled to bool as well
 
         non_census_df = estimation_data[
             ~(
