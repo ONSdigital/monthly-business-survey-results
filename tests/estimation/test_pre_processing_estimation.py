@@ -26,10 +26,10 @@ class TestPreProcessingEstimation:
                 "cell_no",
                 "calibration_group",
                 "auxiliary",
-                "sampled",
+                "is_sampled",
             ]
         ]
-        population_frame = expected.drop(columns=["calibration_group", "sampled"])
+        population_frame = expected.drop(columns=["calibration_group", "is_sampled"])
         sample = population_frame.loc[:1, ["reference", "period"]]
 
         calibration_group_map = expected[["cell_no", "calibration_group"]]

@@ -71,7 +71,8 @@ def apply_estimation(
 
         census_df["design_weight"] = 1
         census_df["calibration_factor"] = 1
-        census_df["sampled"] = 0
+        census_df["is_sampled"] = True
+        census_df["is_census"] = True
         # "census" is true ... census: bool, if census dont apply winsorisation
         # update sampled to bool as well
 
@@ -85,6 +86,7 @@ def apply_estimation(
 
         non_census_df = calculate_design_weight(non_census_df, period, **config)
         non_census_df = calculate_calibration_factor(non_census_df, period, **config)
+        non_census_df["is_census"] = False
 
         all_together = pd.concat([non_census_df, census_df], ignore_index=True)
 
