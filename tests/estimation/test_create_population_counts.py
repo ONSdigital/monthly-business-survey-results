@@ -40,7 +40,7 @@ def test_create_population_count_output():
             "reference": [1, 1, 2, 2, 3],
             "period": [1, 1, 1, 1, 1],
             "strata": ["A", "A", "B", "B", "C"],
-            "sampled": [True, False, True, False, True],
+            "is_sampled": [True, False, True, False, True],
         }
     )
 
