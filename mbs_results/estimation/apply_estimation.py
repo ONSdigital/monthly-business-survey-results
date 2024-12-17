@@ -6,6 +6,9 @@ from mbs_results.estimation.calculate_estimation_weights import (
     calculate_calibration_factor,
     calculate_design_weight,
 )
+from mbs_results.estimation.create_population_counts import (
+    create_population_count_output,
+)
 from mbs_results.estimation.pre_processing_estimation import get_estimation_data
 from mbs_results.staging.data_cleaning import is_census
 
@@ -93,6 +96,10 @@ def apply_estimation(
         estimation_df_list.append(all_together)
 
     estimation_df = pd.concat(estimation_df_list, ignore_index=True)
+
+    create_population_count_output(
+        estimation_df, period, calibration_group, save_output=True, **config
+    )
 
     # validate_estimation(estimation_df, **config)
 

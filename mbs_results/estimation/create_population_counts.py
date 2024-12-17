@@ -71,14 +71,14 @@ def create_population_count_output(
         Returns none if save_output is True
     """
 
-    df_1 = calculate_turnover_sum_count(
+    df_population = calculate_turnover_sum_count(
         df, period, strata, colname="population", **config
     )
 
-    df_2 = calculate_turnover_sum_count(
+    df_sampled = calculate_turnover_sum_count(
         df.loc[df["sampled"]], period, strata, colname="sample", **config
     )
-    combined = pd.merge(df_1, df_2, on=[period, strata])
+    combined = pd.merge(df_population, df_sampled, on=[period, strata])
 
     if save_output:
         combined.to_csv(output_path + "population_counts.csv", index=False)
