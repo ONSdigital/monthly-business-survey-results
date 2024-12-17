@@ -40,7 +40,12 @@ def calculate_turnover_sum_count(
 
 
 def create_population_count_output(
-    df: pd.DataFrame, period, strata, **config
+    df: pd.DataFrame,
+    period: str,
+    strata: str,
+    output_path: str = "",
+    save_output: bool = False,
+    **config: dict,
 ) -> pd.DataFrame:
     """
     creates the population count output
@@ -53,12 +58,17 @@ def create_population_count_output(
         period column name
     strata : str
         strata column name
+    output_path : str, optional
+        Output path to save dataframe
+    save_output : bool, optional
+        Default False. If True, saves the output to output_path
 
     Returns
     -------
     pd.DataFrame
         A grouped dataframe with the sum and count columns prefixed with colname.
         Contains both population and sampled sum and counts for output.
+        Returns none if save_output is True
     """
 
     df_1 = calculate_turnover_sum_count(
@@ -69,4 +79,9 @@ def create_population_count_output(
         df.loc[df["sampled"]], period, strata, colname="sample", **config
     )
     combined = pd.merge(df_1, df_2, on=[period, strata])
-    return combined
+
+    if save_output:
+        combined.to_csv(output_path + "population_counts.csv", index=False)
+        return
+    else:
+        return combined
