@@ -114,20 +114,20 @@ def test_create_imputation_class(filepath):
 
 def test_run_live_or_frozen(filepath):
 
-    df = pd.read_csv(filepath / "test_run_live_or_frozen.csv")
+    df_in = pd.read_csv(filepath / "test_run_live_or_frozen_input.csv")
 
-    df_in = df.drop(columns=["frozen", "frozen_error"])
+    expected_frozen_output = pd.read_csv(
+        filepath / "test_run_live_or_frozen_frozen_output.csv"
+    )
 
-    live_ouput = run_live_or_frozen(df_in, "target", "error", "live")
+    expected_live_output = df_in.copy()
 
-    frozen_output = run_live_or_frozen(df_in, "target", "error", "frozen")
+    live_ouput = run_live_or_frozen(df_in, "target", "status", "live")
 
-    expected_output_frozen = df.copy()
+    frozen_output = run_live_or_frozen(df_in, "target", "status", "frozen")
 
-    expected_output_frozen.drop(columns=["frozen"], inplace=True)
-
-    assert_frame_equal(frozen_output, expected_output_frozen)
-    assert_frame_equal(live_ouput, df_in)
+    assert_frame_equal(frozen_output, expected_frozen_output)
+    assert_frame_equal(live_ouput, expected_live_output)
 
 
 def test_run_live_or_frozen_exception(filepath):
