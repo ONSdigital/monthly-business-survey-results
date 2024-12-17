@@ -77,7 +77,7 @@ def apply_estimation(
         census_df["is_sampled"] = True
         census_df["is_census"] = True
         # "census" is true ... census: bool, if census dont apply winsorisation
-        # update sampled to bool as well
+        # is_sampled: bool. This is used to distinguish sampled refs from non-sampled refs in population
 
         non_census_df = estimation_data[
             ~(
