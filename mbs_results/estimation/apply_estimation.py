@@ -76,8 +76,11 @@ def apply_estimation(
         census_df["calibration_factor"] = 1
         census_df["is_sampled"] = True
         census_df["is_census"] = True
-        # is_census: bool, to distinguish fully sampled (i.e. census) strata from non-census strata. Used in outlier detection so census strata are not winsorised.
-        # is_sampled: bool. This is used to distinguish sampled refs from non-sampled refs in population
+        # is_census: bool, to distinguish fully sampled (i.e. census) strata from
+        # non-census strata. Used in outlier detection so census strata are
+        # not winsorised.
+        # is_sampled: bool. This is used to distinguish sampled refs from non-sampled
+        # refs in population
 
         non_census_df = estimation_data[
             ~(
