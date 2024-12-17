@@ -76,7 +76,7 @@ def create_population_count_output(
     )
 
     df_sampled = calculate_turnover_sum_count(
-        df.loc[df["sampled"]], period, strata, colname="sample", **config
+        df.loc[df["is_sampled"]], period, strata, colname="sample", **config
     )
     combined = pd.merge(df_population, df_sampled, on=[period, strata])
 
