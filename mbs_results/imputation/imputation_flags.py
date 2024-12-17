@@ -110,7 +110,21 @@ def create_imputation_logical_columns(
 
     df.sort_values([reference, strata, period], inplace=True)
 
-    df[f"r_flag_{target}"] = df[target].notna()
+    if f"imputation_flags_{target}" in df.columns:
+        return_mask = (df[f"imputation_flags_{target}"].str.lower() == "r") | (
+            df[f"imputation_flags_{target}"].isnull()
+        )
+        print(
+            df[f"imputation_flags_{target}"],
+            return_mask,
+            return_mask.mul(df[target].notna()),
+            df[target].notna(),
+        )
+
+    else:
+        return_mask = df[target].notna()
+
+    df[f"r_flag_{target}"] = df[target].notna().mul(return_mask)
 
     if f"{target}_man" in df.columns:
         df[f"mc_flag_{target}"] = df[f"{target}_man"].notna()
