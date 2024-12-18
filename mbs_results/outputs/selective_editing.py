@@ -80,8 +80,8 @@ def create_standardising_factor(
         name of column in dataframe containing g_weight variable
     auxiliary_value : str
         name of column in dataframe containing auxiliary value variable
-    previous_period : int
-        previous period to take the weights for estimation of standardising factor in
+    calc_period : int
+        period to take the weights for estimation of standardising factor in
         the format yyyymm
 
     Returns
@@ -92,22 +92,27 @@ def create_standardising_factor(
 
     """
     questions_selected = [40, 49]
-    previous_df = dataframe[(dataframe[period] == period_selected)]
-    previous_df = previous_df[previous_df[question_no].isin(questions_selected)]
+    current_df = dataframe[(dataframe[period] == period_selected)]
+    current_df = current_df[current_df[question_no].isin(questions_selected)]
+
+    prev_const_link = dataframe[
+        (dataframe[period] == period_selected - 1) & (dataframe[question_no] == 49)
+    ][["imputation_class", "construction_link"]].set_index("imputation_class")
+
     # The standardising factor is created for each record before summing for each
     # domain-question grouping.
-    previous_df["unit_standardising_factor"] = (
-        previous_df[predicted_value]
-        * previous_df[a_weight]
-        * previous_df[o_weight]
-        * previous_df[g_weight]
+    current_df["unit_standardising_factor"] = (
+        current_df[predicted_value]
+        * current_df[a_weight]
+        * current_df[o_weight]
+        * current_df[g_weight]
     )
 
-    previous_df["standardising_factor"] = previous_df.groupby([domain, question_no])[
+    current_df["standardising_factor"] = current_df.groupby([domain, question_no])[
         "unit_standardising_factor"
     ].transform("sum")
 
-    output_df = previous_df[
+    output_df = current_df[
         [
             period,
             reference,
@@ -119,4 +124,4 @@ def create_standardising_factor(
         ]
     ]
 
-    return output_df.reset_index(drop=True)
+    return output_df.reset_index(drop=True), prev_const_link
