@@ -1,0 +1,4 @@
+﻿Period,Ruref,adjusted,return,registered_employment,SIC,registered_turnover,a-weight,gweight,outlier_weight
+202203,1234,100,100,300,30000,400,1,1,1
+202204,4567,200,200,200,40000,300,1,0.844322,1
+202205,8910,300,300,100,50000,200,7.23232,0.89523421,1
