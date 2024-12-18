@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from mbs_results.utilities.utils import convert_column_to_datetime
+
 
 def calculate_predicted_value(
     dataframe: pd.DataFrame,
@@ -49,7 +51,6 @@ def create_standardising_factor(
     a_weight: str,
     o_weight: str,
     g_weight: str,
-    auxiliary_value: str,
     period_selected: int,
 ) -> pd.DataFrame:
     """
@@ -78,8 +79,6 @@ def create_standardising_factor(
         name of column in dataframe containing o_weight variable
     g_weight : str
         name of column in dataframe containing g_weight variable
-    auxiliary_value : str
-        name of column in dataframe containing auxiliary value variable
     calc_period : int
         period to take the weights for estimation of standardising factor in
         the format yyyymm
@@ -94,10 +93,6 @@ def create_standardising_factor(
     questions_selected = [40, 49]
     current_df = dataframe[(dataframe[period] == period_selected)]
     current_df = current_df[current_df[question_no].isin(questions_selected)]
-
-    prev_const_link = dataframe[
-        (dataframe[period] == period_selected - 1) & (dataframe[question_no] == 49)
-    ][["imputation_class", "construction_link"]].set_index("imputation_class")
 
     # The standardising factor is created for each record before summing for each
     # domain-question grouping.
@@ -120,8 +115,84 @@ def create_standardising_factor(
             "standardising_factor",
             predicted_value,
             imputation_marker,
-            auxiliary_value,
         ]
     ]
 
-    return output_df.reset_index(drop=True), prev_const_link
+    return output_df.reset_index(drop=True)
+
+
+def calculate_auxiliary_value(
+    dataframe: pd.DataFrame,
+    reference: str,
+    period: str,
+    question_no: str,
+    frozen_turnover: str,
+    construction_link: str,
+    imputation_class: str,
+    period_selected: int,
+) -> pd.DataFrame:
+    """
+    Returning auxiliary values for questions 40 and 49.
+    Auxiliary is frozen turnover for Q40 and
+    construction link(t-1) * frozen turnover for Q49.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        Reference dataframe
+    reference : str
+        name of column in dataframe containing reference variable
+    period : str
+        name of column in dataframe containing period variable
+    question_no : str
+        name of column in dataframe containing question code variable
+    frozen_turnover : str
+        name of column in dataframe containing auxiliary value variable
+    construction_link : str
+        name of column in dataframe containing construction link variable
+    imputation_class : str
+        name of column in dataframe containing imputation class, where
+        there is one contruction link per imputation_class and period
+    calc_period : int
+        period to take the weights for estimation of standardising factor in
+        the format yyyymm
+
+    Returns
+    -------
+    pd.DataFrame
+        dataframe with calculated auxiliary_value and reference, period
+        and question_no in order to merge back onto selective editing
+        questions output
+
+    """
+    period_selected = pd.to_datetime(period_selected, format="%Y%m")
+    dataframe[period] = convert_column_to_datetime(dataframe[period])
+    current_df = dataframe[(dataframe[period] == period_selected)]
+
+    q40 = current_df[current_df[question_no] == 40]
+    q49 = current_df[current_df[question_no] == 49]
+
+    q40["auxiliary_value"] = q40[frozen_turnover]
+
+    previous_period = period_selected - pd.DateOffset(months=1)
+    prev_const_link = (
+        dataframe[
+            (dataframe[period] == previous_period) & (dataframe[question_no] == 49)
+        ][[imputation_class, construction_link, question_no]]
+        .drop_duplicates()
+        .rename(columns={"construction_link": "prev_const_link"})
+    )
+
+    q49 = pd.merge(q49, prev_const_link, on=[imputation_class, question_no], how="left")
+
+    q49["auxiliary_value"] = q49[frozen_turnover] * q49["prev_const_link"]
+    keep_cols = [
+        reference,
+        period,
+        question_no,
+        "auxiliary_value",
+    ]
+
+    output_df = pd.concat([q40[keep_cols], q49[keep_cols]])
+
+    return output_df.reset_index(drop=True)
