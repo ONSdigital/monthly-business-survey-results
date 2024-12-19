@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 def merge_counts(
     input_df: pd.DataFrame,
     count_df: pd.DataFrame,
@@ -46,99 +45,36 @@ def merge_counts(
 
     return df_merge.drop(columns=[count_cell, count_date])
 
+def create_imputation_link(df):
 
-def pivot_imputation_value(
-    df: pd.DataFrame,
-    identifier: str,
-    groups: list,
-    link_columns: list,
-    count_columns: list,
-    imputed_value: str,
-    selected_periods: list = None,
-) -> pd.DataFrame:
-    """
-    Returning dataframe containing imputation_value, filtered by date, pivoted by
-    imputation type and grouped by sic, cell, question and imputation type.
+    mapping_dict = {
+        'bir': 'b_link_adjustedresponse',
+        'fir': 'f_link_adjustedresponse',
+        'c': 'construction_link',
+        'fic': 'f_link_adjustedresponse',
+        'fimc': 'f_link_adjustedresponse',
+        'mc': None
+    }
 
-    Parameters
-    ----------
-    dataframe : pd.DataFrame
-        Reference dataframe containing links, count values, and imputed values
-        by identifier, cell, date, and question
-    identifier : str
-        name of column in dataframe containing identifier variable
-    groups : list
+    
+    df = df[~((df['imputation_flags_adjustedresponse'] == "r") | df['imputation_flags_adjustedresponse'].isnull())].reset_index(drop = True)
+    def get_imputation_link(row):
+        flag = row['imputation_flags_adjustedresponse']
+        column_name = mapping_dict.get(flag)
+        if column_name:
+            return row[column_name]
+        return None
 
-    link_columns : list
+    df['imputation_link'] = df.apply(get_imputation_link, axis=1)
 
-    count_columns : list
-
-    imputed_value: str
-        name of column in dataframe containing imputed_value variable
-    selected_periods: list
-        list containing periods to include in output
-
-    Returns
-    -------
-    dataframe filtered by date, containing imputation_value, pivoted by imputation type
-    and grouped by sic, cell, question and imputation type.
-
-    """
-    if selected_periods is not None:
-        df = df.query("{} in {}".format(groups[0], selected_periods))
-
-    links_df = df.melt(
-        id_vars=groups + [imputed_value],
-        value_vars=link_columns,
-        var_name="link_type",
-        value_name="imputation_link",
-    )
-
-    link_type_map = dict(zip(link_columns, ["F", "B", "C"]))
-    links_df["link_type"] = links_df["link_type"].map(link_type_map)
-
-    counts_df = df.melt(
-        id_vars=groups,
-        value_vars=count_columns,
-        var_name="link_type_count",
-        value_name="count",
-    )
-
-    link_type_map_count = dict(zip(count_columns, ["F", "B", "C"]))
-    counts_df["link_type_count"] = counts_df["link_type_count"].map(link_type_map_count)
-
-    merged_df = pd.merge(
-        links_df,
-        counts_df,
-        how="outer",
-        left_on=groups + ["link_type"],
-        right_on=groups + ["link_type_count"],
-    )
-
-    merged_df.drop_duplicates(inplace=True)
-    merged_df.drop(["link_type_count"], axis=1, inplace=True)
-
-    merged_df = merged_df.groupby(groups + ["link_type"], as_index=False).agg(
-        {imputed_value: "sum", "count": "first", "imputation_link": "first"}
-    )
-
-    sorting_order = {"F": 1, "B": 2, "C": 3}
-    merged_df["sort_column"] = merged_df["link_type"].map(sorting_order)
-
-    merged_df = merged_df.sort_values(groups + ["sort_column"])
-
-    merged_df.drop("sort_column", axis=1, inplace=True)
-
-    merged_df.reset_index(drop=True, inplace=True)
-
-    merged_df = merged_df[
-        groups
-        + [
-            "imputation_link",
-            "link_type",
-            "count",
-            imputed_value,
-        ]
-    ]
-
-    return merged_df
+    return df
+  
+if __name__ == "__main__":
+  input_df = pd.read_csv("monthly-business-survey-results/tests/data/outputs/pivot_imputation_value/create_imputation_link_input.csv", index_col=False)
+  expected_output = pd.read_csv("monthly-business-survey-results/tests/data/outputs/pivot_imputation_value/create_imputation_link_output.csv", index_col=False)
+  actual_output = create_imputation_link(input_df)
+  
+  expected_output
+  actual_output
+  
+  expected_output.columns

@@ -6,7 +6,7 @@ from pandas.testing import assert_frame_equal
 
 from mbs_results.outputs.pivot_imputation_value import (
     merge_counts,
-    pivot_imputation_value,
+    create_imputation_link
 )
 
 
@@ -26,8 +26,12 @@ def merge_counts_output(filepath):
 
 
 @pytest.fixture(scope="class")
-def pivot_imputation_value_output(filepath):
-    return pd.read_csv(filepath / "pivot_imputation_value_output.csv", index_col=False)
+def create_imputation_link_input(filepath):
+    return pd.read_csv(filepath / "create_imputation_link_input.csv", index_col=False)
+  
+@pytest.fixture(scope="class")
+def create_imputation_link_output(filepath):
+    return pd.read_csv(filepath / "create_imputation_link_output.csv", index_col=False)
 
 
 class TestMergeCounts:
@@ -42,44 +46,13 @@ class TestMergeCounts:
 
         assert_frame_equal(actual_output, expected_output)
 
-
-class TestPivotImputationValue:
-    def test_pivot_imputation_value_filter(
-        self, pivot_imputation_value_output, merge_counts_output
-    ):
-
-        expected_output = pivot_imputation_value_output.query("date == 202001")
-
-        input_data = merge_counts_output.drop(columns=["identifier"])
-
-        actual_output = pivot_imputation_value(
-            input_data,
-            "identifier",
-            ["date", "sic", "cell", "question"],
-            ["forward", "backward", "construction"],
-            ["f_count", "b_count", "c_count"],
-            "imputed_value",
-            [202001],
-        )
-
-        assert_frame_equal(actual_output, expected_output)
-
-    def test_pivot_imputation_value_no_filter(
-        self, pivot_imputation_value_output, merge_counts_output
-    ):
-
-        expected_output = pivot_imputation_value_output
-
-        input_data = merge_counts_output.drop(columns=["identifier"])
-        input_data = input_data.query("date in [202001, 202002]")
-
-        actual_output = pivot_imputation_value(
-            input_data,
-            "identifier",
-            ["date", "sic", "cell", "question"],
-            ["forward", "backward", "construction"],
-            ["f_count", "b_count", "c_count"],
-            "imputed_value",
-        )
-
-        assert_frame_equal(actual_output, expected_output)
+class TestCreateImputationLink:
+  def test_create_imputation_link(self, create_imputation_link_input, create_imputation_link_output):
+    
+    input_df = create_imputation_link_input
+    
+    expected_output = create_imputation_link_output
+    
+    actual_output = create_imputation_link(create_imputation_link_input)
+    
+    assert_frame_equal(actual_output, expected_output)
