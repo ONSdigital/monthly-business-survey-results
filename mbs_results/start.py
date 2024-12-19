@@ -9,8 +9,17 @@ def move_files(installPath: str):
     Parameters
     ----------
     installPath : str 
-        Where the the mbs_results package is installed locally, e.g., mbs_results.__file__
-    
+        Where the the mbs_results package is installed locally. 
+        E.g., mbs_results.__file__
+
+    Examples
+    ---------
+    >>> import mbs_results
+    ...
+    >>> from mbs_results.start import move_files
+    ...
+    >>> move_files(mbs_results.__file__)
+
     """
 
     # Get the directory where mbs_results is installed
