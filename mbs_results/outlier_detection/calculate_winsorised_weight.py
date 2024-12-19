@@ -6,12 +6,11 @@ def calculate_winsorised_weight(
     group,
     period,
     aux,
-    sampled,
+    is_census,
     a_weight,
     g_weight,
     target_variable,
     predicted_unit_value,
-    l_values,
     ratio_estimation_treshold,
     nw_ag_flag,
 ):
@@ -29,7 +28,7 @@ def calculate_winsorised_weight(
     aux : str
         Column name containing auxiliary variable (x).
     sampled : str
-        Column name indicating whether it was sampled or not -boolean.
+        Column name indicating whether a reference belongs to a cell that is a census.
     a_weight : str
         Column name containing the design weight.
     g_weight:str
@@ -38,8 +37,6 @@ def calculate_winsorised_weight(
         Column name of the predicted target variable.
     predicted_unit_value: str
         column name containing the predicted unit value.
-    l_values: str
-        column name containing the l values as provided by methodology.
     ratio_estimation_treshold: str
         column name containing the previously calculated ratio estimation threshold.
     nw_ag_flag: str
@@ -66,7 +63,7 @@ def calculate_winsorised_weight(
 
     df = df.drop(["w", "new_target"], axis=1)
 
-    non_winsorised = (df[sampled] == 0) | (df[nw_ag_flag])
+    non_winsorised = (df[is_census]) | (df[nw_ag_flag])
 
     division_with_0 = ~non_winsorised & (df[target_variable] == 0)
 
