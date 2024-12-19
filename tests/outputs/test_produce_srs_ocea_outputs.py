@@ -29,4 +29,4 @@ class TestProduceOceaSrsOutputs:
 
         expected_output = ocea_srs_output
 
-        assert_frame_equal(actual_output, expected_output, check_like=True)
+        assert_frame_equal(actual_output, expected_output)
