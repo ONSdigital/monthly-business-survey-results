@@ -4,7 +4,7 @@ import numpy as np
 def calculate_ratio_estimation(
     df,
     aux,
-    sampled,
+    is_census,
     a_weight,
     g_weight,
     target_variable,
@@ -20,8 +20,8 @@ def calculate_ratio_estimation(
         Original dataframe.
     aux : str
         Column name containing auxiliary variable (x).
-    sampled : str
-        Column name indicating whether it was sampled or not -boolean.
+    is_census : bool
+        Column name indicating whether a reference belongs to a cell that is a census.
     a_weight : str
         Column name containing the design weight.
     g_weight : str
@@ -48,7 +48,7 @@ def calculate_ratio_estimation(
     )
     df = df.drop("flag_calculation", axis=1)
 
-    non_winsorised = (df[sampled] == 0) | (df[nw_ag_flag] == True)  # noqa: E712
+    non_winsorised = (df[is_census]) | (df[nw_ag_flag])
     df["ratio_estimation_treshold"] = df["ratio_estimation_treshold"].mask(
         non_winsorised, np.nan
     )

@@ -42,7 +42,7 @@ class TestRatioEstimation:
         expected_output = ratio_estimation_test_output[
             [
                 "aux",
-                "sampled",
+                "is_census",
                 "a_weight",
                 "g_weight",
                 "target_variable",
@@ -56,7 +56,7 @@ class TestRatioEstimation:
         input_data = ratio_estimation_test_data[
             [
                 "aux",
-                "sampled",
+                "is_census",
                 "a_weight",
                 "g_weight",
                 "target_variable",
@@ -69,7 +69,7 @@ class TestRatioEstimation:
         actual_output = calculate_ratio_estimation(
             input_data,
             "aux",
-            "sampled",
+            "is_census",
             "a_weight",
             "g_weight",
             "target_variale",

@@ -94,7 +94,6 @@ def winsorise(
             g_weight,
             target_variable,
             "predicted_unit_value",
-            l_values,
             "ratio_estimation_treshold",
             "nw_ag_flag",
         )
