@@ -1,13 +1,13 @@
 import pandas as pd
 
 
-def produce_ocea_srs_outputs(df: pd.DataFrame) -> pd.DataFrame:
+def produce_ocea_srs_outputs(additional_outputs_df: pd.DataFrame) -> pd.DataFrame:
     """Produces outputs for OCEA/SRS
 
     Parameters
       ----------
-      df
-        Dataframe containing MBS data
+      additional_outputs_df
+        Dataframe containing MBS data for creating additional outputs
 
       Returns
       -------
