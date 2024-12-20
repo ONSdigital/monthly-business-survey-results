@@ -44,6 +44,7 @@ class TestImputationFlags:
             strata="strata",
             auxiliary="auxiliary",
             predictive_auxiliary="f_match_auxiliary",
+            back_data_period=111,
         )
         df_expected_output.drop(
             columns=[
@@ -53,6 +54,8 @@ class TestImputationFlags:
             ],
             inplace=True,
         )
+        df_output.drop(columns=["is_backdata"], inplace=True)
+
         assert_frame_equal(df_output, df_expected_output)
 
     def test_imputation_marker_manual_construction(
@@ -79,6 +82,7 @@ class TestImputationFlags:
             reference="reference",
             strata="strata",
             auxiliary="auxiliary",
+            back_data_period=111,
         )
         df_expected_output.drop(
             columns=[
@@ -88,5 +92,6 @@ class TestImputationFlags:
             ],
             inplace=True,
         )
+        df_output.drop(columns=["is_backdata"], inplace=True)
 
         assert_frame_equal(df_output, df_expected_output)

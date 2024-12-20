@@ -6,14 +6,19 @@ from mbs_results.imputation.ratio_of_means import ratio_of_means
 
 scenario_path_prefix = "tests/data/imputation/back_data_testing/"
 
-scenarios = ["FIR_FIR_FIR"]
+scenarios = [
+    "FIR_FIR_FIR",
+    "FIC_FIC_FIC",
+    "MC_FIMC_FIMC",
+    "FIMC_FIMC_FIMC",
+]
 
 
 pytestmark = pytest.mark.parametrize("base_file_name", scenarios)
 
 
 class TestRatioOfMeans:
-    def test_ratio_of_means(self, base_file_name):
+    def test_ratio_of_means_back_data(self, base_file_name):
 
         input_data = pd.read_csv(scenario_path_prefix + base_file_name + "_input.csv")
         expected_output = pd.read_csv(
@@ -32,6 +37,8 @@ class TestRatioOfMeans:
             reference="identifier",
             strata="group",
             auxiliary="other",
+            current_period=202003,
+            revision_period=2,
         )
 
         actual_output = actual_output.rename(
@@ -79,7 +86,12 @@ class TestRatioOfMeans:
             errors="ignore",
             inplace=True,
         )
-        print(expected_output.columns, "\n", actual_output.columns)
+        actual_output.drop(
+            columns=["is_backdata", "backdata_flags_question", "backdata_question"],
+            errors="ignore",
+            inplace=True,
+        )
+
         expected_output = expected_output[actual_output.columns]
 
         actual_output = actual_output.sort_values(by=["identifier", "date"])
@@ -92,8 +104,5 @@ class TestRatioOfMeans:
             "imputation_flags_question"
         ].str.lower()
         expected_output = expected_output.replace({"bi": "bir"})
-
-        actual_output.to_csv("actual_output.csv", index=False)
-        expected_output.to_csv("expected_output.csv", index=False)
 
         assert_frame_equal(actual_output, expected_output, check_dtype=False)

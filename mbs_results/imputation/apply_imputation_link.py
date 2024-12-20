@@ -56,6 +56,14 @@ def create_and_merge_imputation_values(
     # constructed has to come first to use the result for forward
     # impute from constructed
     imputation_config = {
+        # "backdata": {
+        #     "intermediate_column": "backdata",
+        #     "marker": "backdata",
+        #     # doesn't actually apply a fill so can be forward or back
+        #     "fill_column": target,
+        #     "fill_method": "ffill",
+        #     "link_column": cumulative_forward_link,
+        # },
         "c": {
             "intermediate_column": "constructed",
             "marker": "c",
