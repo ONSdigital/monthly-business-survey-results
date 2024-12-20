@@ -219,6 +219,44 @@ def wrap_get_cumulative_links(
     return df
 
 
+def process_backdata(df, target, period, back_data_period):
+    # Bool for if period is back data
+    df["is_backdata"] = df[period] == pd.to_datetime(back_data_period, format="%Y%m")
+    # Copying backdata to seperate column
+    df.loc[df["is_backdata"], f"backdata_{target}"] = df.loc[df["is_backdata"], target]
+    # Copying flags to sep column
+    df[f"backdata_flags_{target}"] = df[f"imputation_flags_{target}"].str.lower()
+
+    # moving mc data into manual construction column for MC imputation
+    df.loc[df[f"backdata_flags_{target}"] == "mc", f"{target}_man"] = df.loc[
+        df[f"backdata_flags_{target}"] == "mc", target
+    ]
+    df.loc[df[f"backdata_flags_{target}"] == "fimc", f"{target}_man"] = df.loc[
+        df[f"backdata_flags_{target}"] == "fimc", target
+    ]
+
+    # removing mc data from target column
+    df.loc[df[f"backdata_flags_{target}"] == "mc", target] = None
+    df.loc[df[f"backdata_flags_{target}"] == "fimc", target] = None
+    df.loc[df[f"backdata_flags_{target}"] == "fic", target] = None
+    return df
+
+
+def re_apply_backdata(df, target):
+    is_backdata_not_return = (df[f"backdata_flags_{target}"] != "r") & (
+        df["is_backdata"]
+    )
+    df.loc[is_backdata_not_return, target] = df.loc[
+        df["is_backdata"], f"backdata_{target}"
+    ]
+    df.loc[is_backdata_not_return, f"imputation_flags_{target}"] = df.loc[
+        df["is_backdata"], f"backdata_flags_{target}"
+    ]
+
+    df.drop(columns=["is_backdata"], inplace=True)
+    return df
+
+
 def ratio_of_means(
     df: pd.DataFrame,
     target: str,
@@ -226,6 +264,8 @@ def ratio_of_means(
     reference: str,
     strata: str,
     auxiliary: str,
+    current_period: str,
+    revision_period: str,
     filters: pd.DataFrame = None,
     manual_constructions: pd.DataFrame = None,
     imputation_links: Dict[str, str] = {},
@@ -276,6 +316,12 @@ def ratio_of_means(
     # These arguments are used from the majority of functions
 
     # TODO: Consider more elegant solution, or define function arguments explicitly
+    back_data_period = calculate_back_data_period(current_period, revision_period)
+    if f"imputation_flags_{target}" in df.columns:
+        backdata_present = True
+        df = process_backdata(df, target, period, back_data_period)
+    else:
+        backdata_present = False
 
     default_columns = {
         "target": target,
@@ -283,6 +329,7 @@ def ratio_of_means(
         "reference": reference,
         "strata": strata,
         "auxiliary": auxiliary,
+        "back_data_period": back_data_period,
     }
 
     if filters is not None:
@@ -324,6 +371,7 @@ def ratio_of_means(
         #     **default_columns,
         #     predictive_auxiliary="f_predictive_auxiliary"
         # )
+        # Pass backdata period to calculate imputation link
         .pipe(generate_imputation_marker, **default_columns)
         .pipe(wrap_get_cumulative_links, **default_columns)
         .pipe(
@@ -337,6 +385,13 @@ def ratio_of_means(
             imputation_types=imputation_types,
         )
     )
+
+    if backdata_present:
+        df = re_apply_backdata(df, target)
+    else:
+        df.drop(columns=["is_backdata"], inplace=True)
+
+    # df.to_csv("temp2.csv")
 
     # TODO: Reset index needed because of sorting, perhaps reset index
     #       when sorting directly in the low level functions or consider
@@ -381,3 +436,22 @@ def ratio_of_means(
     # TODO: Missing extra columns, default values and if filter was applied, all bool
 
     return df
+
+
+def calculate_back_data_period(current_period, revision_period) -> str:
+    current_period = pd.to_datetime(current_period, format="%Y%m")
+    back_data_period = (
+        (current_period - pd.DateOffset(months=revision_period)).date().strftime("%Y%m")
+    )
+    return back_data_period
+
+
+if __name__ == "__main__":
+    from mbs_results.utilities.inputs import load_config
+
+    config = load_config()
+    bdp = calculate_back_data_period(
+        current_period=config["current_period"],
+        revision_period=config["revision_period"],
+    )
+    print(config["current_period"], bdp)
