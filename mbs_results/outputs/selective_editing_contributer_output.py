@@ -50,7 +50,6 @@ def get_selective_editing_contributer_output(
             "design_weight",
             "frosic2007",
             "formtype",
-            "construction_link",
         ]
     ]
 

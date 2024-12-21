@@ -165,6 +165,10 @@ def calculate_auxiliary_value(
         questions output
 
     """
+
+    # convert register turover from annual pounds-thousands to monthly pounds
+    dataframe[frozen_turnover] = dataframe[frozen_turnover] * 1000 / 12
+
     period_selected = pd.to_datetime(period_selected, format="%Y%m")
     dataframe[period] = convert_column_to_datetime(dataframe[period])
     current_df = dataframe[(dataframe[period] == period_selected)]
