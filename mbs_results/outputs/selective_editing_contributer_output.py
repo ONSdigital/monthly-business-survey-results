@@ -49,7 +49,7 @@ def get_selective_editing_contributer_output(
             "reference",
             "design_weight",
             "frosic2007",
-            "formtype",
+            "formtype"
         ]
     ]
 

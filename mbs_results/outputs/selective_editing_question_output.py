@@ -64,17 +64,20 @@ def create_selective_editing_question_output(
     )
 
     auxiliary_value = calculate_auxiliary_value(
-        dataframe=additional_outputs_df
+        dataframe=additional_outputs_df,
         reference="reference",
         period="period",
         question_no="questioncode",
         frozen_turnover="frotover",
         construction_link="construction_link",
         imputation_class="imputation_class",
-        period_selected="period_selected"
+        period_selected=period_selected
     )
 
-    question_output = pd.merge(standardising_factor, auxiliary_value, on=["reference", "imputation_class", "questioncode"], how="left")
+    question_output = pd.merge(standardising_factor, 
+                               auxiliary_value, 
+                               on=["reference", "imputation_class", "questioncode"], 
+                               how="left").drop("imputation_class", axis=1)
 
     # Survey code is required on this output, 009 is MBS code
     question_output["survey_code"] = "009"
