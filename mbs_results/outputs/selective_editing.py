@@ -48,6 +48,7 @@ def create_standardising_factor(
     question_no: str,
     predicted_value: str,
     imputation_marker: str,
+    imputation_class: str,
     a_weight: str,
     o_weight: str,
     g_weight: str,
@@ -73,6 +74,8 @@ def create_standardising_factor(
         name of column in dataframe containing predicted value variable
     imputation_marker : str
         name of column in dataframe containing imputation marker variable
+    imputation_class : str
+        name of column in dataframe containing imputation class variable
     a_weight : str
         name of column in dataframe containing a_weight variable
     o_weight : str
@@ -115,6 +118,7 @@ def create_standardising_factor(
             "standardising_factor",
             predicted_value,
             imputation_marker,
+            imputation_class
         ]
     ]
 
