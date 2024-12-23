@@ -153,9 +153,11 @@ def create_impute(df, group, imputation_spec):
     fill_column = imputation_spec["fill_column"]
     fill_method = imputation_spec["fill_method"]
     link_column = imputation_spec["link_column"]
-    df[column_name] = (
-        df.groupby(group)[fill_column].fillna(method=fill_method) * df[link_column]
-    )
+
+    if fill_method == "ffill":
+        df[column_name] = df.groupby(group)[fill_column].ffill() * df[link_column]
+    elif fill_method == "bfill":
+        df[column_name] = df.groupby(group)[fill_column].bfill() * df[link_column]
     return df
 
 
