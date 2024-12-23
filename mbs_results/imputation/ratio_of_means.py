@@ -239,6 +239,7 @@ def process_backdata(df, target, period, back_data_period):
     df.loc[df[f"backdata_flags_{target}"] == "mc", target] = None
     df.loc[df[f"backdata_flags_{target}"] == "fimc", target] = None
     df.loc[df[f"backdata_flags_{target}"] == "fic", target] = None
+    # df.loc[df[f"backdata_flags_{target}"] == "c", target] = None
     return df
 
 
