@@ -219,7 +219,29 @@ def wrap_get_cumulative_links(
     return df
 
 
-def process_backdata(df, target, period, back_data_period):
+def process_backdata(
+    df: pd.DataFrame, target: str, period: str, back_data_period: str
+) -> pd.DataFrame:
+    """
+    function to process the back data. Removes some values from target column so
+    correct imputation links are calculated
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        original dataframe
+    target : str
+        tartget column name
+    period : str
+        period column name
+    back_data_period : str
+        back data period value
+
+    Returns
+    -------
+    pd.DataFrame
+        dataframe with backdata processed and backdata flags copied to seperate columns
+    """
     # Bool for if period is back data
     df["is_backdata"] = df[period] == pd.to_datetime(back_data_period, format="%Y%m")
     # Copying backdata to seperate column
@@ -241,14 +263,32 @@ def process_backdata(df, target, period, back_data_period):
         & (df[f"backdata_flags_{target}"].notna()),
         target,
     ] = None
-    # df.loc[df[f"backdata_flags_{target}"] == "mc", target] = None
-    # df.loc[df[f"backdata_flags_{target}"] == "fimc", target] = None
-    # df.loc[df[f"backdata_flags_{target}"] == "fic", target] = None
-    # df.loc[df[f"backdata_flags_{target}"] == "c", target] = None
+
     return df
 
 
-def re_apply_backdata(df, target, dropping=False):
+def reapply_backdata(
+    df: pd.DataFrame, target: str, dropping: bool = False
+) -> pd.DataFrame:
+    """
+    reapply backdata flags and values to ensure no changes are made to back data.
+    will not do anything if backdata is not present in dataframe
+    dropping is optional argument which will drop the copied backdata column
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        original dataframe
+    target : str
+        target column name
+    dropping : bool, optional
+        if true the temp column to store back data will be removed , by default False
+
+    Returns
+    -------
+    pd.DataFrame
+        original dataframe with back data re-applied.
+    """
     if f"backdata_flags_{target}" in df.columns:
 
         is_backdata_not_return = (df[f"backdata_flags_{target}"] != "r") & (
@@ -267,7 +307,25 @@ def re_apply_backdata(df, target, dropping=False):
     return df
 
 
-def replace_fir_backdata(df, target):
+def replace_fir_backdata(df: pd.DataFrame, target: str) -> pd.DataFrame:
+    """
+    replaced the target column with back data.
+    this is removed before calculating forwards and backwards links to
+    ensure the correct values are used.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        original dataframe
+    target : str
+        target column name
+
+    Returns
+    -------
+    pd.DataFrame
+        original dataframe with imputed data copied over into the target column.
+
+    """
     if f"backdata_flags_{target}" in df.columns:
         df.loc[(df[f"backdata_flags_{target}"].isin(["fir"])), target] = df.loc[
             (df[f"backdata_flags_{target}"].isin(["fir"])), f"backdata_{target}"
@@ -382,16 +440,12 @@ def ratio_of_means(
         imputation_types = ("c", "fir", "bir", "fic")
 
     df = (
-        df  # .pipe(
-        #     create_impute_flags,
-        #     **default_columns,
-        #     predictive_auxiliary="f_predictive_auxiliary"
-        # )
+        df
         # Pass backdata period to calculate imputation link
         .pipe(replace_fir_backdata, target=target)
         .pipe(generate_imputation_marker, **default_columns)
         .pipe(wrap_get_cumulative_links, **default_columns)
-        .pipe(re_apply_backdata, target=target)
+        .pipe(reapply_backdata, target=target)
         .pipe(
             create_and_merge_imputation_values,
             **default_columns,
@@ -402,15 +456,8 @@ def ratio_of_means(
             construction_link="construction_link",
             imputation_types=imputation_types,
         )
-        .pipe(re_apply_backdata, target=target, dropping=True)
+        .pipe(reapply_backdata, target=target, dropping=True)
     )
-
-    # if backdata_present:
-    #     df = re_apply_backdata(df, target)
-    # else:
-    #     df.drop(columns=["is_backdata"], inplace=True)
-
-    # df.to_csv("temp2.csv")
 
     # TODO: Reset index needed because of sorting, perhaps reset index
     #       when sorting directly in the low level functions or consider

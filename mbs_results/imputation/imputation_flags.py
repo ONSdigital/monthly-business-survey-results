@@ -73,14 +73,7 @@ def generate_imputation_marker(
     df.to_csv("temp.csv")
     first_condition_met = [np.where(i)[0][0] for i in df[select_cols].values]
     df[f"imputation_flags_{target}"] = [flags[i] for i in first_condition_met]
-    # df.loc[
-    #     df[f"imputation_flags_{target}"] == "backdata", f"imputation_flags_{target}"
-    # ] = df.loc[
-    #     df[f"imputation_flags_{target}"] == "backdata", f"backdata_flags_{target}"
-    # ]
     df.drop(columns=select_cols, inplace=True)
-    # print(df[f"imputation_flags_{target}"], df[f"backdata_flags_{target}"])
-    # df.to_csv("temp.csv")
 
     return df
 
@@ -133,12 +126,8 @@ def create_imputation_logical_columns(
 
     if f"imputation_flags_{target}" in df.columns:
         # Case where back data is present
-        # df["is_backdata"] = df[period] == pd.to_datetime(
-        # back_data_period, format="%Y%m")
-
         backdata_r_mask = df[f"backdata_flags_{target}"] == "r"
         backdata_fir_mask = df[f"backdata_flags_{target}"] == "fir"
-        # backdata_mc_mask = df[f"backdata_flags_{target}"] == "mc"
         backdata_fimc_mask = df[f"backdata_flags_{target}"] == "fimc"
         backdata_c_mask = df[f"backdata_flags_{target}"] == "c"
         backdata_fic_mask = df[f"backdata_flags_{target}"] == "fic"
@@ -147,24 +136,16 @@ def create_imputation_logical_columns(
         df["is_backdata"] = df[reference] != df[reference]
         backdata_r_mask = df[reference] != df[reference]
         backdata_fir_mask = df[reference] != df[reference]
-        # backdata_mc_mask = df[reference] != df[reference]
         backdata_fimc_mask = df[reference] != df[reference]
         backdata_c_mask = df[reference] != df[reference]
         backdata_fic_mask = df[reference] != df[reference]
         print(backdata_r_mask)
 
-        # return_mask = (df[f"imputation_flags_{target}"].str.lower() == "r") | (
-        #     df[f"imputation_flags_{target}"].isnull()
-        # )
-        # fir_mask = df[f"imputation_flags_{target}"].str.lower() == "fir"
-
     # if target na but not back data period OR if backdata flag is 'r'
     df[f"r_flag_{target}"] = (df[target].notna() & ~df["is_backdata"]) | backdata_r_mask
 
     if f"{target}_man" in df.columns:
-        df[f"mc_flag_{target}"] = df[
-            f"{target}_man"
-        ].notna()  # & ~df["is_backdata"]) | backdata_mc_mask
+        df[f"mc_flag_{target}"] = df[f"{target}_man"].notna()
 
     df[f"fir_flag_{target}"] = (
         flag_rolling_impute(df, time_difference, strata, reference, target, period)
@@ -176,9 +157,7 @@ def create_imputation_logical_columns(
         & ~df["is_backdata"]
     ) | backdata_r_mask
 
-    if (
-        f"{target}_man" in df.columns
-    ):  # ((df[f"does_not_ezist_{target}"].fillna('').str.contains('fimc')).any()):
+    if f"{target}_man" in df.columns:
         df[f"fimc_flag_{target}"] = (
             flag_rolling_impute(
                 df, time_difference, strata, reference, f"{target}_man", period
@@ -197,9 +176,6 @@ def create_imputation_logical_columns(
         flag_rolling_impute(df, time_difference, strata, reference, auxiliary, period)
         | backdata_fic_mask
     )
-
-    # print((df[f"backdata_flags_{target}"].fillna('').str.contains('fimc')).any())
-    # df.drop(columns=["is_backdata"], inplace=True)
 
     return df
 
