@@ -237,11 +237,11 @@ def imputation_overlaps_mc(df, target, reference, strata):
         df[column] = np.where(
             df[imputation_marker_column] & df[f"mc_flag_{target}"], False, None
         )
-        df[column] = (
-            df.groupby([strata, reference])[column].fillna(
-                method=direction_single_string + "fill"
-            )
-        ).fillna(True)
+        if direction_single_string == "b":
+            df[column] = (df.groupby([strata, reference])[column].bfill()).fillna(True)
+        elif direction_single_string == "f":
+            df[column] = (df.groupby([strata, reference])[column].ffill()).fillna(True)
+
         df[imputation_marker_column] = df[imputation_marker_column] & df[column]
         df.drop(
             columns=[column],
