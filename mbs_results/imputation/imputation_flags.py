@@ -284,23 +284,28 @@ def flag_rolling_impute(
     pd.Series
     """
 
-    if time_difference < 0:
-        fillmethod = "bfill"
-    elif time_difference > 0:
-        fillmethod = "ffill"
-
     df["fill_group"] = (
         (df[period] - pd.DateOffset(months=1) != df.shift(1)[period])
         | (df[strata].diff(1) != 0)
         | (df[reference].diff(1) != 0)
     ).cumsum()
 
-    boolean_column = (
-        df.groupby(["fill_group"])[target]
-        .fillna(method=fillmethod)
-        .notnull()
-        .mul(df["fill_group"] == df.shift(time_difference)["fill_group"])
-    )
+    if time_difference < 0:
+        boolean_column = (
+            df.groupby(["fill_group"])[target]
+            .bfill()
+            .notnull()
+            .mul(df["fill_group"] == df.shift(time_difference)["fill_group"])
+        )
+
+    elif time_difference > 0:
+        boolean_column = (
+            df.groupby(["fill_group"])[target]
+            .ffill()
+            .notnull()
+            .mul(df["fill_group"] == df.shift(time_difference)["fill_group"])
+        )
+
     df.drop(columns="fill_group", inplace=True)
 
     return boolean_column
