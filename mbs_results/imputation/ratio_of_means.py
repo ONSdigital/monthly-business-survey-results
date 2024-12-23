@@ -239,22 +239,26 @@ def process_backdata(df, target, period, back_data_period):
     df.loc[df[f"backdata_flags_{target}"] == "mc", target] = None
     df.loc[df[f"backdata_flags_{target}"] == "fimc", target] = None
     df.loc[df[f"backdata_flags_{target}"] == "fic", target] = None
-    # df.loc[df[f"backdata_flags_{target}"] == "c", target] = None
+    df.loc[df[f"backdata_flags_{target}"] == "c", target] = None
     return df
 
 
-def re_apply_backdata(df, target):
-    is_backdata_not_return = (df[f"backdata_flags_{target}"] != "r") & (
-        df["is_backdata"]
-    )
-    df.loc[is_backdata_not_return, target] = df.loc[
-        df["is_backdata"], f"backdata_{target}"
-    ]
-    df.loc[is_backdata_not_return, f"imputation_flags_{target}"] = df.loc[
-        df["is_backdata"], f"backdata_flags_{target}"
-    ]
+def re_apply_backdata(df, target, dropping=False):
+    if f"backdata_flags_{target}" in df.columns:
 
-    df.drop(columns=["is_backdata"], inplace=True)
+        is_backdata_not_return = (df[f"backdata_flags_{target}"] != "r") & (
+            df["is_backdata"]
+        )
+        df.loc[is_backdata_not_return, target] = df.loc[
+            df["is_backdata"], f"backdata_{target}"
+        ]
+        df.loc[is_backdata_not_return, f"imputation_flags_{target}"] = df.loc[
+            df["is_backdata"], f"backdata_flags_{target}"
+        ]
+
+    if dropping:
+        df.drop(columns=["is_backdata"], inplace=True)
+
     return df
 
 
@@ -319,10 +323,7 @@ def ratio_of_means(
     # TODO: Consider more elegant solution, or define function arguments explicitly
     back_data_period = calculate_back_data_period(current_period, revision_period)
     if f"imputation_flags_{target}" in df.columns:
-        backdata_present = True
         df = process_backdata(df, target, period, back_data_period)
-    else:
-        backdata_present = False
 
     default_columns = {
         "target": target,
@@ -375,6 +376,7 @@ def ratio_of_means(
         # Pass backdata period to calculate imputation link
         .pipe(generate_imputation_marker, **default_columns)
         .pipe(wrap_get_cumulative_links, **default_columns)
+        .pipe(re_apply_backdata, target=target)
         .pipe(
             create_and_merge_imputation_values,
             **default_columns,
@@ -385,12 +387,13 @@ def ratio_of_means(
             construction_link="construction_link",
             imputation_types=imputation_types,
         )
+        .pipe(re_apply_backdata, target=target, dropping=True)
     )
 
-    if backdata_present:
-        df = re_apply_backdata(df, target)
-    else:
-        df.drop(columns=["is_backdata"], inplace=True)
+    # if backdata_present:
+    #     df = re_apply_backdata(df, target)
+    # else:
+    #     df.drop(columns=["is_backdata"], inplace=True)
 
     # df.to_csv("temp2.csv")
 

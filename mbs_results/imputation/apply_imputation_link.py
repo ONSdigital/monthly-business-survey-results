@@ -153,11 +153,19 @@ def create_impute(df, group, imputation_spec):
     fill_column = imputation_spec["fill_column"]
     fill_method = imputation_spec["fill_method"]
     link_column = imputation_spec["link_column"]
+    imputation_spec["marker"]
 
     if fill_method == "ffill":
         df[column_name] = df.groupby(group)[fill_column].ffill() * df[link_column]
     elif fill_method == "bfill":
         df[column_name] = df.groupby(group)[fill_column].bfill() * df[link_column]
+
+    if "hold_period_0_values" in df.columns:
+        df.loc[df["hold_period_0_values"].notnull(), column_name] = df.loc[
+            df["hold_period_0_values"].notnull(), "hold_period_0_values"
+        ]
+        df.drop(columns="hold_period_0_values", inplace=True)
+
     return df
 
 
