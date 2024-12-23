@@ -255,10 +255,10 @@ def re_apply_backdata(df, target, dropping=False):
             df["is_backdata"]
         )
         df.loc[is_backdata_not_return, target] = df.loc[
-            df["is_backdata"], f"backdata_{target}"
+            is_backdata_not_return, f"backdata_{target}"
         ]
         df.loc[is_backdata_not_return, f"imputation_flags_{target}"] = df.loc[
-            df["is_backdata"], f"backdata_flags_{target}"
+            is_backdata_not_return, f"backdata_flags_{target}"
         ]
 
     if dropping:
