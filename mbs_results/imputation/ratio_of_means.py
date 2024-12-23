@@ -236,10 +236,15 @@ def process_backdata(df, target, period, back_data_period):
     ]
 
     # removing mc data from target column
-    df.loc[df[f"backdata_flags_{target}"] == "mc", target] = None
-    df.loc[df[f"backdata_flags_{target}"] == "fimc", target] = None
-    df.loc[df[f"backdata_flags_{target}"] == "fic", target] = None
-    df.loc[df[f"backdata_flags_{target}"] == "c", target] = None
+    df.loc[
+        (~df[f"backdata_flags_{target}"].isin(["r"]))
+        & (df[f"backdata_flags_{target}"].notna()),
+        target,
+    ] = None
+    # df.loc[df[f"backdata_flags_{target}"] == "mc", target] = None
+    # df.loc[df[f"backdata_flags_{target}"] == "fimc", target] = None
+    # df.loc[df[f"backdata_flags_{target}"] == "fic", target] = None
+    # df.loc[df[f"backdata_flags_{target}"] == "c", target] = None
     return df
 
 
@@ -258,6 +263,15 @@ def re_apply_backdata(df, target, dropping=False):
 
     if dropping:
         df.drop(columns=["is_backdata"], inplace=True)
+
+    return df
+
+
+def replace_fir_backdata(df, target):
+    if f"backdata_flags_{target}" in df.columns:
+        df.loc[(df[f"backdata_flags_{target}"].isin(["fir"])), target] = df.loc[
+            (df[f"backdata_flags_{target}"].isin(["fir"])), f"backdata_{target}"
+        ]
 
     return df
 
@@ -374,6 +388,7 @@ def ratio_of_means(
         #     predictive_auxiliary="f_predictive_auxiliary"
         # )
         # Pass backdata period to calculate imputation link
+        .pipe(replace_fir_backdata, target=target)
         .pipe(generate_imputation_marker, **default_columns)
         .pipe(wrap_get_cumulative_links, **default_columns)
         .pipe(re_apply_backdata, target=target)
