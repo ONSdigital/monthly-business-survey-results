@@ -238,9 +238,13 @@ def imputation_overlaps_mc(df, target, reference, strata):
             df[imputation_marker_column] & df[f"mc_flag_{target}"], False, None
         )
         if direction_single_string == "b":
-            df[column] = (df.groupby([strata, reference])[column].bfill()).fillna(True)
+            df[column] = (
+                df.groupby([strata, reference])[column].bfill().astype(bool)
+            ).fillna(True)
         elif direction_single_string == "f":
-            df[column] = (df.groupby([strata, reference])[column].ffill()).fillna(True)
+            df[column] = (
+                df.groupby([strata, reference])[column].ffill().astype(bool)
+            ).fillna(True)
 
         df[imputation_marker_column] = df[imputation_marker_column] & df[column]
         df.drop(
