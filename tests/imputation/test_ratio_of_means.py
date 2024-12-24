@@ -57,9 +57,7 @@ scenarios = [
 ]
 
 
-pytestmark = pytest.mark.parametrize("base_file_name", scenarios)
-
-
+@pytest.mark.parametrize("base_file_name", scenarios)
 class TestRatioOfMeans:
     def test_ratio_of_means(self, base_file_name):
 
@@ -166,16 +164,12 @@ class TestRatioOfMeans:
         assert_frame_equal(actual_output, expected_output, check_dtype=False)
 
 
-pytestmark = pytest.mark.parametrize(
-    "base_file_name", scenarios[len(scenarios) - 10 : len(scenarios)]
-)
-
-
+@pytest.mark.parametrize("mc_base_file_name", scenarios[-10:])
 class TestRatioOfMeansManConstruction:
-    def test_manual_construction_input(self, base_file_name):
-        df = pd.read_csv(scenario_path_prefix + base_file_name + "_input.csv")
+    def test_manual_construction_input(self, mc_base_file_name):
+        df = pd.read_csv(scenario_path_prefix + mc_base_file_name + "_input.csv")
         expected_output = pd.read_csv(
-            scenario_path_prefix + base_file_name + "_output.csv"
+            scenario_path_prefix + mc_base_file_name + "_output.csv"
         )
 
         manual_constructions = df.copy()[
