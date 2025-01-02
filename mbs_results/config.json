@@ -150,6 +150,8 @@
         "10":"r",
         "11":"r",
         "13":"fir"
-        }
+        },
+  
+  "additional_outputs":["create_imputation_link_output"]
 
 }

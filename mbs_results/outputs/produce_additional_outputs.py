@@ -14,6 +14,8 @@ from mbs_results.outputs.weighted_adj_val_time_series import (
     get_weighted_adj_val_time_series,
 )
 
+from mbs_results.outputs.pivot_imputation_value import create_imputation_link_output
+
 
 def get_additional_outputs_df(
     estimation_output: pd.DataFrame, outlier_output: pd.DataFrame
@@ -92,6 +94,7 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
             "selective_editing_question": create_selective_editing_question_output,
             "turnover_output": create_turnover_output,
             "weighted_adj_val_time_series": get_weighted_adj_val_time_series,
+            "create_imputation_link_output": create_imputation_link_output
         },
         additional_outputs_df,
     )
