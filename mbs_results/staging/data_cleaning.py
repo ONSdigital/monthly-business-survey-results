@@ -79,7 +79,7 @@ def enforce_datatypes(
     keep_columns: list,
     master_column_type_dict: dict,
     temporarily_remove_cols: list,
-    **config
+    **config,
 ):
     """
     function to change datatypes of columns based on config file
@@ -187,7 +187,7 @@ def join_manual_constructions(
     reference: str,
     period: str,
     question_no: str = "question_no",
-    **config
+    **config,
 ):
     """
     joins manual construction data from onto main dataframe
@@ -278,9 +278,9 @@ def is_same_dtype(df: pd.DataFrame, df2: pd.DataFrame, col_name: str) -> bool:
 def run_live_or_frozen(
     df: pd.DataFrame,
     target: str or list[str],
-    error_marker: str,
+    status: str,
     state: str = "live",
-    error_values: List[str] = ["E", "W"],
+    error_values: List[str] = ["Check needed"],
 ) -> pd.DataFrame:
     """
     For frozen, therefore target values are converted to null, hence responses
@@ -292,15 +292,15 @@ def run_live_or_frozen(
         Original dataframe.
     target : str or list[str]
         Column(s) to treat as non-response.
-    error_marker : str
-        Column name with error values.
+    status : str
+        Column containing error status.
     state : str, optional
         Function config parameter. The default is "live". "live" state won't do
-        anyting, "frozen" will convert to null the error_values within error_marker
+        anyting, "frozen" will convert to null the error_values within status
     error_values : list[str], optional
-        Values to ignore. The default is ['E', 'W'].
+        Values to ignore. The default is ['Check needed'].
         Mapping:
-        E -> 'Check needed' : '201',
+            'Check needed' : '201', ("E" or "W" for CSW)
             'Clear' : '210',
             'Clear - overridden' : '211'
 
@@ -320,8 +320,9 @@ def run_live_or_frozen(
         )
 
     if state == "frozen":
-        df["frozen_error"] = df.apply(
-            lambda x: x[target] if x[error_marker] in (error_values) else None, axis=1
+        df[f"live_{target}"] = df[target].copy()
+        df[target] = df.apply(
+            lambda x: x[target] if x[status] not in (error_values) else None, axis=1
         )
 
     return df

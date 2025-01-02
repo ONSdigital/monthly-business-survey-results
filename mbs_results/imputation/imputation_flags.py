@@ -9,6 +9,7 @@ def generate_imputation_marker(
     reference: str,
     strata: str,
     auxiliary: str,
+    back_data_period: str,
     time_difference=1,
     **kwargs,
 ) -> pd.DataFrame:
@@ -35,7 +36,10 @@ def generate_imputation_marker(
         Column name containing strata information (sic).
     auxiliary : str
         Column name containing auxiliary data.
-    time_difference: int
+    back_data_period : pd.Timestamp
+        Time period used as the back data period. This periods data
+        should not be changed
+    time_difference: int, Optional
         lookup distance for matched pairs
     kwargs : mapping, optional
         A dictionary of keyword arguments passed into func.
@@ -47,6 +51,7 @@ def generate_imputation_marker(
         i.e. the type of imputation method that should be used to fill
         missing returns.
     """
+
     if f"{target}_man" in df.columns:
         flags = ["r", "mc", "fir", "bir", "fimc", "fic", "c"]
         # Check order from Specs
@@ -54,10 +59,18 @@ def generate_imputation_marker(
         flags = ["r", "fir", "bir", "fic", "c"]
 
     create_imputation_logical_columns(
-        df, target, period, reference, strata, auxiliary, time_difference
+        df,
+        target,
+        period,
+        reference,
+        strata,
+        auxiliary,
+        back_data_period,
+        time_difference,
     )
 
     select_cols = [f"{i}_flag_{target}" for i in flags]
+    df.to_csv("temp.csv")
     first_condition_met = [np.where(i)[0][0] for i in df[select_cols].values]
     df[f"imputation_flags_{target}"] = [flags[i] for i in first_condition_met]
     df.drop(columns=select_cols, inplace=True)
@@ -72,6 +85,7 @@ def create_imputation_logical_columns(
     reference: str,
     strata: str,
     auxiliary: str,
+    back_data_period: str,
     time_difference: int = 1,
 ):
     """
@@ -110,31 +124,57 @@ def create_imputation_logical_columns(
 
     df.sort_values([reference, strata, period], inplace=True)
 
-    df[f"r_flag_{target}"] = df[target].notna()
+    if f"imputation_flags_{target}" in df.columns:
+        # Case where back data is present
+        backdata_r_mask = df[f"backdata_flags_{target}"] == "r"
+        backdata_fir_mask = df[f"backdata_flags_{target}"] == "fir"
+        backdata_fimc_mask = df[f"backdata_flags_{target}"] == "fimc"
+        backdata_c_mask = df[f"backdata_flags_{target}"] == "c"
+        backdata_fic_mask = df[f"backdata_flags_{target}"] == "fic"
+
+    else:
+        df["is_backdata"] = df[reference] != df[reference]
+        backdata_r_mask = df[reference] != df[reference]
+        backdata_fir_mask = df[reference] != df[reference]
+        backdata_fimc_mask = df[reference] != df[reference]
+        backdata_c_mask = df[reference] != df[reference]
+        backdata_fic_mask = df[reference] != df[reference]
+        print(backdata_r_mask)
+
+    # if target na but not back data period OR if backdata flag is 'r'
+    df[f"r_flag_{target}"] = (df[target].notna() & ~df["is_backdata"]) | backdata_r_mask
 
     if f"{target}_man" in df.columns:
         df[f"mc_flag_{target}"] = df[f"{target}_man"].notna()
 
-    df[f"fir_flag_{target}"] = flag_rolling_impute(
-        df, time_difference, strata, reference, target, period
-    )
+    df[f"fir_flag_{target}"] = (
+        flag_rolling_impute(df, time_difference, strata, reference, target, period)
+        & ~df["is_backdata"]
+    ) | backdata_fir_mask
 
-    df[f"bir_flag_{target}"] = flag_rolling_impute(
-        df, -time_difference, strata, reference, target, period
-    )
+    df[f"bir_flag_{target}"] = (
+        flag_rolling_impute(df, -time_difference, strata, reference, target, period)
+        & ~df["is_backdata"]
+    ) | backdata_r_mask
 
     if f"{target}_man" in df.columns:
-        df[f"fimc_flag_{target}"] = flag_rolling_impute(
-            df, time_difference, strata, reference, f"{target}_man", period
+        df[f"fimc_flag_{target}"] = (
+            flag_rolling_impute(
+                df, time_difference, strata, reference, f"{target}_man", period
+            )
+            | backdata_fimc_mask
         )
 
         df = imputation_overlaps_mc(df, target, reference, strata)
 
-    construction_conditions = df[target].isna() & df[auxiliary].notna()
+    construction_conditions = (
+        df[target].isna() & df[auxiliary].notna() & ~df["is_backdata"]
+    ) | backdata_c_mask
     df[f"c_flag_{target}"] = np.where(construction_conditions, True, False)
 
-    df[f"fic_flag_{target}"] = flag_rolling_impute(
-        df, time_difference, strata, reference, auxiliary, period
+    df[f"fic_flag_{target}"] = (
+        flag_rolling_impute(df, time_difference, strata, reference, auxiliary, period)
+        | backdata_fic_mask
     )
 
     return df
@@ -173,11 +213,15 @@ def imputation_overlaps_mc(df, target, reference, strata):
         df[column] = np.where(
             df[imputation_marker_column] & df[f"mc_flag_{target}"], False, None
         )
-        df[column] = (
-            df.groupby([strata, reference])[column].fillna(
-                method=direction_single_string + "fill"
-            )
-        ).fillna(True)
+        if direction_single_string == "b":
+            df[column] = (
+                df.groupby([strata, reference])[column].bfill().astype(bool)
+            ).fillna(True)
+        elif direction_single_string == "f":
+            df[column] = (
+                df.groupby([strata, reference])[column].ffill().astype(bool)
+            ).fillna(True)
+
         df[imputation_marker_column] = df[imputation_marker_column] & df[column]
         df.drop(
             columns=[column],
@@ -220,23 +264,28 @@ def flag_rolling_impute(
     pd.Series
     """
 
-    if time_difference < 0:
-        fillmethod = "bfill"
-    elif time_difference > 0:
-        fillmethod = "ffill"
-
     df["fill_group"] = (
         (df[period] - pd.DateOffset(months=1) != df.shift(1)[period])
         | (df[strata].diff(1) != 0)
         | (df[reference].diff(1) != 0)
     ).cumsum()
 
-    boolean_column = (
-        df.groupby(["fill_group"])[target]
-        .fillna(method=fillmethod)
-        .notnull()
-        .mul(df["fill_group"] == df.shift(time_difference)["fill_group"])
-    )
+    if time_difference < 0:
+        boolean_column = (
+            df.groupby(["fill_group"])[target]
+            .bfill()
+            .notnull()
+            .mul(df["fill_group"] == df.shift(time_difference)["fill_group"])
+        )
+
+    elif time_difference > 0:
+        boolean_column = (
+            df.groupby(["fill_group"])[target]
+            .ffill()
+            .notnull()
+            .mul(df["fill_group"] == df.shift(time_difference)["fill_group"])
+        )
+
     df.drop(columns="fill_group", inplace=True)
 
     return boolean_column
