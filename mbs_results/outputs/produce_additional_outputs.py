@@ -13,6 +13,7 @@ from mbs_results.outputs.turnover_analysis import create_turnover_output
 from mbs_results.outputs.weighted_adj_val_time_series import (
     get_weighted_adj_val_time_series,
 )
+from mbs_results.outputs.ocea_srs_outputs import produce_ocea_srs_outputs
 
 
 def get_additional_outputs_df(
@@ -92,6 +93,7 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
             "selective_editing_question": create_selective_editing_question_output,
             "turnover_output": create_turnover_output,
             "weighted_adj_val_time_series": get_weighted_adj_val_time_series,
+            "produce_ocea_srs_outputs": produce_ocea_srs_outputs
         },
         additional_outputs_df,
     )
