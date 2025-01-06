@@ -6,6 +6,7 @@ from pandas.testing import assert_frame_equal
 
 from mbs_results.utilities.constrains import (
     calculate_derived_outlier_weights,
+    constrain,
     replace_values_index_based,
     sum_sub_df,
 )
@@ -60,6 +61,84 @@ def test_sum_sub_df_46_47(filepath):
     )
 
     assert_frame_equal(actual_ouput, expected_output)
+
+
+def test_constrain_functionality(filepath):
+    df = pd.read_csv(
+        filepath / "test_constrain.csv",
+        index_col=False,
+    )
+    # Creating dummy columns needed for constrains, not used other than setting as index
+    for col_name in ["cell_no", "frotover", "froempment", "frosic2007"]:
+        df[col_name] = 1
+
+    df["target"] = df["target"].astype(float)
+    df["spp_form_id"] = df["spp_form_id"].astype(int)
+    # df["new_target_variable"] = df["new_target_variable"].astype(float)
+    # Drop q40 rows
+    df_input = (
+        df.drop(
+            df[(df["question_no"] == 40) & (df["spp_form_id"].isin([13, 14]))].index
+        )
+        .drop(df[(df["question_no"] == 46) & (df["spp_form_id"].isin([15]))].index)
+        .drop(columns=["unadjusted_target"])
+    )
+
+    df_expected_output = df.drop(
+        columns=["cell_no", "frotover", "froempment", "frosic2007", "target"]
+    ).rename(columns={"expected_target": "target"})
+    df_expected_output["target"] = df_expected_output["target"].astype(float)
+
+    df_expected_output["unadjusted_target"] = df_expected_output[
+        "unadjusted_target"
+    ].fillna("filled_na")
+
+    # df_input.drop(
+    #     columns=["default_o_weight", "constrain_marker", "post_wins_marker"],
+    #     inplace=True,
+    # )
+
+    df_output = constrain(
+        df_input,
+        "period",
+        "reference",
+        "target",
+        "question_no",
+        "spp_form_id",
+    )
+
+    # Dropping dummy columns as these are unchanged in function
+    order = [
+        "period",
+        "reference",
+        "spp_form_id",
+        "question_no",
+        "target",
+        "unadjusted_target",
+        "constrain_marker",
+    ]
+
+    df_output.drop(
+        columns=["cell_no", "frotover", "froempment", "frosic2007"], inplace=True
+    )
+    df_output = df_output[order].sort_values(by=order).reset_index(drop=True)
+    df_output["unadjusted_target"] = df_output["unadjusted_target"].fillna("filled_na")
+
+    df_expected_output = (
+        df_expected_output[order].sort_values(by=order).reset_index(drop=True)
+    )
+
+    print(df_expected_output)
+    print(df_output["unadjusted_target"])
+
+    # sorting_by = ["reference", "period", "question_no", "spp_form_id"]
+    # input_col_order = df.columns
+    # df_output = (
+    #     df_output[input_col_order].sort_values(by=sorting_by).reset_index(drop=True)
+    # )
+    # df = df.sort_values(by=sorting_by).reset_index(drop=True)
+
+    assert_frame_equal(df_output, df_expected_output)
 
 
 def test_calculate_derived_outlier_weights(filepath):
