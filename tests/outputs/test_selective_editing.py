@@ -5,9 +5,11 @@ import pytest
 from pandas.testing import assert_frame_equal
 
 from mbs_results.outputs.selective_editing import (
+    calculate_auxiliary_value,
     calculate_predicted_value,
     create_standardising_factor,
 )
+from mbs_results.utilities.utils import convert_column_to_datetime
 
 
 @pytest.fixture(scope="class")
@@ -27,6 +29,20 @@ def calculate_predicted_value_data(filepath):
     return pd.read_csv(filepath / "calculate_predicted_value_data.csv", index_col=False)
 
 
+@pytest.fixture(scope="class")
+def calculate_auxiliary_value_input(filepath):
+    return pd.read_csv(
+        filepath / "calculate_auxiliary_value_input.csv", index_col=False
+    )
+
+
+@pytest.fixture(scope="class")
+def calculate_auxiliary_value_output(filepath):
+    return pd.read_csv(
+        filepath / "calculate_auxiliary_value_output.csv", index_col=False
+    )
+
+
 class TestSelectiveEditing:
     def test_create_standardising_factor(
         self,
@@ -44,7 +60,6 @@ class TestSelectiveEditing:
                 "standardising_factor",
                 "predicted_value",
                 "imputation_marker",
-                "auxiliary_value",
             ]
         ]
         expected_output = expected_output.reset_index(drop=True)
@@ -64,7 +79,6 @@ class TestSelectiveEditing:
             "a_weight",
             "o_weight",
             "g_weight",
-            "auxiliary_value",
             202401,
         )
 
@@ -80,3 +94,27 @@ class TestSelectiveEditing:
         )
 
         assert_frame_equal(actual_output, calculate_predicted_value_data)
+
+    def test_calculate_auxiliary_value(
+        self, calculate_auxiliary_value_input, calculate_auxiliary_value_output
+    ):
+
+        input_data = calculate_auxiliary_value_input
+
+        expected_output = calculate_auxiliary_value_output
+        expected_output["period"] = convert_column_to_datetime(
+            expected_output["period"]
+        )
+
+        actual_output = calculate_auxiliary_value(
+            input_data,
+            "reference",
+            "period",
+            "question_no",
+            "frozen_turnover",
+            "construction_link",
+            "imputation_class",
+            202001,
+        )
+
+        assert_frame_equal(actual_output, expected_output)
