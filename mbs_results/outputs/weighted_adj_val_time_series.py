@@ -1,7 +1,8 @@
 import numpy as np
 import pandas as pd
-from staging.merge_domain import merge_domain
-from utilities.utils import convert_column_to_datetime
+
+from mbs_results.staging.merge_domain import merge_domain
+from mbs_results.utilities.utils import convert_column_to_datetime
 
 
 def get_weighted_adj_val_time_series(
