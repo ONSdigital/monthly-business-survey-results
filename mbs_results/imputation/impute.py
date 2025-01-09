@@ -71,7 +71,7 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
         lambda row: (
             "d"
             if "sum" in str(row["constrain_marker"]).lower()
-            else row["imputation_flags_adjusted_value"]
+            else row["imputation_flags_" + config["target"]]
         ),
         axis=1,
     )

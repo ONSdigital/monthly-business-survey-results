@@ -176,8 +176,8 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         column=config["question_no"],
         questions_to_filter=config["filter_out_questions"],
         save_full_path=config["output_path"]
-        + config["mbs_file_name"]
-        + "filter_out_questions.csv",
+        + config["mbs_file_name"].split(".")[0]
+        + "_filter_out_questions.csv",
     )
 
     warnings.warn("add live or frozen after fixing error marker column in config")

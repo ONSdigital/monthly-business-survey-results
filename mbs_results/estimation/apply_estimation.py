@@ -90,7 +90,9 @@ def apply_estimation(
             )
         ]
 
-        non_census_df = calculate_design_weight(non_census_df, period, **config)
+        non_census_df = calculate_design_weight(
+            non_census_df, period, sampled="is_sampled", **config
+        )
         non_census_df = calculate_calibration_factor(non_census_df, period, **config)
         non_census_df["is_census"] = False
 
