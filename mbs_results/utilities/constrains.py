@@ -171,14 +171,20 @@ def constrain(
     unique_q_numbers = df[question_no].unique()
     df.set_index([question_no, period, reference], inplace=True)
 
+    pre_con_col_name = f'pre_con_{target}'
+    pre_con_vari ={}
+
     if 49 in unique_q_numbers:
+        if unique_q_numbers > 40:
+            pre_con_vari[pre_con_col_name] = target.copy()
         replace_values_index_based(df, target, 49, ">", 40)
+
     elif 90 in unique_q_numbers:
         replace_values_index_based(df, target, 90, ">=", 40)
 
     df.reset_index(inplace=True)
 
-    final_constrained = pd.concat([df, derived_values])
+    final_constrained = pd.concat([df, derived_values, pre_con_vari])
 
     return final_constrained
 
