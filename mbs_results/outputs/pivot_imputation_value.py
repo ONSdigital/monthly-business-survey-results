@@ -166,6 +166,7 @@ def format_imputation_link(df):
             "imputation_link",
             "imputation_flags_adjustedresponse",
             "count_imps",
+            "adjustedresponse"
         ]
     ]
 
@@ -176,7 +177,9 @@ def format_imputation_link(df):
             "questioncode": "Question",
             "imputation_flags_adjustedresponse": "link_type",
             "count_imps": "Count_imps",
+            "adjustedresponse": "Imputation_value"
         }
     )
 
     return renamed_df
+                
