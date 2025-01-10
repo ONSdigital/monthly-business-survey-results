@@ -143,6 +143,8 @@ def constrain(
 
     derive_map = create_derive_map(df, spp_form_id)
 
+    df["unadjusted_target"] = df[target]
+
     # pre_derive_df has dimenesions as index, columns the values to be used when derived
     # Hard coded columns are from finalsel files,
     pre_derive_df = df.set_index(
@@ -173,7 +175,7 @@ def constrain(
 
     if 49 in unique_q_numbers:
         replace_values_index_based(df, target, 49, ">", 40)
-    elif 90 in unique_q_numbers:
+    if 90 in unique_q_numbers:
         replace_values_index_based(df, target, 90, ">=", 40)
 
     df.reset_index(inplace=True)
