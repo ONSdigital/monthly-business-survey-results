@@ -149,7 +149,6 @@ class TestRatioOfMeans:
             errors="ignore",
             inplace=True,
         )
-        print(expected_output.columns)
         expected_output = expected_output[actual_output.columns]
 
         actual_output = actual_output.sort_values(by=["identifier", "date"])

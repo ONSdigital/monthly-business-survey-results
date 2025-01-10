@@ -74,8 +74,8 @@ def test_constrain_functionality(filepath):
 
     df["target"] = df["target"].astype(float)
     df["spp_form_id"] = df["spp_form_id"].astype(int)
-    # df["new_target_variable"] = df["new_target_variable"].astype(float)
-    # Drop q40 rows
+
+    # Drop q40 rows for form 13 and 14 and q46 for form 15
     df_input = (
         df.drop(
             df[(df["question_no"] == 40) & (df["spp_form_id"].isin([13, 14]))].index
@@ -92,11 +92,6 @@ def test_constrain_functionality(filepath):
     df_expected_output["unadjusted_target"] = df_expected_output[
         "unadjusted_target"
     ].fillna("filled_na")
-
-    # df_input.drop(
-    #     columns=["default_o_weight", "constrain_marker", "post_wins_marker"],
-    #     inplace=True,
-    # )
 
     df_output = constrain(
         df_input,
@@ -127,16 +122,6 @@ def test_constrain_functionality(filepath):
     df_expected_output = (
         df_expected_output[order].sort_values(by=order).reset_index(drop=True)
     )
-
-    print(df_expected_output)
-    print(df_output["unadjusted_target"])
-
-    # sorting_by = ["reference", "period", "question_no", "spp_form_id"]
-    # input_col_order = df.columns
-    # df_output = (
-    #     df_output[input_col_order].sort_values(by=sorting_by).reset_index(drop=True)
-    # )
-    # df = df.sort_values(by=sorting_by).reset_index(drop=True)
 
     assert_frame_equal(df_output, df_expected_output)
 
