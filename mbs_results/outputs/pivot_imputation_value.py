@@ -33,8 +33,9 @@ def merge_counts(
 
     Returns
     -------
-    Dataframe resulting from the left-join of input_df and count_df on the cell and
-    date columns.
+    pd.DataFrame
+        Dataframe resulting from the left-join of input_df and count_df on the cell and
+        date columns.
     """
     df_merge = pd.merge(
         input_df,
@@ -49,7 +50,8 @@ def merge_counts(
 
 def create_imputation_link_output(additional_outputs_df: pd.DataFrame) -> pd.DataFrame:
     """
-    A wrapper function that runs the necessary functions for creating the imputation_link output.
+    A wrapper function that runs the necessary functions for creating the
+    imputation_link output.
 
     Parameters
     ----------
@@ -59,7 +61,8 @@ def create_imputation_link_output(additional_outputs_df: pd.DataFrame) -> pd.Dat
 
     Returns
     -------
-    Dataframe formatted according to the imputation_link output requirements.
+    pd.DataFrame
+        Dataframe formatted according to the imputation_link output requirements.
     """
     output_df = (
         additional_outputs_df.pipe(create_imputation_link_column)
@@ -70,20 +73,22 @@ def create_imputation_link_output(additional_outputs_df: pd.DataFrame) -> pd.Dat
     return output_df
 
 
-def create_imputation_link_column(df):
+def create_imputation_link_column(df: pd.DataFrame) -> pd.DataFrame:
     """
     Generates an 'imputation_link' column based on specified rules for imputation flags.
 
     This function:
     1. Filters out rows where 'imputation_flags_adjustedresponse' is either 'r' or null.
-    2. Creates an 'imputation_link' column by mapping the value of 'imputation_flags_adjustedresponse'
-       to the appropriate link column using the variable mapping_dict.
+    2. Creates an 'imputation_link' column by mapping the value of
+    'imputation_flags_adjustedresponse' to the appropriate link column using the
+    variable mapping_dict.
 
     Parameters
     ----------
     df : pd.DataFrame
         Input DataFrame containing the following required columns:
-        - 'imputation_flags_adjustedresponse': Specifies the type of link to use for imputation.
+        - 'imputation_flags_adjustedresponse': Specifies the type of link to use
+            for imputation.
         - 'f_link_adjustedresponse': Forward link values for imputation.
         - 'b_link_adjustedresponse': Backward link values for imputation.
         - 'construction_link': Construction link values for imputation.
@@ -91,8 +96,9 @@ def create_imputation_link_column(df):
 
     Returns
     -------
-    Dataframe containing an imputation_link column which takes values from the relevant link columns
-    as specified in the mapping_dict variable.
+    pd.DataFrame
+        Dataframe containing an imputation_link column which takes values from the
+        relevant link columns as specified in the mapping_dict variable.
     """
 
     mapping_dict = {
@@ -123,12 +129,14 @@ def create_imputation_link_column(df):
     return df
 
 
-def create_count_imps_column(df):
+def create_count_imps_column(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Adds a 'count_imps' column to the input DataFrame based on the size of groups formed by the 'cell_no' column.
+    Adds a 'count_imps' column to the input DataFrame based on the size of
+    groups formed by the 'cell_no' column.
 
-    This function groups the input DataFrame by the 'cell_no' column and calculates the size of each group.
-    It then assigns the size value to all rows within the respective group as a new column named 'count_imps'.
+    This function groups the input DataFrame by the 'cell_no' column and calculates
+    the size of each group. It then assigns the size value to all rows within the
+    respective group as a new column named 'count_imps'.
 
     Parameters
     ----------
@@ -137,15 +145,18 @@ def create_count_imps_column(df):
 
     Returns
     -------
-    Dataframe containing the columns in the original dataframe plus a count_imps column.
+    pd.DataFrame
+        Dataframe containing the columns in the original dataframe plus a count_imps
+        column.
     """
     df["count_imps"] = df.groupby("cell_no")["cell_no"].transform("size")
     return df
 
 
-def format_imputation_link(df):
+def format_imputation_link(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Selects the relevant columns and renames them to match the expected imputation_link output format.
+    Selects the relevant columns and renames them to match the expected imputation_link
+    output format.
 
     Parameters
     ----------
@@ -155,7 +166,9 @@ def format_imputation_link(df):
 
     Returns
     -------
-    Dataframe formatted according to the requirements for the imputation_link output.
+    pd.DataFrame
+        Dataframe formatted according to the requirements for the imputation_link
+        output.
     """
 
     df = df[
@@ -166,7 +179,7 @@ def format_imputation_link(df):
             "imputation_link",
             "imputation_flags_adjustedresponse",
             "count_imps",
-            "adjustedresponse"
+            "adjustedresponse",
         ]
     ]
 
@@ -177,9 +190,8 @@ def format_imputation_link(df):
             "questioncode": "Question",
             "imputation_flags_adjustedresponse": "link_type",
             "count_imps": "Count_imps",
-            "adjustedresponse": "Imputation_value"
+            "adjustedresponse": "Imputation_value",
         }
     )
 
     return renamed_df
-                

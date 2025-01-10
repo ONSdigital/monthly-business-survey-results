@@ -5,11 +5,11 @@ import pytest
 from pandas.testing import assert_frame_equal
 
 from mbs_results.outputs.pivot_imputation_value import (
-    merge_counts,
-    create_imputation_link_column,
     create_count_imps_column,
-    format_imputation_link,
+    create_imputation_link_column,
     create_imputation_link_output,
+    format_imputation_link,
+    merge_counts,
 )
 
 
@@ -69,8 +69,6 @@ class TestCreateImputationLinkColumn:
     def test_create_imputation_link_column(
         self, create_imputation_link_column_input, create_imputation_link_column_output
     ):
-
-        input_df = create_imputation_link_column_input
 
         expected_output = create_imputation_link_column_output
 
