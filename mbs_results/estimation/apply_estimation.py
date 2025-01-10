@@ -91,9 +91,19 @@ def apply_estimation(
         ]
 
         non_census_df = calculate_design_weight(
-            non_census_df, period, sampled="is_sampled", **config
+            population_frame=non_census_df,
+            period=period,
+            sampled="is_sampled",
+            strata=config["strata"],
         )
-        non_census_df = calculate_calibration_factor(non_census_df, period, **config)
+        non_census_df = calculate_calibration_factor(
+            non_census_df,
+            period,
+            group=config["group"],
+            sampled="is_sampled",
+            auxiliary=config["auxiliary"],
+            design_weight=config["design_weight"],
+        )
         non_census_df["is_census"] = False
 
         all_together = pd.concat([non_census_df, census_df], ignore_index=True)
@@ -103,7 +113,11 @@ def apply_estimation(
     estimation_df = pd.concat(estimation_df_list, ignore_index=True)
 
     create_population_count_output(
-        estimation_df, period, calibration_group, save_output=True, **config
+        df=estimation_df,
+        period=period,
+        strata=calibration_group,
+        output_path=config["output_path"],
+        save_output=True,
     )
 
     # validate_estimation(estimation_df, **config)
