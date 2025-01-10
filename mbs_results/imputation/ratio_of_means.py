@@ -219,6 +219,121 @@ def wrap_get_cumulative_links(
     return df
 
 
+def process_backdata(
+    df: pd.DataFrame, target: str, period: str, back_data_period: str
+) -> pd.DataFrame:
+    """
+    function to process the back data. Removes some values from target column so
+    correct imputation links are calculated
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        original dataframe
+    target : str
+        tartget column name
+    period : str
+        period column name
+    back_data_period : str
+        back data period value
+
+    Returns
+    -------
+    pd.DataFrame
+        dataframe with backdata processed and backdata flags copied to seperate columns
+    """
+    # Bool for if period is back data
+    df["is_backdata"] = df[period] == pd.to_datetime(back_data_period, format="%Y%m")
+    # Copying backdata to seperate column
+    df.loc[df["is_backdata"], f"backdata_{target}"] = df.loc[df["is_backdata"], target]
+    # Copying flags to sep column
+    df[f"backdata_flags_{target}"] = df[f"imputation_flags_{target}"].str.lower()
+
+    # moving mc data into manual construction column for MC imputation
+    df.loc[df[f"backdata_flags_{target}"] == "mc", f"{target}_man"] = df.loc[
+        df[f"backdata_flags_{target}"] == "mc", target
+    ]
+    df.loc[df[f"backdata_flags_{target}"] == "fimc", f"{target}_man"] = df.loc[
+        df[f"backdata_flags_{target}"] == "fimc", target
+    ]
+
+    # removing mc data from target column
+    df.loc[
+        (~df[f"backdata_flags_{target}"].isin(["r"]))
+        & (df[f"backdata_flags_{target}"].notna()),
+        target,
+    ] = None
+
+    return df
+
+
+def reapply_backdata(
+    df: pd.DataFrame, target: str, dropping: bool = False
+) -> pd.DataFrame:
+    """
+    reapply backdata flags and values to ensure no changes are made to back data.
+    will not do anything if backdata is not present in dataframe
+    dropping is optional argument which will drop the copied backdata column
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        original dataframe
+    target : str
+        target column name
+    dropping : bool, optional
+        if true the temp column to store back data will be removed , by default False
+
+    Returns
+    -------
+    pd.DataFrame
+        original dataframe with back data re-applied.
+    """
+    if f"backdata_flags_{target}" in df.columns:
+
+        is_backdata_not_return = (df[f"backdata_flags_{target}"] != "r") & (
+            df["is_backdata"]
+        )
+        df.loc[is_backdata_not_return, target] = df.loc[
+            is_backdata_not_return, f"backdata_{target}"
+        ]
+        df.loc[is_backdata_not_return, f"imputation_flags_{target}"] = df.loc[
+            is_backdata_not_return, f"backdata_flags_{target}"
+        ]
+
+    if dropping:
+        df.drop(columns=["is_backdata"], inplace=True)
+
+    return df
+
+
+def replace_fir_backdata(df: pd.DataFrame, target: str) -> pd.DataFrame:
+    """
+    replaced the target column with back data.
+    this is removed before calculating forwards and backwards links to
+    ensure the correct values are used.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        original dataframe
+    target : str
+        target column name
+
+    Returns
+    -------
+    pd.DataFrame
+        original dataframe with imputed data copied over into the target column.
+
+    """
+    if f"backdata_flags_{target}" in df.columns:
+        df.loc[(df[f"backdata_flags_{target}"].isin(["fir"])), target] = df.loc[
+            (df[f"backdata_flags_{target}"].isin(["fir"])), f"backdata_{target}"
+        ]
+
+    return df
+
+
 def ratio_of_means(
     df: pd.DataFrame,
     target: str,
@@ -226,6 +341,8 @@ def ratio_of_means(
     reference: str,
     strata: str,
     auxiliary: str,
+    current_period: str,
+    revision_period: str,
     filters: pd.DataFrame = None,
     manual_constructions: pd.DataFrame = None,
     imputation_links: Dict[str, str] = {},
@@ -276,6 +393,9 @@ def ratio_of_means(
     # These arguments are used from the majority of functions
 
     # TODO: Consider more elegant solution, or define function arguments explicitly
+    back_data_period = calculate_back_data_period(current_period, revision_period)
+    if f"imputation_flags_{target}" in df.columns:
+        df = process_backdata(df, target, period, back_data_period)
 
     default_columns = {
         "target": target,
@@ -283,6 +403,7 @@ def ratio_of_means(
         "reference": reference,
         "strata": strata,
         "auxiliary": auxiliary,
+        "back_data_period": back_data_period,
     }
 
     if filters is not None:
@@ -319,13 +440,12 @@ def ratio_of_means(
         imputation_types = ("c", "fir", "bir", "fic")
 
     df = (
-        df  # .pipe(
-        #     create_impute_flags,
-        #     **default_columns,
-        #     predictive_auxiliary="f_predictive_auxiliary"
-        # )
+        df
+        # Pass backdata period to calculate imputation link
+        .pipe(replace_fir_backdata, target=target)
         .pipe(generate_imputation_marker, **default_columns)
         .pipe(wrap_get_cumulative_links, **default_columns)
+        .pipe(reapply_backdata, target=target)
         .pipe(
             create_and_merge_imputation_values,
             **default_columns,
@@ -336,6 +456,7 @@ def ratio_of_means(
             construction_link="construction_link",
             imputation_types=imputation_types,
         )
+        .pipe(reapply_backdata, target=target, dropping=True)
     )
 
     # TODO: Reset index needed because of sorting, perhaps reset index
@@ -381,3 +502,22 @@ def ratio_of_means(
     # TODO: Missing extra columns, default values and if filter was applied, all bool
 
     return df
+
+
+def calculate_back_data_period(current_period, revision_period) -> str:
+    current_period = pd.to_datetime(current_period, format="%Y%m")
+    back_data_period = (
+        (current_period - pd.DateOffset(months=revision_period)).date().strftime("%Y%m")
+    )
+    return back_data_period
+
+
+if __name__ == "__main__":
+    from mbs_results.utilities.inputs import load_config
+
+    config = load_config()
+    bdp = calculate_back_data_period(
+        current_period=config["current_period"],
+        revision_period=config["revision_period"],
+    )
+    print(config["current_period"], bdp)
