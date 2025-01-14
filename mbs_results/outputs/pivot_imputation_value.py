@@ -33,8 +33,9 @@ def merge_counts(
 
     Returns
     -------
-    Dataframe resulting from the left-join of input_df and count_df on the cell and
-    date columns.
+    pd.DataFrame
+        Dataframe resulting from the left-join of input_df and count_df on the cell and
+        date columns.
     """
     df_merge = pd.merge(
         input_df,
@@ -47,98 +48,150 @@ def merge_counts(
     return df_merge.drop(columns=[count_cell, count_date])
 
 
-def pivot_imputation_value(
-    df: pd.DataFrame,
-    identifier: str,
-    groups: list,
-    link_columns: list,
-    count_columns: list,
-    imputed_value: str,
-    selected_periods: list = None,
-) -> pd.DataFrame:
+def create_imputation_link_output(additional_outputs_df: pd.DataFrame) -> pd.DataFrame:
     """
-    Returning dataframe containing imputation_value, filtered by date, pivoted by
-    imputation type and grouped by sic, cell, question and imputation type.
+    A wrapper function that runs the necessary functions for creating the
+    imputation_link output.
 
     Parameters
     ----------
-    dataframe : pd.DataFrame
-        Reference dataframe containing links, count values, and imputed values
-        by identifier, cell, date, and question
-    identifier : str
-        name of column in dataframe containing identifier variable
-    groups : list
+    addional_outputs_df : pd.DataFrame
+        Dataframe containing the variables used for creating additional outputs.
 
-    link_columns : list
-
-    count_columns : list
-
-    imputed_value: str
-        name of column in dataframe containing imputed_value variable
-    selected_periods: list
-        list containing periods to include in output
 
     Returns
     -------
-    dataframe filtered by date, containing imputation_value, pivoted by imputation type
-    and grouped by sic, cell, question and imputation type.
-
+    pd.DataFrame
+        Dataframe formatted according to the imputation_link output requirements.
     """
-    if selected_periods is not None:
-        df = df.query("{} in {}".format(groups[0], selected_periods))
-
-    links_df = df.melt(
-        id_vars=groups + [imputed_value],
-        value_vars=link_columns,
-        var_name="link_type",
-        value_name="imputation_link",
+    output_df = (
+        additional_outputs_df.pipe(create_imputation_link_column)
+        .pipe(create_count_imps_column)
+        .pipe(format_imputation_link)
     )
 
-    link_type_map = dict(zip(link_columns, ["F", "B", "C"]))
-    links_df["link_type"] = links_df["link_type"].map(link_type_map)
+    return output_df
 
-    counts_df = df.melt(
-        id_vars=groups,
-        value_vars=count_columns,
-        var_name="link_type_count",
-        value_name="count",
-    )
 
-    link_type_map_count = dict(zip(count_columns, ["F", "B", "C"]))
-    counts_df["link_type_count"] = counts_df["link_type_count"].map(link_type_map_count)
+def create_imputation_link_column(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Generates an 'imputation_link' column based on specified rules for imputation flags.
 
-    merged_df = pd.merge(
-        links_df,
-        counts_df,
-        how="outer",
-        left_on=groups + ["link_type"],
-        right_on=groups + ["link_type_count"],
-    )
+    This function:
+    1. Filters out rows where 'imputation_flags_adjustedresponse' is either 'r' or null.
+    2. Creates an 'imputation_link' column by mapping the value of
+    'imputation_flags_adjustedresponse' to the appropriate link column using the
+    variable mapping_dict.
 
-    merged_df.drop_duplicates(inplace=True)
-    merged_df.drop(["link_type_count"], axis=1, inplace=True)
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input DataFrame containing the following required columns:
+        - 'imputation_flags_adjustedresponse': Specifies the type of link to use
+            for imputation.
+        - 'f_link_adjustedresponse': Forward link values for imputation.
+        - 'b_link_adjustedresponse': Backward link values for imputation.
+        - 'construction_link': Construction link values for imputation.
 
-    merged_df = merged_df.groupby(groups + ["link_type"], as_index=False).agg(
-        {imputed_value: "sum", "count": "first", "imputation_link": "first"}
-    )
 
-    sorting_order = {"F": 1, "B": 2, "C": 3}
-    merged_df["sort_column"] = merged_df["link_type"].map(sorting_order)
+    Returns
+    -------
+    pd.DataFrame
+        Dataframe containing an imputation_link column which takes values from the
+        relevant link columns as specified in the mapping_dict variable.
+    """
 
-    merged_df = merged_df.sort_values(groups + ["sort_column"])
+    mapping_dict = {
+        "bir": "b_link_adjustedresponse",
+        "fir": "f_link_adjustedresponse",
+        "c": "construction_link",
+        "fic": "f_link_adjustedresponse",
+        "fimc": "f_link_adjustedresponse",
+        "mc": None,
+    }
 
-    merged_df.drop("sort_column", axis=1, inplace=True)
+    df = df[
+        ~(
+            (df["imputation_flags_adjustedresponse"] == "r")
+            | df["imputation_flags_adjustedresponse"].isnull()
+        )
+    ].reset_index(drop=True)
 
-    merged_df.reset_index(drop=True, inplace=True)
+    def get_imputation_link(row):
+        flag = row["imputation_flags_adjustedresponse"]
+        column_name = mapping_dict.get(flag)
+        if column_name:
+            return row[column_name]
+        return None
 
-    merged_df = merged_df[
-        groups
-        + [
+    df["imputation_link"] = df.apply(get_imputation_link, axis=1)
+
+    return df
+
+
+def create_count_imps_column(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Adds a 'count_imps' column to the input DataFrame based on the size of
+    groups formed by the 'cell_no' column.
+
+    This function groups the input DataFrame by the 'cell_no' column and calculates
+    the size of each group. It then assigns the size value to all rows within the
+    respective group as a new column named 'count_imps'.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe containing cell_no and any other relevant variables.
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataframe containing the columns in the original dataframe plus a count_imps
+        column.
+    """
+    df["count_imps"] = df.groupby("cell_no")["cell_no"].transform("size")
+    return df
+
+
+def format_imputation_link(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Selects the relevant columns and renames them to match the expected imputation_link
+    output format.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe containing frosic2007, cell_no, questioncode, imputation_link,
+        imputation_flags_adjustedresponse and count_imps.
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataframe formatted according to the requirements for the imputation_link
+        output.
+    """
+
+    df = df[
+        [
+            "frosic2007",
+            "cell_no",
+            "questioncode",
             "imputation_link",
-            "link_type",
-            "count",
-            imputed_value,
+            "imputation_flags_adjustedresponse",
+            "count_imps",
+            "adjustedresponse",
         ]
     ]
 
-    return merged_df
+    renamed_df = df.rename(
+        columns={
+            "frosic2007": "sic",
+            "cell_no": "cell",
+            "questioncode": "Question",
+            "imputation_flags_adjustedresponse": "link_type",
+            "count_imps": "Count_imps",
+            "adjustedresponse": "Imputation_value",
+        }
+    )
+
+    return renamed_df

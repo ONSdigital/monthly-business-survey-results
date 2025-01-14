@@ -2,7 +2,7 @@ import numpy as np
 
 
 def calculate_predicted_unit_value(
-    df, group, period, aux, sampled, a_weight, target_variable, nw_ag_flag
+    df, group, period, aux, is_census, a_weight, target_variable, nw_ag_flag
 ):
     """
     Calculate predicted unit value
@@ -17,8 +17,8 @@ def calculate_predicted_unit_value(
         Column name containing time period.
     aux : str
         Column name containing auxiliary variable (x).
-    sampled : str
-        Column name indicating whether it was sampled or not -boolean.
+    is_cenus : bool
+        Column name indicating whether the reference belongs to a cell that is a census.
     a_weight : str
         Column name containing the design weight.
     target_variable : str
@@ -32,7 +32,7 @@ def calculate_predicted_unit_value(
         A pandas DataFrame with a new column containing the predicted unit value.
     """
 
-    winsorised = (df[sampled] == 1) & (df[nw_ag_flag] == False)  # noqa: E712
+    winsorised = (~df[is_census]) & (~df[nw_ag_flag])
     filtered_df = df.loc[winsorised]
 
     filtered_df["weighted_target_values"] = (
@@ -69,9 +69,7 @@ def calculate_predicted_unit_value(
         ["sum_weighted_target_values", "sum_weighted_auxiliary_values"], axis=1
     )
 
-    non_winsorised = (final_df[sampled] == 0) | (
-        final_df[nw_ag_flag] == True  # noqa: E712
-    )
+    non_winsorised = (final_df[is_census]) | (final_df[nw_ag_flag])
     final_df["predicted_unit_value"] = final_df["predicted_unit_value"].mask(
         non_winsorised, np.nan
     )
