@@ -1,30 +1,25 @@
 import os
 import shutil
 
+import mbs_results
 
-def move_files(installPath: str):
+
+def copy_script_and_config():
     """
     Copy mbs_results/main.py and mbs_results/config.json from
     virtual environment site packages into the current working directory
-
-    Parameters
-    ----------
-    installPath : str
-        Where the the mbs_results package is installed locally.
-        E.g., mbs_results.__file__
+    This uses the installed package to find the location of files.
 
     Examples
     ---------
-    >>> import mbs_results
+    >>> from mbs_results.utilities.copy_script_and_config import copy_script_and_config
     ...
-    >>> from mbs_results.start import move_files
-    ...
-    >>> move_files(mbs_results.__file__)
+    >>> copy_script_and_config()
 
     """
 
     # Get the directory where mbs_results is installed
-    target_path = os.path.dirname(installPath)
+    target_path = os.path.dirname(mbs_results.__file__)
 
     # Append main.py and config.json
     main_path = os.path.join(target_path, "main.py")
