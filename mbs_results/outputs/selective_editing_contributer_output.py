@@ -44,13 +44,7 @@ def get_selective_editing_contributer_output(
     """
 
     input_data = additional_outputs_df[
-        [
-            "period",
-            "reference",
-            "design_weight",
-            "frosic2007",
-            "formtype"
-        ]
+        ["period", "reference", "design_weight", "frosic2007", "formtype"]
     ]
 
     domain_data = pd.read_csv(sic_domain_mapping_path).astype(str)

@@ -118,7 +118,7 @@ def create_standardising_factor(
             "standardising_factor",
             predicted_value,
             imputation_marker,
-            imputation_class
+            imputation_class,
         ]
     ]
 

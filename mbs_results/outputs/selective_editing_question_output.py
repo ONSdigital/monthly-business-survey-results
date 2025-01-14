@@ -1,6 +1,9 @@
 import pandas as pd
 
-from mbs_results.outputs.selective_editing import create_standardising_factor, calculate_auxiliary_value
+from mbs_results.outputs.selective_editing import (
+    calculate_auxiliary_value,
+    create_standardising_factor,
+)
 from mbs_results.staging.merge_domain import merge_domain
 
 
@@ -71,13 +74,15 @@ def create_selective_editing_question_output(
         frozen_turnover="frotover",
         construction_link="construction_link",
         imputation_class="imputation_class",
-        period_selected=period_selected
+        period_selected=period_selected,
     )
 
-    question_output = pd.merge(standardising_factor, 
-                               auxiliary_value, 
-                               on=["reference", "imputation_class", "questioncode"], 
-                               how="left").drop("imputation_class", axis=1)
+    question_output = pd.merge(
+        standardising_factor,
+        auxiliary_value,
+        on=["reference", "imputation_class", "questioncode"],
+        how="left",
+    ).drop("imputation_class", axis=1)
 
     # Survey code is required on this output, 009 is MBS code
     question_output["survey_code"] = "009"
