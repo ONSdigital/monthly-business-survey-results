@@ -1,6 +1,7 @@
 import os
 import shutil
 
+
 def move_files(installPath: str):
     """
     Copy mbs_results/main.py and mbs_results/config.json from
@@ -8,8 +9,8 @@ def move_files(installPath: str):
 
     Parameters
     ----------
-    installPath : str 
-        Where the the mbs_results package is installed locally. 
+    installPath : str
+        Where the the mbs_results package is installed locally.
         E.g., mbs_results.__file__
 
     Examples
