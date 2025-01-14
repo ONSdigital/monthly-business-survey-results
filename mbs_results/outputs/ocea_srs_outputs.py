@@ -15,7 +15,7 @@ def produce_ocea_srs_outputs(additional_outputs_df: pd.DataFrame) -> pd.DataFram
           MBS output formatted according to SRS/OCEA requirements
     """
 
-    output_df = df[
+    output_df = additional_outputs_df[
         [
             "reference",
             "period",

@@ -1,8 +1,8 @@
 from pathlib import Path
 
 import pandas as pd
-from pandas.testing import assert_frame_equal
 import pytest
+from pandas.testing import assert_frame_equal
 
 from mbs_results.outputs.ocea_srs_outputs import produce_ocea_srs_outputs
 
