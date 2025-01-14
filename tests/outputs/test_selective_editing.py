@@ -60,7 +60,7 @@ class TestSelectiveEditing:
                 "standardising_factor",
                 "predicted_value",
                 "imputation_marker",
-                "imputation_class"
+                "imputation_class",
             ]
         ]
         expected_output = expected_output.reset_index(drop=True)
@@ -81,7 +81,7 @@ class TestSelectiveEditing:
             "a_weight",
             "o_weight",
             "g_weight",
-            period_selected=202401
+            period_selected=202401,
         )
 
         assert_frame_equal(actual_output, expected_output)
