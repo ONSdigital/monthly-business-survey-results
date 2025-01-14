@@ -60,6 +60,7 @@ def create_selective_editing_question_output(
         question_no="questioncode",
         predicted_value="adjustedresponse",
         imputation_marker="imputation_flags_adjustedresponse",
+        imputation_class="imputation_class",
         a_weight="design_weight",
         o_weight="outlier_weight",
         g_weight="calibration_factor",
