@@ -34,6 +34,21 @@ or for installing in development mode:
 pip install .[dev]
 ```
 
+### Running the pipeline
+
+Once the module has been installed copy over the config and main script by running
+
+```shell
+setup_mbs
+```
+Following this you can either run the main.py script, or use the command line argument
+
+```shell
+run_mbs_main
+```
+To run the main mbs pipeline. This will load the local config you copied over, so
+populate this with the required filepaths.
+
 ## Required secrets and credentials
 
 To run this project, [you need a `.secrets` file with secrets/credentials as
