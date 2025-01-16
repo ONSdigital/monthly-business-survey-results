@@ -90,7 +90,7 @@ def concat_files_from_pattern(
     return df
 
 
-def convert_cp_to_contributors(df):
+def convert_cp_to_contributors(df: pd.DataFrame) -> pd.DataFrame:
     """
     Converts a dataframe from a cp file from CSW and returns a dataframe that
     looks like a contributors table in from an SPP snapshot.
