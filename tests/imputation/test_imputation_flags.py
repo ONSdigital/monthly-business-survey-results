@@ -6,7 +6,11 @@ from tests.helper_functions import load_and_format
 
 scenario_path_prefix = "tests/data/imputation/imputation_flags/"
 
-scenarios = ["imputation_flag_data.csv", "imputation_flag_data_manual_construction.csv"]
+scenarios = [
+    "imputation_flag_data.csv",
+    "imputation_flag_data_manual_construction.csv",
+    "imputation_flag_mc_fimc_fir_bir.csv",
+]
 
 
 @pytest.mark.parametrize("file_name", scenarios)
@@ -50,7 +54,10 @@ class TestImputationFlags:
                 "f_match_auxiliary",
             ],
             inplace=True,
+            axis=1,
+            errors="ignore",
         )
+
         df_output.drop(columns=["is_backdata"], inplace=True)
 
         assert_frame_equal(df_output, df_expected_output)
