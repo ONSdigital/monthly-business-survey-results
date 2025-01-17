@@ -8,8 +8,12 @@ from typing import List
 
 import pandas as pd
 
+from mbs_results.staging.stage_dataframe import read_and_combine_colon_sep_files
 
-def create_snapshot(input_directory: str, periods: List[str], output_directory: str):
+
+def create_snapshot(
+    input_directory: str, periods: List[str], output_directory: str, config: dict
+):
     """
     Reads qv and cp files, applies transformations and writes snapshot.
 
@@ -38,9 +42,16 @@ def create_snapshot(input_directory: str, periods: List[str], output_directory: 
     responses = convert_qv_to_responses(qv_df)
     contributors = convert_cp_to_contributors(cp_df)
 
+    contributors_with_finalsel = load_and_join_finalsel(
+        contributors,
+        "D:/repos/cdsw_cloning/monthly-business-survey-results/selective_editing_testing/finalsel*",  # Hard coded as input data does not have uncompressed versions
+        config["sample_column_names"],
+        config,
+    )
+
     output = {
         "snapshot_id": input_directory + str(uuid.uuid4().hex),
-        "contributors": contributors.to_dict("list"),
+        "contributors": contributors_with_finalsel.to_dict("list"),
         "responses": responses.to_dict("list"),
     }
 
@@ -148,8 +159,11 @@ def convert_cp_to_contributors(df: pd.DataFrame) -> pd.DataFrame:
         df["status"].tolist(), index=df.index
     )
 
+    df["createdby"] = "csw to spp converter"
+    df["createddate"] = datetime.today().strftime("%d/%m/%Y")
+
     return df[
-        ["period", "reference", "combined_error_marker", "status", "status_encoded"]
+        ["period", "reference", "status", "status_encoded", "createdby", "createddate"]
     ]
 
 
@@ -181,3 +195,51 @@ def convert_qv_to_responses(df: pd.DataFrame) -> pd.DataFrame:
         rename_columns.keys()
     )
     return df[out_columns].rename(columns=rename_columns)
+
+
+def load_and_join_finalsel(
+    df: pd.DataFrame, finalsel_path: str, finalsel_cols: list, config: dict
+) -> pd.DataFrame:
+    """
+    Loads finalsel data and joins it with the input dataframe.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame to join with finalsel data.
+    finalsel_path: str
+        Path to finalsel file.
+    finalsel_cols: List[str]
+        List containing all column names in the finalsel file
+    period: str
+        name of the period column
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataframe that is a join of input dataframe and finalsel data.
+    """
+    finalsel_column_remapper = {
+        "cell_no": "cellnumber",
+        "froempees": "frozenemployees",
+        "frosic2007": "frozensic",
+        "frotover": "frozenturnover",
+    }
+    finalsel_data = read_and_combine_colon_sep_files(
+        finalsel_path, finalsel_cols, config
+    )
+    finalsel_data = finalsel_data[
+        [
+            "reference",
+            "period",
+            "cell_no",
+            "formtype",
+            "froempees",
+            "frosic2007",
+            "frotover",
+        ]
+    ]  # Check if froempees is correct
+    finalsel_data.rename(columns=finalsel_column_remapper, inplace=True)
+
+    # df_merged = df.merge(finalsel_data, on=["reference","period"], how="left")
+    return df.merge(finalsel_data, on=["reference", "period"], how="left")
