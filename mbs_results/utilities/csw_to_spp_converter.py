@@ -1,6 +1,7 @@
 import fnmatch
 import json
 import uuid
+from datetime import datetime
 from os import listdir
 from os.path import isfile, join
 from typing import List
@@ -8,9 +9,7 @@ from typing import List
 import pandas as pd
 
 
-def create_snapshot(
-    input_directory: str, periods: List[str], output_directory: str
-) -> pd.DataFrame:
+def create_snapshot(input_directory: str, periods: List[str], output_directory: str):
     """
     Reads qv and cp files, applies transformations and writes snapshot.
 
@@ -40,7 +39,7 @@ def create_snapshot(
     contributors = convert_cp_to_contributors(cp_df)
 
     output = {
-        "id": input_directory + str(uuid.uuid4().hex),
+        "snapshot_id": input_directory + str(uuid.uuid4().hex),
         "contributors": contributors.to_dict("list"),
         "responses": responses.to_dict("list"),
     }
@@ -48,7 +47,7 @@ def create_snapshot(
     max_period = max([int(period) for period in periods])
 
     with open(
-        f"{output_directory}/snapshot_qv_cp_{max_period}_{len(periods)}.json",
+        f"{output_directory}snapshot_qv_cp_{max_period}_{len(periods)}.json",
         "w",
         encoding="utf-8",
     ) as f:
@@ -114,31 +113,47 @@ def convert_cp_to_contributors(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     error_marker_map = {
-        "C": "Clear",
-        "O": "Clear - overridden",
-        "E": "Check needed",
-        # TODO: Should W map to check needed or something else?
-        "W": "Check needed",
-        # TODO: Check which ones below are used in SPP
-        "3": "Sample deletion",
-        "4": "Nil1, dead letter",
-        "5": "Nil2, combined return, zero response",
-        "6": "Nil3, out-of-scope",
-        "7": "Nil4, ceased trading",
-        "8": "Nil5, dormant",
-        "9": "Nil6, out-of-scope and insufficient data",
-        "10": "Nil7, in-scope but suspect data",
-        "11": "Dead",
-        "12": "Nil8, part year return, death in year",
-        "13": "Nil9, out of scope and no UK activity",
+        # Error marker mapping for cases when response <= 2
+        "C": ("Clear - overridden", "211"),
+        "O": ("Clear", "210"),
+        "E": ("Check needed", "201"),
+        "W": ("Check needed", "201"),
+        "200": ("Form sent out", "100"),
+        "300": (
+            "Clear - overridden",
+            "211",
+        ),  # Out of scopes have data in them for BERD!
+        "500": ("Check needed", "201"),
+        "600": ("Clear", "210"),
+        "700": (
+            "Clear - overridden",
+            "211",
+        ),  # Out of scopes have data in them for BERD!
+        "800": ("Clear - overridden", "211"),
+        "900": (
+            "Clear - overridden",
+            "211",
+        ),  # Out of scopes have data in them for BERD!
+        # Response type mapping
+        "5": ("Combined child (NIL2)", "302"),
+        "6": ("Out of scope (NIL3)", "303"),
+        "7": ("Ceased trading (NIL4)", "304"),
+        "8": ("Dormant (NIL5)", "305"),
+        "12": ("Part year return (NIL8)", "308"),
+        "13": ("No UK activity (NIL9)", "309"),
     }
 
     df["status"] = df["combined_error_marker"].map(error_marker_map)
+    df[["status", "status_encoded"]] = pd.DataFrame(
+        df["status"].tolist(), index=df.index
+    )
 
-    return df[["period", "reference", "status"]]
+    return df[
+        ["period", "reference", "combined_error_marker", "status", "status_encoded"]
+    ]
 
 
-def convert_qv_to_responses(df):
+def convert_qv_to_responses(df: pd.DataFrame) -> pd.DataFrame:
     """
     Converts a dataframe from a qv file from CSW and returns a dataframe that
     looks like a responses table in from an SPP snapshot.
@@ -155,11 +170,14 @@ def convert_qv_to_responses(df):
     """
 
     rename_columns = {
-        "question_no": "questionnumber",
+        "question_no": "questioncode",
         "returned_value": "response",
         "adjusted_value": "adjustedresponse",
     }
+    df["createdby"] = "csw to spp converter"
+    df["createddate"] = datetime.today().strftime("%d/%m/%Y")
 
-    out_columns = ["reference"] + list(rename_columns.keys())
-
-    return df[out_columns].rename(rename_columns)
+    out_columns = ["reference", "period", "createdby", "createddate"] + list(
+        rename_columns.keys()
+    )
+    return df[out_columns].rename(columns=rename_columns)
