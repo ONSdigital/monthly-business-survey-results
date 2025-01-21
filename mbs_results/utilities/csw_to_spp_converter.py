@@ -240,9 +240,7 @@ def load_and_join_finalsel(
             "frosic2007",
             "frotover",
         ]
-    ]  # Check if froempees is correct
+    ]
     finalsel_data["formtype"] = "0" + finalsel_data["formtype"].astype(str)
     finalsel_data.rename(columns=finalsel_column_remapper, inplace=True)
-
-    # df_merged = df.merge(finalsel_data, on=["reference","period"], how="left")
     return df.merge(finalsel_data, on=["reference", "period"], how="left")
