@@ -202,6 +202,8 @@ def load_and_join_finalsel(
 ) -> pd.DataFrame:
     """
     Loads finalsel data and joins it with the input dataframe.
+    NOTE: This function may not be needed if input data is adjusted
+    If we change the columns loaded from json files, this function could be removed
 
     Parameters
     ----------
