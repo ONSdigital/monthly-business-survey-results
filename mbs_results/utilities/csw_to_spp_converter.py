@@ -44,7 +44,7 @@ def create_snapshot(
 
     contributors_with_finalsel = load_and_join_finalsel(
         contributors,
-        "D:/repos/cdsw_cloning/monthly-business-survey-results/selective_editing_testing/finalsel*",  # Hard coded as input data does not have uncompressed versions
+        input_directory + "finalsel*",
         config["sample_column_names"],
         config,
     )
@@ -155,7 +155,7 @@ def convert_cp_to_contributors(df: pd.DataFrame) -> pd.DataFrame:
     }
 
     df["status"] = df["combined_error_marker"].map(error_marker_map)
-    df[["status", "status_encoded"]] = pd.DataFrame(
+    df[["status", "statusencoded"]] = pd.DataFrame(
         df["status"].tolist(), index=df.index
     )
 
@@ -163,7 +163,7 @@ def convert_cp_to_contributors(df: pd.DataFrame) -> pd.DataFrame:
     df["createddate"] = datetime.today().strftime("%d/%m/%Y")
 
     return df[
-        ["period", "reference", "status", "status_encoded", "createdby", "createddate"]
+        ["period", "reference", "status", "statusencoded", "createdby", "createddate"]
     ]
 
 
@@ -239,6 +239,7 @@ def load_and_join_finalsel(
             "frotover",
         ]
     ]  # Check if froempees is correct
+    finalsel_data["formtype"] = "0" + finalsel_data["formtype"].astype(str)
     finalsel_data.rename(columns=finalsel_column_remapper, inplace=True)
 
     # df_merged = df.merge(finalsel_data, on=["reference","period"], how="left")
