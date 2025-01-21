@@ -70,7 +70,6 @@ def generate_imputation_marker(
     )
 
     select_cols = [f"{i}_flag_{target}" for i in flags]
-    df.to_csv("temp.csv")
     first_condition_met = [np.where(i)[0][0] for i in df[select_cols].values]
     df[f"imputation_flags_{target}"] = [flags[i] for i in first_condition_met]
     df.drop(columns=select_cols, inplace=True)
@@ -139,7 +138,6 @@ def create_imputation_logical_columns(
         backdata_fimc_mask = df[reference] != df[reference]
         backdata_c_mask = df[reference] != df[reference]
         backdata_fic_mask = df[reference] != df[reference]
-        print(backdata_r_mask)
 
     # if target na but not back data period OR if backdata flag is 'r'
     df[f"r_flag_{target}"] = (df[target].notna() & ~df["is_backdata"]) | backdata_r_mask
@@ -263,11 +261,20 @@ def flag_rolling_impute(
     -------
     pd.Series
     """
+    # Fill group tells when forward/backward filling should apply
+    # If there are mannual constuctions we need to account and create a new
+    # fill group, if they don't exist then forward or backward fill (fill group)
+    # should be applied for references with same strata without date gap
+
+    mc_exists_rule = (
+        (df[f"{target}_man"].notna()) if f"{target}_man" in df.columns else False
+    )
 
     df["fill_group"] = (
         (df[period] - pd.DateOffset(months=1) != df.shift(1)[period])
         | (df[strata].diff(1) != 0)
         | (df[reference].diff(1) != 0)
+        | mc_exists_rule
     ).cumsum()
 
     if time_difference < 0:
