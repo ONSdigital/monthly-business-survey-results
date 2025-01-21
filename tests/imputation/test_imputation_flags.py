@@ -44,7 +44,6 @@ class TestImputationFlags:
             reference="reference",
             strata="strata",
             auxiliary="auxiliary",
-            predictive_auxiliary="f_match_auxiliary",
             back_data_period=111,
         )
         df_expected_output.drop(
