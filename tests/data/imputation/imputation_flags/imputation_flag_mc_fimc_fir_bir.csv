@@ -22,3 +22,7 @@ period,reference,target_variable,auxiliary,strata,target_variable_man,imputation
 202302,2,99,7,8,,r
 202303,2,,7,8,,fir
 202304,2,,7,8,12,mc
+202301,3,,7,8,100,mc
+202302,3,99,7,8,,r
+202303,3,,7,8,,fir
+202304,3,,7,8,,fir
