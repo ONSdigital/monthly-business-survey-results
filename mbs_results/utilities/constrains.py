@@ -141,6 +141,14 @@ def constrain(
         Original dataframe with constrains.
     """
 
+    # TODO: Concat of derived and constains df needs to moved up prior to constains
+    # Currently we are not constaining any derived questions ... Move and refactor
+    #
+    # elif statement changed to if (might already be done on main branch - merge main)
+    # Add a pre-derived column and a post-derived-pre-constain column (again half done
+    # on main )
+    # Make unit tests pass and then work on validation function
+
     derive_map = create_derive_map(df, spp_form_id)
 
     # pre_derive_df has dimenesions as index, columns the values to be used when derived
@@ -171,8 +179,8 @@ def constrain(
     unique_q_numbers = df[question_no].unique()
     df.set_index([question_no, period, reference], inplace=True)
 
-    pre_con_col_name = f'pre_con_{target}'
-    pre_con_vari ={}
+    pre_con_col_name = f"pre_con_{target}"
+    pre_con_vari = {}
 
     if 49 in unique_q_numbers:
         if unique_q_numbers > 40:
