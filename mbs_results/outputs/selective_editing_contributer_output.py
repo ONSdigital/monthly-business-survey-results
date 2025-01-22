@@ -58,10 +58,9 @@ def get_selective_editing_contributer_output(
     selective_editing_contributer_output = pd.merge(
         selective_editing_contributer_output,
         threshold_mapping,
-        left_on=["formtype", "domain"],
-        right_on=["form", "domain"],
+        on=["formtype", "domain"],
         how="left",
-    ).drop(columns=["form", "formtype"])
+    ).drop(columns=["formtype"])
 
     selective_editing_contributer_output = selective_editing_contributer_output.rename(
         columns={"reference": "ruref", "domain": "domain_group"}
