@@ -2,7 +2,7 @@
     "platform" : "network",
     "bucket" : "",
 
-    "calibration_group_map": "",
+    "calibration_group_map_path": "",
     "classification_values_path": "",
     "folder_path": "",
     "l_values_path": "",
@@ -11,9 +11,15 @@
     "output_path": "",
     "population_path": "",
     "sample_path": "",
+    "back_data_qv_path":"",
+    "back_data_cp_path":"",
+    "back_data_finalsel_path":"",
+
 
     "current_period" : 202303,
     "previous_period" : 202302,
+    "revision_period": 13,
+
 
     "auxiliary": "frotover",
     "calibration_factor": "calibration_factor",
@@ -129,6 +135,21 @@
 
     "census_extra_calibration_group": [5043, 5113, 5123, 5203, 5233,
      5403, 5643, 5763, 5783, 5903, 6073],
-     "filter_out_questions": [11, 12 ,146]
+     "filter_out_questions": [11, 12 ,146],
+     "csw_to_spp_columns":{
+        "returned_value":"response",
+        "adjusted_value":"adjustedresponse",
+        "question_no":"questioncode"
+     },
+     "type_to_imputation_marker" : {
+        "1":"r",
+        "3":"fir",
+        "4":"bir",
+        "5":"c",
+        "6":"mc",
+        "10":"r",
+        "11":"r",
+        "13":"fir"
+        }
 
 }

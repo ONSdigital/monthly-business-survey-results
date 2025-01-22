@@ -110,8 +110,8 @@ def derive_estimation_variables(
     )
 
     sample = sample.copy()[[reference, period]]
-    sample["sampled"] = 1
+    sample["is_sampled"] = True
 
     return population_frame.merge(sample, on=[reference, period], how="left").fillna(
-        value={"sampled": 0}
+        value={"is_sampled": False}
     )

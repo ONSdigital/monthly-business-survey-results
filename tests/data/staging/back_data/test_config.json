@@ -1,0 +1,23 @@
+{
+    "current_period" : 202303,
+    "revision_period": 13,
+    "period": "period",
+    "reference": "reference",
+    "back_data_type":"type",
+    "imputation_marker_col":"imputation_marker",
+    "type_to_imputation_marker" : {
+        "1":"r",
+        "3":"fir",
+        "4":"bir",
+        "5":"c",
+        "6":"mc",
+        "10":"r",
+        "11":"r",
+        "13":"fir"
+        },
+     "csw_to_spp_columns":{
+        "returned_value":"response",
+        "adjusted_value":"adjustedresponse",
+        "question_no":"questioncode"
+     }
+}
