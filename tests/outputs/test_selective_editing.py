@@ -107,6 +107,9 @@ class TestSelectiveEditing:
         expected_output["period"] = convert_column_to_datetime(
             expected_output["period"]
         )
+        expected_output["auxiliary_value"] = expected_output["auxiliary_value"].astype(
+            float
+        )
 
         actual_output = calculate_auxiliary_value(
             input_data,
