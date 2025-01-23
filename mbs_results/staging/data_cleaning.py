@@ -374,7 +374,7 @@ def create_imputation_class(
     df[new_col] = (
         df[cell_no_col]
         .astype(str)
-        .map(lambda x: str(5) + x[1:-1] if x[0] == str(7) else x[:-1])
+        .map(lambda x: x[:-1])
         .astype(int)
     )
 
