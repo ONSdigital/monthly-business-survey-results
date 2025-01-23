@@ -380,6 +380,36 @@ def create_imputation_class(
 
     return df
 
+def convert_cell_number(
+    df: pd.DataFrame,
+    cell_number: str
+):
+    """
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DESCRIPTION.
+    cell_number : TYPE
+        DESCRIPTION.
+     : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    """
+    df["ni_uk_cell_number"] = df[cell_number]
+    df[cell_number] = (
+        df[cell_number]
+        .astype(str)
+        .map(lambda x: str(5) + x[1:] if x[0] == str(7) else x)
+        .astype(int)
+    )
+    
+    return df
+
 
 def is_census(calibration_group: pd.Series, extra_bands: List) -> pd.Series:
     """
