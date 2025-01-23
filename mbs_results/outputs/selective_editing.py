@@ -182,7 +182,7 @@ def calculate_auxiliary_value(
 
     q40["auxiliary_value"] = q40[frozen_turnover]
     q49["auxiliary_value"] = q49[frozen_turnover] * q49[construction_link]
-    
+
     keep_cols = [
         reference,
         period,
