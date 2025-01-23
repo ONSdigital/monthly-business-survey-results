@@ -135,6 +135,9 @@ def convert_cp_to_contributors(df: pd.DataFrame) -> pd.DataFrame:
         "E": ("Check needed", "201"),
         "W": ("Check needed", "201"),
         # Check where codes 200 - 900 come from
+        # We believe this are not used in MBS.
+        # Need to create a validation check to ensure that these are not needed
+        # Adding this task to the backlog
         "200": ("Form sent out", "100"),
         "300": (
             "Clear - overridden",
