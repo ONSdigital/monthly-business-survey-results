@@ -138,7 +138,7 @@ def calculate_auxiliary_value(
     """
     Returning auxiliary values for questions 40 and 49.
     Auxiliary is frozen turnover for Q40 and
-    construction link(t-1) * frozen turnover for Q49.
+    construction link * frozen turnover for Q49.
 
     Parameters
     ----------
@@ -181,19 +181,8 @@ def calculate_auxiliary_value(
     q49 = current_df[current_df[question_no] == 49]
 
     q40["auxiliary_value"] = q40[frozen_turnover]
-
-    previous_period = period_selected - pd.DateOffset(months=1)
-    prev_const_link = (
-        dataframe[
-            (dataframe[period] == previous_period) & (dataframe[question_no] == 49)
-        ][[imputation_class, construction_link, question_no]]
-        .drop_duplicates()
-        .rename(columns={"construction_link": "prev_const_link"})
-    )
-
-    q49 = pd.merge(q49, prev_const_link, on=[imputation_class, question_no], how="left")
-
-    q49["auxiliary_value"] = q49[frozen_turnover] * q49["prev_const_link"]
+    q49["auxiliary_value"] = q49[frozen_turnover] * q49[construction_link]
+    
     keep_cols = [
         reference,
         period,
