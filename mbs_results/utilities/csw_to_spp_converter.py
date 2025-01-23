@@ -23,6 +23,11 @@ def create_snapshot(
         Folder path to CSW files.
     periods: List[str]
         list of periods to include in the snapshot
+    output_directory : str
+        Folder path to write the snapshot.
+    config: dict
+        main config file for the pipeline.
+
 
     Action
     -------
@@ -129,6 +134,7 @@ def convert_cp_to_contributors(df: pd.DataFrame) -> pd.DataFrame:
         "O": ("Clear", "210"),
         "E": ("Check needed", "201"),
         "W": ("Check needed", "201"),
+        # Check where codes 200 - 900 come from
         "200": ("Form sent out", "100"),
         "300": (
             "Clear - overridden",
@@ -213,8 +219,6 @@ def load_and_join_finalsel(
         Path to finalsel file.
     finalsel_cols: List[str]
         List containing all column names in the finalsel file
-    period: str
-        name of the period column
 
     Returns
     -------
