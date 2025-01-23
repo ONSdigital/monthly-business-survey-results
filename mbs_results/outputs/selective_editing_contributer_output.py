@@ -53,9 +53,14 @@ def get_selective_editing_contributer_output(
         [period, reference, "design_weight", "frosic2007", "formtype"]
     ]
 
-    domain_data = pd.read_csv(sic_domain_mapping_path).astype(str)
+    domain_data = pd.read_csv(
+        sic_domain_mapping_path, dtype={"sic_5_digit": str, "domain": str}
+    )
+    threshold_mapping = pd.read_csv(
+        threshold_filepath, dtype={"formtype": str, "domain": str, "threshold": float}
+    )
 
-    threshold_mapping = pd.read_csv(threshold_filepath).astype(str)
+    input_data.to_csv("input_data.csv")
 
     selective_editing_contributer_output = merge_domain(
         input_data, domain_data, "frosic2007", "sic_5_digit"
@@ -65,10 +70,9 @@ def get_selective_editing_contributer_output(
         selective_editing_contributer_output,
         threshold_mapping,
         left_on=["formtype", "domain"],
-        right_on=["form", "domain"],
+        right_on=["formtype", "domain"],
         how="left",
-    ).drop(columns=["form", "formtype"])
-
+    )
     selective_editing_contributer_output = selective_editing_contributer_output.rename(
         columns={"reference": "ruref", "domain": "domain_group"}
     )
