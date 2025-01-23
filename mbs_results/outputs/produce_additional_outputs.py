@@ -108,4 +108,4 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
     snapshot_name = config["mbs_file_name"].split(".")[0]
     for output in additional_outputs:
         filename = f"{output}_v{file_version_mbs}_{snapshot_name}.csv"
-        additional_outputs[output].to_csv(config["output_path"] + filename)
+        additional_outputs[output].to_csv(config["output_path"] + filename, index=False)
