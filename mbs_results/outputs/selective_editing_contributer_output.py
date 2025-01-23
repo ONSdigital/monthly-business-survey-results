@@ -60,8 +60,6 @@ def get_selective_editing_contributer_output(
         threshold_filepath, dtype={"formtype": str, "domain": str, "threshold": float}
     )
 
-    input_data.to_csv("input_data.csv")
-
     selective_editing_contributer_output = merge_domain(
         input_data, domain_data, "frosic2007", "sic_5_digit"
     )
