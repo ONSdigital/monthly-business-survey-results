@@ -171,7 +171,6 @@ def load_manual_constructions(
     manual_constructions[period] = convert_column_to_datetime(
         manual_constructions[period]
     )
-    manual_constructions[reference] = manual_constructions[reference].astype("str")
     manual_constructions.set_index([reference, period], inplace=True)
 
     validate_manual_constructions(df, manual_constructions)
@@ -186,7 +185,7 @@ def join_manual_constructions(
     manual_constructions: pd.DataFrame,
     reference: str,
     period: str,
-    question_no: str = "question_no",
+    question_no: str,
     **config,
 ):
     """
@@ -205,7 +204,7 @@ def join_manual_constructions(
         the name of the reference column
     period: str
         the name of the period column
-    period: str
+    question_no: str
         the name of the question number column
     **config: Dict
         main pipeline configuration. Can be used to input the entire config dictionary
