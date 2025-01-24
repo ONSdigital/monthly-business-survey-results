@@ -341,8 +341,9 @@ def ratio_of_means(
     reference: str,
     strata: str,
     auxiliary: str,
-    current_period: str,
-    revision_period: str,
+    current_period: int,
+    revision_period: int,
+    question_no: str,
     filters: pd.DataFrame = None,
     manual_constructions: pd.DataFrame = None,
     imputation_links: Dict[str, str] = {},
@@ -372,6 +373,12 @@ def ratio_of_means(
         Column name containing strata information (sic).
     auxiliary : str
         Column name containing auxiliary information (sic).
+    current_period: int
+        Value with current period to be imputed as int.
+    revision_period: int
+        Value containing the amount of periods for imputation.
+    question_no: str
+        Column name containing question_no
     filters : pd.DataFrame, optional
         Dataframe with values to exclude from imputation method.
     manual_constructions : pd.DataFrame, optional
@@ -429,7 +436,9 @@ def ratio_of_means(
 
     if manual_constructions is not None:
         # Need to join mc dataframe to original df
-        df = join_manual_constructions(df, manual_constructions, reference, period)
+        df = join_manual_constructions(
+            df, manual_constructions, reference, period, question_no
+        )
 
     if f"{target}_man" in df.columns:
         # Manual Construction
@@ -510,14 +519,3 @@ def calculate_back_data_period(current_period, revision_period) -> str:
         (current_period - pd.DateOffset(months=revision_period)).date().strftime("%Y%m")
     )
     return back_data_period
-
-
-if __name__ == "__main__":
-    from mbs_results.utilities.inputs import load_config
-
-    config = load_config()
-    bdp = calculate_back_data_period(
-        current_period=config["current_period"],
-        revision_period=config["revision_period"],
-    )
-    print(config["current_period"], bdp)
