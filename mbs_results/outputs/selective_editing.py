@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+from mbs_results.utilities.utils import convert_column_to_datetime
+
 
 def calculate_predicted_value(
     dataframe: pd.DataFrame,
@@ -28,7 +30,7 @@ def calculate_predicted_value(
           and imputed_value
 
     """
-
+    # TODO: This has already been combined somewhere updstream
     dataframe["predicted_value"] = np.where(
         dataframe[adjusted_value].isna(),
         dataframe[imputed_value],
@@ -46,10 +48,10 @@ def create_standardising_factor(
     question_no: str,
     predicted_value: str,
     imputation_marker: str,
+    imputation_class: str,
     a_weight: str,
     o_weight: str,
     g_weight: str,
-    auxiliary_value: str,
     period_selected: int,
 ) -> pd.DataFrame:
     """
@@ -72,16 +74,16 @@ def create_standardising_factor(
         name of column in dataframe containing predicted value variable
     imputation_marker : str
         name of column in dataframe containing imputation marker variable
+    imputation_class : str
+        name of column in dataframe containing imputation class variable
     a_weight : str
         name of column in dataframe containing a_weight variable
     o_weight : str
         name of column in dataframe containing o_weight variable
     g_weight : str
         name of column in dataframe containing g_weight variable
-    auxiliary_value : str
-        name of column in dataframe containing auxiliary value variable
-    previous_period : int
-        previous period to take the weights for estimation of standardising factor in
+    calc_period : int
+        period to take the weights for estimation of standardising factor in
         the format yyyymm
 
     Returns
@@ -92,22 +94,23 @@ def create_standardising_factor(
 
     """
     questions_selected = [40, 49]
-    previous_df = dataframe[(dataframe[period] == period_selected)]
-    previous_df = previous_df[previous_df[question_no].isin(questions_selected)]
+    current_df = dataframe[(dataframe[period] == period_selected)]
+    current_df = current_df[current_df[question_no].isin(questions_selected)]
+
     # The standardising factor is created for each record before summing for each
     # domain-question grouping.
-    previous_df["unit_standardising_factor"] = (
-        previous_df[predicted_value]
-        * previous_df[a_weight]
-        * previous_df[o_weight]
-        * previous_df[g_weight]
+    current_df["unit_standardising_factor"] = (
+        current_df[predicted_value]
+        * current_df[a_weight]
+        * current_df[o_weight]
+        * current_df[g_weight]
     )
 
-    previous_df["standardising_factor"] = previous_df.groupby([domain, question_no])[
+    current_df["standardising_factor"] = current_df.groupby([domain, question_no])[
         "unit_standardising_factor"
     ].transform("sum")
 
-    output_df = previous_df[
+    output_df = current_df[
         [
             period,
             reference,
@@ -115,8 +118,78 @@ def create_standardising_factor(
             "standardising_factor",
             predicted_value,
             imputation_marker,
-            auxiliary_value,
+            imputation_class,
         ]
     ]
+
+    return output_df.reset_index(drop=True)
+
+
+def calculate_auxiliary_value(
+    dataframe: pd.DataFrame,
+    reference: str,
+    period: str,
+    question_no: str,
+    frozen_turnover: str,
+    construction_link: str,
+    imputation_class: str,
+    period_selected: int,
+) -> pd.DataFrame:
+    """
+    Returning auxiliary values for questions 40 and 49.
+    Auxiliary is frozen turnover for Q40 and
+    construction link * frozen turnover for Q49.
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        Reference dataframe
+    reference : str
+        name of column in dataframe containing reference variable
+    period : str
+        name of column in dataframe containing period variable
+    question_no : str
+        name of column in dataframe containing question code variable
+    frozen_turnover : str
+        name of column in dataframe containing auxiliary value variable
+    construction_link : str
+        name of column in dataframe containing construction link variable
+    imputation_class : str
+        name of column in dataframe containing imputation class, where
+        there is one contruction link per imputation_class and period
+    calc_period : int
+        period to take the weights for estimation of standardising factor in
+        the format yyyymm
+
+    Returns
+    -------
+    pd.DataFrame
+        dataframe with calculated auxiliary_value and reference, period
+        and question_no in order to merge back onto selective editing
+        questions output
+
+    """
+
+    # convert register turover from annual pounds-thousands to monthly pounds
+    dataframe[frozen_turnover] = dataframe[frozen_turnover] * 1000 / 12
+
+    period_selected = pd.to_datetime(period_selected, format="%Y%m")
+    dataframe[period] = convert_column_to_datetime(dataframe[period])
+    current_df = dataframe[(dataframe[period] == period_selected)]
+
+    q40 = current_df[current_df[question_no] == 40]
+    q49 = current_df[current_df[question_no] == 49]
+
+    q40["auxiliary_value"] = q40[frozen_turnover]
+    q49["auxiliary_value"] = q49[frozen_turnover] * q49[construction_link]
+
+    keep_cols = [
+        reference,
+        period,
+        question_no,
+        "auxiliary_value",
+    ]
+
+    output_df = pd.concat([q40[keep_cols], q49[keep_cols]])
 
     return output_df.reset_index(drop=True)
