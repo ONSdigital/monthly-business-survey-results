@@ -52,7 +52,6 @@ def get_additional_outputs_df(
             "response",
             "froempment",
             "cell_no",
-            "referencename",
             "imputation_flags_adjustedresponse",
             "f_link_adjustedresponse",
             "b_link_adjustedresponse",
