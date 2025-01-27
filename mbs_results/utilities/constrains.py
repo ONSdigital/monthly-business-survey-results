@@ -141,18 +141,11 @@ def constrain(
         Original dataframe with constrains.
     """
 
-    # TODO: Concat of derived and constains df needs to moved up prior to constains
-    # Currently we are not constaining any derived questions ... Move and refactor
-    #
-    # elif statement changed to if (might already be done on main branch - merge main)
-    # Add a pre-derived column and a post-derived-pre-constain column (again half done
-    # on main )
-    # Make unit tests pass and then work on validation function
-
     derive_map = create_derive_map(df, spp_form_id)
 
-    df["unadjusted_target"] = df[target]
+    df[f"pre_derived_{target}"] = df[target]
 
+    
     # pre_derive_df has dimenesions as index, columns the values to be used when derived
     # Hard coded columns are from finalsel files,
     pre_derive_df = df.set_index(
@@ -178,29 +171,25 @@ def constrain(
             for form_type, derives in derive_map.items()
         ]
     )
-    unique_q_numbers = df[question_no].unique()
-    df.set_index([question_no, period, reference], inplace=True)
+    
+    pre_constrained = pd.concat([df, derived_values])
+    pre_constrained[f"pre_constrained_{target}"] = pre_constrained[target]
 
-    pre_con_col_name = f"pre_con_{target}"
-    pre_con_vari = {}
+    unique_q_numbers = pre_constrained[question_no].unique()
+    pre_constrained.set_index([question_no, period, reference], inplace=True)
+  
 
     if 49 in unique_q_numbers:
-        if unique_q_numbers > 40:
-            pre_con_vari[pre_con_col_name] = target.copy()
-        replace_values_index_based(df, target, 49, ">", 40)
-<<<<<<< HEAD
+        replace_values_index_based(pre_constrained, target, 49, ">", 40)
 
-    elif 90 in unique_q_numbers:
-=======
     if 90 in unique_q_numbers:
->>>>>>> 32e5aca974763866c27b30694bad38415f68e093
-        replace_values_index_based(df, target, 90, ">=", 40)
+        replace_values_index_based(pre_constrained, target, 90, ">=", 40)
 
-    df.reset_index(inplace=True)
 
-    final_constrained = pd.concat([df, derived_values, pre_con_vari])
+    post_constrained = pre_constrained.copy().reset_index()
 
-    return final_constrained
+
+    return post_constrained
 
 
 def derive_questions(

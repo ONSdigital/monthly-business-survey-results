@@ -81,7 +81,7 @@ def test_constrain_functionality(filepath):
             df[(df["question_no"] == 40) & (df["spp_form_id"].isin([13, 14]))].index
         )
         .drop(df[(df["question_no"] == 46) & (df["spp_form_id"].isin([15]))].index)
-        .drop(columns=["unadjusted_target"])
+        .drop(columns=["pre_derived_target"])
     )
 
     df_expected_output = df.drop(
@@ -89,8 +89,8 @@ def test_constrain_functionality(filepath):
     ).rename(columns={"expected_target": "target"})
     df_expected_output["target"] = df_expected_output["target"].astype(float)
 
-    df_expected_output["unadjusted_target"] = df_expected_output[
-        "unadjusted_target"
+    df_expected_output["pre_derived_target"] = df_expected_output[
+        "pre_derived_target"
     ].fillna("filled_na")
 
     df_output = constrain(
@@ -109,7 +109,7 @@ def test_constrain_functionality(filepath):
         "spp_form_id",
         "question_no",
         "target",
-        "unadjusted_target",
+        "pre_derived_target",
         "constrain_marker",
     ]
 
@@ -117,12 +117,12 @@ def test_constrain_functionality(filepath):
         columns=["cell_no", "frotover", "froempment", "frosic2007"], inplace=True
     )
     df_output = df_output[order].sort_values(by=order).reset_index(drop=True)
-    df_output["unadjusted_target"] = df_output["unadjusted_target"].fillna("filled_na")
+    df_output["pre_derived_target"] = df_output["pre_derived_target"].fillna("filled_na")
 
     df_expected_output = (
         df_expected_output[order].sort_values(by=order).reset_index(drop=True)
     )
-
+    df_expected_output['spp_form_id'] = df_expected_output['spp_form_id'].astype('int64')
     assert_frame_equal(df_output, df_expected_output)
 
 

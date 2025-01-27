@@ -1,4 +1,4 @@
-period,reference,spp_form_id,question_no,target,unadjusted_target,expected_target,constrain_marker
+period,reference,spp_form_id,question_no,target,pre_derived_target,expected_target,constrain_marker
 202001,100,15,40,99,99,99,
 202001,100,15,49,100,100,99,49 > 40
 202001,100,15,90,100,100,99,90 >= 40
