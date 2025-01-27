@@ -36,4 +36,9 @@ class TestReplaceLValue:
             df_input, "strata", "question_no", "l_value", replace_l_values_path
         )
 
+        df_output = df_output.sort_values(by=["question_no"]).reset_index(drop=True)
+        df_expected_output = df_expected_output.sort_values(
+            by=["question_no"]
+        ).reset_index(drop=True)
+
         assert_frame_equal(df_expected_output, df_output)

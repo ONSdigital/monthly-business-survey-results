@@ -56,6 +56,14 @@ def create_and_merge_imputation_values(
     # constructed has to come first to use the result for forward
     # impute from constructed
     imputation_config = {
+        # "backdata": {
+        #     "intermediate_column": "backdata",
+        #     "marker": "backdata",
+        #     # doesn't actually apply a fill so can be forward or back
+        #     "fill_column": target,
+        #     "fill_method": "ffill",
+        #     "link_column": cumulative_forward_link,
+        # },
         "c": {
             "intermediate_column": "constructed",
             "marker": "c",
@@ -145,9 +153,19 @@ def create_impute(df, group, imputation_spec):
     fill_column = imputation_spec["fill_column"]
     fill_method = imputation_spec["fill_method"]
     link_column = imputation_spec["link_column"]
-    df[column_name] = (
-        df.groupby(group)[fill_column].fillna(method=fill_method) * df[link_column]
-    )
+    imputation_spec["marker"]
+
+    if fill_method == "ffill":
+        df[column_name] = df.groupby(group)[fill_column].ffill() * df[link_column]
+    elif fill_method == "bfill":
+        df[column_name] = df.groupby(group)[fill_column].bfill() * df[link_column]
+
+    if "hold_period_0_values" in df.columns:
+        df.loc[df["hold_period_0_values"].notnull(), column_name] = df.loc[
+            df["hold_period_0_values"].notnull(), "hold_period_0_values"
+        ]
+        df.drop(columns="hold_period_0_values", inplace=True)
+
     return df
 
 
