@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
-      - uses: pre-commit/action@6b88fe577c44472d234e8d4d8ee89ca36e03ae2a #commit hash for v3.0.0
+      - uses: pre-commit/action@6b88fe5 #commit hash for v3.0.0
 
   testing-cml:
     runs-on: ubuntu-latest
