@@ -184,7 +184,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     df = run_live_or_frozen(
         df,
         config["target"],
-        error_marker=config["errormarker"],
+        status=config["status"],
         state=config["state"],
         error_values=[201],
     )

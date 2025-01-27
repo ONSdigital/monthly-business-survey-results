@@ -1,4 +1,5 @@
 import operator
+import warnings
 from typing import List
 
 import pandas as pd
@@ -143,9 +144,8 @@ def constrain(
 
     derive_map = create_derive_map(df, spp_form_id)
 
-    df[f"pre_derived_{target}"] = df[target]
+    df["unadjusted_target"] = df[target]
 
-    
     # pre_derive_df has dimenesions as index, columns the values to be used when derived
     # Hard coded columns are from finalsel files,
     pre_derive_df = df.set_index(
@@ -163,21 +163,29 @@ def constrain(
     )
     pre_derive_df = pre_derive_df[[target]]
 
-    derived_values = pd.concat(
-        [
-            sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
-            .assign(**{question_no: derives["derive"]})
-            .assign(**{spp_form_id: form_type})
-            for form_type, derives in derive_map.items()
-        ]
-    )
-    
+    derived_values_list = [
+        sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
+        .assign(**{question_no: derives["derive"]})
+        .assign(**{spp_form_id: form_type})
+        for form_type, derives in derive_map.items()
+    ]
+
+    if derived_values_list:
+
+        derived_values = pd.concat(derived_values_list)
+
+    else:
+        warnings.warn("No derived questions created")
+        derived_values = pd.DataFrame(columns=["constrain_marker"])
+
+
     pre_constrained = pd.concat([df, derived_values])
     pre_constrained[f"pre_constrained_{target}"] = pre_constrained[target]
 
     unique_q_numbers = pre_constrained[question_no].unique()
     pre_constrained.set_index([question_no, period, reference], inplace=True)
   
+
 
     if 49 in unique_q_numbers:
         replace_values_index_based(pre_constrained, target, 49, ">", 40)
@@ -245,15 +253,20 @@ def derive_questions(
     # Assuming default value of o-weight is 1
     pre_derive_df = pre_derive_df[[target]].fillna(value=0)
 
-    derived_values = pd.concat(
-        [
-            sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
-            .assign(**{question_no: derives["derive"]})
-            .assign(**{spp_form_id: form_type})
-            # Create a task on Backlog to fix this.
-            for form_type, derives in derive_map.items()
-        ]
-    )
+    derived_values_list = [
+        sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
+        .assign(**{question_no: derives["derive"]})
+        .assign(**{spp_form_id: form_type})
+        # Create a task on Backlog to fix this.
+        for form_type, derives in derive_map.items()
+    ]
+    if derived_values_list:
+        derived_values = pd.concat(derived_values_list)
+
+    else:
+        warnings.warn("No derived questions created")
+        derived_values = pd.DataFrame(columns=["constrain_marker"])
+
     unique_q_numbers = df[question_no].unique()
 
     df.set_index([question_no, period, reference], inplace=True)

@@ -39,6 +39,7 @@ class TestRatioOfMeans:
             reference="identifier",
             strata="group",
             auxiliary="other",
+            question_no="questioncode",
             current_period=202003,
             revision_period=2,
         )

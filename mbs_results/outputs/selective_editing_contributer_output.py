@@ -8,6 +8,9 @@ def get_selective_editing_contributer_output(
     sic_domain_mapping_path: str,
     threshold_filepath: str,
     period_selected: int,
+    question_no: str,
+    period: str,
+    reference: str,
     **config
 ) -> pd.DataFrame:
     """
@@ -25,6 +28,12 @@ def get_selective_editing_contributer_output(
         Filepath to csv file containing form type, domain and threshold columns.
     period_selected : int
         period to include in outputs
+    question_no : str
+        Column name containing question number.
+    period : str
+        Column name containing date information.
+    reference : str
+        Column name containing reference.
     **config: Dict
           main pipeline configuration. Can be used to input the entire config dictionary
 
@@ -42,14 +51,20 @@ def get_selective_editing_contributer_output(
     >>        period_selected=202201
     >> )
     """
-
+    questions_selected = [40, 49]
+    input_data = additional_outputs_df.loc[
+        additional_outputs_df[question_no].isin(questions_selected)
+    ]
     input_data = additional_outputs_df[
-        ["period", "reference", "design_weight", "frosic2007", "formtype"]
+        [period, reference, "design_weight", "frosic2007", "formtype"]
     ]
 
-    domain_data = pd.read_csv(sic_domain_mapping_path).astype(str)
-
-    threshold_mapping = pd.read_csv(threshold_filepath).astype(str)
+    domain_data = pd.read_csv(
+        sic_domain_mapping_path, dtype={"sic_5_digit": str, "domain": str}
+    )
+    threshold_mapping = pd.read_csv(
+        threshold_filepath, dtype={"formtype": str, "domain": str, "threshold": float}
+    )
 
     selective_editing_contributer_output = merge_domain(
         input_data, domain_data, "frosic2007", "sic_5_digit"
@@ -58,10 +73,9 @@ def get_selective_editing_contributer_output(
     selective_editing_contributer_output = pd.merge(
         selective_editing_contributer_output,
         threshold_mapping,
-        left_on=["formtype", "domain"],
-        right_on=["form", "domain"],
+        on=["formtype", "domain"],
         how="left",
-    ).drop(columns=["form", "formtype"])
+    ).drop(columns=["formtype"])
 
     selective_editing_contributer_output = selective_editing_contributer_output.rename(
         columns={"reference": "ruref", "domain": "domain_group"}
