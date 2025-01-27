@@ -83,6 +83,7 @@ class TestRatioOfMeans:
                 reference="identifier",
                 strata="group",
                 auxiliary="other",
+                question_no="questioncode",
                 filters=filter_df,
                 imputation_links={
                     "forward": "f_link_question",
@@ -100,6 +101,7 @@ class TestRatioOfMeans:
                 reference="identifier",
                 strata="group",
                 auxiliary="other",
+                question_no="questioncode",
                 filters=filter_df,
                 current_period=202001,
                 revision_period=10,
@@ -195,6 +197,7 @@ class TestRatioOfMeansManConstruction:
             reference="identifier",
             strata="group",
             auxiliary="other",
+            question_no="question_no",
             manual_constructions=manual_constructions,
             current_period=202001,
             revision_period=10,

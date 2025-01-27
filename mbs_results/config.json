@@ -17,6 +17,10 @@
     "sic_domain_mapping_path": "",
     "threshold_filepath":"",
 
+    "back_data_type":"response_type",
+    "imputation_marker_col":"imputation_marker",
+
+
     "period_selected": 202303,
     "current_period" : 202303,
     "previous_period" : 202302,
@@ -27,7 +31,7 @@
     "calibration_factor": "calibration_factor",
     "cell_number": "cell_no",
     "design_weight": "design_weight",
-    "errormarker": "statusencoded",
+    "status": "statusencoded",
     "form_id_idbr": "formtype",
     "group": "calibration_group",
     "calibration_group": "calibration_group",
@@ -35,7 +39,7 @@
     "question_no": "questioncode",
     "reference": "reference",
     "region": "region",
-    "sampled": "sampled",
+    "sampled": "is_sampled",
     "state": "frozen",
     "strata": "cell_no",
     "target": "adjustedresponse",
@@ -154,6 +158,6 @@
         "13":"fir"
         },
 
-  "additional_outputs":["create_imputation_link_output"]
+  "additional_outputs":[]
 
 }
