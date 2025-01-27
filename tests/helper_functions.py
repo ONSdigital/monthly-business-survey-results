@@ -40,6 +40,6 @@ def create_testing_config(file_paths):
 
     config.update(file_paths)
 
-    with open("tests/config.json", "w") as f:
+    with open("config.json", "w") as f:
 
         json.dump(config, f)

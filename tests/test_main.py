@@ -1,10 +1,8 @@
-import os
-
 from helper_functions import create_testing_config
 
 from mbs_results.main import run_mbs_main
 
-input_path = "data/test_main/input/"
+input_path = "tests/data/test_main/input/"
 
 test_config = {
     "calibration_group_map_path": input_path
@@ -15,7 +13,7 @@ test_config = {
     + "test_classification_question_number_l_value_mapping.csv",
     "manual_constructions_path": input_path + "test_manual_constructions.csv",
     "mbs_file_name": "test_snaphot.json",
-    "output_path": "data/test_main/output/",
+    "output_path": "tests/data/test_main/output/",
     "population_path": input_path + "test_universe009_*",
     "sample_path": input_path + "test_finalsel009_*",
     "back_data_qv_path": input_path + "test_qv_009_202112.csv",
@@ -35,12 +33,4 @@ def test_main():
     """
     create_testing_config(test_config)
 
-    original_dir = os.getcwd()
-
-    # only testing main needs this as working dir
-    # other tests expect as working dir the parent dir
-    os.chdir("tests/")
-
     run_mbs_main()
-
-    os.chdir(original_dir)
