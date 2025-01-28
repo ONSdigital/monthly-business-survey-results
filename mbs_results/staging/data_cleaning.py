@@ -374,10 +374,11 @@ def create_imputation_class(
 
     return df
 
+
 def convert_cell_number(df: pd.DataFrame, cell_number: str):
     """
     Convert NI and GB cell numbers to UK by changing the first digit to 5 if this is 7.
-    
+
     Parameters
     ----------
     df : pd.DataFrame
