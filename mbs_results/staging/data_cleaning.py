@@ -379,22 +379,23 @@ def convert_cell_number(
     cell_number: str
 ):
     """
-
+    Convert NI and GB cell numbers to UK by changing the first digit to 5 if this is 7.
+    
     Parameters
     ----------
     df : pd.DataFrame
-        DESCRIPTION.
-    cell_number : TYPE
-        DESCRIPTION.
-     : TYPE
-        DESCRIPTION.
+        Dataframe with cell_number column to convert
+    cell_number : str
+        Column name for cell_number in df
 
     Returns
     -------
-    None.
+    pd.DataFrame
+        Dataframe with converted cell_number column (and original cell_number
+        in separate column)                                                     
 
     """
-    df["ni_uk_cell_number"] = df[cell_number]
+    df["ni_gb_cell_number"] = df[cell_number]
     df[cell_number] = (
         df[cell_number]
         .astype(str)
