@@ -178,15 +178,11 @@ def constrain(
         warnings.warn("No derived questions created")
         derived_values = pd.DataFrame(columns=["constrain_marker"])
 
-
     pre_constrained = pd.concat([df, derived_values])
     pre_constrained[f"pre_constrained_{target}"] = pre_constrained[target]
 
-
     unique_q_numbers = pre_constrained[question_no].unique()
     pre_constrained.set_index([question_no, period, reference], inplace=True)
-  
-
 
     if 49 in unique_q_numbers:
         replace_values_index_based(pre_constrained, target, 49, ">", 40)
@@ -194,9 +190,7 @@ def constrain(
     if 90 in unique_q_numbers:
         replace_values_index_based(pre_constrained, target, 90, ">=", 40)
 
-
     post_constrained = pre_constrained.copy().reset_index()
-
 
     return post_constrained
 

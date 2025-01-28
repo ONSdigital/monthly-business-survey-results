@@ -81,7 +81,14 @@ def test_constrain_functionality(filepath):
             df[(df["question_no"] == 40) & (df["spp_form_id"].isin([13, 14]))].index
         )
         .drop(df[(df["question_no"] == 46) & (df["spp_form_id"].isin([15]))].index)
-        .drop(columns=["pre_derived_target",'expected_target','pre_constrained_target','constrain_marker'])
+        .drop(
+            columns=[
+                "pre_derived_target",
+                "expected_target",
+                "pre_constrained_target",
+                "constrain_marker",
+            ]
+        )
     )
 
     df_expected_output = df.drop(
@@ -107,7 +114,7 @@ def test_constrain_functionality(filepath):
         "target",
         "pre_derived_target",
         "constrain_marker",
-        "pre_constrained_target"
+        "pre_constrained_target",
     ]
 
     df_output.drop(
