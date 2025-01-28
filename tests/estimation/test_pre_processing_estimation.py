@@ -27,11 +27,13 @@ class TestPreProcessingEstimation:
                 "calibration_group",
                 "auxiliary",
                 "is_sampled",
-                "ni_gb_cell_number"
+                "ni_gb_cell_number",
             ]
         ]
 
-        original = expected.drop(columns="cell_no").rename(columns={"ni_gb_cell_number": "cell_no"})
+        original = expected.drop(columns="cell_no").rename(
+            columns={"ni_gb_cell_number": "cell_no"}
+        )
         original = original[
             [
                 "period",
@@ -39,7 +41,7 @@ class TestPreProcessingEstimation:
                 "cell_no",
                 "calibration_group",
                 "auxiliary",
-                "is_sampled"
+                "is_sampled",
             ]
         ]
 
