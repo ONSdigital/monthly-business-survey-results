@@ -1,3 +1,4 @@
+from mbs_results.staging.data_cleaning import convert_cell_number
 from mbs_results.utilities.utils import read_colon_separated_file
 
 
@@ -90,7 +91,7 @@ def derive_estimation_variables(
     reference: Str
         the name of the reference column
     **config: Dict
-       main pipeline configuration. Can be used to input the entire config dictionary
+        main pipeline configuration. Can be used to input the entire config dictionary
 
     Returns
     -------
@@ -98,12 +99,8 @@ def derive_estimation_variables(
         population frame containing sampled column
 
     """
-    population_frame[cell_number] = (
-        population_frame[cell_number]
-        .astype(str)
-        .map(lambda x: str(5) + x[1:] if x[0] == str(7) else x)
-        .astype(int)
-    )
+
+    population_frame = convert_cell_number(population_frame, cell_number)
 
     population_frame = population_frame.merge(
         calibration_group_map, on=[cell_number], how="left"
