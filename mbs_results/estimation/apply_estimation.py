@@ -100,9 +100,7 @@ def apply_estimation(
 
     estimation_df = pd.concat(estimation_df_list, ignore_index=True)
 
-    create_population_count_output(
-        estimation_df, period, calibration_group, save_output=True, **config
-    )
+    create_population_count_output(estimation_df, period, save_output=True, **config)
 
     # validate_estimation(estimation_df, **config)
 

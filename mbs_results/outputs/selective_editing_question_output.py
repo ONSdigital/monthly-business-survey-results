@@ -1,6 +1,9 @@
 import pandas as pd
 
-from mbs_results.outputs.selective_editing import create_standardising_factor
+from mbs_results.outputs.selective_editing import (
+    calculate_auxiliary_value,
+    create_standardising_factor,
+)
 from mbs_results.staging.merge_domain import merge_domain
 
 
@@ -57,20 +60,39 @@ def create_selective_editing_question_output(
         question_no="questioncode",
         predicted_value="adjustedresponse",
         imputation_marker="imputation_flags_adjustedresponse",
+        imputation_class="imputation_class",
         a_weight="design_weight",
         o_weight="outlier_weight",
         g_weight="calibration_factor",
-        auxiliary_value="frotover",
         period_selected=period_selected,
     )
 
-    # Survey code is requested on this output, 009 is MBS code
-    standardising_factor["survey_code"] = "009"
+    auxiliary_value = calculate_auxiliary_value(
+        dataframe=additional_outputs_df,
+        reference="reference",
+        period="period",
+        question_no="questioncode",
+        frozen_turnover="frotover",
+        construction_link="construction_link",
+        imputation_class="imputation_class",
+        period_selected=period_selected,
+    )
 
-    standardising_factor["imputation_flags_adjustedresponse"] = standardising_factor[
+    question_output = pd.merge(
+        standardising_factor,
+        auxiliary_value,
+        on=["reference", "imputation_class", "questioncode"],
+        how="left",
+    ).drop("imputation_class", axis=1)
+
+    # Survey code is required on this output, 009 is MBS code
+    question_output["survey_code"] = "009"
+
+    question_output["imputation_flags_adjustedresponse"] = question_output[
         "imputation_flags_adjustedresponse"
     ].str.upper()
-    standardising_factor = standardising_factor.rename(
+
+    question_output = question_output.rename(
         columns={
             "reference": "ruref",
             "domain": "domain_group",
@@ -80,7 +102,7 @@ def create_selective_editing_question_output(
         }
     )
 
-    return standardising_factor
+    return question_output
 
 
 def validation_checks_selective_editing(df: pd.DataFrame):

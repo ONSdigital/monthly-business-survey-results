@@ -1,4 +1,5 @@
 import operator
+import warnings
 from typing import List
 
 import pandas as pd
@@ -162,14 +163,21 @@ def constrain(
     )
     pre_derive_df = pre_derive_df[[target]]
 
-    derived_values = pd.concat(
-        [
-            sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
-            .assign(**{question_no: derives["derive"]})
-            .assign(**{spp_form_id: form_type})
-            for form_type, derives in derive_map.items()
-        ]
-    )
+    derived_values_list = [
+        sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
+        .assign(**{question_no: derives["derive"]})
+        .assign(**{spp_form_id: form_type})
+        for form_type, derives in derive_map.items()
+    ]
+
+    if derived_values_list:
+
+        derived_values = pd.concat(derived_values_list)
+
+    else:
+        warnings.warn("No derived questions created")
+        derived_values = pd.DataFrame(columns=["constrain_marker"])
+
     unique_q_numbers = df[question_no].unique()
     df.set_index([question_no, period, reference], inplace=True)
 
@@ -238,15 +246,20 @@ def derive_questions(
     # Assuming default value of o-weight is 1
     pre_derive_df = pre_derive_df[[target]].fillna(value=0)
 
-    derived_values = pd.concat(
-        [
-            sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
-            .assign(**{question_no: derives["derive"]})
-            .assign(**{spp_form_id: form_type})
-            # Create a task on Backlog to fix this.
-            for form_type, derives in derive_map.items()
-        ]
-    )
+    derived_values_list = [
+        sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
+        .assign(**{question_no: derives["derive"]})
+        .assign(**{spp_form_id: form_type})
+        # Create a task on Backlog to fix this.
+        for form_type, derives in derive_map.items()
+    ]
+    if derived_values_list:
+        derived_values = pd.concat(derived_values_list)
+
+    else:
+        warnings.warn("No derived questions created")
+        derived_values = pd.DataFrame(columns=["constrain_marker"])
+
     unique_q_numbers = df[question_no].unique()
 
     df.set_index([question_no, period, reference], inplace=True)

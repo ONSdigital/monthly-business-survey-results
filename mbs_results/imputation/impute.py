@@ -51,6 +51,9 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
             reference=config["reference"],
             target=config["target"],
             period=config["period"],
+            current_period=config["current_period"],
+            revision_period=config["revision_period"],
+            question_no=config["question_no"],
             strata="imputation_class",
             auxiliary=config["auxiliary"],
         )
@@ -66,12 +69,13 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
         question_no=config["question_no"],
         spp_form_id=config["form_id_spp"],
     )
+    target = config["target"]
 
     post_constrain["imputed_and_derived_flag"] = post_constrain.apply(
         lambda row: (
             "d"
             if "sum" in str(row["constrain_marker"]).lower()
-            else row["imputation_flags_adjusted_value"]
+            else row[f"imputation_flags_{target}"]
         ),
         axis=1,
     )
