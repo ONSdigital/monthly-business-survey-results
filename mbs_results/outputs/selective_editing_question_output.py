@@ -81,7 +81,7 @@ def create_selective_editing_question_output(
     question_output = pd.merge(
         standardising_factor,
         auxiliary_value,
-        on=["reference", "imputation_class", "questioncode"],
+        on=["period", "reference", "imputation_class", "questioncode"],
         how="left",
     ).drop("imputation_class", axis=1)
 
@@ -97,7 +97,8 @@ def create_selective_editing_question_output(
             "reference": "ruref",
             "domain": "domain_group",
             "frotover": "auxiliary_value",
-            "imputation_flags_adjusted_value": "imputation_marker",
+            "imputation_flags_adjustedresponse": "imputation_marker",
+            "adjustedresponse": "predicted_value",
             "questioncode": "question_code",
         }
     )

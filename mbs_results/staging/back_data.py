@@ -87,6 +87,7 @@ def read_back_data(config: dict) -> pd.DataFrame:
     finalsel = read_colon_separated_file(
         config["back_data_finalsel_path"], config["sample_column_names"]
     )
+    finalsel["formtype"] = "0" + finalsel["formtype"].astype(str)
 
     qv_and_cp = pd.merge(
         qv_df, cp_df, how="left", on=[config["period"], config["reference"]]
@@ -136,7 +137,10 @@ def append_back_data(staged_data: pd.DataFrame, config: dict) -> pd.DataFrame:
     # they are loaded as int
 
     back_data.insert(0, imp_marker_col, back_data[type_col].astype(str).map(map_type))
-
+    idbr_to_spp_mapping = config["idbr_to_spp"]
+    back_data[config["form_id_spp"]] = back_data[config["form_id_idbr"]].map(
+        idbr_to_spp_mapping
+    )
     common_cols = list(staged_data.columns.intersection(back_data.columns))
 
     common_cols.append(imp_marker_col)
@@ -155,6 +159,8 @@ def append_back_data(staged_data: pd.DataFrame, config: dict) -> pd.DataFrame:
         config["current_period"],
         config["revision_period"],
     )
+
+    back_data["cellnumber"] = back_data["cell_no"]
 
     staged_and_back_data = pd.concat([back_data, staged_data], ignore_index=True)
 

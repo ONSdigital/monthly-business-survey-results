@@ -55,9 +55,11 @@ def get_selective_editing_contributer_output(
     input_data = additional_outputs_df.loc[
         additional_outputs_df[question_no].isin(questions_selected)
     ]
-    input_data = additional_outputs_df[
+    input_data = input_data[
         [period, reference, "design_weight", "frosic2007", "formtype"]
     ]
+
+    input_data["frosic2007"] = input_data["frosic2007"].astype(str)
 
     domain_data = pd.read_csv(
         sic_domain_mapping_path, dtype={"sic_5_digit": str, "domain": str}
@@ -79,7 +81,7 @@ def get_selective_editing_contributer_output(
 
     selective_editing_contributer_output = selective_editing_contributer_output.rename(
         columns={"reference": "ruref", "domain": "domain_group"}
-    )
+    ).drop(columns="frosic2007")
 
     # Survey code is requested on this output, 009 is MBS code
     selective_editing_contributer_output["survey_code"] = "009"

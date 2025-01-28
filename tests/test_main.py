@@ -1,3 +1,5 @@
+import os
+
 from helper_functions import create_testing_config
 
 from mbs_results.main import run_mbs_main
@@ -34,3 +36,5 @@ def test_main():
     create_testing_config(test_config)
 
     run_mbs_main()
+
+    os.remove("config.json")
