@@ -144,7 +144,7 @@ def constrain(
 
     derive_map = create_derive_map(df, spp_form_id)
 
-    df["unadjusted_target"] = df[target]
+    df[f"pre_derived_{target}"] = df[target]
 
     # pre_derive_df has dimenesions as index, columns the values to be used when derived
     # Hard coded columns are from finalsel files,
@@ -181,6 +181,7 @@ def constrain(
 
     pre_constrained = pd.concat([df, derived_values])
     pre_constrained[f"pre_constrained_{target}"] = pre_constrained[target]
+
 
     unique_q_numbers = pre_constrained[question_no].unique()
     pre_constrained.set_index([question_no, period, reference], inplace=True)
