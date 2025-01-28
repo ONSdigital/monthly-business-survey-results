@@ -1,5 +1,5 @@
-from mbs_results.utilities.utils import read_colon_separated_file
 from mbs_results.staging.data_cleaning import convert_cell_number
+from mbs_results.utilities.utils import read_colon_separated_file
 
 
 def get_estimation_data(
@@ -100,7 +100,9 @@ def derive_estimation_variables(
 
     """
 
-    population_frame = convert_cell_number(population_frame, cell_number).drop(columns = "ni_gb_cell_number")
+    population_frame = convert_cell_number(population_frame, cell_number).drop(
+        columns = "ni_gb_cell_number"
+    )
 
     population_frame = population_frame.merge(
         calibration_group_map, on=[cell_number], how="left"

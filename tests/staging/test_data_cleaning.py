@@ -7,12 +7,12 @@ from pandas.testing import assert_frame_equal, assert_series_equal
 
 from mbs_results.staging.data_cleaning import (
     clean_and_merge,
+    convert_cell_number,
     create_imputation_class,
     enforce_datatypes,
     filter_out_questions,
     is_census,
     run_live_or_frozen,
-    convert_cell_number,
 )
 
 
@@ -111,16 +111,20 @@ def test_create_imputation_class(filepath):
     actual_output = create_imputation_class(df_in, "cell_no", "expected")
 
     assert_frame_equal(actual_output, expected_output)
-    
+
+
 def test_convert_cell_number(filepath):
     
     expected_output = pd.read_csv(filepath / "test_convert_cell_number.csv")
-    
-    df_in = expected_output.drop(columns=["cell_number"]).rename(columns = {"ni_gb_cell_number" : "cell_number"})
-    
+
+    df_in = expected_output.drop(columns=["cell_number"]).rename(
+        columns = {"ni_gb_cell_number" : "cell_number"}
+    )
+
     actual_output = convert_cell_number(df_in, "cell_number")
-    
+
     assert_frame_equal(actual_output, expected_output)
+
 
 def test_run_live_or_frozen(filepath):
 

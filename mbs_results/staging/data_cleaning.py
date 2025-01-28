@@ -374,10 +374,7 @@ def create_imputation_class(
 
     return df
 
-def convert_cell_number(
-    df: pd.DataFrame,
-    cell_number: str
-):
+def convert_cell_number(df: pd.DataFrame, cell_number: str):
     """
     Convert NI and GB cell numbers to UK by changing the first digit to 5 if this is 7.
     
@@ -392,7 +389,7 @@ def convert_cell_number(
     -------
     pd.DataFrame
         Dataframe with converted cell_number column (and original cell_number
-        in separate column)                                                     
+        in separate column)
 
     """
     df["ni_gb_cell_number"] = df[cell_number]
@@ -402,7 +399,7 @@ def convert_cell_number(
         .map(lambda x: str(5) + x[1:] if x[0] == str(7) else x)
         .astype(int)
     )
-    
+
     return df
 
 
