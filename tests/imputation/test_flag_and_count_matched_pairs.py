@@ -12,12 +12,16 @@ from tests.helper_functions import load_and_format
 
 match_inputs = [
     load_and_format(
-        Path("tests/data/imputation")
-        / "flag_and_count_matched_pairs/flag_pairs_2_groups_expected_output.csv"
+        Path("tests/data/imputation/flag_and_count_matched_pairs/")
+        / "flag_pairs_2_groups_expected_output.csv"
     ),
     load_and_format(
-        Path("tests/data/imputation")
-        / "flag_and_count_matched_pairs/flag_pairs_missing_rows_expected_output.csv"
+        Path("tests/data/imputation/flag_and_count_matched_pairs/")
+        / "flag_pairs_missing_rows_expected_output.csv"
+    ),
+    load_and_format(
+        Path("tests/data/imputation/flag_and_count_matched_pairs/")
+        / "flag_pairs_imputation_marker_expected_output.csv"
     ),
 ]
 
@@ -43,18 +47,32 @@ class TestMatchedPair:
     def test_flag_matched_pair_forward(self, match_test_data):
         expected_output = match_test_data.drop(["b_match_target_variable"], axis=1)
         df_input = match_test_data[
-            ["reference", "strata", "period", "target_variable"]
-        ].sample(frac=1)
+            ["reference", "strata", "period", "target_variable", "imputation_marker"]
+        ]
         df_output = flag_matched_pair(
-            df_input, "f", "target_variable", "period", "reference", "strata"
+            df_input,
+            "f",
+            "target_variable",
+            "period",
+            "reference",
+            "strata",
+            "imputation_marker",
         )
         assert_frame_equal(df_output, expected_output)
 
     def test_flag_matched_pair_backward(self, match_test_data):
         expected_output = match_test_data.drop(["f_match_target_variable"], axis=1)
-        df_input = match_test_data[["reference", "strata", "period", "target_variable"]]
+        df_input = match_test_data[
+            ["reference", "strata", "period", "target_variable", "imputation_marker"]
+        ]
         df_output = flag_matched_pair(
-            df_input, "b", "target_variable", "period", "reference", "strata"
+            df_input,
+            "b",
+            "target_variable",
+            "period",
+            "reference",
+            "strata",
+            "imputation_marker",
         )
         assert_frame_equal(df_output, expected_output)
 

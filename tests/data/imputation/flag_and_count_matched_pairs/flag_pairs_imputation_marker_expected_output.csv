@@ -1,0 +1,10 @@
+reference,strata,period,target_variable,imputation_marker,f_match_target_variable,b_match_target_variable
+1,101,202401,237,r,FALSE,FALSE
+1,101,202402,,,FALSE,FALSE
+1,101,202403,281,r,FALSE,TRUE
+1,101,202404,251,r,TRUE,FALSE
+2,101,202401,270,fir,FALSE,FALSE
+2,101,202402,250,r,FALSE,TRUE
+2,101,202403,255,r,TRUE,TRUE
+2,101,202404,260,r,TRUE,FALSE
+2,101,202405,272,fir,FALSE,FALSE
