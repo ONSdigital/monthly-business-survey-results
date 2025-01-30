@@ -70,6 +70,7 @@ def generate_imputation_marker(
     )
 
     select_cols = [f"{i}_flag_{target}" for i in flags]
+    df.to_csv("deburg_dataframe.csv", index=False, header=True) # added for deburging
     first_condition_met = [np.where(i)[0][0] for i in df[select_cols].values]
     df[f"imputation_flags_{target}"] = [flags[i] for i in first_condition_met]
     df.drop(columns=select_cols, inplace=True)
@@ -130,6 +131,7 @@ def create_imputation_logical_columns(
         backdata_fimc_mask = df[f"backdata_flags_{target}"] == "fimc"
         backdata_c_mask = df[f"backdata_flags_{target}"] == "c"
         backdata_fic_mask = df[f"backdata_flags_{target}"] == "fic"
+        backdata_bir_mask = df[f"backdata_flags_{target}"] == "bir"
 
     else:
         df["is_backdata"] = df[reference] != df[reference]
@@ -153,7 +155,7 @@ def create_imputation_logical_columns(
     df[f"bir_flag_{target}"] = (
         flag_rolling_impute(df, -time_difference, strata, reference, target, period)
         & ~df["is_backdata"]
-    ) | backdata_r_mask
+    ) | backdata_r_mask | backdata_bir_mask
 
     if f"{target}_man" in df.columns:
         df[f"fimc_flag_{target}"] = (
@@ -172,7 +174,7 @@ def create_imputation_logical_columns(
 
     df[f"fic_flag_{target}"] = (
         flag_rolling_impute(df, time_difference, strata, reference, auxiliary, period)
-        | backdata_fic_mask
+        | backdata_fic_mask 
     )
 
     return df
