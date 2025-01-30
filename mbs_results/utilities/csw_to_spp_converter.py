@@ -8,7 +8,7 @@ from typing import List
 
 import pandas as pd
 
-#from mbs_results.staging.stage_dataframe import read_and_combine_colon_sep_files
+from mbs_results.staging.stage_dataframe import read_and_combine_colon_sep_files
 
 
 def create_snapshot(
@@ -251,7 +251,6 @@ def load_and_join_finalsel(
     finalsel_data["formtype"] = "0" + finalsel_data["formtype"].astype(str)
     finalsel_data.rename(columns=finalsel_column_remapper, inplace=True)
     return df.merge(finalsel_data, on=["reference", "period"], how="left")
-
 
 def validate_nil_markers(df: pd.DataFrame, log_file: str) -> pd.DataFrame:
     """
