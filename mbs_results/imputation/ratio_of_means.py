@@ -36,12 +36,19 @@ def wrap_flag_matched_pairs(
         forward_or_backward keyword and target column name to distinguish them
     """
 
+    target = default_columns["target"]
+
     if "ignore_from_link" in df.columns:
 
-        target = default_columns["target"]
         df[f"filtered_{target}"] = df[default_columns["target"]]
         df.loc[df["ignore_from_link"], f"filtered_{target}"] = np.nan
         default_columns = {**default_columns, "target": f"filtered_{target}"}
+
+    #   if "imputation_flag" in df.columns:
+    default_columns = {
+        **default_columns,
+        "imputation_flag": f"imputation_flags_{target}",
+    }
 
     flag_arguments = [
         dict(**default_columns, **{"forward_or_backward": "f"}),
@@ -49,7 +56,6 @@ def wrap_flag_matched_pairs(
     ]
 
     for args in flag_arguments:
-
         df = flag_matched_pair(df, **args)
 
     df = flag_construction_matches(df, **default_columns)

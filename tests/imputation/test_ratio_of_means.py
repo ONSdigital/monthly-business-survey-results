@@ -62,6 +62,7 @@ class TestRatioOfMeans:
     def test_ratio_of_means(self, base_file_name):
 
         input_data = pd.read_csv(scenario_path_prefix + base_file_name + "_input.csv")
+
         expected_output = pd.read_csv(
             scenario_path_prefix + base_file_name + "_output.csv"
         )
@@ -69,6 +70,9 @@ class TestRatioOfMeans:
         filter_df = load_filter(
             scenario_path_prefix + "ratio_of_means_filters/" + base_file_name + ".csv"
         )
+
+        # add imputation_flag onto data
+        input_data["imputation_flags_question"] = None
 
         # Can't use load_format helper, test cases have date instead of period
 

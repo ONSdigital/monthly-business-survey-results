@@ -9,7 +9,7 @@ def flag_matched_pair(
     period,
     reference,
     strata,
-    imputation_marker,
+    imputation_flag,
     time_difference=1,
     **kwargs,
 ):
@@ -30,8 +30,8 @@ def flag_matched_pair(
         column name containing business reference id
     strata : str
         column name containing strata information (sic)
-    imputation_marker : str
-        column name containing imputation marker
+    imputation_flag : str
+        column name containing imputation flag
     time_difference: int
         lookup distance for matched pairs
     kwargs : mapping, optional
@@ -51,7 +51,10 @@ def flag_matched_pair(
 
     df["actual_response"] = df[target].copy()
 
-    df.loc[df[df[imputation_marker] != "r"].index, "actual_response"] = None
+    df.loc[
+        df[df[imputation_flag].isin(["fir", "fic", "fimc", "bir", "c"])].index,
+        "actual_response",
+    ] = None
 
     df[f"{forward_or_backward}_match_{target}"] = (
         df.groupby([strata, reference])
