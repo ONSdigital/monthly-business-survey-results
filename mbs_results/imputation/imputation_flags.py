@@ -132,6 +132,7 @@ def create_imputation_logical_columns(
         backdata_c_mask = df[f"backdata_flags_{target}"] == "c"
         backdata_fic_mask = df[f"backdata_flags_{target}"] == "fic"
         backdata_bir_mask = df[f"backdata_flags_{target}"] == "bir"
+        prior_month_backdata_bir_mask = df[f"backdata_flags_{target}"].shift(1) == "bir"
 
     else:
         df["is_backdata"] = df[reference] != df[reference]
@@ -140,6 +141,8 @@ def create_imputation_logical_columns(
         backdata_fimc_mask = df[reference] != df[reference]
         backdata_c_mask = df[reference] != df[reference]
         backdata_fic_mask = df[reference] != df[reference]
+        backdata_bir_mask = False
+        prior_month_backdata_bir_mask = False
 
     # if target na but not back data period OR if backdata flag is 'r'
     df[f"r_flag_{target}"] = (df[target].notna() & ~df["is_backdata"]) | backdata_r_mask
@@ -153,9 +156,13 @@ def create_imputation_logical_columns(
     ) | backdata_fir_mask
 
     df[f"bir_flag_{target}"] = (
-        flag_rolling_impute(df, -time_difference, strata, reference, target, period)
-        & ~df["is_backdata"]
-    ) | backdata_r_mask | backdata_bir_mask
+        (
+            flag_rolling_impute(df, -time_difference, strata, reference, target, period)
+            & ~df["is_backdata"]
+        )
+        | backdata_r_mask
+        | backdata_bir_mask
+    )
 
     if f"{target}_man" in df.columns:
         df[f"fimc_flag_{target}"] = (
@@ -174,8 +181,8 @@ def create_imputation_logical_columns(
 
     df[f"fic_flag_{target}"] = (
         flag_rolling_impute(df, time_difference, strata, reference, auxiliary, period)
-        | backdata_fic_mask 
-    )
+        | backdata_fic_mask
+    ) & ~(prior_month_backdata_bir_mask)
 
     return df
 
