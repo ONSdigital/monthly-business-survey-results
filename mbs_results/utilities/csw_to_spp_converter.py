@@ -8,7 +8,7 @@ from typing import List
 
 import pandas as pd
 
-from mbs_results.staging.stage_dataframe import read_and_combine_colon_sep_files
+#from mbs_results.staging.stage_dataframe import read_and_combine_colon_sep_files
 
 
 def create_snapshot(
@@ -251,3 +251,38 @@ def load_and_join_finalsel(
     finalsel_data["formtype"] = "0" + finalsel_data["formtype"].astype(str)
     finalsel_data.rename(columns=finalsel_column_remapper, inplace=True)
     return df.merge(finalsel_data, on=["reference", "period"], how="left")
+
+
+def validate_nil_markers(df: pd.DataFrame, log_file: str) -> pd.DataFrame:
+    """
+    Checks if 'type' >= 10 and 'adjusted_value' != 0, sets 'adjusted_value' to 0,
+    raises a warning, and writes a log file with references, periods, and question numbers.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The input dataframe containing type and adjusted_value columns.
+    log_file : str
+        The path to the log file to write the details of adjustments.
+
+    Returns
+    -------
+    pd.DataFrame
+        The adjusted dataframe.
+    """
+    log_details = []
+
+    for index, row in df.iterrows():
+        if row['type'] >= 10 and row['adjusted_value'] != 0:
+            log_details.append({
+                'reference': row['reference'],
+                'period': row['period'],
+                'question_number': row['question_number']
+            })
+            df.at[index, 'adjusted_value'] = 0
+            print(f"WARNING: Adjusted value for reference {row['reference']} set to 0.")
+
+    with open(log_file, 'w') as file:
+        json.dump(log_details, file, indent=4)
+
+    return df
