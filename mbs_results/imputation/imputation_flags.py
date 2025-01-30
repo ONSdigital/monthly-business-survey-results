@@ -70,7 +70,7 @@ def generate_imputation_marker(
     )
 
     select_cols = [f"{i}_flag_{target}" for i in flags]
-    df.to_csv("deburg_dataframe.csv", index=False, header=True) # added for deburging
+    df.to_csv("debug_dataframe.csv", index=False, header=True) # added for debuging
     first_condition_met = [np.where(i)[0][0] for i in df[select_cols].values]
     df[f"imputation_flags_{target}"] = [flags[i] for i in first_condition_met]
     df.drop(columns=select_cols, inplace=True)
