@@ -53,8 +53,10 @@ def create_snapshot(
                         datefmt="%Y-%m-%d %H:%M:%S")
 
     qv_df = concat_files_from_pattern(input_directory, "qv*.csv", periods)
+    logger.info(f"Concattinented qv files from {input_directory}")
     cp_df = concat_files_from_pattern(input_directory, "cp*.csv", periods)
-    
+    logger.info(f"Concattinented cp files from {input_directory}")
+
     qv_df_validated = validate_nil_markers(qv_df, logger)
 
     responses = convert_qv_to_responses(qv_df_validated)
@@ -81,7 +83,8 @@ def create_snapshot(
         encoding="utf-8",
     ) as f:
         json.dump(output, f, ensure_ascii=False, indent=4)
-
+        
+    logger.info(f"Snapshot written to {output_directory} for periods {periods}")
 
 def concat_files_from_pattern(
     directory: str, pattern: str, periods: List[str]
