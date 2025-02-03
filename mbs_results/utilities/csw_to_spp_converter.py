@@ -1,6 +1,8 @@
 import fnmatch
 import json
+import logging
 import uuid
+
 from datetime import datetime
 from os import listdir
 from os.path import isfile, join
@@ -269,19 +271,15 @@ def validate_nil_markers(df: pd.DataFrame, log_file: str) -> pd.DataFrame:
     pd.DataFrame
         The adjusted dataframe.
     """
-    log_details = []
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(filename=log_file,
+                        level=logging.DEBUG,
+                        format="%(asctime)s %(levelname)s %(message)s",
+                        datefmt="%Y-%m-%d %H:%M:%S")
 
     for index, row in df.iterrows():
         if row['type'] >= 10 and row['adjusted_value'] != 0:
-            log_details.append({
-                'reference': row['reference'],
-                'period': row['period'],
-                'question_number': row['question_number']
-            })
             df.at[index, 'adjusted_value'] = 0
-            print(f"WARNING: Adjusted value for reference {row['reference']} set to 0.")
-
-    with open(log_file, 'w') as file:
-        json.dump(log_details, file, indent=4)
+            logger.warning(f"Adjusted value set to 0 for reference {row['reference']}, period {row['period']}, question number {row['question_number']}.")
 
     return df
