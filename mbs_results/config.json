@@ -18,7 +18,7 @@
     "threshold_filepath":"",
 
     "back_data_type":"response_type",
-    "imputation_marker_col":"imputation_marker",
+    "imputation_marker_col":"imputation_flags_adjustedresponse",
 
 
     "period_selected": 202303,

@@ -148,6 +148,8 @@ class TestRatioOfMeans:
                 "filtered_question",
                 "cumulative_b_link_filtered_question",
                 "cumulative_f_link_filtered_question",
+                "backdata_question",
+                "backdata_flags_question",
             ],
             errors="ignore",
             inplace=True,
@@ -177,6 +179,7 @@ class TestRatioOfMeans:
 class TestRatioOfMeansManConstruction:
     def test_manual_construction_input(self, mc_base_file_name):
         df = pd.read_csv(scenario_path_prefix + mc_base_file_name + "_input.csv")
+        df["imputation_flags_question"] = None
         expected_output = pd.read_csv(
             scenario_path_prefix + mc_base_file_name + "_output.csv"
         )
@@ -245,6 +248,8 @@ class TestRatioOfMeansManConstruction:
                 "filtered_question",
                 "cumulative_b_link_filtered_question",
                 "cumulative_f_link_filtered_question",
+                "backdata_question",
+                "backdata_flags_question",
             ],
             errors="ignore",
             inplace=True,

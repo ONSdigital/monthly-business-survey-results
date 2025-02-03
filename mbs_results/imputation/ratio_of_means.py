@@ -443,7 +443,7 @@ def ratio_of_means(
     if manual_constructions is not None:
         # Need to join mc dataframe to original df
         df = join_manual_constructions(
-            df, manual_constructions, reference, period, question_no
+            df, manual_constructions, reference, period, question_no, target
         )
 
     if f"{target}_man" in df.columns:

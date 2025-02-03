@@ -1,3 +1,4 @@
+import warnings
 from typing import List
 
 import pandas as pd
@@ -186,6 +187,7 @@ def join_manual_constructions(
     reference: str,
     period: str,
     question_no: str,
+    target: str,
     **config,
 ):
     """
@@ -244,12 +246,31 @@ def join_manual_constructions(
 
         validate_manual_constructions(df, manual_constructions_filter)
 
-        return df.merge(
+        df = df.merge(
             manual_constructions_filter,
             on=[reference, period],
             how="left",
-            suffixes=("", "_man"),
+            suffixes=("", "_man_from_file"),
         ).reset_index()
+
+        duplicate_mc_test = (
+            df[f"{target}_man"].mul(df[f"{target}_man_from_file"]).notna()
+        )
+
+        if duplicate_mc_test.any():
+            warnings.warn(
+                f"""There is a manual construction in the backdata and
+          mc file for the same reference period
+          {df[duplicate_mc_test]}"""
+            )
+
+        df[f"{target}_man"] = df[f"{target}_man"].combine_first(
+            df[f"{target}_man_from_file"]
+        )
+
+        df.drop(f"{target}_man_from_file", axis=1, inplace=True)
+
+        return df
 
 
 def is_same_dtype(df: pd.DataFrame, df2: pd.DataFrame, col_name: str) -> bool:
