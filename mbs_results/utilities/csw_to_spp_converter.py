@@ -14,7 +14,7 @@ from mbs_results.staging.stage_dataframe import read_and_combine_colon_sep_files
 
 
 def create_snapshot(
-    input_directory: str, periods: List[str], output_directory: str, config: dict
+    input_directory: str, periods: List[str], output_directory: str, log_file: str, config: dict
 ):
     """
     Reads qv and cp files, applies transformations and writes snapshot.
@@ -27,6 +27,8 @@ def create_snapshot(
         list of periods to include in the snapshot
     output_directory : str
         Folder path to write the snapshot.
+    log_file: str
+        File path to log file
     config: dict
         main config file for the pipeline.
 
@@ -40,13 +42,22 @@ def create_snapshot(
     >>periods = [str(i) for i in range(202201, 202213)] + ["202301", "202302", "202303"]
     >>input_directory = "path/mbs_anonymised_2024"
     >>output_directory = "path/mbs-data"
-    >>create_snapshot(input_directory, periods, output_directory)
+    >>log_file = "example_log.log"
+    >>create_snapshot(input_directory, periods, log_file, output_directory)
     """
+    
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(filename=log_file,
+                        level=logging.DEBUG,
+                        format="%(asctime)s %(levelname)s %(message)s",
+                        datefmt="%Y-%m-%d %H:%M:%S")
 
     qv_df = concat_files_from_pattern(input_directory, "qv*.csv", periods)
     cp_df = concat_files_from_pattern(input_directory, "cp*.csv", periods)
+    
+    qv_df_validated = validate_nil_markers(qv_df, logger)
 
-    responses = convert_qv_to_responses(qv_df)
+    responses = convert_qv_to_responses(qv_df_validated)
     contributors = convert_cp_to_contributors(cp_df)
 
     contributors_with_finalsel = load_and_join_finalsel(
@@ -254,7 +265,7 @@ def load_and_join_finalsel(
     finalsel_data.rename(columns=finalsel_column_remapper, inplace=True)
     return df.merge(finalsel_data, on=["reference", "period"], how="left")
 
-def validate_nil_markers(df: pd.DataFrame, log_file: str) -> pd.DataFrame:
+def validate_nil_markers(df: pd.DataFrame, logger: logging.Logger) -> pd.DataFrame:
     """
     Checks if 'type' >= 10 and 'adjusted_value' != 0, sets 'adjusted_value' to 0,
     raises a warning, and writes a log file with references, periods, and question numbers.
@@ -263,20 +274,14 @@ def validate_nil_markers(df: pd.DataFrame, log_file: str) -> pd.DataFrame:
     ----------
     df : pd.DataFrame
         The input dataframe containing type and adjusted_value columns.
-    log_file : str
-        The path to the log file to write the details of adjustments.
+    logger : logging.Logger
+        The logger object to write the details of adjustments.
 
     Returns
     -------
     pd.DataFrame
         The adjusted dataframe.
     """
-    logger = logging.getLogger(__name__)
-    logging.basicConfig(filename=log_file,
-                        level=logging.DEBUG,
-                        format="%(asctime)s %(levelname)s %(message)s",
-                        datefmt="%Y-%m-%d %H:%M:%S")
-
     for index, row in df.iterrows():
         if row['type'] >= 10 and row['adjusted_value'] != 0:
             df.at[index, 'adjusted_value'] = 0
