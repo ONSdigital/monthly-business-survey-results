@@ -67,25 +67,31 @@ def get_selective_editing_contributer_output(
     threshold_mapping = pd.read_csv(
         threshold_filepath, dtype={"formtype": str, "domain": str, "threshold": float}
     )
+    # Threshold file contains multiple duplicate rows
+    threshold_mapping.drop_duplicates(inplace=True)
 
-    selective_editing_contributer_output = merge_domain(
+    selective_editing_contributor_output = merge_domain(
         input_data, domain_data, "frosic2007", "sic_5_digit"
     )
 
-    selective_editing_contributer_output = pd.merge(
-        selective_editing_contributer_output,
+    selective_editing_contributor_output = pd.merge(
+        selective_editing_contributor_output,
         threshold_mapping,
         on=["formtype", "domain"],
         how="left",
     ).drop(columns=["formtype"])
 
-    selective_editing_contributer_output = selective_editing_contributer_output.rename(
+    selective_editing_contributor_output = selective_editing_contributor_output.rename(
         columns={"reference": "ruref", "domain": "domain_group"}
     ).drop(columns="frosic2007")
 
     # Survey code is requested on this output, 009 is MBS code
-    selective_editing_contributer_output["survey_code"] = "009"
+    selective_editing_contributor_output["survey_code"] = "009"
 
-    return selective_editing_contributer_output.loc[
-        selective_editing_contributer_output["period"] == period_selected
-    ]
+    # Dropping duplicates as we expect the same contributor for q40 and q49 in some form
+    # types. Selecting only needed period
+    contributor_output_without_dupes = selective_editing_contributor_output.loc[
+        selective_editing_contributor_output["period"] == period_selected
+    ].drop_duplicates()
+
+    return contributor_output_without_dupes
