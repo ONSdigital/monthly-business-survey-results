@@ -32,8 +32,8 @@ def generate_imputation_marker(
         Column name containing date variable.
     reference : str
         Column name containing business reference id.
-    strata : str
-        Column name containing strata information (sic).
+    imputation_class : str
+        Column name containing imputation class information (sic).
     auxiliary : str
         Column name containing auxiliary data.
     back_data_period : pd.Timestamp
@@ -58,12 +58,12 @@ def generate_imputation_marker(
     else:
         flags = ["r", "fir", "bir", "fic", "c"]
 
+    create_fill_group(df, target, strata, reference, period)
+
     create_imputation_logical_columns(
         df,
         target,
-        period,
-        reference,
-        strata,
+        "fill_group",
         auxiliary,
         back_data_period,
         time_difference,
@@ -73,6 +73,7 @@ def generate_imputation_marker(
     first_condition_met = [np.where(i)[0][0] for i in df[select_cols].values]
     df[f"imputation_flags_{target}"] = [flags[i] for i in first_condition_met]
     df.drop(columns=select_cols, inplace=True)
+    df.drop(columns="fill_group", inplace=True)
 
     return df
 
@@ -80,9 +81,7 @@ def generate_imputation_marker(
 def create_imputation_logical_columns(
     df: pd.DataFrame,
     target: str,
-    period: str,
-    reference: str,
-    strata: str,
+    fill_group: str,
     auxiliary: str,
     back_data_period: str,
     time_difference: int = 1,
@@ -121,8 +120,6 @@ def create_imputation_logical_columns(
         backward imputation (bir_flag) or can be constructed (c_flag)
     """
 
-    df.sort_values([reference, strata, period], inplace=True)
-
     if f"imputation_flags_{target}" in df.columns:
         # Case where back data is present
         backdata_r_mask = df[f"backdata_flags_{target}"] == "r"
@@ -130,14 +127,19 @@ def create_imputation_logical_columns(
         backdata_fimc_mask = df[f"backdata_flags_{target}"] == "fimc"
         backdata_c_mask = df[f"backdata_flags_{target}"] == "c"
         backdata_fic_mask = df[f"backdata_flags_{target}"] == "fic"
-
+        backdata_bir_mask = df[f"backdata_flags_{target}"] == "bir"
+        prior_month_backdata_bir_mask = (
+            df.groupby([fill_group])[f"backdata_flags_{target}"].shift(1) == "bir"
+        )
     else:
-        df["is_backdata"] = df[reference] != df[reference]
-        backdata_r_mask = df[reference] != df[reference]
-        backdata_fir_mask = df[reference] != df[reference]
-        backdata_fimc_mask = df[reference] != df[reference]
-        backdata_c_mask = df[reference] != df[reference]
-        backdata_fic_mask = df[reference] != df[reference]
+        df["is_backdata"] = False
+        backdata_r_mask = False
+        backdata_fir_mask = False
+        backdata_fimc_mask = False
+        backdata_c_mask = False
+        backdata_fic_mask = False
+        backdata_bir_mask = False
+        prior_month_backdata_bir_mask = False
 
     # if target na but not back data period OR if backdata flag is 'r'
     df[f"r_flag_{target}"] = (df[target].notna() & ~df["is_backdata"]) | backdata_r_mask
@@ -146,24 +148,26 @@ def create_imputation_logical_columns(
         df[f"mc_flag_{target}"] = df[f"{target}_man"].notna()
 
     df[f"fir_flag_{target}"] = (
-        flag_rolling_impute(df, time_difference, strata, reference, target, period)
+        flag_rolling_impute(df, time_difference, target, fill_group)
         & ~df["is_backdata"]
     ) | backdata_fir_mask
 
     df[f"bir_flag_{target}"] = (
-        flag_rolling_impute(df, -time_difference, strata, reference, target, period)
-        & ~df["is_backdata"]
-    ) | backdata_r_mask
+        (
+            flag_rolling_impute(df, -time_difference, target, fill_group)
+            & ~df["is_backdata"]
+        )
+        | backdata_r_mask
+        | backdata_bir_mask
+    )
 
     if f"{target}_man" in df.columns:
         df[f"fimc_flag_{target}"] = (
-            flag_rolling_impute(
-                df, time_difference, strata, reference, f"{target}_man", period
-            )
+            flag_rolling_impute(df, time_difference, f"{target}_man", fill_group)
             | backdata_fimc_mask
         )
 
-        df = imputation_overlaps_mc(df, target, reference, strata)
+        df = imputation_overlaps_mc(df, target, fill_group)
 
     construction_conditions = (
         df[target].isna() & df[auxiliary].notna() & ~df["is_backdata"]
@@ -171,14 +175,14 @@ def create_imputation_logical_columns(
     df[f"c_flag_{target}"] = np.where(construction_conditions, True, False)
 
     df[f"fic_flag_{target}"] = (
-        flag_rolling_impute(df, time_difference, strata, reference, auxiliary, period)
+        flag_rolling_impute(df, time_difference, auxiliary, fill_group)
         | backdata_fic_mask
-    )
+    ) & ~(prior_month_backdata_bir_mask)
 
     return df
 
 
-def imputation_overlaps_mc(df, target, reference, strata):
+def imputation_overlaps_mc(df, target, fill_group):
     """
     function which checks and breaks a chain of imputations if a
     manual construction is present
@@ -212,13 +216,13 @@ def imputation_overlaps_mc(df, target, reference, strata):
             df[imputation_marker_column] & df[f"mc_flag_{target}"], False, None
         )
         if direction_single_string == "b":
-            df[column] = (
-                df.groupby([strata, reference])[column].bfill().astype(bool)
-            ).fillna(True)
+            df[column] = (df.groupby(fill_group)[column].bfill().astype(bool)).fillna(
+                True
+            )
         elif direction_single_string == "f":
-            df[column] = (
-                df.groupby([strata, reference])[column].ffill().astype(bool)
-            ).fillna(True)
+            df[column] = (df.groupby(fill_group)[column].ffill().astype(bool)).fillna(
+                True
+            )
 
         df[imputation_marker_column] = df[imputation_marker_column] & df[column]
         df.drop(
@@ -229,12 +233,7 @@ def imputation_overlaps_mc(df, target, reference, strata):
 
 
 def flag_rolling_impute(
-    df: pd.DataFrame,
-    time_difference: int,
-    strata: str,
-    reference: str,
-    target: str,
-    period: str,
+    df: pd.DataFrame, time_difference: int, target: str, fill_group: str
 ):
     """
     Function to create logical values for whether rolling imputation can be done.
@@ -252,30 +251,14 @@ def flag_rolling_impute(
         Column name containing target variable.
     period: str
         Column name containing date variable.
-    reference : str
-        Column name containing business reference id.
-    strata : str
-        Column name containing strata information (sic).
+    fill_group : str
+        Column name containing fill group. This is used to apply ffill or
+        bfill.
 
     Returns
     -------
     pd.Series
     """
-    # Fill group tells when forward/backward filling should apply
-    # If there are mannual constuctions we need to account and create a new
-    # fill group, if they don't exist then forward or backward fill (fill group)
-    # should be applied for references with same strata without date gap
-
-    mc_exists_rule = (
-        (df[f"{target}_man"].notna()) if f"{target}_man" in df.columns else False
-    )
-
-    df["fill_group"] = (
-        (df[period] - pd.DateOffset(months=1) != df.shift(1)[period])
-        | (df[strata].diff(1) != 0)
-        | (df[reference].diff(1) != 0)
-        | mc_exists_rule
-    ).cumsum()
 
     if time_difference < 0:
         boolean_column = (
@@ -293,6 +276,57 @@ def flag_rolling_impute(
             .mul(df["fill_group"] == df.shift(time_difference)["fill_group"])
         )
 
-    df.drop(columns="fill_group", inplace=True)
-
     return boolean_column
+
+
+def create_fill_group(
+    df: pd.DataFrame,
+    target: str,
+    imputation_class: str,
+    reference: str,
+    period: str,
+):
+    """
+    Creates a new colum `fill_group` which seperates data which have same
+    reference are in the imputation_class and do not have any date gaps.
+
+    For an example a reference with period 202201 202202 and 202204 202205
+    since it has missing 202203, it will have different fill groups for
+    202201 202202 and for 202204 202205.
+
+    Also checks for MC existence, if any exists then a new fill group is
+    created.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame containing forward, backward predictive period columns (
+        These columns are created by calling flag_matched_pair forward
+        and backwards)
+    target : str
+        Column name containing target variable.
+    imputation_class : str
+        Column name containing imputation_class information (sic).
+    reference : str
+        Column name containing business reference id.
+    period: str
+        Column name containing date variable.
+
+    Returns
+    -------
+    pd.DataFrame
+    """
+    df.sort_values([reference, imputation_class, period], inplace=True)
+
+    mc_exists_rule = (
+        (df[f"{target}_man"].notna()) if f"{target}_man" in df.columns else False
+    )
+
+    df["fill_group"] = (
+        (df[period] - pd.DateOffset(months=1) != df.shift(1)[period])
+        | (df[imputation_class].diff(1) != 0)
+        | (df[reference].diff(1) != 0)
+        | mc_exists_rule
+    ).cumsum()
+
+    return df

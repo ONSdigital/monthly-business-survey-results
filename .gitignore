@@ -884,3 +884,6 @@ docs/reference/api/*
 
 # Ignore Sphinx documentation link checking folder
 docs/_linkcheck/
+
+#ignore debug script
+debug_script*
