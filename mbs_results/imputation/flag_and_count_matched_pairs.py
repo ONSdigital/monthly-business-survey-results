@@ -52,7 +52,7 @@ def flag_matched_pair(
     df["actual_response"] = df[target].copy()
 
     df.loc[
-        df[df[imputation_flag].isin(["fir", "fic", "fimc", "bir", "c"])].index,
+        df[df[imputation_flag].isin(["fir", "fic", "fimc", "bir", "c", "mc"])].index,
         "actual_response",
     ] = None
 
