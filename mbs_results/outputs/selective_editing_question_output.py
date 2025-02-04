@@ -43,10 +43,15 @@ def create_selective_editing_question_output(
      >>            period_selected=202201,
      >>            )
     """
+    questions_selected = [40, 49]
+    input_data = additional_outputs_df.loc[
+        additional_outputs_df["questioncode"].isin(questions_selected)
+    ]
+    input_data = input_data[(input_data["period"] == period_selected)]
     sic_domain_mapping = pd.read_csv(sic_domain_mapping_path).astype(str)
 
     df_with_domain = merge_domain(
-        input_df=additional_outputs_df,
+        input_df=input_data,
         domain_mapping=sic_domain_mapping,
         sic_input="frosic2007",
         sic_mapping="sic_5_digit",
@@ -68,7 +73,7 @@ def create_selective_editing_question_output(
     )
 
     auxiliary_value = calculate_auxiliary_value(
-        dataframe=additional_outputs_df,
+        dataframe=input_data,
         reference="reference",
         period="period",
         question_no="questioncode",
