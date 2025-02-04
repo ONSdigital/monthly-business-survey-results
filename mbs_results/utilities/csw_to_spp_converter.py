@@ -2,7 +2,6 @@ import fnmatch
 import json
 import logging
 import uuid
-
 from datetime import datetime
 from os import listdir
 from os.path import isfile, join
@@ -14,7 +13,11 @@ from mbs_results.staging.stage_dataframe import read_and_combine_colon_sep_files
 
 
 def create_snapshot(
-    input_directory: str, periods: List[str], output_directory: str, log_file: str, config: dict
+    input_directory: str,
+    periods: List[str],
+    output_directory: str,
+    log_file: str,
+    config: dict,
 ):
     """
     Reads qv and cp files, applies transformations and writes snapshot.
@@ -43,19 +46,22 @@ def create_snapshot(
     >>input_directory = "path/mbs_anonymised_2024"
     >>output_directory = "path/mbs-data"
     >>log_file = "example_log.log"
-    >>create_snapshot(input_directory, periods, log_file, output_directory)
+    >>create_snapshot(input_directory, periods, output_directory, log_file, config)
     """
-    
-    logger = logging.getLogger(__name__)
-    logging.basicConfig(filename=log_file,
-                        level=logging.DEBUG,
-                        format="%(asctime)s %(levelname)s %(message)s",
-                        datefmt="%Y-%m-%d %H:%M:%S")
 
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(
+        filename=log_file,
+        level=logging.DEBUG,
+        format="%(asctime)s %(levelname)s %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    logger.info(f"Concatenating qv files from {input_directory}")
     qv_df = concat_files_from_pattern(input_directory, "qv*.csv", periods)
-    logger.info(f"Concattinented qv files from {input_directory}")
+
+    logger.info(f"Concatenating cp files from {input_directory}")
     cp_df = concat_files_from_pattern(input_directory, "cp*.csv", periods)
-    logger.info(f"Concattinented cp files from {input_directory}")
 
     qv_df_validated = validate_nil_markers(qv_df, logger)
 
@@ -77,14 +83,14 @@ def create_snapshot(
 
     max_period = max([int(period) for period in periods])
 
+    logger.info(f"Writting snapshot to {output_directory} for periods {periods}")
     with open(
         f"{output_directory}snapshot_qv_cp_{max_period}_{len(periods)}.json",
         "w",
         encoding="utf-8",
     ) as f:
         json.dump(output, f, ensure_ascii=False, indent=4)
-        
-    logger.info(f"Snapshot written to {output_directory} for periods {periods}")
+
 
 def concat_files_from_pattern(
     directory: str, pattern: str, periods: List[str]
@@ -150,27 +156,15 @@ def convert_cp_to_contributors(df: pd.DataFrame) -> pd.DataFrame:
         "O": ("Clear", "210"),
         "E": ("Check needed", "201"),
         "W": ("Check needed", "201"),
-        # Check where codes 200 - 900 come from
-        # We believe this are not used in MBS.
-        # Need to create a validation check to ensure that these are not needed
-        # Adding this task to the backlog
+        # We haven't seen codes 200-900 in MBS data before
+        # but we're leaving them in the mapping in case they are needed
         "200": ("Form sent out", "100"),
-        "300": (
-            "Clear - overridden",
-            "211",
-        ),  # Out of scopes have data in them for BERD!
+        "300": ("Clear - overridden", "211"),
         "500": ("Check needed", "201"),
         "600": ("Clear", "210"),
-        "700": (
-            "Clear - overridden",
-            "211",
-        ),  # Out of scopes have data in them for BERD!
+        "700": ("Clear - overridden", "211"),
         "800": ("Clear - overridden", "211"),
-        "900": (
-            "Clear - overridden",
-            "211",
-        ),  # Out of scopes have data in them for BERD!
-        # Response type mapping
+        "900": ("Clear - overridden", "211"),
         "5": ("Combined child (NIL2)", "302"),
         "6": ("Out of scope (NIL3)", "303"),
         "7": ("Ceased trading (NIL4)", "304"),
@@ -268,10 +262,11 @@ def load_and_join_finalsel(
     finalsel_data.rename(columns=finalsel_column_remapper, inplace=True)
     return df.merge(finalsel_data, on=["reference", "period"], how="left")
 
+
 def validate_nil_markers(df: pd.DataFrame, logger: logging.Logger) -> pd.DataFrame:
     """
-    Checks if 'type' >= 10 and 'adjusted_value' != 0, sets 'adjusted_value' to 0,
-    raises a warning, and writes a log file with references, periods, and question numbers.
+    Checks if 'type' >= 10 and 'adjusted_value' != 0, sets 'adjusted_value' to 0
+    and writes a log file with references, periods, and question numbers.
 
     Parameters
     ----------
@@ -286,8 +281,10 @@ def validate_nil_markers(df: pd.DataFrame, logger: logging.Logger) -> pd.DataFra
         The adjusted dataframe.
     """
     for index, row in df.iterrows():
-        if row['type'] >= 10 and row['adjusted_value'] != 0:
-            df.at[index, 'adjusted_value'] = 0
-            logger.warning(f"Adjusted value set to 0 for reference {row['reference']}, period {row['period']}, question number {row['question_number']}.")
+        if row["type"] >= 10 and row["adjusted_value"] != 0:
+            logger.warning(
+                f"Adjusted value set to 0 for: reference {row['reference']}, \
+                period {row['period']}, question number {row['question_number']}."
+            )
 
     return df
