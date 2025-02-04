@@ -7,6 +7,10 @@ from mbs_results.imputation.ratio_of_means import ratio_of_means
 scenario_path_prefix = "tests/data/imputation/back_data_testing/"
 
 scenarios = [
+    "BIR_C_FIC",
+    "BIR_BIR_R",
+    "BIR_MC_FIMC",
+    "BIR_C_MC_FIMC",
     "R_FIR_FIR",
     "FIR_FIR_FIR",
     "C_FIC_FIC",
