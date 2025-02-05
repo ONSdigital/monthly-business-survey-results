@@ -63,10 +63,10 @@ def create_snapshot(
     logger.info(f"Concatenating cp files from {input_directory}")
     cp_df = concat_files_from_pattern(input_directory, "cp*.csv", periods)
 
-    qv_df_validated = validate_nil_markers(qv_df, logger)
+    cp_df_validated = validate_nil_markers(cp_df, logger)
 
-    responses = convert_qv_to_responses(qv_df_validated)
-    contributors = convert_cp_to_contributors(cp_df)
+    responses = convert_qv_to_responses(qv_df)
+    contributors = convert_cp_to_contributors(cp_df_validated)
 
     contributors_with_finalsel = load_and_join_finalsel(
         contributors,
