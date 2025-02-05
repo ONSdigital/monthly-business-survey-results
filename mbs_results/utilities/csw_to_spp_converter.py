@@ -282,6 +282,7 @@ def validate_nil_markers(df: pd.DataFrame, logger: logging.Logger) -> pd.DataFra
     """
     for index, row in df.iterrows():
         if row["type"] >= 10 and row["adjusted_value"] != 0:
+            df.loc[index, "adjusted_value"] = 0
             logger.warning(
                 f"Adjusted value set to 0 for: reference {row['reference']}, \
                 period {row['period']}, question number {row['question_number']}."
