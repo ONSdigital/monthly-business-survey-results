@@ -286,7 +286,11 @@ def validate_nil_markers(
     pd.DataFrame
         The dataframe with 'adjusted_value' set to 0 where necessary.
     """
-    qv_df = qv_df.merge(cp_df, on=["reference", "period"], how="left")
+    qv_df = qv_df.merge(
+        cp_df[["reference", "period", "response_type"]],
+        on=["reference", "period"],
+        how="left",
+    )
 
     for index, row in qv_df.iterrows():
         if row["response_type"] >= 4 and row["adjusted_value"] != 0:
@@ -297,8 +301,6 @@ def validate_nil_markers(
                 with response_type {row['response_type']}."
             )
 
-    qv_df.drop(
-        columns=["form_type", "sic92", "error_mkr", "response_type"], inplace=True
-    )
+    qv_df.drop(columns=["response_type"], inplace=True)
 
     return qv_df
