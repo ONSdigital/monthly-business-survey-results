@@ -265,13 +265,13 @@ def load_and_join_finalsel(
 
 def validate_nil_markers(df: pd.DataFrame, logger: logging.Logger) -> pd.DataFrame:
     """
-    Checks if 'type' >= 10 and 'adjusted_value' != 0, sets 'adjusted_value' to 0
+    Checks if 'response_type' >= 4 and 'adjusted_value' != 0, sets 'adjusted_value' to 0
     and writes a log file with references, periods, and question numbers.
 
     Parameters
     ----------
     df : pd.DataFrame
-        The input dataframe containing type and adjusted_value columns.
+        The input dataframe containing response_type and adjusted_value columns.
     logger : logging.Logger
         The logger object to write the details of adjustments.
 
@@ -281,7 +281,7 @@ def validate_nil_markers(df: pd.DataFrame, logger: logging.Logger) -> pd.DataFra
         The adjusted dataframe.
     """
     for index, row in df.iterrows():
-        if row["type"] >= 10 and row["adjusted_value"] != 0:
+        if row["response_type"] >= 4 and row["adjusted_value"] != 0:
             df.loc[index, "adjusted_value"] = 0
             logger.warning(
                 f"Adjusted value set to 0 for: reference {row['reference']}, \
