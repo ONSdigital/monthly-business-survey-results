@@ -91,24 +91,24 @@ def create_standardising_factor(
         each reference.
 
     """
-    # questions_selected = [40, 49]
-    # current_df = dataframe[(dataframe[period] == period_selected)]
-    # current_df = current_df[current_df[question_no].isin(questions_selected)]
+    questions_selected = [40, 49]
+    current_df = dataframe[(dataframe[period] == period_selected)]
+    current_df = current_df[current_df[question_no].isin(questions_selected)]
 
     # The standardising factor is created for each record before summing for each
     # domain-question grouping.
-    dataframe["unit_standardising_factor"] = (
-        dataframe[predicted_value]
-        * dataframe[a_weight]
-        * dataframe[o_weight]
-        * dataframe[g_weight]
+    current_df["unit_standardising_factor"] = (
+        current_df[predicted_value]
+        * current_df[a_weight]
+        * current_df[o_weight]
+        * current_df[g_weight]
     )
 
-    dataframe["standardising_factor"] = dataframe.groupby([domain, question_no])[
+    current_df["standardising_factor"] = current_df.groupby([domain, question_no])[
         "unit_standardising_factor"
     ].transform("sum")
 
-    output_df = dataframe[
+    output_df = current_df[
         [
             period,
             reference,
