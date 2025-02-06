@@ -13,9 +13,6 @@ def test_validate_nil_markers():
         {
             "period": [202101, 202102, 202103],
             "reference": [1, 2, 3],
-            "form_type": [1, 2, 3],
-            "sic92": [4, 5, 6],
-            "error_mkr": [7, 8, 9],
             "response_type": [3, 4, 5],
         }
     )
