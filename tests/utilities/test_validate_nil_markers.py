@@ -25,11 +25,9 @@ def test_validate_nil_markers():
             "period": [202101, 202102, 202103],
             "reference": [1, 2, 3],
             "question_number": [1, 2, 3],
-            "adjusted_value": [10, 20, 30],
+            "adjusted_value": [10, 0, 30],
         }
     )
-
-    result_df = validate_nil_markers(cp_df, qv_df, mock_logger)
 
     expected_df = pd.DataFrame(
         {
@@ -40,4 +38,16 @@ def test_validate_nil_markers():
         }
     )
 
+    result_df = validate_nil_markers(cp_df, qv_df, mock_logger)
+
     pd.testing.assert_frame_equal(result_df, expected_df)
+
+    expected_warning_message = (
+        "Adjusted value set to 0 for: "
+        "reference 3, "
+        "period 202103, "
+        "question number 3, "
+        "with response type 5."
+    )
+
+    mock_logger.warning.assert_called_with(expected_warning_message)

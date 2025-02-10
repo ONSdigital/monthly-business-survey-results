@@ -286,21 +286,23 @@ def validate_nil_markers(
     pd.DataFrame
         The dataframe with 'adjusted_value' set to 0 where necessary.
     """
-    qv_df = qv_df.merge(
+    qv_cp_df = qv_df.merge(
         cp_df[["reference", "period", "response_type"]],
         on=["reference", "period"],
         how="left",
     )
 
-    for index, row in qv_df.iterrows():
-        if row["response_type"] >= 4 and row["adjusted_value"] != 0:
-            qv_df.loc[index, "adjusted_value"] = 0
-            logger.warning(
-                f"Adjusted value set to 0 for: reference {row['reference']}, \
-                period {row['period']}, question number {row['question_number']}, \
-                with response_type {row['response_type']}."
-            )
+    condition = (qv_cp_df["response_type"] >= 4) & (qv_cp_df["adjusted_value"] != 0)
+    filtered_qv_df = qv_cp_df[condition]
 
-    qv_df.drop(columns=["response_type"], inplace=True)
+    for index, row in filtered_qv_df.iterrows():
+        qv_cp_df.loc[index, "adjusted_value"] = 0
+        logger.warning(
+            f"Adjusted value set to 0 for: reference {row['reference']}, "
+            f"period {row['period']}, question number {row['question_number']}, "
+            f"with response type {row['response_type']}."
+        )
 
-    return qv_df
+    validated_qv_df = qv_cp_df.drop(columns=["response_type"])
+
+    return validated_qv_df
