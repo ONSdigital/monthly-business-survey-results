@@ -63,7 +63,7 @@ def create_snapshot(
     logger.info(f"Concatenating cp files from {input_directory}")
     cp_df = concat_files_from_pattern(input_directory, "cp*.csv", periods)
 
-    qv_df_validated = validate_nil_markers(qv_df, logger)
+    qv_df_validated = validate_nil_markers(cp_df, qv_df, logger)
 
     responses = convert_qv_to_responses(qv_df_validated)
     contributors = convert_cp_to_contributors(cp_df)
@@ -263,28 +263,46 @@ def load_and_join_finalsel(
     return df.merge(finalsel_data, on=["reference", "period"], how="left")
 
 
-def validate_nil_markers(df: pd.DataFrame, logger: logging.Logger) -> pd.DataFrame:
+def validate_nil_markers(
+    cp_df: pd.DataFrame, qv_df: pd.DataFrame, logger: logging.Logger
+) -> pd.DataFrame:
     """
-    Checks if 'type' >= 10 and 'adjusted_value' != 0, sets 'adjusted_value' to 0
-    and writes a log file with references, periods, and question numbers.
+    Validates and adjusts 'adjusted_value' in the dataframe based on 'response_type'.
+
+    If 'response_type' is greater than or equal to 4 and 'adjusted_value' is not 0,
+    sets 'adjusted_value' to 0 and logs the details of the adjustment.
 
     Parameters
     ----------
-    df : pd.DataFrame
-        The input dataframe containing type and adjusted_value columns.
+    cp_df : pd.DataFrame
+        The dataframe containing response_type
+    qv_df : pd.DataFrame
+        The dataframe containing adjusted_value
     logger : logging.Logger
-        The logger object to write the details of adjustments.
+        The logger object used to log details of the adjustments.
 
     Returns
     -------
     pd.DataFrame
-        The adjusted dataframe.
+        The dataframe with 'adjusted_value' set to 0 where necessary.
     """
-    for index, row in df.iterrows():
-        if row["type"] >= 10 and row["adjusted_value"] != 0:
-            logger.warning(
-                f"Adjusted value set to 0 for: reference {row['reference']}, \
-                period {row['period']}, question number {row['question_number']}."
-            )
+    qv_cp_df = qv_df.merge(
+        cp_df[["reference", "period", "response_type"]],
+        on=["reference", "period"],
+        how="left",
+    )
 
-    return df
+    condition = (qv_cp_df["response_type"] >= 4) & (qv_cp_df["adjusted_value"] != 0)
+    filtered_qv_df = qv_cp_df[condition]
+
+    for index, row in filtered_qv_df.iterrows():
+        qv_cp_df.loc[index, "adjusted_value"] = 0
+        logger.warning(
+            f"Adjusted value set to 0 for: reference {row['reference']}, "
+            f"period {row['period']}, question number {row['question_number']}, "
+            f"with response type {row['response_type']}."
+        )
+
+    validated_qv_df = qv_cp_df.drop(columns=["response_type"])
+
+    return validated_qv_df
