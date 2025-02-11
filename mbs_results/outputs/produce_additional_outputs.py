@@ -15,7 +15,37 @@ from mbs_results.outputs.turnover_analysis import create_turnover_output
 from mbs_results.outputs.weighted_adj_val_time_series import (
     get_weighted_adj_val_time_series,
 )
+from mbs_results.staging.back_data import read_back_data
+from mbs_results.imputation.construction_matches import flag_construction_matches
+from mbs_results.imputation.calculate_imputation_link import calculate_imputation_link
+from mbs_results.estimation.estimate import estimate
+from mbs_results.outlier_detection.detect_outlier import detect_outlier
 
+
+def back_data_wrapper(config: dict, strata: str):
+    
+    # Read in back data
+    back_data = read_back_data(config)
+
+    # Run apply_imputation_link function to get construction links
+    back_data_cons_matches = flag_construction_matches(back_data, **config)
+    back_data_imputation = calculate_imputation_link(back_data, config["period"], strata, "flag_construction_matches", config["target"], config["auxiliary"], "construction_link")
+
+    # Running all of estimation and outliers
+    back_data_estimation = estimate(back_data, config)
+    back_data_outliering = detect_outlier(back_data_estimation, config)
+    
+    back_data_output = back_data_outliering[
+        [
+            # relevant columns here
+        ]
+    ]
+    
+    # Link to produce_additional_outputs
+    
+    return back_data_outliering
+    
+    
 
 def get_additional_outputs_df(
     estimation_output: pd.DataFrame, outlier_output: pd.DataFrame
@@ -78,6 +108,8 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
         main pipeline configuration
     additional_outputs_df : pd.DataFrame
         Dataframe to feed in as arguments for additional outputs
+    back_data_output : pd.DataFrame
+        Dataframe from back_data_wrapper to feed into selective editing
 
     Returns
     -------
@@ -96,7 +128,7 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
             "produce_ocea_srs_outputs": produce_ocea_srs_outputs,
             "create_imputation_link_output": create_imputation_link_output,
         },
-        additional_outputs_df,
+        additional_outputs_df
     )
 
     # Stop function if no additional_outputs are listed in config.
