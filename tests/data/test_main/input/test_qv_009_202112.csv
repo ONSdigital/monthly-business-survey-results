@@ -1,2 +1,2 @@
-period,reference,question_no,returned_value,adjusted_value,instance
-202112,1,40,999,999,999
+period,reference,question_no,returned_value,adjusted_value,instance,type
+202112,1,40,999,999,999,1
