@@ -137,6 +137,11 @@ def append_back_data(staged_data: pd.DataFrame, config: dict) -> pd.DataFrame:
 
     back_data.insert(0, imp_marker_col, back_data[type_col].astype(str).map(map_type))
 
+    # Remove derived, derived values not needed
+    # Having derivedd values in back data will throw an error in imputation flags
+
+    back_data = back_data[back_data[config["imputation_marker_col"]] != "derived"]
+
     common_cols = list(staged_data.columns.intersection(back_data.columns))
 
     common_cols.append(imp_marker_col)
