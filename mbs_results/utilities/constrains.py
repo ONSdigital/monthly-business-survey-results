@@ -58,8 +58,14 @@ def replace_values_index_based(
             # Has format (question_no,period,reference)
             index_to_replace = (a,) + date_ref_idx
             index_to_replace_with = (b,) + date_ref_idx
-            # Filter target based on the indices
-            df.loc[index_to_replace, target] = df.loc[index_to_replace_with, target]
+
+            # Convert to series to ensure consistent dtype
+            # df.loc[index_to_replace_with, target] could be either series or float
+
+            replace_with_value = pd.Series(df.loc[index_to_replace_with, target]).iloc[
+                0
+            ]
+            df.loc[index_to_replace, target] = replace_with_value
             df.loc[index_to_replace, "constrain_marker"] = f"{a} {compare} {b}"
 
 
