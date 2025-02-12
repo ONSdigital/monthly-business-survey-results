@@ -170,6 +170,8 @@ def append_back_data(staged_data: pd.DataFrame, config: dict) -> pd.DataFrame:
         config["revision_period"],
     )
 
+    back_data["cellnumber"] = back_data["cell_no"]
+
     staged_and_back_data = pd.concat([back_data, staged_data], ignore_index=True)
 
     return staged_and_back_data
