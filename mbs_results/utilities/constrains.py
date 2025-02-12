@@ -416,6 +416,13 @@ def calculate_derived_outlier_weights(
     df_pre_winsorised.loc[
         df_pre_winsorised["constrain_marker"].notna(), outlier_weight
     ] = (df_pre_winsorised[winsorised_target] / df_pre_winsorised[target])
+
+    df_pre_winsorised.loc[
+        (df_pre_winsorised["constrain_marker"].notna())
+        & (df_pre_winsorised[target] == 0),
+        outlier_weight,
+    ] = 1
+
     df_pre_winsorised.sort_values(
         by=[reference, period, question_no, spp_form_id], inplace=True
     )
