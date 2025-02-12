@@ -226,7 +226,17 @@ def drop_derived_questions(
         15: 46,
         16: 42,
     }
+
     for formid, question_number in question_dict.items():
+        filtered_df = df.loc[
+            (df[question_no] == question_number) & (df[form_type_spp] == formid)
+        ]
+        if not filtered_df.empty:
+            warnings.warn(
+                f"Derived question dataframe {question_number} for "
+                + f"formid {formid} was found in the staged dataframe. "
+                + "Dropping"
+            )
         df = df.drop(
             df[
                 (df[question_no] == question_number) & (df[form_type_spp] == formid)
