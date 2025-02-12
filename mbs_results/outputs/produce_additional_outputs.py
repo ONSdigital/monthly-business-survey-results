@@ -79,8 +79,6 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
         main pipeline configuration
     additional_outputs_df : pd.DataFrame
         Dataframe to feed in as arguments for additional outputs
-    back_data_output : pd.DataFrame
-        Dataframe from back_data_wrapper to feed into selective editing
 
     Returns
     -------
