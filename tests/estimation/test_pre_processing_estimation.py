@@ -27,9 +27,25 @@ class TestPreProcessingEstimation:
                 "calibration_group",
                 "auxiliary",
                 "is_sampled",
+                "ni_gb_cell_number",
             ]
         ]
-        population_frame = expected.drop(columns=["calibration_group", "is_sampled"])
+
+        original = expected.drop(columns="cell_no").rename(
+            columns={"ni_gb_cell_number": "cell_no"}
+        )
+        original = original[
+            [
+                "period",
+                "reference",
+                "cell_no",
+                "calibration_group",
+                "auxiliary",
+                "is_sampled",
+            ]
+        ]
+
+        population_frame = original.drop(columns=["calibration_group", "is_sampled"])
         sample = population_frame.loc[:1, ["reference", "period"]]
 
         calibration_group_map = expected[["cell_no", "calibration_group"]]

@@ -17,8 +17,8 @@
     "sic_domain_mapping_path": "",
     "threshold_filepath":"",
 
-    "back_data_type":"response_type",
-    "imputation_marker_col":"imputation_marker",
+    "back_data_type":"type",
+    "imputation_marker_col":"imputation_flags_adjustedresponse",
 
 
     "period_selected": 202303,
@@ -40,6 +40,7 @@
     "reference": "reference",
     "region": "region",
     "sampled": "is_sampled",
+    "census": "is_census",
     "state": "frozen",
     "strata": "cell_no",
     "target": "adjustedresponse",
@@ -64,11 +65,6 @@
         "cell_no": "int"},
 
     "contributors_keep_cols": [
-        "cellnumber",
-        "formtype",
-        "frozenemployees",
-        "frozensic",
-        "frozenturnover",
         "period",
         "reference",
         "status",
@@ -84,6 +80,7 @@
     ],
 
     "finalsel_keep_cols": [
+        "formtype",
         "cell_no",
         "froempment",
         "frosic2007",
@@ -122,22 +119,22 @@
     ],
     "sample_keep_columns": ["reference", "period"],
 
-    "idbr_to_spp": {"0201":9,
-                    "0202":9,
-                    "0203":10,
-                    "0204":10,
-                    "0205":11,
-                    "0216":11,
-                    "0106":12,
-                    "0111":12,
-                    "0117":13,
-                    "0167":13,
-                    "0123":14,
-                    "0173":14,
-                    "0817":15,
-                    "0867":15,
-                    "0823":16,
-                    "0873":16},
+    "idbr_to_spp": {"201":9,
+                    "202":9,
+                    "203":10,
+                    "204":10,
+                    "205":11,
+                    "216":11,
+                    "106":12,
+                    "111":12,
+                    "117":13,
+                    "167":13,
+                    "123":14,
+                    "173":14,
+                    "817":15,
+                    "867":15,
+                    "823":16,
+                    "873":16},
 
     "census_extra_calibration_group": [5043, 5113, 5123, 5203, 5233,
      5403, 5643, 5763, 5783, 5903, 6073],
@@ -148,16 +145,17 @@
         "question_no":"questioncode"
      },
      "type_to_imputation_marker" : {
+        "0":"r",
         "1":"r",
+        "2":"derived",
         "3":"fir",
         "4":"bir",
         "5":"c",
         "6":"mc",
         "10":"r",
         "11":"r",
+        "12":"derived",
         "13":"fir"
         },
-
   "additional_outputs":[]
-
 }

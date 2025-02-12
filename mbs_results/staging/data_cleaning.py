@@ -1,11 +1,11 @@
+import warnings
 from typing import List
 
 import pandas as pd
 
 from mbs_results.utilities.utils import convert_column_to_datetime
-from mbs_results.utilities.validation_checks import (
+from mbs_results.utilities.validation_checks import (  # validate_manual_constructions,
     validate_indices,
-    validate_manual_constructions,
 )
 
 
@@ -173,7 +173,7 @@ def load_manual_constructions(
     )
     manual_constructions.set_index([reference, period], inplace=True)
 
-    validate_manual_constructions(df, manual_constructions)
+    # validate_manual_constructions(df, manual_constructions)
 
     return df.merge(
         manual_constructions, on=[reference, period], how="outer", suffixes=("", "_man")
@@ -186,6 +186,7 @@ def join_manual_constructions(
     reference: str,
     period: str,
     question_no: str,
+    target: str,
     **config,
 ):
     """
@@ -242,14 +243,33 @@ def join_manual_constructions(
         manual_constructions_filter.set_index([reference, period], inplace=True)
         df.set_index([reference, period], inplace=True)
 
-        validate_manual_constructions(df, manual_constructions_filter)
+        # validate_manual_constructions(df, manual_constructions_filter)
 
-        return df.merge(
+        df = df.merge(
             manual_constructions_filter,
             on=[reference, period],
             how="left",
-            suffixes=("", "_man"),
+            suffixes=("", "_man_from_file"),
         ).reset_index()
+
+        duplicate_mc_test = (
+            df[f"{target}_man"].mul(df[f"{target}_man_from_file"]).notna()
+        )
+
+        if duplicate_mc_test.any():
+            warnings.warn(
+                f"""There is a manual construction in the backdata and
+          mc file for the same reference period
+          {df[duplicate_mc_test]}"""
+            )
+
+        df[f"{target}_man"] = df[f"{target}_man"].combine_first(
+            df[f"{target}_man_from_file"]
+        )
+
+        df.drop(f"{target}_man_from_file", axis=1, inplace=True)
+
+        return df
 
 
 def is_same_dtype(df: pd.DataFrame, df2: pd.DataFrame, col_name: str) -> bool:
@@ -370,10 +390,34 @@ def create_imputation_class(
     df : pd.DataFrame
         Original dataframe with new_col.
     """
-    df[new_col] = (
-        df[cell_no_col]
+    df[new_col] = df[cell_no_col].astype(str).map(lambda x: x[:-1]).astype(int)
+
+    return df
+
+
+def convert_cell_number(df: pd.DataFrame, cell_number: str):
+    """
+    Convert NI and GB cell numbers to UK by changing the first digit to 5 if this is 7.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Dataframe with cell_number column to convert
+    cell_number : str
+        Column name for cell_number in df
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataframe with converted cell_number column (and original cell_number
+        in separate column)
+
+    """
+    df["ni_gb_cell_number"] = df[cell_number]
+    df[cell_number] = (
+        df[cell_number]
         .astype(str)
-        .map(lambda x: str(5) + x[1:-1] if x[0] == str(7) else x[:-1])
+        .map(lambda x: str(5) + x[1:] if x[0] == str(7) else x)
         .astype(int)
     )
 

@@ -58,8 +58,14 @@ def replace_values_index_based(
             # Has format (question_no,period,reference)
             index_to_replace = (a,) + date_ref_idx
             index_to_replace_with = (b,) + date_ref_idx
-            # Filter target based on the indices
-            df.loc[index_to_replace, target] = df.loc[index_to_replace_with, target]
+
+            # Convert to series to ensure consistent dtype
+            # df.loc[index_to_replace_with, target] could be either series or float
+
+            replace_with_value = pd.Series(df.loc[index_to_replace_with, target]).iloc[
+                0
+            ]
+            df.loc[index_to_replace, target] = replace_with_value
             df.loc[index_to_replace, "constrain_marker"] = f"{a} {compare} {b}"
 
 
@@ -144,7 +150,7 @@ def constrain(
 
     derive_map = create_derive_map(df, spp_form_id)
 
-    df["unadjusted_target"] = df[target]
+    df[f"pre_derived_{target}"] = df[target]
 
     # pre_derive_df has dimenesions as index, columns the values to be used when derived
     # Hard coded columns are from finalsel files,
@@ -178,19 +184,21 @@ def constrain(
         warnings.warn("No derived questions created")
         derived_values = pd.DataFrame(columns=["constrain_marker"])
 
-    unique_q_numbers = df[question_no].unique()
-    df.set_index([question_no, period, reference], inplace=True)
+    pre_constrained = pd.concat([df, derived_values])
+    pre_constrained[f"pre_constrained_{target}"] = pre_constrained[target]
+
+    unique_q_numbers = pre_constrained[question_no].unique()
+    pre_constrained.set_index([question_no, period, reference], inplace=True)
 
     if 49 in unique_q_numbers:
-        replace_values_index_based(df, target, 49, ">", 40)
+        replace_values_index_based(pre_constrained, target, 49, ">", 40)
+
     if 90 in unique_q_numbers:
-        replace_values_index_based(df, target, 90, ">=", 40)
+        replace_values_index_based(pre_constrained, target, 90, ">=", 40)
 
-    df.reset_index(inplace=True)
+    post_constrained = pre_constrained.copy().reset_index()
 
-    final_constrained = pd.concat([df, derived_values])
-
-    return final_constrained
+    return post_constrained
 
 
 def derive_questions(
@@ -408,6 +416,13 @@ def calculate_derived_outlier_weights(
     df_pre_winsorised.loc[
         df_pre_winsorised["constrain_marker"].notna(), outlier_weight
     ] = (df_pre_winsorised[winsorised_target] / df_pre_winsorised[target])
+
+    df_pre_winsorised.loc[
+        (df_pre_winsorised["constrain_marker"].notna())
+        & (df_pre_winsorised[target] == 0),
+        outlier_weight,
+    ] = 1
+
     df_pre_winsorised.sort_values(
         by=[reference, period, question_no, spp_form_id], inplace=True
     )

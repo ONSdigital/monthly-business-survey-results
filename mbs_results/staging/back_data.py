@@ -144,6 +144,13 @@ def append_back_data(staged_data: pd.DataFrame, config: dict) -> pd.DataFrame:
     back_data[config["form_id_spp"]] = back_data[config["form_id_idbr"]].map(
         idbr_to_spp_mapping
     )
+
+    # Remove derived, derived values not needed
+    # Having derivedd values in back data will throw an error in imputation flags
+    if "derived" in back_data[config["imputation_marker_col"]].unique():
+        back_data = back_data[back_data[config["imputation_marker_col"]] != "derived"]
+        warnings.warn("Removing derived values from back")
+
     common_cols = list(staged_data.columns.intersection(back_data.columns))
 
     common_cols.append(imp_marker_col)

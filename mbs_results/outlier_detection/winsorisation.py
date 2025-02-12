@@ -17,7 +17,7 @@ def winsorise(
     group: str,
     period: str,
     aux: str,
-    sampled: str,
+    census: str,
     a_weight: str,
     g_weight: str,
     target_variable: str,
@@ -44,8 +44,8 @@ def winsorise(
         Column name containing time period.
     aux : str
         Column name containing auxiliary variable (x).
-    sampled : str
-        Column name indicating whether it was sampled or not -boolean.
+    census : str
+        Column name indicating whether it was census or not -boolean.
     a_weight : str
         Column name containing the design weight.
     g_weight:str
@@ -68,7 +68,7 @@ def winsorise(
             group,
             period,
             aux,
-            sampled,
+            census,
             a_weight,
             target_variable,
             "nw_ag_flag",
@@ -76,7 +76,7 @@ def winsorise(
         .pipe(
             calculate_ratio_estimation,
             aux,
-            sampled,
+            census,
             a_weight,
             g_weight,
             target_variable,
@@ -89,7 +89,7 @@ def winsorise(
             group,
             period,
             aux,
-            sampled,
+            census,
             a_weight,
             g_weight,
             target_variable,

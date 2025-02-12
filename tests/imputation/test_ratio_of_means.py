@@ -62,6 +62,7 @@ class TestRatioOfMeans:
     def test_ratio_of_means(self, base_file_name):
 
         input_data = pd.read_csv(scenario_path_prefix + base_file_name + "_input.csv")
+
         expected_output = pd.read_csv(
             scenario_path_prefix + base_file_name + "_output.csv"
         )
@@ -69,6 +70,9 @@ class TestRatioOfMeans:
         filter_df = load_filter(
             scenario_path_prefix + "ratio_of_means_filters/" + base_file_name + ".csv"
         )
+
+        # add imputation_flag onto data
+        input_data["imputation_flags_question"] = None
 
         # Can't use load_format helper, test cases have date instead of period
 
@@ -116,7 +120,7 @@ class TestRatioOfMeans:
             }
         )
 
-        actual_output = actual_output.drop(columns=["other"])
+        actual_output = actual_output.drop(columns=["other", "is_backdata"])
 
         # if stays like this we need a function to load expected data
         expected_output = expected_output.rename(
@@ -144,6 +148,8 @@ class TestRatioOfMeans:
                 "filtered_question",
                 "cumulative_b_link_filtered_question",
                 "cumulative_f_link_filtered_question",
+                "backdata_question",
+                "backdata_flags_question",
             ],
             errors="ignore",
             inplace=True,
@@ -173,6 +179,7 @@ class TestRatioOfMeans:
 class TestRatioOfMeansManConstruction:
     def test_manual_construction_input(self, mc_base_file_name):
         df = pd.read_csv(scenario_path_prefix + mc_base_file_name + "_input.csv")
+        df["imputation_flags_question"] = None
         expected_output = pd.read_csv(
             scenario_path_prefix + mc_base_file_name + "_output.csv"
         )
@@ -213,7 +220,7 @@ class TestRatioOfMeansManConstruction:
             }
         )
 
-        actual_output = actual_output.drop(columns=["other"])
+        actual_output = actual_output.drop(columns=["other", "is_backdata"])
 
         # if stays like this we need a function to load expected data
         expected_output = expected_output.rename(
@@ -241,6 +248,8 @@ class TestRatioOfMeansManConstruction:
                 "filtered_question",
                 "cumulative_b_link_filtered_question",
                 "cumulative_f_link_filtered_question",
+                "backdata_question",
+                "backdata_flags_question",
             ],
             errors="ignore",
             inplace=True,
