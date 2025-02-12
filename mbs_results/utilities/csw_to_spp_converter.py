@@ -18,6 +18,7 @@ def create_snapshot(
     output_directory: str,
     log_file: str,
     config: dict,
+    man_data_path=None,
 ):
     """
     Reads qv and cp files, applies transformations and writes snapshot.
@@ -34,7 +35,8 @@ def create_snapshot(
         File path to log file
     config: dict
         main config file for the pipeline.
-
+    man_data_path: str, optional
+        Path for mannual constructions
 
     Action
     -------
@@ -59,6 +61,9 @@ def create_snapshot(
 
     logger.info(f"Concatenating qv files from {input_directory}")
     qv_df = concat_files_from_pattern(input_directory, "qv*.csv", periods)
+
+    if man_data_path:
+        qv_df = remove_mannual_constructions(qv_df, man_data_path, config)
 
     logger.info(f"Concatenating cp files from {input_directory}")
     cp_df = concat_files_from_pattern(input_directory, "cp*.csv", periods)
@@ -306,3 +311,45 @@ def validate_nil_markers(
     validated_qv_df = qv_cp_df.drop(columns=["response_type"])
 
     return validated_qv_df
+
+
+def remove_mannual_constructions(
+    qv_df: pd.DataFrame, man_file_path: str, config: dict
+) -> pd.DataFrame:
+    """
+    Removes mannual constructions values from qv files based on index
+
+    Parameters
+    ----------
+    qv_df : pd.DataFrame
+        dataframe from qv files.
+    man_df : pd.DataFrame
+        dataframe with mannual construction files.
+    config : dict
+        pipeline settings dictionary.
+
+    Returns
+    -------
+    qv_df : pd.DataFrame
+        Qv files without mannual constructions.
+
+    """
+    man_df = pd.read_csv(man_file_path)
+
+    qv_df = qv_df.copy()
+
+    man_df.rename(columns={config["question_no"]: "question_no"}, inplace=True)
+
+    man_df.set_index(
+        [config["period"], config["reference"], "question_no"], inplace=True
+    )
+
+    qv_df.set_index(["period", "reference", "question_no"], inplace=True)
+
+    rows_ro_remove = qv_df.index.intersection(man_df.index)
+
+    qv_df.drop(rows_ro_remove, inplace=True)
+
+    qv_df.reset_index(inplace=True)
+
+    return qv_df
