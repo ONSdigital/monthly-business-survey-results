@@ -299,7 +299,7 @@ def validate_nil_markers(
         qv_cp_df.loc[index, "adjusted_value"] = 0
         logger.warning(
             f"Adjusted value set to 0 for: reference {row['reference']}, "
-            f"period {row['period']}, question number {row['question_number']}, "
+            f"period {row['period']}, question number {row['question_no']}, "
             f"with response type {row['response_type']}."
         )
 
