@@ -1,3 +1,5 @@
+import warnings
+
 import pandas as pd
 
 from mbs_results.utilities.utils import (
@@ -87,7 +89,8 @@ def read_back_data(config: dict) -> pd.DataFrame:
     finalsel = read_colon_separated_file(
         config["back_data_finalsel_path"], config["sample_column_names"]
     )
-    finalsel["formtype"] = "0" + finalsel["formtype"].astype(str)
+    finalsel["formtype"] = "0" + finalsel["formtype"].astype(int).astype(str)
+    warnings.warn("Fix added to ensure formtype has leading 0")
 
     qv_and_cp = pd.merge(
         qv_df, cp_df, how="left", on=[config["period"], config["reference"]]
@@ -159,8 +162,6 @@ def append_back_data(staged_data: pd.DataFrame, config: dict) -> pd.DataFrame:
         config["current_period"],
         config["revision_period"],
     )
-
-    back_data["cellnumber"] = back_data["cell_no"]
 
     staged_and_back_data = pd.concat([back_data, staged_data], ignore_index=True)
 
