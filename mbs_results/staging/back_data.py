@@ -1,4 +1,5 @@
 import pandas as pd
+import warnings
 
 from mbs_results.utilities.utils import (
     convert_column_to_datetime,
@@ -139,8 +140,9 @@ def append_back_data(staged_data: pd.DataFrame, config: dict) -> pd.DataFrame:
 
     # Remove derived, derived values not needed
     # Having derivedd values in back data will throw an error in imputation flags
-
-    back_data = back_data[back_data[config["imputation_marker_col"]] != "derived"]
+    if 'derived' in back_data[config["imputation_marker_col"]].unique():
+        back_data = back_data[back_data[config["imputation_marker_col"]] != "derived"]
+        warnings.warn("Removing derived values from back")
 
     common_cols = list(staged_data.columns.intersection(back_data.columns))
 
