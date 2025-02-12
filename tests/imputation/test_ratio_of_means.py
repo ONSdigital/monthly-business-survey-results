@@ -120,7 +120,7 @@ class TestRatioOfMeans:
             }
         )
 
-        actual_output = actual_output.drop(columns=["other"])
+        actual_output = actual_output.drop(columns=["other", "is_backdata"])
 
         # if stays like this we need a function to load expected data
         expected_output = expected_output.rename(
@@ -220,7 +220,7 @@ class TestRatioOfMeansManConstruction:
             }
         )
 
-        actual_output = actual_output.drop(columns=["other"])
+        actual_output = actual_output.drop(columns=["other", "is_backdata"])
 
         # if stays like this we need a function to load expected data
         expected_output = expected_output.rename(

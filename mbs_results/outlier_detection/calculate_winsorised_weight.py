@@ -27,7 +27,7 @@ def calculate_winsorised_weight(
         Column name containing time period.
     aux : str
         Column name containing auxiliary variable (x).
-    sampled : str
+    is_census : str
         Column name indicating whether a reference belongs to a cell that is a census.
     a_weight : str
         Column name containing the design weight.

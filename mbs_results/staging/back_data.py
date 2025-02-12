@@ -1,3 +1,5 @@
+import warnings
+
 import pandas as pd
 
 from mbs_results.utilities.utils import (
@@ -136,6 +138,12 @@ def append_back_data(staged_data: pd.DataFrame, config: dict) -> pd.DataFrame:
     # they are loaded as int
 
     back_data.insert(0, imp_marker_col, back_data[type_col].astype(str).map(map_type))
+
+    # Remove derived, derived values not needed
+    # Having derivedd values in back data will throw an error in imputation flags
+    if "derived" in back_data[config["imputation_marker_col"]].unique():
+        back_data = back_data[back_data[config["imputation_marker_col"]] != "derived"]
+        warnings.warn("Removing derived values from back")
 
     common_cols = list(staged_data.columns.intersection(back_data.columns))
 
