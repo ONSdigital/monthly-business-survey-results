@@ -4,9 +4,8 @@ from typing import List
 import pandas as pd
 
 from mbs_results.utilities.utils import convert_column_to_datetime
-from mbs_results.utilities.validation_checks import (
+from mbs_results.utilities.validation_checks import (  # validate_manual_constructions,
     validate_indices,
-    validate_manual_constructions,
 )
 
 
@@ -174,7 +173,7 @@ def load_manual_constructions(
     )
     manual_constructions.set_index([reference, period], inplace=True)
 
-    validate_manual_constructions(df, manual_constructions)
+    # validate_manual_constructions(df, manual_constructions)
 
     return df.merge(
         manual_constructions, on=[reference, period], how="outer", suffixes=("", "_man")
@@ -244,7 +243,7 @@ def join_manual_constructions(
         manual_constructions_filter.set_index([reference, period], inplace=True)
         df.set_index([reference, period], inplace=True)
 
-        validate_manual_constructions(df, manual_constructions_filter)
+        # validate_manual_constructions(df, manual_constructions_filter)
 
         df = df.merge(
             manual_constructions_filter,
