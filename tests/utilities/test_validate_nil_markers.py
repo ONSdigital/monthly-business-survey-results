@@ -24,7 +24,7 @@ def test_validate_nil_markers():
         {
             "period": [202101, 202102, 202103],
             "reference": [1, 2, 3],
-            "question_number": [1, 2, 3],
+            "question_no": [1, 2, 3],
             "adjusted_value": [10, 0, 30],
         }
     )
@@ -33,7 +33,7 @@ def test_validate_nil_markers():
         {
             "period": [202101, 202102, 202103],
             "reference": [1, 2, 3],
-            "question_number": [1, 2, 3],
+            "question_no": [1, 2, 3],
             "adjusted_value": [10, 0, 0],
         }
     )
