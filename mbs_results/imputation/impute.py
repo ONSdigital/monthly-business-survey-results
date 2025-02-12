@@ -61,6 +61,9 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
 
     post_impute["period"] = post_impute["period"].dt.strftime("%Y%m").astype("int")
     post_impute = post_impute.reset_index(drop=True)  # remove groupby leftovers
+    post_impute = post_impute[~post_impute["is_backdata"]]  # remove backdata
+    post_impute.drop(columns=["is_backdata"], inplace=True)
+
     post_constrain = constrain(
         df=post_impute,
         period=config["period"],
