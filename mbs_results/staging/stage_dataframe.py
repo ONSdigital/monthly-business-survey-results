@@ -180,6 +180,12 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         + "filter_out_questions.csv",
     )
 
+    df = drop_derived_questions(
+        df,
+        config["question_no"],
+        config["form_id_spp"],
+    )
+
     warnings.warn("add live or frozen after fixing error marker column in config")
     df = run_live_or_frozen(
         df,
@@ -191,4 +197,49 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
 
     print("Staging Completed")
 
+    return df
+
+
+def drop_derived_questions(
+    df: pd.DataFrame, question_no: str, form_type_spp: str
+) -> pd.DataFrame:
+    """
+    drops rows containing derived questions based on spp form type
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        original dataframe with spp form type column
+    question_no : str
+        column name for question number
+    form_type_spp : str
+        column name for spp form type
+    Returns
+    -------
+    pd.DataFrame
+        _description_
+    """
+
+    question_dict = {
+        13: 40,
+        14: 40,
+        15: 46,
+        16: 42,
+    }
+
+    for formid, question_number in question_dict.items():
+        filtered_df = df.loc[
+            (df[question_no] == question_number) & (df[form_type_spp] == formid)
+        ]
+        if not filtered_df.empty:
+            warnings.warn(
+                f"Derived question dataframe {question_number} for "
+                + f"formid {formid} was found in the staged dataframe. "
+                + "Dropping"
+            )
+        df = df.drop(
+            df[
+                (df[question_no] == question_number) & (df[form_type_spp] == formid)
+            ].index
+        )
     return df

@@ -9,7 +9,6 @@ from mbs_results.outputs.selective_editing import (
     calculate_predicted_value,
     create_standardising_factor,
 )
-from mbs_results.utilities.utils import convert_column_to_datetime
 
 
 @pytest.fixture(scope="class")
@@ -104,9 +103,6 @@ class TestSelectiveEditing:
         input_data = calculate_auxiliary_value_input
 
         expected_output = calculate_auxiliary_value_output
-        expected_output["period"] = convert_column_to_datetime(
-            expected_output["period"]
-        )
         expected_output["auxiliary_value"] = expected_output["auxiliary_value"].astype(
             float
         )

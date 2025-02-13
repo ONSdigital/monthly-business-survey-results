@@ -43,10 +43,15 @@ def create_selective_editing_question_output(
      >>            period_selected=202201,
      >>            )
     """
+    questions_selected = [40, 49]
+    input_data = additional_outputs_df.loc[
+        additional_outputs_df["questioncode"].isin(questions_selected)
+    ]
+    input_data = input_data[(input_data["period"] == period_selected)]
     sic_domain_mapping = pd.read_csv(sic_domain_mapping_path).astype(str)
 
     df_with_domain = merge_domain(
-        input_df=additional_outputs_df,
+        input_df=input_data,
         domain_mapping=sic_domain_mapping,
         sic_input="frosic2007",
         sic_mapping="sic_5_digit",
@@ -68,7 +73,7 @@ def create_selective_editing_question_output(
     )
 
     auxiliary_value = calculate_auxiliary_value(
-        dataframe=additional_outputs_df,
+        dataframe=input_data,
         reference="reference",
         period="period",
         question_no="questioncode",
@@ -81,7 +86,7 @@ def create_selective_editing_question_output(
     question_output = pd.merge(
         standardising_factor,
         auxiliary_value,
-        on=["reference", "imputation_class", "questioncode"],
+        on=["period", "reference", "imputation_class", "questioncode"],
         how="left",
     ).drop("imputation_class", axis=1)
 
@@ -97,7 +102,8 @@ def create_selective_editing_question_output(
             "reference": "ruref",
             "domain": "domain_group",
             "frotover": "auxiliary_value",
-            "imputation_flags_adjusted_value": "imputation_marker",
+            "imputation_flags_adjustedresponse": "imputation_marker",
+            "adjustedresponse": "predicted_value",
             "questioncode": "question_code",
         }
     )

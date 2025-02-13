@@ -1,8 +1,6 @@
 import numpy as np
 import pandas as pd
 
-from mbs_results.utilities.utils import convert_column_to_datetime
-
 
 def calculate_predicted_value(
     dataframe: pd.DataFrame,
@@ -173,8 +171,6 @@ def calculate_auxiliary_value(
     # convert register turover from annual pounds-thousands to monthly pounds
     dataframe[frozen_turnover] = dataframe[frozen_turnover] * 1000 / 12
 
-    period_selected = pd.to_datetime(period_selected, format="%Y%m")
-    dataframe[period] = convert_column_to_datetime(dataframe[period])
     current_df = dataframe[(dataframe[period] == period_selected)]
 
     q40 = current_df[current_df[question_no] == 40]
@@ -183,12 +179,7 @@ def calculate_auxiliary_value(
     q40["auxiliary_value"] = q40[frozen_turnover]
     q49["auxiliary_value"] = q49[frozen_turnover] * q49[construction_link]
 
-    keep_cols = [
-        reference,
-        period,
-        question_no,
-        "auxiliary_value",
-    ]
+    keep_cols = [reference, period, question_no, "auxiliary_value", imputation_class]
 
     output_df = pd.concat([q40[keep_cols], q49[keep_cols]])
 

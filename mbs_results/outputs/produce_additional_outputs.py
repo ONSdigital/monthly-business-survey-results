@@ -52,6 +52,7 @@ def get_additional_outputs_df(
             "response",
             "froempment",
             "cell_no",
+            "imputation_class",
             "imputation_flags_adjustedresponse",
             "f_link_adjustedresponse",
             "b_link_adjustedresponse",
@@ -108,3 +109,4 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
     for output in additional_outputs:
         filename = f"{output}_v{file_version_mbs}_{snapshot_name}.csv"
         additional_outputs[output].to_csv(config["output_path"] + filename, index=False)
+        print(config["output_path"] + filename + " saved")
