@@ -16,7 +16,7 @@ def back_data_wrapper():
     # Run apply_imputation_link function to get construction links
     back_data_cons_matches = flag_construction_matches(back_data, **config)
     back_data_imputation = calculate_imputation_link(
-        back_data, 
+        back_data_cons_matches, 
         match_col = "flag_construction_matches", 
         link_col = "construction_link",
         predictive_variable = config["auxiliary"],
@@ -24,7 +24,7 @@ def back_data_wrapper():
     )
 
     # Running all of estimation and outliers
-    back_data_estimation = estimate(back_data, config)
+    back_data_estimation = estimate(back_data_imputation, config)
     back_data_outliering = detect_outlier(back_data_estimation, config)
     
     back_data_output = back_data_outliering[
