@@ -15,8 +15,7 @@ from mbs_results.outputs.turnover_analysis import create_turnover_output
 from mbs_results.outputs.weighted_adj_val_time_series import (
     get_weighted_adj_val_time_series,
 )
-    
-    
+
 
 def get_additional_outputs_df(
     estimation_output: pd.DataFrame, outlier_output: pd.DataFrame
@@ -97,7 +96,7 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
             "produce_ocea_srs_outputs": produce_ocea_srs_outputs,
             "create_imputation_link_output": create_imputation_link_output,
         },
-        additional_outputs_df
+        additional_outputs_df,
     )
 
     # Stop function if no additional_outputs are listed in config.
