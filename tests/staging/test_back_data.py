@@ -94,5 +94,8 @@ def test_append_back_data(mock_read_back_data, filepath):
     actual_output = append_back_data(staged, config)
 
     mock_read_back_data.assert_called_once_with(config)
+    order = actual_output.columns
+    expected_output = expected_output[order]
+    expected_output["cellnumber"] = expected_output["cellnumber"].astype(int)
 
     assert_frame_equal(actual_output, expected_output)

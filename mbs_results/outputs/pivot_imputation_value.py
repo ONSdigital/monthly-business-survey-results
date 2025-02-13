@@ -48,7 +48,9 @@ def merge_counts(
     return df_merge.drop(columns=[count_cell, count_date])
 
 
-def create_imputation_link_output(additional_outputs_df: pd.DataFrame) -> pd.DataFrame:
+def create_imputation_link_output(
+    additional_outputs_df: pd.DataFrame, **config
+) -> pd.DataFrame:
     """
     A wrapper function that runs the necessary functions for creating the
     imputation_link output.
