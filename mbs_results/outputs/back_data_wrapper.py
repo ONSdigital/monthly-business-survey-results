@@ -1,3 +1,7 @@
+from importlib import metadata
+
+import pandas as pd
+
 from mbs_results.estimation.estimate import estimate
 from mbs_results.imputation.calculate_imputation_link import calculate_imputation_link
 from mbs_results.imputation.construction_matches import flag_construction_matches
@@ -21,7 +25,7 @@ def back_data_wrapper():
         match_col="flag_construction_matches",
         link_col="construction_link",
         predictive_variable=config["auxiliary"],
-        **config
+        **config,
     )
 
     # Running all of estimation and outliers
@@ -49,4 +53,81 @@ def back_data_wrapper():
     # Link to produce_additional_outputs
     produce_additional_outputs(config, back_data_output)
 
+    qa_seletive_editing_outputs(config)
+
     return back_data_outliering
+
+
+def qa_seletive_editing_outputs(config: dict):
+    """
+    function to QA check the selective editing outputs
+
+    Parameters
+    ----------
+    config : dict
+        _description_
+    """
+    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
+    snapshot_name = config["mbs_file_name"].split(".")[0]
+    se_contributor_path = (
+        config["output_path"]
+        + f"selective_editing_contributor_v{file_version_mbs}_{snapshot_name}.csv"
+    )
+    se_question_path = (
+        config["output_path"]
+        + f"selective_editing_question_v{file_version_mbs}_{snapshot_name}.csv"
+    )
+
+    contributor_df = pd.read_csv(se_contributor_path).rename(
+        columns={"ruref": "reference"}
+    )
+    question_df = pd.read_csv(se_question_path).rename(columns={"ruref": "reference"})
+
+    contributor_unique_reference = contributor_df["reference"].unique().tolist()
+    question_unique_reference = question_df["reference"].unique().tolist()
+    unique_references_not_in_con_question = list(
+        set(contributor_unique_reference).symmetric_difference(
+            set(question_unique_reference)
+        )
+    )
+    print(unique_references_not_in_con_question)
+
+    print(
+        len(contributor_unique_reference),
+        len(question_unique_reference),
+        len(unique_references_not_in_con_question),
+    )
+
+    print()
+    duplicated_references = contributor_df[contributor_df.duplicated(keep=False)]
+    print(duplicated_references)
+    dupes = question_df.drop_duplicates(keep=False)
+    print(dupes.shape)
+
+    question_df.groupby(["period", "reference", "question_code"]).apply(
+        lambda df: print(df) if df["survey_code"].count() > 1 else None
+    )
+    print("duplicated questions ^")
+    contributor_df.groupby(["period", "reference"]).apply(
+        lambda df: print(df) if df["survey_code"].count() > 1 else None
+    )
+    print("duplicated con ^")
+
+    print(len(question_df["reference"].unique()))
+    print(
+        "unique in con:",
+        len(contributor_df["reference"].unique()),
+        "shape of full con: (should match)",
+        contributor_df.shape,
+    )
+    print(
+        "unique in ques:",
+        len(question_df["reference"].unique()),
+        "shape of full question: (shouldn't match)",
+        question_df.shape,
+    )
+    print("Nulls or NaNs in each row of se_contributor:")
+    print(contributor_df.isnull().sum(axis=0))
+
+    print("Nulls or NaNs in each row of se_question:")
+    print(question_df.isnull().sum(axis=0))
