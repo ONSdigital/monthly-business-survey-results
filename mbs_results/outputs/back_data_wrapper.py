@@ -1,3 +1,4 @@
+import logging
 from importlib import metadata
 
 import pandas as pd
@@ -9,6 +10,14 @@ from mbs_results.outlier_detection.detect_outlier import detect_outlier
 from mbs_results.outputs.produce_additional_outputs import produce_additional_outputs
 from mbs_results.staging.back_data import read_back_data
 from mbs_results.utilities.inputs import load_config
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    filename="test.txt",
+    level=logging.DEBUG,
+    format="%(asctime)s %(levelname)s %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 def back_data_wrapper():
@@ -53,20 +62,25 @@ def back_data_wrapper():
     # Link to produce_additional_outputs
     produce_additional_outputs(config, back_data_output)
 
-    qa_seletive_editing_outputs(config)
+    qa_selective_editing_outputs(config)
 
     return back_data_outliering
 
 
-def qa_seletive_editing_outputs(config: dict):
+def qa_selective_editing_outputs(config: dict):
     """
     function to QA check the selective editing outputs
+    Outputs warings to logging file if any issues are found
 
     Parameters
     ----------
     config : dict
-        _description_
+        main config for pipeline
     """
+
+    # Loading SE outputs, function to create SE outputs cannot return them, easier to
+    # load them here
+
     file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
     snapshot_name = config["mbs_file_name"].split(".")[0]
     se_contributor_path = (
@@ -83,51 +97,75 @@ def qa_seletive_editing_outputs(config: dict):
     )
     question_df = pd.read_csv(se_question_path).rename(columns={"ruref": "reference"})
 
+    # Checking that references match
     contributor_unique_reference = contributor_df["reference"].unique().tolist()
     question_unique_reference = question_df["reference"].unique().tolist()
-    unique_references_not_in_con_question = list(
+    unmatched_references = list(
         set(contributor_unique_reference).symmetric_difference(
             set(question_unique_reference)
         )
     )
-    print(unique_references_not_in_con_question)
 
-    print(
-        len(contributor_unique_reference),
-        len(question_unique_reference),
-        len(unique_references_not_in_con_question),
-    )
+    if len(unmatched_references) > 0:
+        logger.warning(
+            f"There are {unmatched_references} unmatched refrences in the"
+            + " contributor and question SE outputs"
+        )
+        logger.warning(f"unmatched references {unmatched_references}")
 
-    print()
-    duplicated_references = contributor_df[contributor_df.duplicated(keep=False)]
-    print(duplicated_references)
-    dupes = question_df.drop_duplicates(keep=False)
-    print(dupes.shape)
+    # Checking for duplicates in contributors
+    duplicated_contributors = contributor_df[
+        contributor_df.duplicated(subset=["period", "reference"], keep=False)
+    ]
 
-    question_df.groupby(["period", "reference", "question_code"]).apply(
-        lambda df: print(df) if df["survey_code"].count() > 1 else None
-    )
-    print("duplicated questions ^")
-    contributor_df.groupby(["period", "reference"]).apply(
-        lambda df: print(df) if df["survey_code"].count() > 1 else None
-    )
-    print("duplicated con ^")
+    if duplicated_contributors.shape[0] > 0:
+        logger.warning(
+            f"""There are {duplicated_contributors.shape[0]}
+            duplicated contributors in the SE outputs"""
+        )
+        logger.warning(duplicated_contributors)
 
-    print(len(question_df["reference"].unique()))
-    print(
-        "unique in con:",
-        len(contributor_df["reference"].unique()),
-        "shape of full con: (should match)",
-        contributor_df.shape,
-    )
-    print(
-        "unique in ques:",
-        len(question_df["reference"].unique()),
-        "shape of full question: (shouldn't match)",
-        question_df.shape,
-    )
-    print("Nulls or NaNs in each row of se_contributor:")
-    print(contributor_df.isnull().sum(axis=0))
+    # Duplicates are expected in questions file if reference has q40 and 49 on same form
+    # Hence why we also group by question code in this case
+    duplicated_questions = question_df[
+        question_df.duplicated(
+            subset=["period", "reference", "question_code"], keep=False
+        )
+    ]
 
-    print("Nulls or NaNs in each row of se_question:")
-    print(question_df.isnull().sum(axis=0))
+    if duplicated_questions.shape[0] > 0:
+        logger.warning(
+            f"There are {duplicated_questions.shape[0]} "
+            "duplicated contributors in the SE outputs"
+        )
+        logger.warning(duplicated_questions)
+
+    # Checking for nulls in contributors (expecting one null)
+    if contributor_df.isnull().sum(axis=0).any():
+        null_contributor_columns = contributor_df.isnull().sum(axis=0)
+        null_contributor_columns = null_contributor_columns[
+            null_contributor_columns > 0
+        ]
+        if not null_contributor_columns.empty:
+            logger.warning(
+                "Nulls or NaNs detected in se contributor "
+                "dataframe in the following columns:\n"
+                f"{null_contributor_columns}"
+            )
+            logger.warning(f"\n{null_contributor_columns}")
+
+    # Checking for nulls in contributors (expecting one null)
+    # Expect lot more nulls in imputation_marker as derived is left blank
+    if question_df.isnull().sum(axis=0).any():
+        null_question_columns = question_df.isnull().sum(axis=0)
+        null_question_columns = null_question_columns[null_question_columns > 0]
+        if not null_question_columns.empty:
+            logger.warning(
+                "Nulls or NaNs detected in se question "
+                "dataframe in the following columns:\n"
+                f"{null_question_columns}"
+            )
+            logger.warning(
+                "Null or NaNs detected in the following columns:\n"
+                f"{null_question_columns}"
+            )
