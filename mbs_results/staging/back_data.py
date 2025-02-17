@@ -96,12 +96,26 @@ def read_back_data(config: dict) -> pd.DataFrame:
         qv_df, cp_df, how="left", on=[config["period"], config["reference"]]
     )
 
-    back_data_all_cols = pd.merge(
-        qv_and_cp, finalsel, how="left", on=[config["period"], config["reference"]]
+    finalsel[config["period"]] = convert_column_to_datetime(finalsel[config["period"]])
+
+    qv_and_cp[config["period"]] = convert_column_to_datetime(
+        qv_and_cp[config["period"]]
     )
 
-    back_data_all_cols[config["period"]] = convert_column_to_datetime(
-        back_data_all_cols[config["period"]]
+    qv_and_cp_period = qv_and_cp[config["period"]].unique()
+    finalsel_period = finalsel[config["period"]].unique()
+
+    if qv_and_cp_period + pd.DateOffset(months=1) == finalsel_period:
+        qv_and_cp[config["period"]] = qv_and_cp[config["period"]] + pd.DateOffset(
+            months=1
+        )
+        warnings.warn(
+            "finalsel period is 1 month later than qv_and_cp period.",
+            "Treating as start of period processing.",
+        )
+
+    back_data_all_cols = pd.merge(
+        qv_and_cp, finalsel, how="right", on=[config["period"], config["reference"]]
     )
 
     return back_data_all_cols
