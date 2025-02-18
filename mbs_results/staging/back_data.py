@@ -105,17 +105,23 @@ def read_back_data(config: dict) -> pd.DataFrame:
     qv_and_cp_period = qv_and_cp[config["period"]].unique()
     finalsel_period = finalsel[config["period"]].unique()
 
+    join_type = "left"
+
     if qv_and_cp_period + pd.DateOffset(months=1) == finalsel_period:
+
         qv_and_cp[config["period"]] = qv_and_cp[config["period"]] + pd.DateOffset(
             months=1
         )
+
+        join_type = "right"
+
         warnings.warn(
             "finalsel period is 1 month later than qv_and_cp period.",
             "Treating as start of period processing.",
         )
 
     back_data_all_cols = pd.merge(
-        qv_and_cp, finalsel, how="right", on=[config["period"], config["reference"]]
+        qv_and_cp, finalsel, how=join_type, on=[config["period"], config["reference"]]
     )
 
     return back_data_all_cols
