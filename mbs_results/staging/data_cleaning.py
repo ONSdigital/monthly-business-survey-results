@@ -390,6 +390,7 @@ def create_imputation_class(
     df : pd.DataFrame
         Original dataframe with new_col.
     """
+
     df[new_col] = df[cell_no_col].astype(str).map(lambda x: x[:-1]).astype(int)
 
     return df
@@ -413,7 +414,6 @@ def convert_cell_number(df: pd.DataFrame, cell_number: str):
         in separate column)
 
     """
-    df["ni_gb_cell_number"] = df[cell_number]
     df[cell_number] = (
         df[cell_number]
         .astype(str)
