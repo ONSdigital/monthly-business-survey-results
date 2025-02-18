@@ -30,7 +30,7 @@ class TestPreProcessingEstimation:
             ]
         ]
 
-        expected.rename(columns={"expected_cell_no": "cell_no"},inplace=True)
+        expected.rename(columns={"expected_cell_no": "cell_no"}, inplace=True)
 
         original = derive_estimation_variables_data[
             [
