@@ -196,7 +196,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     )
 
     print("Staging Completed")
-
+    df["ni_gb_cell_number"] = df[config["cell_number"]]
     return df
 
 
