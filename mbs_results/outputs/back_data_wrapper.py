@@ -14,7 +14,7 @@ from mbs_results.utilities.inputs import load_config
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     filename="test.txt",
-    level=logging.DEBUG,
+    level=logging.WARNING,
     format="%(asctime)s %(levelname)s %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
@@ -81,6 +81,8 @@ def qa_selective_editing_outputs(config: dict):
     # Loading SE outputs, function to create SE outputs cannot return them, easier to
     # load them here
 
+    logger.info("QA checking selective editing outputs")
+
     file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
     snapshot_name = config["mbs_file_name"].split(".")[0]
     se_contributor_path = (
@@ -108,64 +110,43 @@ def qa_selective_editing_outputs(config: dict):
 
     if len(unmatched_references) > 0:
         logger.warning(
-            f"There are {unmatched_references} unmatched refrences in the"
-            + " contributor and question SE outputs"
+            f"There are {len(unmatched_references)} unmatched refrences in the"
+            " contributor and question SE outputs"
+            f"unmatched references {unmatched_references}"
         )
-        logger.warning(f"unmatched references {unmatched_references}")
 
-    # Checking for duplicates in contributors
-    duplicated_contributors = contributor_df[
-        contributor_df.duplicated(subset=["period", "reference"], keep=False)
-    ]
-
-    if duplicated_contributors.shape[0] > 0:
-        logger.warning(
-            f"""There are {duplicated_contributors.shape[0]}
-            duplicated contributors in the SE outputs"""
-        )
-        logger.warning(duplicated_contributors)
-
-    # Duplicates are expected in questions file if reference has q40 and 49 on same form
-    # Hence why we also group by question code in this case
-    duplicated_questions = question_df[
-        question_df.duplicated(
-            subset=["period", "reference", "question_code"], keep=False
-        )
-    ]
-
-    if duplicated_questions.shape[0] > 0:
-        logger.warning(
-            f"There are {duplicated_questions.shape[0]} "
-            "duplicated contributors in the SE outputs"
-        )
-        logger.warning(duplicated_questions)
-
-    # Checking for nulls in contributors (expecting one null)
-    if contributor_df.isnull().sum(axis=0).any():
-        null_contributor_columns = contributor_df.isnull().sum(axis=0)
-        null_contributor_columns = null_contributor_columns[
-            null_contributor_columns > 0
+    # Checking for duplicates
+    groupby_cols = {
+        "contributor": ["period", "reference"],
+        "question": ["period", "reference", "question_code"],
+    }
+    dataframe_dict = {"contributor": contributor_df, "question": question_df}
+    for dataframe_name in ["contributor", "question"]:
+        dataframe = dataframe_dict.get(dataframe_name)
+        duplicated = dataframe[
+            dataframe.duplicated(subset=groupby_cols[dataframe_name], keep=False)
         ]
-        if not null_contributor_columns.empty:
+        if duplicated.shape[0] > 0:
             logger.warning(
-                "Nulls or NaNs detected in se contributor "
-                "dataframe in the following columns:\n"
-                f"{null_contributor_columns}"
+                f"""There are {duplicated.shape[0]}
+            duplicated {dataframe_name} in the SE outputs"""
             )
-            logger.warning(f"\n{null_contributor_columns}")
+        else:
+            logger.info(
+                f"no duplicates in {dataframe_name} dataframe columns "
+                f"{groupby_cols[dataframe_name]}"
+            )
 
-    # Checking for nulls in contributors (expecting one null)
-    # Expect lot more nulls in imputation_marker as derived is left blank
-    if question_df.isnull().sum(axis=0).any():
-        null_question_columns = question_df.isnull().sum(axis=0)
-        null_question_columns = null_question_columns[null_question_columns > 0]
-        if not null_question_columns.empty:
-            logger.warning(
-                "Nulls or NaNs detected in se question "
-                "dataframe in the following columns:\n"
-                f"{null_question_columns}"
-            )
-            logger.warning(
-                "Null or NaNs detected in the following columns:\n"
-                f"{null_question_columns}"
-            )
+        if dataframe.isnull().sum(axis=0).any():
+            null_columns = dataframe.isnull().sum(axis=0)
+            null_columns = null_columns[null_columns > 0]
+            if not null_columns.empty:
+                logger.warning(
+                    f"Nulls or NaNs detected in se {dataframe_name} "
+                    "dataframe in the following columns:\n"
+                    f"{null_columns}"
+                )
+        else:
+            logger.info(f"No nulls or NaNs detected in {dataframe_name} dataframe")
+
+    logger.info("QA of SE outputs finished")
