@@ -1,3 +1,5 @@
+import logging
+
 from mbs_results.estimation.estimate import estimate
 from mbs_results.imputation.calculate_imputation_link import calculate_imputation_link
 from mbs_results.imputation.construction_matches import flag_construction_matches
@@ -5,6 +7,15 @@ from mbs_results.outlier_detection.detect_outlier import detect_outlier
 from mbs_results.outputs.produce_additional_outputs import produce_additional_outputs
 from mbs_results.staging.back_data import read_back_data
 from mbs_results.utilities.inputs import load_config
+from mbs_results.utilities.validation_checks import qa_selective_editing_outputs
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    filename="test.txt",
+    level=logging.WARNING,
+    format="%(asctime)s %(levelname)s %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 def back_data_wrapper():
@@ -21,7 +32,7 @@ def back_data_wrapper():
         match_col="flag_construction_matches",
         link_col="construction_link",
         predictive_variable=config["auxiliary"],
-        **config
+        **config,
     )
 
     # Running all of estimation and outliers
@@ -48,5 +59,7 @@ def back_data_wrapper():
 
     # Link to produce_additional_outputs
     produce_additional_outputs(config, back_data_output)
+
+    qa_selective_editing_outputs(config)
 
     return back_data_outliering
