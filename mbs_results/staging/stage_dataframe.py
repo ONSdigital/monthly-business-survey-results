@@ -196,7 +196,6 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     )
 
     print("Staging Completed")
-
     return df
 
 

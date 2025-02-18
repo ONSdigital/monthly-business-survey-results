@@ -23,18 +23,16 @@ class TestPreProcessingEstimation:
             [
                 "period",
                 "reference",
-                "cell_no",
+                "expected_cell_no",
                 "calibration_group",
                 "auxiliary",
                 "is_sampled",
-                "ni_gb_cell_number",
             ]
         ]
 
-        original = expected.drop(columns="cell_no").rename(
-            columns={"ni_gb_cell_number": "cell_no"}
-        )
-        original = original[
+        expected.rename(columns={"expected_cell_no": "cell_no"}, inplace=True)
+
+        original = derive_estimation_variables_data[
             [
                 "period",
                 "reference",
