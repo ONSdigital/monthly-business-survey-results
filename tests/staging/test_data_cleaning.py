@@ -121,8 +121,10 @@ def test_convert_cell_number(filepath):
 
     actual_output = convert_cell_number(df_in, "cell_number")
 
-    expected_output = df.drop(columns=["cell_number"]).rename(columns={"expected":"cell_number"})
-    
+    expected_output = df.drop(columns=["cell_number"]).rename(
+        columns={"expected": "cell_number"}
+    )
+
     assert_frame_equal(actual_output, expected_output)
 
 
