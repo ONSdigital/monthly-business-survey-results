@@ -4,6 +4,7 @@ import pandas as pd
 
 from mbs_results.imputation.ratio_of_means import ratio_of_means
 from mbs_results.staging.data_cleaning import (
+    convert_cell_number,
     create_imputation_class,
     load_manual_constructions,
 )
@@ -30,6 +31,10 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
     warnings.warn("Check what will happen if we try and apply RoM to q146 - Comments")
     # If this is an issue, we could filter to remove 146 and
     # add back after, or escape from Rom if q==146...
+    dataframe["ni_gb_cell_number"] = dataframe[config["cell_number"]]
+
+    dataframe = convert_cell_number(dataframe, config["cell_number"])
+
     pre_impute_dataframe = create_imputation_class(
         dataframe, config["cell_number"], "imputation_class"
     )

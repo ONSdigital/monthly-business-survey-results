@@ -100,7 +100,7 @@ def derive_estimation_variables(
 
     """
 
-    population_frame = convert_cell_number(population_frame, cell_number, cell_number)
+    population_frame = convert_cell_number(population_frame, cell_number)
 
     population_frame = population_frame.merge(
         calibration_group_map, on=[cell_number], how="left"

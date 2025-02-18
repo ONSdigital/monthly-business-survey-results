@@ -115,12 +115,14 @@ def test_create_imputation_class(filepath):
 
 def test_convert_cell_number(filepath):
 
-    expected_output = pd.read_csv(filepath / "test_convert_cell_number.csv")
+    df = pd.read_csv(filepath / "test_convert_cell_number.csv")
 
-    df_in = expected_output.drop(columns=["expected"])
+    df_in = df.drop(columns=["expected"])
 
-    actual_output = convert_cell_number(df_in, "cell_number", "expected")
+    actual_output = convert_cell_number(df_in, "cell_number")
 
+    expected_output = df.drop(columns=["cell_number"]).rename(columns={"expected":"cell_number"})
+    
     assert_frame_equal(actual_output, expected_output)
 
 
