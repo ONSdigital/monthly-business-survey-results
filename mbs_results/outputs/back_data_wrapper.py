@@ -110,7 +110,7 @@ def qa_selective_editing_outputs(config: dict):
 
     if len(unmatched_references) > 0:
         logger.warning(
-            f"There are {len(unmatched_references)} unmatched refrences in the"
+            f"There are {len(unmatched_references)} unmatched references in the"
             " contributor and question SE outputs"
             f"unmatched references {unmatched_references}"
         )
