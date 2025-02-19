@@ -27,6 +27,16 @@ def run_mbs_main():
     imputation_output = impute(staged_data, config)
     validate_imputation(imputation_output, config)
 
+    # p2 start of period, p1 data + period
+    if config["start_of_period_processing"]:
+        # we only care about p2 (doesnt exist yet)
+        config["current_period"] in df["period"].unique()
+        df = df.loc[df["period"] == config["current_period"] - 1]
+
+        period = period + 1
+        p0 + 1
+        p1 + 1 ****
+
     # Estimation Wrapper
     estimation_output = estimate(imputation_output, config)
     validate_estimation(estimation_output, config)

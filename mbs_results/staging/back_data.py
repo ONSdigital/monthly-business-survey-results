@@ -82,15 +82,19 @@ def read_back_data(config: dict) -> pd.DataFrame:
         Back data with all column as in source, period is converted to datetime.
     """
 
-    qv_df = pd.read_csv(config["back_data_qv_path"])
+    qv_df = pd.read_csv(config["back_data_qv_path"]).drop(
+        columns=["cell_no", "classification"], errors="ignore"
+    )
 
-    cp_df = pd.read_csv(config["back_data_cp_path"])
+    cp_df = pd.read_csv(config["back_data_cp_path"]).drop(
+        columns=["cell_no", "classification"], errors="ignore"
+    )
 
     finalsel = read_colon_separated_file(
         config["back_data_finalsel_path"], config["sample_column_names"]
     )
-    finalsel["formtype"] = "0" + finalsel["formtype"].astype(int).astype(str)
-    warnings.warn("Fix added to ensure formtype has leading 0")
+    # finalsel["formtype"] = "0" + finalsel["formtype"].astype(int).astype(str)
+    # warnings.warn("Fix added to ensure formtype has leading 0")
 
     qv_and_cp = pd.merge(
         qv_df, cp_df, how="left", on=[config["period"], config["reference"]]
@@ -116,8 +120,8 @@ def read_back_data(config: dict) -> pd.DataFrame:
         join_type = "right"
 
         warnings.warn(
-            "finalsel period is 1 month later than qv_and_cp period.",
-            "Treating as start of period processing.",
+            "finalsel period is 1 month later than qv_and_cp period. "
+            "Treating as start of period processing."
         )
 
     back_data_all_cols = pd.merge(
@@ -149,9 +153,9 @@ def append_back_data(staged_data: pd.DataFrame, config: dict) -> pd.DataFrame:
 
     # Remove derived, derived values not needed
     # Having derivedd values in back data will throw an error in imputation flags
-    if "derived" in back_data[config["imputation_marker_col"]].unique():
-        back_data = back_data[back_data[config["imputation_marker_col"]] != "derived"]
-        warnings.warn("Removing derived values from back")
+    # if "derived" in back_data[config["imputation_marker_col"]].unique():
+    #     back_data = back_data[back_data[config["imputation_marker_col"]] != "derived"]
+    #     warnings.warn("Removing derived values from back")
 
     common_cols = list(staged_data.columns.intersection(back_data.columns))
 
@@ -207,13 +211,17 @@ def read_and_process_back_data(config: dict) -> pd.DataFrame:
     back_data.insert(
         0,
         config["imputation_marker_col"],
-        back_data[type_col].astype(str).map(map_type),
-    )
-    idbr_to_spp_mapping = config["idbr_to_spp"]
-    back_data[config["form_id_spp"]] = back_data[config["form_id_idbr"]].map(
-        idbr_to_spp_mapping
+        back_data[type_col].fillna(-999).astype(int).astype(str).map(map_type),
     )
 
+    idbr_to_spp_mapping = config["idbr_to_spp"]
+    back_data[config["form_id_spp"]] = (
+        back_data[config["form_id_idbr"]].astype(str).map(idbr_to_spp_mapping)
+    )
     back_data["cellnumber"] = back_data["cell_no"]
+
+    if "derived" in back_data[config["imputation_marker_col"]].unique():
+        back_data = back_data[back_data[config["imputation_marker_col"]] != "derived"]
+        warnings.warn("Removing derived values from back")
 
     return back_data

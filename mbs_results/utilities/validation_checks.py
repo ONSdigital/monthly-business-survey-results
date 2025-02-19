@@ -325,6 +325,7 @@ def qa_selective_editing_outputs(config: dict):
                 f"""There are {duplicated.shape[0]}
             duplicated {dataframe_name} in the SE outputs"""
             )
+            logger.warning(duplicated)
         else:
             logger.info(
                 f"no duplicates in {dataframe_name} dataframe columns "

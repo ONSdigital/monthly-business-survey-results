@@ -65,8 +65,11 @@ def get_selective_editing_contributer_output(
         sic_domain_mapping_path, dtype={"sic_5_digit": str, "domain": str}
     )
     threshold_mapping = pd.read_csv(
-        threshold_filepath, dtype={"formtype": str, "domain": str, "threshold": float}
+        threshold_filepath, dtype={"formtype": int, "domain": str, "threshold": float}
     )
+    # Loading as int to remove leading 0, converting back to str to match main df
+    threshold_mapping["formtype"] = threshold_mapping["formtype"].astype(str)
+
     # Threshold file contains multiple duplicate rows
     threshold_mapping.drop_duplicates(inplace=True)
 
