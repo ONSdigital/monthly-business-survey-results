@@ -195,7 +195,7 @@ def test_filter_out_questions(mock_to_csv, filepath):
     )
 
     # testing if pandas export was called once
-    mock_to_csv.assert_called_once_with("export.csv", index=False)
+    mock_to_csv.assert_called_once_with("export.csv", index=False, date_format="%Y%m")
 
     assert_frame_equal(actual_output, expected_output)
 

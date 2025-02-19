@@ -47,3 +47,36 @@ def read_colon_separated_file(
         df[period] = int(date_string[0])
 
     return df
+
+
+def append_filter_out_questions(
+    df: pd.DataFrame, filter_out_questions_path: str
+) -> pd.DataFrame:
+    """Appends data with question codes which were ommitted from the processing
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Main dataframe to append.
+    filter_out_questions_path : str
+        File path with filtered out questions.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Main dataframe with filtered out questions.
+
+    """
+    try:
+        filter_out_questions_df = pd.read_csv(filter_out_questions_path)
+
+    except FileNotFoundError:
+        print(
+            """File not found. Please check filter_out_questions_path path,
+         filter_out_questions_df is being created by filter_out_questions()
+         in mbs_results/staging/data_cleaning.py"""
+        )
+
+    df = pd.concat([df, filter_out_questions_df])
+
+    return df

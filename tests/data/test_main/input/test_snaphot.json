@@ -10,5 +10,7 @@
     {"reference":1,"period":202201,"survey":9,"questioncode":46,"response":9999.0,"adjustedresponse":9999.0,"instance":null,"createdby":null,"createddate":null,"lastupdatedby":null,"lastupdateddate":null},
     {"reference":1,"period":202206,"survey":9,"questioncode":46,"response":9999.0,"adjustedresponse":9999.0,"instance":null,"createdby":null,"createddate":null,"lastupdatedby":null,"lastupdateddate":null},
     {"reference":1,"period":202206,"survey":9,"questioncode":40,"response":8888.0,"adjustedresponse":8888.0,"instance":null,"createdby":null,"createddate":null,"lastupdatedby":null,"lastupdateddate":null},
-    {"reference":1,"period":202206,"survey":9,"questioncode":49,"response":9999.0,"adjustedresponse":9999.0,"instance":null,"createdby":null,"createddate":null,"lastupdatedby":null,"lastupdateddate":null}
+    {"reference":1,"period":202206,"survey":9,"questioncode":49,"response":9999.0,"adjustedresponse":9999.0,"instance":null,"createdby":null,"createddate":null,"lastupdatedby":null,"lastupdateddate":null},
+    {"reference":1,"period":202206,"survey":9,"questioncode":146,"response":9999.0,"adjustedresponse":9999.0,"instance":null,"createdby":null,"createddate":null,"lastupdatedby":null,"lastupdateddate":null}
+
     ]}
