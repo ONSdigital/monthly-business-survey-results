@@ -51,7 +51,7 @@ def create_turnover_output(
     # The error_res_code column exists in the turnover tool input but is ignored, and
     # its purpose is not known. Adding as a constant zero column to prevent code used
     # for producing tool from erroring.
-    turnover_df["error_res_code"] = 0
+    # turnover_df["error_res_code"] = 0
 
     turnover_df = turnover_df[
         [
