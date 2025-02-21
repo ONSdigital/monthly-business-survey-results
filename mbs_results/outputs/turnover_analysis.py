@@ -55,7 +55,7 @@ def create_turnover_output(
 
     # Check if referencename in data
     if 'referencename' in turnover_df.columns:
-    
+
         turnover_df = turnover_df[
             [
                 "frosic2007",
@@ -74,7 +74,7 @@ def create_turnover_output(
             ]
         ]
     elif 'referencename' not in turnover_df.columns:
-    
+
         turnover_df["referencename"] = ""
 
         turnover_df = turnover_df[
