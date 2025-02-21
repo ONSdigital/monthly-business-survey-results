@@ -52,49 +52,48 @@ def create_turnover_output(
     # its purpose is not known. Adding as a constant zero column to prevent code used
     # for producing tool from erroring.
     turnover_df["error_res_code"] = 0
-    
+
     # Check if referencename in data
     if 'referencename' in turnover_df.columns:
-        
-        turnover_df = turnover_df[
-        [
-            "frosic2007",
-            "cell_no",
-            "reference",
-            "referencename",
-            "adjustedresponse",
-            "type",
-            "curr_grossed_value",
-            "outlier_weight",
-            "status",
-            "error_res_code",
-            "frotover",
-            "froempment",
-            "response",
-        ]
-    ]
-    elif 'referencename' not in turnover_df.columns:
-        
-        turnover_df["referencename"] = ""
-        
-        turnover_df = turnover_df[
-        [
-            "frosic2007",
-            "cell_no",
-            "reference",
-            "referencename",
-            "adjustedresponse",
-            "type",
-            "curr_grossed_value",
-            "outlier_weight",
-            "status",
-            "error_res_code",
-            "frotover",
-            "froempment",
-            "response",
-        ]
-    ]
-        
     
+        turnover_df = turnover_df[
+            [
+                "frosic2007",
+                "cell_no",
+                "reference",
+                "referencename",
+                "adjustedresponse",
+                "type",
+                "curr_grossed_value",
+                "outlier_weight",
+                "status",
+                "error_res_code",
+                "frotover",
+                "froempment",
+                "response",
+            ]
+        ]
+    elif 'referencename' not in turnover_df.columns:
+    
+        turnover_df["referencename"] = ""
+
+        turnover_df = turnover_df[
+            [
+                "frosic2007",
+                "cell_no",
+                "reference",
+                "referencename",
+                "adjustedresponse",
+                "type",
+                "curr_grossed_value",
+                "outlier_weight",
+                "status",
+                "error_res_code",
+                "frotover",
+                "froempment",
+                "response",
+            ]
+        ]
+
     # output turnover analysis dataframe
     return turnover_df.reset_index(drop=True)
