@@ -3,7 +3,7 @@ import pandas as pd
 from mbs_results.staging.merge_domain import merge_domain
 
 
-def get_selective_editing_contributer_output(
+def get_selective_editing_contributor_output(
     additional_outputs_df: pd.DataFrame,
     sic_domain_mapping_path: str,
     threshold_filepath: str,
@@ -44,7 +44,7 @@ def get_selective_editing_contributer_output(
 
     Examples
     --------
-    >> get_selective_editing_contributer_output(
+    >> get_selective_editing_contributor_output(
     >>        input_filepath=input_filepath,
     >>        domain_filepath=domain_filepath,
     >>        threshold_filepath=threshold_filepath,
