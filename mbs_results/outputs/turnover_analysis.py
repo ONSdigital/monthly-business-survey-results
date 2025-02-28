@@ -54,7 +54,7 @@ def create_turnover_output(
     turnover_df["error_res_code"] = 0
 
     # Check if referencename in data
-    if 'referencename' in turnover_df.columns:
+    if "referencename" in turnover_df.columns:
 
         turnover_df = turnover_df[
             [
@@ -73,7 +73,7 @@ def create_turnover_output(
                 "response",
             ]
         ]
-    elif 'referencename' not in turnover_df.columns:
+    elif "referencename" not in turnover_df.columns:
 
         turnover_df["referencename"] = ""
 
