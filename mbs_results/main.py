@@ -20,7 +20,7 @@ from mbs_results.utilities.validation_checks import (
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename="test.txt",
+    filename="main_logger.txt",
     level=logging.DEBUG,
     format="%(asctime)s %(levelname)s %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
@@ -28,7 +28,7 @@ logging.basicConfig(
 
 
 def run_mbs_main():
-    config = load_config("./mbs_results/config.json")
+    config = load_config()
     validate_config(config)
 
     staged_data = stage_dataframe(config)
@@ -39,8 +39,8 @@ def run_mbs_main():
     validate_imputation(imputation_output, config)
 
     # p2 start of period, p1 data + period
-    if config["start_of_period_processing"]:
-
+    if config["start_of_period_processing"] == "True":
+        print(config["start_of_period_processing"])
         imputation_output = start_of_period_staging(imputation_output, config)
 
     # Estimation Wrapper
@@ -54,7 +54,9 @@ def run_mbs_main():
     additional_outputs_df = get_additional_outputs_df(estimation_output, outlier_output)
     produce_additional_outputs(config, additional_outputs_df)
 
-    qa_selective_editing_outputs(config)
+    if config["start_of_period_processing"] == "True":
+        # Only run QA validation if dealing with start of period processing
+        qa_selective_editing_outputs(config)
 
 
 if __name__ == "__main__":
