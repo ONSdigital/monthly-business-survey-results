@@ -171,13 +171,15 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
 
     df = append_back_data(df, config)
 
+    snapshot_name = config["mbs_file_name"].split(".")[0]
+
     df = filter_out_questions(
         df=df,
         column=config["question_no"],
         questions_to_filter=config["filter_out_questions"],
         save_full_path=config["output_path"]
-        + config["mbs_file_name"]
-        + "filter_out_questions.csv",
+        + snapshot_name
+        + "_filter_out_questions.csv",
     )
 
     df = drop_derived_questions(
