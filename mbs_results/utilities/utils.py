@@ -64,11 +64,14 @@ def append_filter_out_questions(
     Returns
     -------
     df : pd.DataFrame
-        Main dataframe with filtered out questions.
+       "Main dataframe with filtered-out questions. If the file is not found or empty,
+        logs a FileNotFoundError error and returns original dataframe"
 
     """
     try:
         filter_out_questions_df = pd.read_csv(filter_out_questions_path)
+
+        df = pd.concat([df, filter_out_questions_df])
 
     except FileNotFoundError:
         print(
@@ -76,7 +79,5 @@ def append_filter_out_questions(
          filter_out_questions_df is being created by filter_out_questions()
          in mbs_results/staging/data_cleaning.py"""
         )
-
-    df = pd.concat([df, filter_out_questions_df])
 
     return df
