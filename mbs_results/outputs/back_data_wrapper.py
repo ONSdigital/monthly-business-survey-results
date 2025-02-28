@@ -8,6 +8,7 @@ from mbs_results.outputs.produce_additional_outputs import produce_additional_ou
 from mbs_results.staging.back_data import read_and_process_back_data
 from mbs_results.staging.data_cleaning import create_imputation_class
 from mbs_results.staging.stage_dataframe import drop_derived_questions
+from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.inputs import load_config
 from mbs_results.utilities.validation_checks import qa_selective_editing_outputs
 
@@ -43,35 +44,26 @@ def back_data_wrapper():
     )
     print(back_data.index, back_data.shape)
 
-    # post_constrain = constrain(
-    #     df=back_data,
-    #     period=config["period"],
-    #     reference=config["reference"],
-    #     target=config["target"],
-    #     question_no=config["question_no"],
-    #     spp_form_id=config["form_id_spp"],
-    # )
+    back_data = constrain(
+        df=back_data,
+        period=config["period"],
+        reference=config["reference"],
+        target=config["target"],
+        question_no=config["question_no"],
+        spp_form_id=config["form_id_spp"],
+    )
 
-    # post_constrain.to_csv("constrained.csv")
+    back_data["imputed_and_derived_flag"] = back_data.apply(
+        lambda row: (
+            "d"
+            if "sum" in str(row["constrain_marker"]).lower()
+            else row[f"imputation_flags_{config['target']}"]
+        ),
+        axis=1,
+    )
+    # check what columns are needed from finalsel and which are blank
 
-    # duplicate_references = post_constrain[
-    #     post_constrain.duplicated(
-    #         subset=["reference", "period", config["question_no"]], keep=False
-    #     )
-    # ]
-    # unique_duplicate_references = duplicate_references["reference"].unique()
-
-    # post_constrain = post_constrain[
-    #     (
-    #         (post_constrain["reference"].isin(unique_duplicate_references)) &
-    #         (post_constrain["imputation_flags_adjustedresponse"].isna()) &
-    #         (post_constrain[config["question_no"]] == 40)
-    #     )
-    # ]
-    # ghjfg
-    # print(post_constrain)
-    # post_constrain.to_csv("dropped.csv")
-
+    # NOT DROP DERIVED Qs - Will p0 data contain derived questions?
     spp_to_idbr_mapping = {value: key for key, value in config["idbr_to_spp"].items()}
     back_data.loc[back_data["formtype"].isnull(), "formtype"] = back_data.loc[
         back_data["formtype"].isnull(), "form_type_spp"
@@ -105,6 +97,12 @@ def back_data_wrapper():
     back_data_estimation = estimate(back_data_imputation, config)
     print(back_data_estimation.index)
     back_data_estimation.to_csv("estimation.csv")
+    # MANUAL FIX FOR BACKDATA MISMATCH FORMTYPE ##
+    back_data_estimation = back_data_estimation[
+        back_data_estimation["reference"] != 18331572400
+    ]
+    # MANUAL FIX FOR BACKDATA MISMATCH FORMTYPE ##
+
     back_data_outliering = detect_outlier(back_data_estimation, config)
     print(back_data_outliering.index)
     back_data_outliering.to_csv("outlier.csv")
