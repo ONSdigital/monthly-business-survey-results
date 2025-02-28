@@ -293,14 +293,12 @@ def qa_selective_editing_outputs(config: dict):
     logger.info("QA checking selective editing outputs")
 
     file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
-    snapshot_name = config["mbs_file_name"].split(".")[0]
+    period = config["period_selected"]
     se_contributor_path = (
-        config["output_path"]
-        + f"selective_editing_contributor_v{file_version_mbs}_{snapshot_name}.csv"
+        config["output_path"] + f"secontributors009_{period}_v{file_version_mbs}.csv"
     )
     se_question_path = (
-        config["output_path"]
-        + f"selective_editing_question_v{file_version_mbs}_{snapshot_name}.csv"
+        config["output_path"] + f"sequestions009_{period}_v{file_version_mbs}.csv"
     )
 
     contributor_df = pd.read_csv(se_contributor_path).rename(
@@ -340,6 +338,7 @@ def qa_selective_editing_outputs(config: dict):
                 f"""There are {duplicated.shape[0]}
             duplicated {dataframe_name} in the SE outputs"""
             )
+            logger.warning(duplicated)
         else:
             logger.info(
                 f"no duplicates in {dataframe_name} dataframe columns "

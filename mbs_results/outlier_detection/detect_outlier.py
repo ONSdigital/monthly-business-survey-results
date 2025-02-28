@@ -7,22 +7,25 @@ from mbs_results.utilities.constrains import calculate_derived_outlier_weights
 def join_l_values(df, l_values_path, classification_values_path, config):
     """Read l values, classifications and drop duplicates and period"""
 
-    l_values = pd.read_csv(l_values_path)
-    l_values["classification"] = l_values["classification"].astype(str)
-    l_values["question_no"] = l_values["question_no"].astype("int64")
+    l_values = pd.read_csv(
+        l_values_path, dtype={"question_no": "int64", "classification": "str"}
+    )
+    # l_values["classification"] = l_values["classification"].astype(str)
+    # l_values["question_no"] = l_values["question_no"].astype("int64")
 
     # l_values = l_values.drop_duplicates(['question_no','classification'])
 
     # l_values = l_values.drop(columns=["period"])
 
     # Merge on classification SIC map (merge on SIC to get classsificaion on df -> )
-    classification_values = pd.read_csv(classification_values_path)
-    classification_values["sic_5_digit"] = classification_values["sic_5_digit"].astype(
-        str
-    )
-    classification_values["classification"] = classification_values[
-        "classification"
-    ].astype(str)
+    classification_values = pd.read_csv(classification_values_path, dtype=str)
+
+    # classification_values["sic_5_digit"] = classification_values["sic_5_digit"].astype(
+    #     str
+    # )
+    # classification_values["classification"] = classification_values[
+    #     "classification"
+    # ].astype(str)
 
     df = pd.merge(
         df,
