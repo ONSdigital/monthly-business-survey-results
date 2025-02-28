@@ -1,3 +1,29 @@
 {
-    "key": "value"
-}
+    "config_paths": {
+        "platform": "local",
+        "s3_bucket": "onscdp-dev-data01-5320d6ca",
+        "local_drive_directory": "",        
+        "parent_path": "mbs_results_files/",        
+        "input_path": "in/",
+        "output_path": "out/",
+        "mapping_path": "mapping_files/",
+        "folder_path": "release/"
+    },
+
+    "file_paths": {
+        "calibration_group_map_path": "cell_no_calibration_group_mapping.csv",
+        "classification_values_path": "classification_sic_mapping.csv",
+        "folder_path": "release/",
+        "l_values_path": "classification_question_number_l_value_mapping.csv",
+        "manual_constructions_path": "manual_constructions.csv",
+        "mbs_file_name": "snapshot_qv_cp_202303_15.json",
+        "output_path": "out/",
+        "population_path": "universe009_*",
+        "sample_path": "finalsel009_*",
+        "back_data_qv_path": "periodzero_009_202112.csv",
+        "back_data_cp_path": "cp_009_202112.csv",
+        "back_data_finalsel_path": "finalsel009_202112",
+        "sic_domain_mapping_path": "sic_domain_mapping.csv",
+        "threshold_filepath": "form_domain_threshold_mapping.csv"
+    }
+  }

@@ -4,90 +4,87 @@ from pathlib import Path
 from typing import Dict, Any
 
 
-def load_config_file(config_path: str = 'user_config.json') -> Dict[str, Any]:
+def load_config_file(config_file: str = 'user_config.json') -> Dict[str, Any]:
     """Function loads a JSON file and returns its content as a dictionary.
 
     Args:
-        config_path (str): Path to the JSON file.
+        config_file (str): Path to the JSON file.
 
     Returns:
         Dict[str, Any]: Parsed JSON content as a dictionary.
     """  
-    with open(config_path, 'r') as file:
+    with open(config_file, 'r') as file:
         data = json.load(file)
     return data
 
 
-def construct_path(config: Dict[str, str], file_key: str, file_paths: Dict[str, str]) -> str:
+def construct_path(config_paths: Dict[str, str], file_paths: Dict[str, str], root_dir: str) -> str:
     """
-    Constructs the full path for a given file based on the provided config dictionary.
-
-    This function checks the config to determine where to concatenate the file path.
-    For files under specific subdirectories like `in/`, `out/`, and `mapping_files/`,
-    the correct parent directory from the config is used.
-
+    Constructs the full path for each file using the provided configuration.
+    
+    This function constructs the full path for each file by joining the root directory
+    with the relative path for the file. It also ensures that the directories for those
+    paths exist by calling the `ensure_directory_exists` function.
+    
     Args:
         config (Dict[str, str]): A dictionary containing configuration keys and their
-                                 values, such as the 's3_bucket', 'parent_directory', and subdirectories.
-                                 
-        file_key (str): The key in the file_paths dictionary corresponding to the relative
-                        file path.
-                        
-        file_paths (Dict[str, str]): The dictionary containing file paths as relative paths.
-
+                                    corresponding file paths.
+                                    
+        file_paths (Dict[str, str]): A dictionary containing file keys and their relative paths.
+        
+        root_dir (str): The root directory where the parent directory will be created.
+        
     Returns:
-        str: The full file path constructed by joining the parent directory and the 
-             relative path.
-             
-    Raises:
-        KeyError: If the configuration dictionary does not contain the 's3_bucket' or
-                  'parent_directory' key
+        Dict[str, str]: A dictionary with the same keys as the input, but with the
+                        full file paths constructed by joining the base directory
+                        with the relative paths
     """
+    # Create the directory and subdirectory paths
+    directory_paths = {}
+    directory_paths['parent_path'] = Path(root_dir) / Path(config_paths.get("parent_path", None))
+    directory_paths['input_path'] = directory_paths['parent_path'] / Path(config_paths.get("input_path", None))
+    directory_paths['output_path'] = directory_paths['parent_path'] / Path(config_paths.get("output_path", None))
+    directory_paths['mapping_path'] = directory_paths['parent_path'] / Path(config_paths.get("mapping_path", None))
+    directory_paths['folder_path'] = directory_paths['parent_path'] / Path(config_paths.get("folder_path", None))
+    
+    #Check if the directory_paths exist and create them
+    for key, value in directory_paths.items():
+        ensure_directory_exists(value)
+    
     # Mapping of the specific file paths to their corresponding config subdirectories
     path_mapping = {
-        "population_path": "input_directory",
-        "sample_path": "input_directory",
-        "output_path": "output_directory",
-        "back_data_qv_path": "input_directory",
-        "back_data_cp_path": "mapping_files_directory",
-        "back_data_finalsel_path": "parent_directory",
-        "sic_domain_mapping_path": "mapping_files_directory",
-        "threshold_filepath": "mapping_files_directory",
-        "calibration_group_map_path": "mapping_files_directory",
-        "classification_values_path": "mapping_files_directory",
-        "l_values_path": "mapping_files_directory",
-        "manual_constructions_path": "parent_directory",
-        "mbs_file_name": "parent_directory",
+        "population_path": "input_path",
+        "sample_path": "input_path",
+        "back_data_qv_path": "input_path",
+        "back_data_cp_path": "mapping_path",
+        "back_data_finalsel_path": "parent_path",
+        "sic_domain_mapping_path": "mapping_path",
+        "threshold_filepath": "mapping_path",
+        "calibration_group_map_path": "mapping_path",
+        "classification_values_path": "mapping_path",
+        "l_values_path": "mapping_path",
+        "manual_constructions_path": "parent_path",
+        "mbs_file_name": "parent_path",
+        "folder_path": "parent_path",
+        "output_path": "parent_path",
     }
-    
-    try:
-        # Get the parent directory based on the mapping
-        root_dir = config.get("s3_bucket", None)  # Get the root directory
-        if root_dir is not None:
-            root_dir = f"s3://{root_dir}"
-        else:
-            root_dir = config["parent_directory"]        
+    config = {}
+    for key, value in file_paths.items():
+        relative_path_map = path_mapping.get(key, None)
+        print(f"\nkey: {key} | relative_path_map: {relative_path_map}")
+        relative_path = ""
+        if relative_path_map is not None:
+            relative_path = directory_paths.get(relative_path_map, None)
         
-        subdir_key = path_mapping.get(file_key, None)
-        if subdir_key is None:
-            parent_dir = config["parent_directory"]
-        else:
-            parent_dir = config["parent_directory"]
-            parent_dir = Path(parent_dir) / subdir_key  # Get the parent directory for the key
-    except KeyError:
-        # raise KeyError(f"Configuration does not contain key '{file_key}' or corresponding subdirectory mapping.")
-        pass
+        print(f"relative_path: {relative_path}")
 
-    # Get the relative path from the file_paths
-    relative_path = file_paths[file_key]
-
-    # Use pathlib to join paths properly (handles different OS path conventions)
-    full_path = str(Path(root_dir) /     Path(parent_dir) / relative_path)  # Using Path to join paths
-    print("construct_path full_path:", full_path)
-    return str(full_path)
+        # Use pathlib to join paths properly (handles different OS path conventions)
+        config[key] = Path(relative_path) / Path(value)  # Using Path to join paths
+        print("construct_path full_path:", config[key])
+    return config
 
 
-def ensure_directory_exists(directory_path: str) -> None:
+def ensure_directory_exists(directory_path: Path) -> None:
     """
     Ensures that the specified directory exists. If the directory does not exist, it creates it.
 
@@ -103,15 +100,18 @@ def ensure_directory_exists(directory_path: str) -> None:
         None: This function does not return any value. It only prints messages about
               the directory's status.
     """
-    path = Path(directory_path)
-    if not path.exists():
-        print(f"Directory does not exist: {directory_path}. Creating now...")
-        path.mkdir(parents=True, exist_ok=True)
+    #full_path = Path(full_path)
+    print(f"directory_path: {directory_path}")
+    
+    if os.path.isdir(directory_path):
+        print(f"Directory {directory_path} exists")
     else:
-        print(f"Directory already exists: {directory_path}")
+        print("Doesn't exists")
+        os.mkdir(directory_path)
+        print(f"Created parent directory: {directory_path}")
 
 
-def get_file_paths(config: Dict[str, str], file_paths: Dict[str, str]) -> Dict[str, str]:
+def get_file_paths(config_data: Dict[str, str]) -> Dict[str, str]:
     """
     Connects all the file paths using the provided configuration.
 
@@ -129,36 +129,51 @@ def get_file_paths(config: Dict[str, str], file_paths: Dict[str, str]) -> Dict[s
                         full file paths constructed by joining the base directory
                         with the relative paths.
     """
-    # Define the full file paths
-    full_file_paths = {}
+    # Extract the 'config' and 'file_paths' dictionaries from the loaded JSON data
+    config_paths = config_data['config_paths']
+    file_paths = config_data['file_paths']
+       
+    try:
+        # Get the parent directory based on the mapping
+        root_dir = config_paths.get("s3_bucket", None)   
+        # Check if root_dir is None or an empty string
+        if root_dir not in (None, ""):
+            root_dir = f"s3://{root_dir}"
+            # Connect to s3 bucket in AWS cloud
+        else:
+            root_dir = config_paths.get("local_drive_directory", None)
+            if root_dir is None:
+                raise KeyError("Configuration does not contain 's3_bucket' or 'local_drive_directory' key.")
+            # Concatenate the root directory with the parent directory
 
-    for key, relative_path in file_paths.items():
-        full_path = construct_path(config, key, file_paths)  # Construct the full path for each file
-        full_file_paths[key] = full_path
+    except KeyError:
+        raise KeyError("Configuration does not contain 's3_bucket' or 'local_drive_directory' key.")
 
-        # Ensure all directories exist before proceeding
-        directory = Path(full_path).parent  # Get the parent directory
-        ensure_directory_exists(directory)
+    config = construct_path(config_paths, file_paths, root_dir)  # Construct the full path for each file
 
-    return full_file_paths
+    return config
+
+
+def main():
+    # Load the config file
+    config_file = Path('mbs_results/user_config.json')
+    config_data = load_config_file(config_file=config_file)
+
+    # Get all file paths and check directories
+    config = get_file_paths(config_data)
+        
+    # Load the constants file
+    config_constant_file = Path('mbs_results/config/constants.json')
+    config_constant_data = load_config_file(config_file=config_constant_file)
+    
+    # Update the config dictionary with the constants
+    config.update(config_constant_data)
+   
+    # Print all the dynamically constructed paths
+    for key, path in config.items():
+        print(f"key: {key} | value: {path}")
 
 
 # Example of how to use these functions
 if __name__ == "__main__":
-    # Load the config file
-    config_file = 'user_config.json'
-    config_data = load_config_file(config_path=config_file)
-
-    # Extract the 'config' and 'file_paths' dictionaries from the loaded JSON data
-    config = config_data['config']
-    file_paths = config_data['file_paths']
-
-    # Ensure the root directory exists (e.g., /release/)
-    ensure_directory_exists(config['parent_directory'])
-
-    # Get all file paths and check directories
-    full_file_paths = get_file_paths(config, file_paths)
-
-    # Print all the dynamically constructed paths
-    for key, path in full_file_paths.items():
-        print(f"Full path for {key}: {path}")
+    main()

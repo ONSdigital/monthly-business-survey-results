@@ -1,0 +1,92 @@
+{
+    "auxiliary": "frotover",
+    "calibration_factor": "calibration_factor",
+    "cell_number": "cell_no",
+    "design_weight": "design_weight",
+    "status": "statusencoded",
+    "form_id_idbr": "formtype",
+    "group": "calibration_group",
+    "calibration_group": "calibration_group",
+    "period": "period",
+    "question_no": "questioncode",
+    "reference": "reference",
+    "region": "region",
+    "sampled": "is_sampled",
+    "census": "is_census",
+    "state": "frozen",
+    "strata": "cell_no",
+    "target": "adjustedresponse",
+    "form_id_spp": "form_type_spp",
+
+    "master_column_type_dict" : {
+        "reference": "int",
+        "period": "date",
+        "response": "str",
+        "questioncode": "int",
+        "adjustedresponse": "float",
+        "frozensic": "str",
+        "frozenemployees": "int",
+        "frozenturnover": "float",
+        "cellnumber": "int",
+        "formtype": "str",
+        "status": "str",
+        "statusencoded": "int",
+        "frosic2007": "str",
+        "froempment": "int",
+        "frotover": "float",
+        "cell_no": "int"},
+
+    "contributors_keep_cols": [
+        "period",
+        "reference",
+        "status",
+        "statusencoded"
+    ],
+
+    "responses_keep_cols": [
+        "adjustedresponse",
+        "period",
+        "questioncode",
+        "reference",
+        "response"
+    ],
+
+    "finalsel_keep_cols": [
+        "formtype",
+        "cell_no",
+        "froempment",
+        "frosic2007",
+        "frotover",
+        "period",
+        "reference"
+    ],
+
+    "temporarily_remove_cols": [],
+    "non_sampled_strata": [
+        "5141", "5142", "5143",
+        "5371", "5372", "5373",
+        "5661", "5662", "5663"
+    ],
+    "population_column_names": [
+        "reference", "checkletter", "inqcode", "entref", "wowentref", "frosic2003",
+        "rusic2003", "frosic2007", "rusic2007", "froempees", "employees",
+        "froempment", "employment", "froFTEempt", "FTEempt", "frotover",
+        "turnover", "entrepmkr", "legalstatus", "inqstop", "entzonemkr", "region",
+        "live_lu", "live_vat", "live_paye", "immfoc", "ultfoc", "cell_no",
+        "selmkr", "inclexcl"
+    ],
+    "population_keep_columns": [
+        "reference", "region", "frotover", "cell_no", "period", "frosic2007"
+    ],
+
+    "sample_column_names": [
+        "reference","checkletter","frosic2003","rusic2003","frosic2007",
+        "rusic2007","froempees","employees","froempment","employment","froFTEempt",
+        "FTEempt","frotover","turnover","entref","wowentref","vatref","payeref",
+        "crn","live_lu","live_vat","live_paye","legalstatus","entrepmkr","region",
+        "birthdate","entname1","entname2","entname3","runame1","runame2","runame3",
+        "ruaddr1","ruaddr2","ruaddr3","ruaddr4","ruaddr5","rupostcode","tradstyle1",
+        "tradstyle2","tradstyle3","contact","telephone","fax","seltype","inclexcl",
+        "cell_no","formtype","cso_tel","currency"
+    ]
+}
