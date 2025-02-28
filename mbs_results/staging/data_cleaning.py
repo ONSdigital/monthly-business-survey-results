@@ -487,7 +487,7 @@ def filter_out_questions(
 
     keep_questions_df = df[~df[column].isin(questions_to_filter)]
 
-    filter_out_questions_df.to_csv(save_full_path, index=False)
+    filter_out_questions_df.to_csv(save_full_path, index=False, date_format="%Y%m")
 
     keep_questions_df.reset_index(drop=True, inplace=True)
 

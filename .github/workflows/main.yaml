@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cml_version: ["3.8", "3.9", "3.10","3.11"]
+        cml_version: ["3.9", "3.10","3.11","3.12"]
     steps:
     - name: checkout ml-runtimes  #https://github.com/cloudera/ml-runtimes
       uses: actions/checkout@master
