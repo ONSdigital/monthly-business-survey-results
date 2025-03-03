@@ -13,7 +13,7 @@ def create_turnover_output(
     additional_outputs_df : pd.DataFrame
         estimation input dataframe containing relevant columns for turnover tool
     current_period : int
-        Period to output results for in the format YYYYMM
+        Period of output results in the format YYYYMM
     **config: Dict
           main pipeline configuration. Can be used to input the entire config dictionary
 
