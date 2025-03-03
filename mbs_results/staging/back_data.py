@@ -2,6 +2,7 @@ import warnings
 
 import pandas as pd
 
+from mbs_results.staging.data_cleaning import enforce_datatypes
 from mbs_results.utilities.utils import (
     convert_column_to_datetime,
     read_colon_separated_file,
@@ -93,6 +94,10 @@ def read_back_data(config: dict) -> pd.DataFrame:
     finalsel = read_colon_separated_file(
         config["back_data_finalsel_path"], config["sample_column_names"]
     )
+    finalsel = finalsel[config["finalsel_keep_cols"]]
+    finalsel = enforce_datatypes(
+        finalsel, keep_columns=config["finalsel_keep_cols"], **config
+    )
     # finalsel["formtype"] = "0" + finalsel["formtype"].astype(int).astype(str)
     # warnings.warn("Fix added to ensure formtype has leading 0")
 
@@ -118,6 +123,9 @@ def read_back_data(config: dict) -> pd.DataFrame:
         )
 
         join_type = "right"
+        # Nans in question number column means the type is converted from int to float
+        # This is a limitation with pandas, nullable int type is being devloped,
+        # Need to see how SPP / methodology want us to deal with missing responses
 
         warnings.warn(
             "finalsel period is 1 month later than qv_and_cp period. "

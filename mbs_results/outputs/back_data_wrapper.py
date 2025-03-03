@@ -62,6 +62,7 @@ def back_data_wrapper():
         axis=1,
     )
     # check what columns are needed from finalsel and which are blank
+    back_data.to_csv(config["output_path"] + "post_constained.csv")
 
     # NOT DROP DERIVED Qs - Will p0 data contain derived questions?
     spp_to_idbr_mapping = {value: key for key, value in config["idbr_to_spp"].items()}
@@ -93,10 +94,9 @@ def back_data_wrapper():
     )
 
     # Running all of estimation and outliers
-    back_data_imputation.drop(columns="region", inplace=True)
     back_data_estimation = estimate(back_data_imputation, config)
     print(back_data_estimation.index)
-    back_data_estimation.to_csv("estimation.csv")
+    back_data_estimation.to_csv(config["output_path"] + "estimation.csv")
     # MANUAL FIX FOR BACKDATA MISMATCH FORMTYPE ##
     back_data_estimation = back_data_estimation[
         back_data_estimation["reference"] != 18331572400
@@ -129,10 +129,14 @@ def back_data_wrapper():
             "froempment",
             "cell_no",
             "imputation_class",
-            "imputation_flags_adjustedresponse",
+            "imputed_and_derived_flag",
             "construction_link",
         ]
     ]
+    additional_outputs_df.rename(
+        columns={"imputed_and_derived_flag": "imputation_flags_adjustedresponse"},
+        inplace=True,
+    )
 
     additional_outputs_df = additional_outputs_df.merge(
         back_data_outliering[["reference", "period", "questioncode", "outlier_weight"]],
@@ -144,7 +148,6 @@ def back_data_wrapper():
 
     additional_outputs_df.drop_duplicates(inplace=True)
 
-    additional_outputs_df.to_csv("output_df.csv")
     produce_additional_outputs(config, additional_outputs_df)
 
     qa_selective_editing_outputs(config)
