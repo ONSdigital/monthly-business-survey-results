@@ -13,7 +13,7 @@ def create_turnover_output(
     additional_outputs_df : pd.DataFrame
         estimation input dataframe containing relevant columns for turnover tool
     current_period : int
-        Period to output results for in the format YYYYMM
+        Period of output results in the format YYYYMM
     **config: Dict
           main pipeline configuration. Can be used to input the entire config dictionary
 
@@ -53,22 +53,47 @@ def create_turnover_output(
     # for producing tool from erroring.
     turnover_df["error_res_code"] = 0
 
-    turnover_df = turnover_df[
-        [
-            "frosic2007",
-            "cell_no",
-            "reference",
-            "referencename",
-            "adjustedresponse",
-            "type",
-            "curr_grossed_value",
-            "outlier_weight",
-            "status",
-            "error_res_code",
-            "frotover",
-            "froempment",
-            "response",
-        ]
-    ]
+    # Check if referencename in data
+    if "referencename" in turnover_df.columns:
 
+        turnover_df = turnover_df[
+            [
+                "frosic2007",
+                "cell_no",
+                "reference",
+                "referencename",
+                "adjustedresponse",
+                "type",
+                "curr_grossed_value",
+                "outlier_weight",
+                "status",
+                "error_res_code",
+                "frotover",
+                "froempment",
+                "response",
+            ]
+        ]
+    elif "referencename" not in turnover_df.columns:
+
+        turnover_df["referencename"] = ""
+
+        turnover_df = turnover_df[
+            [
+                "frosic2007",
+                "cell_no",
+                "reference",
+                "referencename",
+                "adjustedresponse",
+                "type",
+                "curr_grossed_value",
+                "outlier_weight",
+                "status",
+                "error_res_code",
+                "frotover",
+                "froempment",
+                "response",
+            ]
+        ]
+
+    # output turnover analysis dataframe
     return turnover_df.reset_index(drop=True)
