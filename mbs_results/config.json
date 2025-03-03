@@ -28,6 +28,7 @@
 
 
     "auxiliary": "frotover",
+    "auxiliary_imputation": "converted_turnover",
     "calibration_factor": "calibration_factor",
     "cell_number": "cell_no",
     "design_weight": "design_weight",
