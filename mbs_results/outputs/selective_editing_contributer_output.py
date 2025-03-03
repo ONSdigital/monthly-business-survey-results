@@ -73,6 +73,14 @@ def get_selective_editing_contributor_output(
     # Threshold file contains multiple duplicate rows
     threshold_mapping.drop_duplicates(inplace=True)
 
+    print("Input Data Summary:")
+    print(input_data.describe(include="all"))
+    print("\nDomain Data Types:")
+    print(domain_data.describe(include="all"))
+    print("\nThreshold Mapping Data Types:")
+    print(threshold_mapping.describe(include="all"))
+    # Issues with threshold file again?
+    threshold_mapping.to_csv("threshold_dropped_dupes.csv")
     selective_editing_contributor_output = merge_domain(
         input_data, domain_data, "frosic2007", "sic_5_digit"
     )
