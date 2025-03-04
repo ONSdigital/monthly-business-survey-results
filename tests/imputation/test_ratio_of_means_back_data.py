@@ -84,6 +84,9 @@ class TestRatioOfMeans:
                 "filtered_question",
                 "cumulative_b_link_filtered_question",
                 "cumulative_f_link_filtered_question",
+                "f_match_question_count",
+                "b_match_question_count",
+                "flag_construction_matches_count",
             ],
             errors="ignore",
             inplace=True,
@@ -98,7 +101,6 @@ class TestRatioOfMeans:
             errors="ignore",
             inplace=True,
         )
-
         expected_output = expected_output[actual_output.columns]
 
         actual_output = actual_output.sort_values(by=["identifier", "date"])
