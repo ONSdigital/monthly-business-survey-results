@@ -96,4 +96,7 @@ def count_matches(df, flag, period, strata, **kwargs):
         pandas dataframe: match counts for each flag column.
     """
 
-    return df.groupby([strata, period])[flag].agg("sum").reset_index()
+    count_col_name = flag + "_count"
+    df[count_col_name] = df.groupby([strata, period])[flag].transform("sum")
+
+    return df

@@ -9,7 +9,10 @@ from mbs_results.imputation.apply_imputation_link import (
 from mbs_results.imputation.calculate_imputation_link import calculate_imputation_link
 from mbs_results.imputation.construction_matches import flag_construction_matches
 from mbs_results.imputation.cumulative_imputation_links import get_cumulative_links
-from mbs_results.imputation.flag_and_count_matched_pairs import flag_matched_pair
+from mbs_results.imputation.flag_and_count_matched_pairs import (
+    count_matches,
+    flag_matched_pair,
+)
 from mbs_results.imputation.imputation_flags import generate_imputation_marker
 from mbs_results.imputation.link_filter import flag_rows_to_ignore
 from mbs_results.imputation.predictive_variable import shift_by_strata_period
@@ -340,6 +343,45 @@ def replace_fir_backdata(df: pd.DataFrame, target: str) -> pd.DataFrame:
     return df
 
 
+def count_all_matches(
+    df: pd.DataFrame, **default_columns: Dict[str, str]
+) -> pd.DataFrame:
+    """
+    Creates 3 new numeric columns with the sum of matches between targeted and
+    predicted values for each imputation method. This is wrapper for
+    count_matches function.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    **default_columns : Dict[str, str]
+        The column names kwargs which were passed to ratio of means function.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Original dataframe with 3 new numeric columns.
+    """
+
+    target_col_name = default_columns["target"]
+
+    if "ignore_from_link" in df.columns:
+
+        target_col_name = "filtered_" + target_col_name
+
+    count_arguments = (
+        dict(**default_columns, **{"flag": "f_match_" + target_col_name}),
+        dict(**default_columns, **{"flag": "b_match_" + target_col_name}),
+        dict(**default_columns, **{"flag": "flag_construction_matches"}),
+    )
+
+    for args in count_arguments:
+        df = count_matches(df, **args)
+
+    return df
+
+
 def ratio_of_means(
     df: pd.DataFrame,
     target: str,
@@ -438,6 +480,7 @@ def ratio_of_means(
             df.pipe(wrap_flag_matched_pairs, **default_columns)
             .pipe(wrap_shift_by_strata_period, **default_columns)
             .pipe(wrap_calculate_imputation_link, **default_columns)
+            .pipe(count_all_matches, **default_columns)
         )
 
     if manual_constructions is not None:
