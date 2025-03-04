@@ -198,8 +198,8 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         error_values=[201],
     )
 
-    df[config["auxiliary_imputation"]] = df[config["auxiliary"]].copy()
-    df = convert_annual_thousands(df, config["auxiliary_imputation"])
+    df[config["auxiliary_converted"]] = df[config["auxiliary"]].copy()
+    df = convert_annual_thousands(df, config["auxiliary_converted"])
 
     print("Staging Completed")
     return df
