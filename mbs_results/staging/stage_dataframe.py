@@ -6,6 +6,7 @@ import pandas as pd
 from mbs_results.staging.back_data import append_back_data
 from mbs_results.staging.create_missing_questions import create_missing_questions
 from mbs_results.staging.data_cleaning import (
+    convert_annual_thousands,
     enforce_datatypes,
     filter_out_questions,
     run_live_or_frozen,
@@ -196,6 +197,9 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         state=config["state"],
         error_values=[201],
     )
+
+    df[config["auxiliary_converted"]] = df[config["auxiliary"]].copy()
+    df = convert_annual_thousands(df, config["auxiliary_converted"])
 
     print("Staging Completed")
     return df
