@@ -27,7 +27,6 @@ def back_data_wrapper():
 
     # Read in back data
     back_data = read_and_process_back_data(config)
-    # back_data.to_csv("loaded_bd.csv")
 
     # back_data = enfoce_dtypes...()
 
@@ -35,14 +34,11 @@ def back_data_wrapper():
     # Another method could be to look at imputation, and try to keep original imputation
     # markers.
 
-    print(back_data.index, back_data.shape)
-
     back_data = drop_derived_questions(
         back_data,
         config["question_no"],
         config["form_id_spp"],
     )
-    print(back_data.index, back_data.shape)
 
     back_data = constrain(
         df=back_data,
@@ -61,14 +57,7 @@ def back_data_wrapper():
         ),
         axis=1,
     )
-    # check what columns are needed from finalsel and which are blank
-    back_data.to_csv(config["output_path"] + "post_constained.csv")
 
-    # NOT DROP DERIVED Qs - Will p0 data contain derived questions?
-    spp_to_idbr_mapping = {value: key for key, value in config["idbr_to_spp"].items()}
-    back_data.loc[back_data["formtype"].isnull(), "formtype"] = back_data.loc[
-        back_data["formtype"].isnull(), "form_type_spp"
-    ].map(spp_to_idbr_mapping)
     back_data = create_imputation_class(
         back_data, config["cell_number"], "imputation_class"
     )
@@ -95,25 +84,9 @@ def back_data_wrapper():
 
     # Running all of estimation and outliers
     back_data_estimation = estimate(back_data_imputation, config)
-    print(back_data_estimation.index)
-    back_data_estimation.to_csv(config["output_path"] + "estimation.csv")
-    # MANUAL FIX FOR BACKDATA MISMATCH FORMTYPE ##
-    back_data_estimation = back_data_estimation[
-        back_data_estimation["reference"] != 18331572400
-    ]
-    # MANUAL FIX FOR BACKDATA MISMATCH FORMTYPE ##
 
     back_data_outliering = detect_outlier(back_data_estimation, config)
-    print(back_data_outliering.index)
-    back_data_outliering.to_csv("outlier.csv")
 
-    # Link to produce_additional_outputs additional_outputs_df = estimation_output[
-
-    back_data_estimation.loc[back_data_estimation["formtype"].isnull(), "formtype"] = (
-        back_data_estimation.loc[
-            back_data_estimation["formtype"].isnull(), "form_type_spp"
-        ].map(spp_to_idbr_mapping)
-    )
     additional_outputs_df = back_data_estimation[
         [
             "reference",
@@ -161,8 +134,3 @@ if __name__ == "__main__":
     print("wrapper start")
     back_data_wrapper()
     print("wrapper end")
-
-
-# TODO Deal with dupe in MC case
-# Check mapping file for threshold 26k missing. Then output should be ready
-# to be sent over
