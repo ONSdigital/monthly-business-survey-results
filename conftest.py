@@ -1,7 +1,7 @@
-from mbs_results.utilities.inputs_dev import main
+from mbs_results.utilities.inputs import load_config
 from pathlib import Path
 
 
 # Load the config file
 config_file = Path('mbs_results/user_config.json')
-main()
+config = load_config()

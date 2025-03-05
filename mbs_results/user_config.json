@@ -2,12 +2,13 @@
     "config_paths": {
         "platform": "local",
         "s3_bucket": "onscdp-dev-data01-5320d6ca",
-        "local_drive_directory": "",        
+        "local_drive_directory": "./",        
         "parent_path": "mbs_results_files/",        
         "input_path": "in/",
         "output_path": "out/",
         "mapping_path": "mapping_files/",
-        "folder_path": "release/"
+        "folder_path": "release/",
+        "mbs_anonymised": "mbs_anonymised_jan_2025_20250128T111044/"
     },
 
     "file_paths": {

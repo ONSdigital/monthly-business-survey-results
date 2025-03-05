@@ -4,7 +4,17 @@ from pathlib import Path
 from typing import Dict, Any
 import boto3
 import raz_client
- 
+from botocore.exceptions import ClientError
+from mbs_results.utilities.s3_operations_utils import (
+    connect_to_s3,
+    is_object_present,
+    create_folder_if_not_exists,
+    create_s3_object,
+    upload_dataframe_to_s3
+)
+from mbs_results import logger
+from mbs_results.utilities.save_file import save_file
+from mbs_results.utilities.load_file_object import load_file
 
 def load_config_file(config_file: str = "user_config.json") -> Dict[str, Any]:
     """Function loads a JSON file and returns its content as a dictionary.
@@ -36,10 +46,19 @@ def connect_to_s3_bucket(bucket_name: str) -> None:
     # Connect to the S3 bucket
     s3_client = boto3.client("s3")
     raz_client.configure_ranger_raz(s3_client, ssl_file='/etc/pki/tls/certs/ca-bundle.crt')
+    
+    response = s3_client.list_objects(Bucket=bucket_name, Prefix="user/derrick.njobuenwu/")
+    
+    if 'Contents' in response:
+        for obj in response['Contents']:
+            print(f"Found file: {obj['Key']}")
+    else:
+        print("No objects found.")
+    
     return s3_client
 
 
-def create_s3_object(s3_client, bucket_name, s3_key):
+def create_s3_objec_1(s3_client, bucket_name, s3_key):
     """
     Creates an S3 object in the specified bucket.
     This function uses the provided `s3_client` to create an S3 object in the specified
@@ -58,14 +77,17 @@ def create_s3_object(s3_client, bucket_name, s3_key):
     """
 
     # Check if object exists
+    print(f"bucket_name: {bucket_name}, s3_key: {s3_key}")
     try:
-        s3_client.head_object(Bucket=bucket_name, Key=s3_key)
+        # Attempt to head the object (check if it exists)
+        s3_client.get_object(Bucket=bucket_name, Key=s3_key)
         print(f"File already exists: {s3_key}")
-    except boto3.exceptions.S3UploadFailedError:
-        # Upload an empty file as a placeholder
-        s3_client.put_object(Bucket=bucket_name, Key=s3_key, Body="")
-        print(f"Created: {s3_key}")
-
+    except s3_client.exceptions.NoSuchKey:
+        # Check for the 404 error code ('NoSuchKey')
+            s3_client.put_object(Bucket=bucket_name, Key=f"{s3_key}/.nokeep", Body="")
+            print(f"Created: {s3_key}")
+            
+        
 
 def construct_path(
     config_paths: Dict[str, str],
@@ -117,12 +139,21 @@ def construct_path(
     directory_paths["folder_path"] = directory_paths["parent_path"] / Path(
         config_paths.get("folder_path", None)
     )
+    
+    directory_paths["mbs_anonymised"] = directory_paths["parent_path"] / Path(
+        config_paths.get("mbs_anonymised", None)
+    )
 
     # Check if the directory_paths exist and create them
     if prod_run:
         # Connect to the S3 bucket
-        s3_client = connect_to_s3_bucket(config_paths.get("s3_bucket"))
         s3_bucket = config_paths.get("s3_bucket")
+        s3_client = connect_to_s3()
+        
+        for key, value in directory_paths.items():
+            logger.info(f"key: {key} | value: {value}")
+            create_folder_if_not_exists(s3_client, s3_bucket, str(value))
+        
     else:
         for key, value in directory_paths.items():
             ensure_directory_exists(value)
@@ -132,15 +163,15 @@ def construct_path(
         "population_path": "input_path",
         "sample_path": "input_path",
         "back_data_qv_path": "input_path",
-        "back_data_cp_path": "mapping_path",
-        "back_data_finalsel_path": "parent_path",
+        "back_data_cp_path": "mbs_anonymised",
+        "back_data_finalsel_path": "folder_path",
         "sic_domain_mapping_path": "mapping_path",
         "threshold_filepath": "mapping_path",
         "calibration_group_map_path": "mapping_path",
         "classification_values_path": "mapping_path",
         "l_values_path": "mapping_path",
-        "manual_constructions_path": "parent_path",
-        "mbs_file_name": "parent_path",
+        "manual_constructions_path": "folder_path",
+        "mbs_file_name": "folder_path",
         "folder_path": "parent_path",
         "output_path": "parent_path",
     }
@@ -156,10 +187,13 @@ def construct_path(
 
         # Use pathlib to join paths properly (handles different OS path conventions)
         config[key] = Path(relative_path) / Path(value)
-        if prod_run:         
-            # Create the S3 object
-            create_s3_object(s3_client, s3_bucket, str(config[key]))
-        print("construct_path full_path:", config[key])
+        if prod_run:
+            object_status = is_object_present(s3_client, s3_bucket, str(config[key]))
+            logger.info(f"Is the object {str(config[key])} present? {object_status}") 
+            if not object_status:     
+                # Create the S3 object
+                create_s3_object(s3_client, s3_bucket, str(config[key]))
+        #print("construct_path full_path:", config[key])
     return config
 
 
@@ -225,7 +259,7 @@ def get_file_paths(config_data: Dict[str, str]) -> Dict[str, str]:
             "local",
         ):
             prod_run = True
-            root_dir = f"s3://{root_dir}"
+            root_dir = ""
             # Connect to s3 bucket in AWS cloud
         else:
             root_dir = config_paths.get("local_drive_directory", None)
@@ -262,6 +296,42 @@ def main():
 
     # Update the config dictionary with the constants
     config.update(config_constant_data)
+    config['platform'] = config_data['config_paths'].get("platform")
+    config['s3_bucket'] = config_data['config_paths'].get("s3_bucket")
+    
+    
+    # Create a dummy DataFrame with 5 columns and 10 rows of personal information
+    data = {
+        'Name': ['Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank', 'Grace', 'Hannah', 'Ivy', 'Jack'],
+        'Age': [25, 30, 22, 35, 29, 40, 31, 28, 26, 33],
+        'Gender': ['Female', 'Male', 'Male', 'Male', 'Female', 'Male', 'Female', 'Female', 'Female', 'Male'],
+        'City': ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'Austin'],
+        'Occupation': ['Engineer', 'Doctor', 'Artist', 'Teacher', 'Nurse', 'Developer', 'Scientist', 'Designer', 'Manager', 'Entrepreneur']
+    }
+
+    import pandas as pd
+    df = pd.DataFrame(data)
+    
+    
+    for key, path in config_data.items():
+        print(f"key: {key} | value: {path}")
+    
+    # Save df to s3
+    s3_bucket = config_data['config_paths'].get("s3_bucket")
+    logger.info(f"s3_bucket: {s3_bucket}")
+    s3_client = connect_to_s3()
+    s3_key = Path(config['output_path']) / 'dataframe_saved_to_json.json'
+    upload_dataframe_to_s3(s3_bucket, str(s3_key), df, file_format='json')
+    
+    
+    save_file(df, config, 'csv', str(Path(config['output_path']) / 'dataframe_saved_to_csv.csv'))
+    
+    logger.info(df.head())
+    
+    # load data from platform
+    df_read = load_file(config, str(Path(config['output_path']) / 'dataframe_saved_to_csv.csv'), 'csv')
+    logger.info(df_read)
+
 
 # Example of how to use these functions
 if __name__ == "__main__":
