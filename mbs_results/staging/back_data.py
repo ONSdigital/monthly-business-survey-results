@@ -2,6 +2,10 @@ import warnings
 
 import pandas as pd
 
+from mbs_results.staging.create_missing_questions import (
+    create_mapper,
+    create_missing_questions,
+)
 from mbs_results.staging.data_cleaning import enforce_datatypes
 from mbs_results.utilities.utils import (
     convert_column_to_datetime,
@@ -86,10 +90,12 @@ def read_back_data(config: dict) -> pd.DataFrame:
     qv_df = pd.read_csv(config["back_data_qv_path"]).drop(
         columns=["cell_no", "classification"], errors="ignore"
     )
+    qv_df[config["period"]] = convert_column_to_datetime(qv_df[config["period"]])
 
     cp_df = pd.read_csv(config["back_data_cp_path"]).drop(
         columns=["cell_no", "classification"], errors="ignore"
     )
+    cp_df[config["period"]] = convert_column_to_datetime(cp_df[config["period"]])
 
     finalsel = read_colon_separated_file(
         config["back_data_finalsel_path"], config["sample_column_names"]
@@ -98,45 +104,58 @@ def read_back_data(config: dict) -> pd.DataFrame:
     finalsel = enforce_datatypes(
         finalsel, keep_columns=config["finalsel_keep_cols"], **config
     )
-    # finalsel["formtype"] = "0" + finalsel["formtype"].astype(int).astype(str)
-    # warnings.warn("Fix added to ensure formtype has leading 0")
-
-    qv_and_cp = pd.merge(
-        qv_df, cp_df, how="left", on=[config["period"], config["reference"]]
-    )
-
-    finalsel[config["period"]] = convert_column_to_datetime(finalsel[config["period"]])
-
-    qv_and_cp[config["period"]] = convert_column_to_datetime(
-        qv_and_cp[config["period"]]
-    )
-
-    qv_and_cp_period = qv_and_cp[config["period"]].unique()
-    finalsel_period = finalsel[config["period"]].unique()
 
     join_type = "left"
 
-    if qv_and_cp_period + pd.DateOffset(months=1) == finalsel_period:
+    qv_period = qv_df[config["period"]].unique()
+    cp_period = cp_df[config["period"]].unique()
+    finalsel_period = finalsel[config["period"]].unique()
 
-        qv_and_cp[config["period"]] = qv_and_cp[config["period"]] + pd.DateOffset(
-            months=1
-        )
+    qv_start_of_period = qv_period + pd.DateOffset(months=1) == finalsel_period
+    cp_start_of_period = cp_period + pd.DateOffset(months=1) == finalsel_period
+
+    if qv_start_of_period and cp_start_of_period:
+
+        qv_df[config["period"]] = qv_df[config["period"]] + pd.DateOffset(months=1)
+        cp_df[config["period"]] = cp_df[config["period"]] + pd.DateOffset(months=1)
 
         join_type = "right"
-        # Nans in question number column means the type is converted from int to float
-        # This is a limitation with pandas, nullable int type is being devloped,
-        # Need to see how SPP / methodology want us to deal with missing responses
 
         warnings.warn(
             "finalsel period is 1 month later than qv_and_cp period. "
             "Treating as start of period processing."
         )
 
-    back_data_all_cols = pd.merge(
-        qv_and_cp, finalsel, how=join_type, on=[config["period"], config["reference"]]
+    cp_finalsel = pd.merge(
+        cp_df, finalsel, how=join_type, on=[config["period"], config["reference"]]
     )
 
-    return back_data_all_cols
+    if qv_start_of_period and cp_start_of_period:
+        # Creating missing questions for period 0 SE process
+
+        # Candidate to refactor into a function?
+        mapper_question = create_mapper()
+        idbr_to_spp_mapping = config["idbr_to_spp"]
+        cp_finalsel[config["form_id_spp"]] = (
+            cp_finalsel[config["form_id_idbr"]].astype(str).map(idbr_to_spp_mapping)
+        )
+
+        qv_df = create_missing_questions(
+            cp_finalsel,
+            qv_df,
+            config["reference"],
+            config["period"],
+            config["form_id_spp"],
+            "question_no",
+            mapper_question,
+        )
+        qv_df["question_no"] = qv_df["question_no"].astype(int)
+
+    qv_and_cp = pd.merge(
+        qv_df, cp_finalsel, how="right", on=[config["period"], config["reference"]]
+    )
+
+    return qv_and_cp
 
 
 def append_back_data(staged_data: pd.DataFrame, config: dict) -> pd.DataFrame:
@@ -161,9 +180,9 @@ def append_back_data(staged_data: pd.DataFrame, config: dict) -> pd.DataFrame:
 
     # Remove derived, derived values not needed
     # Having derivedd values in back data will throw an error in imputation flags
-    # if "derived" in back_data[config["imputation_marker_col"]].unique():
-    #     back_data = back_data[back_data[config["imputation_marker_col"]] != "derived"]
-    #     warnings.warn("Removing derived values from back")
+    if "derived" in back_data[config["imputation_marker_col"]].unique():
+        back_data = back_data[back_data[config["imputation_marker_col"]] != "derived"]
+        warnings.warn("Removing derived values from back")
 
     common_cols = list(staged_data.columns.intersection(back_data.columns))
 
@@ -222,14 +241,11 @@ def read_and_process_back_data(config: dict) -> pd.DataFrame:
         back_data[type_col].fillna(-999).astype(int).astype(str).map(map_type),
     )
 
+    # This needed here?
     idbr_to_spp_mapping = config["idbr_to_spp"]
     back_data[config["form_id_spp"]] = (
         back_data[config["form_id_idbr"]].astype(str).map(idbr_to_spp_mapping)
     )
     back_data["cellnumber"] = back_data["cell_no"]
-
-    if "derived" in back_data[config["imputation_marker_col"]].unique():
-        back_data = back_data[back_data[config["imputation_marker_col"]] != "derived"]
-        warnings.warn("Removing derived values from back")
 
     return back_data
