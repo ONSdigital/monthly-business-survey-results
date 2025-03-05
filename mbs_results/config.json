@@ -24,8 +24,8 @@
     "period_selected": 202303,
     "current_period" : 202303,
     "previous_period" : 202302,
-    "revision_period": 13,
-
+    "revision_period": 1,
+    "start_of_period_processing": "True",
 
     "auxiliary": "frotover",
     "calibration_factor": "calibration_factor",
