@@ -35,16 +35,16 @@ def does_not_raise():
 
 def create_testing_config(file_paths):
     """Copy config to testing directory and update file_paths"""
-    
+
     # merger the two config files into config.json
     # Load the user config
     with open("mbs_results/config_user.json", "r") as f:
-        user_config  = json.load(f)
-        
+        user_config = json.load(f)
+
     # Load the constants config
     with open("mbs_results/config_constants.json", "r") as f:
         constant_config = json.load(f)
-        
+
     # Merge both config files
     config = {**user_config, **constant_config}
 
