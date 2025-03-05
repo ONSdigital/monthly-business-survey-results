@@ -164,6 +164,7 @@ def constrain(
             "frotover",
             "froempment",
             "frosic2007",
+            "formtype",
         ],
         verify_integrity=False,
     )
@@ -248,6 +249,7 @@ def derive_questions(
             "frotover",
             "froempment",
             "frosic2007",
+            "formtype",
         ],
         verify_integrity=False,
     )
