@@ -234,6 +234,7 @@ def read_and_process_back_data(config: dict) -> pd.DataFrame:
     # Json file can't store keys as int, thus stored them as str
     # This is why we need to convert them to str here since from csv source
     # they are loaded as int
+    # Filled as -999 because int cannot store nulls, and -999 isnt a used type
 
     back_data.insert(
         0,
