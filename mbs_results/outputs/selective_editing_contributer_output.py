@@ -51,9 +51,12 @@ def get_selective_editing_contributor_output(
     >>        period_selected=202201
     >> )
     """
-    questions_selected = [40, 49]
+    forms_ignored = [
+        "203",
+        "204",
+    ]  # IDBR for water form probably should use spp form type
     input_data = additional_outputs_df.loc[
-        additional_outputs_df[question_no].isin(questions_selected)
+        ~additional_outputs_df["formtype"].isin(forms_ignored)
     ]
     input_data = input_data[
         [period, reference, "design_weight", "frosic2007", "formtype"]
@@ -73,14 +76,6 @@ def get_selective_editing_contributor_output(
     # Threshold file contains multiple duplicate rows
     threshold_mapping.drop_duplicates(inplace=True)
 
-    print("Input Data Summary:")
-    print(input_data.describe(include="all"))
-    print("\nDomain Data Types:")
-    print(domain_data.describe(include="all"))
-    print("\nThreshold Mapping Data Types:")
-    print(threshold_mapping.describe(include="all"))
-    # Issues with threshold file again?
-    threshold_mapping.to_csv("threshold_dropped_dupes.csv")
     selective_editing_contributor_output = merge_domain(
         input_data, domain_data, "frosic2007", "sic_5_digit"
     )
