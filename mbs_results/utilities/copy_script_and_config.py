@@ -25,8 +25,9 @@ def copy_script_and_config():
     # Append main.py and config.json
     main_path = os.path.join(target_path, "main.py")
     config_path = os.path.join(target_path, "config.json")
-    
-     # Merge the config_user.json and config_constants.json into config.json in the mbs_results dir
+
+    # Merge the config_user.json and config_constants.json
+    # into config.json in the mbs_results dir
     user_config_path = os.path.join(target_path, "config_user.json")
     constants_config_path = os.path.join(target_path, "config_constants.json")
     merge_two_config_files(user_config_path, constants_config_path, config_path)
