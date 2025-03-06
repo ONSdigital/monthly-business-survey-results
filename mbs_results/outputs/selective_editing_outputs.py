@@ -6,7 +6,7 @@ from mbs_results.estimation.estimate import estimate
 from mbs_results.outlier_detection.detect_outlier import detect_outlier
 from mbs_results.outputs.produce_additional_outputs import get_additional_outputs_df
 from mbs_results.outputs.selective_editing_contributer_output import (
-    get_selective_editing_contributer_output,
+    get_selective_editing_contributor_output,
 )
 from mbs_results.outputs.selective_editing_question_output import (
     create_selective_editing_question_output,
@@ -72,7 +72,7 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
 
     se_outputs_df = get_additional_outputs_df(estimation_output, outlier_output)
 
-    contributer = get_selective_editing_contributer_output(se_outputs_df, **config)
+    contributer = get_selective_editing_contributor_output(se_outputs_df, **config)
     question = create_selective_editing_question_output(se_outputs_df, **config)
 
     file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
