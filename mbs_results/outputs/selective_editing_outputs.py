@@ -16,7 +16,22 @@ from mbs_results.utilities.validation_checks import qa_selective_editing_outputs
 
 
 def load_imputation_output(config: dict) -> pd.DataFrame:
+    """
+    Loads the imputation output from a CSV file.
 
+    Parameters
+    ----------
+    config : dict
+        A dictionary containing configuration parameters.
+        - "output_path" (str): The path to the directory containing the output files.
+        - "mbs_file_name" (str): The name of the MBS file used to generate the
+        imputation output.
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame containing the imputation output data.
+    """
     output_path = config["output_path"]
     file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
     snapshot_name = config["mbs_file_name"].split(".")[0]
@@ -28,7 +43,25 @@ def load_imputation_output(config: dict) -> pd.DataFrame:
 
 
 def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataFrame:
+    """
+    Creates and saves selective editing outputs from the imputation output DataFrame.
 
+    Parameters
+    ----------
+    imputation_output : pd.DataFrame
+        The DataFrame containing the imputation output data.
+    config : dict
+        A dictionary containing configuration parameters.
+        - "output_path" (str): The path to the directory where the output files will
+        be saved.
+        - "mbs_file_name" (str): The name of the MBS file used to generate the
+        imputation output.
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame containing the selective editing outputs.
+    """
     imputation_output = start_of_period_staging(imputation_output, config)
 
     # Create missing questions
