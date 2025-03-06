@@ -25,6 +25,7 @@ test_config = {
     "current_period": 202206,
     "previous_period": 202205,
     "revision_period": 6,
+    "start_of_period_processing": "False",
 }
 
 

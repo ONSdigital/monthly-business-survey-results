@@ -1,3 +1,5 @@
+import warnings
+
 import pandas as pd
 
 
@@ -74,3 +76,26 @@ def create_missing_questions(
     )
 
     return concatenated_responses
+
+
+def create_mapper() -> dict:
+    """
+    placeholder function to create question and form mapping dict
+
+    Returns
+    -------
+    dict
+        dictionary containing question numbers and form id.
+    """
+    mapper = {
+        9: [40, 49],
+        10: [110],
+        11: [40, 49, 90],
+        12: [40],
+        13: [46, 47],
+        14: [42, 43],
+        15: [40],
+        16: [40],
+    }
+    warnings.warn("create_mapper needs to be fully defined and moved to config")
+    return mapper

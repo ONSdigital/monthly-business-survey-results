@@ -278,14 +278,12 @@ def qa_selective_editing_outputs(config: dict):
     logger.info("QA checking selective editing outputs")
 
     file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
-    snapshot_name = config["mbs_file_name"].split(".")[0]
+    period = config["period_selected"]
     se_contributor_path = (
-        config["output_path"]
-        + f"selective_editing_contributor_v{file_version_mbs}_{snapshot_name}.csv"
+        config["output_path"] + f"secontributors009_{period}_v{file_version_mbs}.csv"
     )
     se_question_path = (
-        config["output_path"]
-        + f"selective_editing_question_v{file_version_mbs}_{snapshot_name}.csv"
+        config["output_path"] + f"sequestions009_{period}_v{file_version_mbs}.csv"
     )
 
     contributor_df = pd.read_csv(se_contributor_path).rename(
@@ -343,5 +341,30 @@ def qa_selective_editing_outputs(config: dict):
                 )
         else:
             logger.info(f"No nulls or NaNs detected in {dataframe_name} dataframe")
+
+    manual_edit_po = True
+    if manual_edit_po:
+        # MANUAL EDITING PO FOR SE OUTPUT (TEMP)
+        print("temp")
+        reference_mask = contributor_df["reference"] == 11513303775
+        contributor_df.loc[reference_mask, "domain_group"] = 63
+        contributor_df.loc[reference_mask, "threshold"] = 0.05
+
+        question_df.loc[
+            question_df["reference"] == 11513303775, "standardising_factor"
+        ] = 84125668231.64378
+
+        logger.warning("manual edit of post office")
+
+        contributor_df.to_csv(
+            config["output_path"]
+            + f"secontributors009_{period}_v{file_version_mbs}_po_filled.csv",
+            index=False,
+        )
+        question_df.to_csv(
+            config["output_path"]
+            + f"sequestions009_{period}_v{file_version_mbs}_po_filled.csv",
+            index=False,
+        )
 
     logger.info("QA of SE outputs finished")

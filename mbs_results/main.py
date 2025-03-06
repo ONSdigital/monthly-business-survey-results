@@ -19,7 +19,7 @@ from mbs_results.utilities.validation_checks import (
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename="test.txt",
+    filename="main_logger.txt",
     level=logging.DEBUG,
     format="%(asctime)s %(levelname)s %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
@@ -27,7 +27,7 @@ logging.basicConfig(
 
 
 def run_mbs_main():
-    config = load_config("./mbs_results/config.json")
+    config = load_config()
     validate_config(config)
 
     staged_data = stage_dataframe(config)

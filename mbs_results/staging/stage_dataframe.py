@@ -4,7 +4,10 @@ import warnings
 import pandas as pd
 
 from mbs_results.staging.back_data import append_back_data
-from mbs_results.staging.create_missing_questions import create_missing_questions
+from mbs_results.staging.create_missing_questions import (
+    create_mapper,
+    create_missing_questions,
+)
 from mbs_results.staging.data_cleaning import (
     enforce_datatypes,
     filter_out_questions,
@@ -40,29 +43,6 @@ def create_form_type_spp_column(
         idbr_to_spp_mapping
     )
     return contributors
-
-
-def create_mapper() -> dict:
-    """
-    placeholder function to create question and form mapping dict
-
-    Returns
-    -------
-    dict
-        dictionary containing question numbers and form id.
-    """
-    mapper = {
-        9: [40, 49],
-        10: [110],
-        11: [40, 49, 90],
-        12: [40],
-        13: [46, 47],
-        14: [42, 43],
-        15: [40],
-        16: [40],
-    }
-    warnings.warn("create_mapper needs to be fully defined and moved to config")
-    return mapper
 
 
 def read_and_combine_colon_sep_files(

@@ -5,6 +5,12 @@ import pandas as pd
 from mbs_results.outputs.get_additional_outputs import get_additional_outputs
 from mbs_results.outputs.ocea_srs_outputs import produce_ocea_srs_outputs
 from mbs_results.outputs.pivot_imputation_value import create_imputation_link_output
+from mbs_results.outputs.selective_editing_contributer_output import (
+    get_selective_editing_contributor_output,
+)
+from mbs_results.outputs.selective_editing_question_output import (
+    create_selective_editing_question_output,
+)
 from mbs_results.outputs.turnover_analysis import create_turnover_output
 from mbs_results.outputs.weighted_adj_val_time_series import (
     get_weighted_adj_val_time_series,
@@ -84,8 +90,8 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
     additional_outputs = get_additional_outputs(
         config,
         {
-            # "selective_editing_contributor": get_selective_editing_contributer_output,
-            # "selective_editing_question": create_selective_editing_question_output,
+            "selective_editing_contributors": get_selective_editing_contributor_output,
+            "selective_editing_questions": create_selective_editing_question_output,
             "turnover_output": create_turnover_output,
             "weighted_adj_val_time_series": get_weighted_adj_val_time_series,
             "produce_ocea_srs_outputs": produce_ocea_srs_outputs,
@@ -101,6 +107,14 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
     file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
     snapshot_name = config["mbs_file_name"].split(".")[0]
     for output in additional_outputs:
-        filename = f"{output}_v{file_version_mbs}_{snapshot_name}.csv"
+        if (
+            output == "selective_editing_contributors"
+            or output == "selective_editing_questions"
+        ):
+            file = output.split("_")[-1]
+            period = additional_outputs[output]["period"].unique()[0]
+            filename = f"se{file}009_{period}_v{file_version_mbs}.csv"
+        else:
+            filename = f"{output}_v{file_version_mbs}_{snapshot_name}.csv"
         additional_outputs[output].to_csv(config["output_path"] + filename, index=False)
         print(config["output_path"] + filename + " saved")
