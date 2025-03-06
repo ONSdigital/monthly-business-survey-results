@@ -1,5 +1,7 @@
 import logging
 
+import pandas as pd
+
 from mbs_results.estimation.estimate import estimate
 from mbs_results.imputation.calculate_imputation_link import calculate_imputation_link
 from mbs_results.imputation.construction_matches import flag_construction_matches
@@ -21,7 +23,7 @@ logging.basicConfig(
 )
 
 
-def back_data_wrapper():
+def period_zero_se_wrapper():
 
     config = load_config(path="./mbs_results/config.json")
 
@@ -34,53 +36,18 @@ def back_data_wrapper():
     # Another method could be to look at imputation, and try to keep original imputation
     # markers.
 
+    # Have to drop derrived questions in this way, other method dropped "derived"
+    # imputation markers, these are needed because a reference can change form type
+    # i.e. have 46 as derived in one period, then 40 derived in next period and 46 used
+    # to derive 40
+
     back_data = drop_derived_questions(
         back_data,
         config["question_no"],
         config["form_id_spp"],
     )
 
-    back_data = constrain(
-        df=back_data,
-        period=config["period"],
-        reference=config["reference"],
-        target=config["target"],
-        question_no=config["question_no"],
-        spp_form_id=config["form_id_spp"],
-    )
-
-    back_data["imputed_and_derived_flag"] = back_data.apply(
-        lambda row: (
-            "d"
-            if "sum" in str(row["constrain_marker"]).lower()
-            else row[f"imputation_flags_{config['target']}"]
-        ),
-        axis=1,
-    )
-
-    back_data = create_imputation_class(
-        back_data, config["cell_number"], "imputation_class"
-    )
-
-    # Run apply_imputation_link function to get construction links
-    back_data_cons_matches = flag_construction_matches(back_data, **config)
-    back_data_imputation = calculate_imputation_link(
-        back_data_cons_matches,
-        match_col="flag_construction_matches",
-        link_col="construction_link",
-        predictive_variable=config["auxiliary"],
-        **config,
-    )
-
-    # Changing period back into int. Read_colon_sep_file should be updated to enforce
-    # data types as per the config.
-
-    back_data_imputation["period"] = (
-        back_data_imputation["period"].dt.strftime("%Y%m").astype("int")
-    )
-    back_data_imputation["frosic2007"] = back_data_imputation["frosic2007"].astype(
-        "str"
-    )
+    back_data_imputation = imputation_processing(back_data, config)
 
     # Running all of estimation and outliers
     back_data_estimation = estimate(back_data_imputation, config)
@@ -128,9 +95,56 @@ def back_data_wrapper():
     return back_data_outliering
 
 
+def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame:
+
+    back_data = constrain(
+        df=back_data,
+        period=config["period"],
+        reference=config["reference"],
+        target=config["target"],
+        question_no=config["question_no"],
+        spp_form_id=config["form_id_spp"],
+    )
+
+    back_data["imputed_and_derived_flag"] = back_data.apply(
+        lambda row: (
+            "d"
+            if "sum" in str(row["constrain_marker"]).lower()
+            else row[f"imputation_flags_{config['target']}"]
+        ),
+        axis=1,
+    )
+
+    back_data = create_imputation_class(
+        back_data, config["cell_number"], "imputation_class"
+    )
+
+    # Run apply_imputation_link function to get construction links
+    back_data_cons_matches = flag_construction_matches(back_data, **config)
+    back_data_imputation = calculate_imputation_link(
+        back_data_cons_matches,
+        match_col="flag_construction_matches",
+        link_col="construction_link",
+        predictive_variable=config["auxiliary"],
+        **config,
+    )
+
+    # Changing period back into int. Read_colon_sep_file should be updated to enforce
+    # data types as per the config.
+
+    back_data_imputation["period"] = (
+        back_data_imputation["period"].dt.strftime("%Y%m").astype("int")
+    )
+    back_data_imputation["frosic2007"] = back_data_imputation["frosic2007"].astype(
+        "str"
+    )
+
+    return back_data_imputation
+
+
 if __name__ == "__main__":
     # config = load_config(path="./mbs_results/config.json")
     # qa_selective_editing_outputs(config)
     print("wrapper start")
-    back_data_wrapper()
+    period_zero_se_wrapper()
     print("wrapper end")
