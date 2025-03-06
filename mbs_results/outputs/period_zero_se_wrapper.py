@@ -96,6 +96,24 @@ def period_zero_se_wrapper():
 
 
 def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame:
+    """
+    Processing that should have been done during imputation.
+    For period zero data, we do not do this processing, therefore we need to run the
+    specific functions needed for estimation and outliering here
+
+    Parameters
+    ----------
+    back_data : pd.DataFrame
+        dataframe consisting only of back data i.e. period zero data
+    config : dict
+        main pipeline config dictionary
+
+    Returns
+    -------
+    pd.DataFrame
+        processed back data dataframe with derived questions, imputation class and
+        construction link.
+    """
 
     back_data = constrain(
         df=back_data,
