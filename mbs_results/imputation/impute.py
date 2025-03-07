@@ -60,7 +60,7 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
             revision_period=config["revision_period"],
             question_no=config["question_no"],
             strata="imputation_class",
-            auxiliary=config["auxiliary"],
+            auxiliary=config["auxiliary_converted"],
         )
     )
 
