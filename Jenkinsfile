@@ -1,28 +1,22 @@
 #!groovy
 
 // Global scope required for multi-stage persistence
-def artifactoryStr = 'onsart-01'
-artServer = Artifactory.server "${artifactoryStr}"
-buildInfo = Artifactory.newBuildInfo()
+def artServer = Artifactory.server "onsart-01"
+def buildInfo = Artifactory.newBuildInfo()
 def agentPython3Version = 'python_3.10'
-def artifactVersion
 
-// Define a function to push packaged code to Artifactory
+
 def pushToPyPiArtifactoryRepo(String projectName, String sourceDist = 'dist/*', String artifactoryHost = 'onsart-01.ons.statistics.gov.uk') {
     withCredentials([usernamePassword(credentialsId: env.ARTIFACTORY_CREDS, usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]){ // pragma: allowlist secret
         sh "curl -u ${ARTIFACTORY_USER}:\${ARTIFACTORY_PASSWORD} -T ${sourceDist} 'https://${artifactoryHost}/artifactory/${env.ARTIFACTORY_PYPI_REPO}/${projectName}/'"
     }
 }
 
-// This section defines the Jenkins pipeline
 pipeline {
-
-    agent any
-
     libraries {
             // Useful library from ONS internal GitLab
-        lib('jenkins-pipeline-shared@feature/dap-ci-scripts')
-    }
+            lib('jenkins-pipeline-shared')
+        }
 
     // Define environment variables
     environment {
@@ -31,7 +25,7 @@ pipeline {
         PROXY = credentials("PROXY")  // Http proxy address, set in Jenkins Credentials
         ARTIFACTORY_CREDS = "ARTIFACTORY_CREDENTIALS"
         ARTIFACTORY_PYPI_REPO = "LR_mbs-results"
-        BUILD_BRANCH = "fix_jenkins" // only deploy from this/these branches
+        BUILD_BRANCH = "main" // only deploy from this/these branches
         BUILD_TAG = "v*.*.*" // only deploy with a commit message tagged like v0.0.1
     }
 
