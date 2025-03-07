@@ -887,3 +887,6 @@ docs/_linkcheck/
 
 #ignore debug script
 debug_script*
+
+# Ignore logs
+logs/
