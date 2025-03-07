@@ -79,5 +79,5 @@ class TestMatchedPair:
 
 class TestCountMatches:
     def test_count_matches(self, count_test_data, count_expected_output):
-        output = count_matches(count_test_data, ["flag_1", "flag_2"], "period", "group")
+        output = count_matches(count_test_data, "flag_2", "period", "group")
         assert_frame_equal(output, count_expected_output)
