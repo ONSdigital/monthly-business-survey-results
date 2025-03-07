@@ -25,7 +25,7 @@ pipeline {
         PROXY = credentials("PROXY")  // Http proxy address, set in Jenkins Credentials
         ARTIFACTORY_CREDS = "ARTIFACTORY_CREDENTIALS"
         ARTIFACTORY_PYPI_REPO = "LR_mbs-results"
-        BUILD_BRANCH = "fix_jenkins" // only deploy from this/these branches
+        BUILD_BRANCH = "main" // only deploy from this/these branches
         BUILD_TAG = "v*.*.*" // only deploy with a commit message tagged like v0.0.1
     }
 
