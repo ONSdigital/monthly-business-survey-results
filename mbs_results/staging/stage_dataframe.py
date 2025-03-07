@@ -4,7 +4,10 @@ import warnings
 import pandas as pd
 
 from mbs_results.staging.back_data import append_back_data
-from mbs_results.staging.create_missing_questions import create_missing_questions
+from mbs_results.staging.create_missing_questions import (
+    create_mapper,
+    create_missing_questions,
+)
 from mbs_results.staging.data_cleaning import (
     convert_annual_thousands,
     enforce_datatypes,
@@ -12,7 +15,10 @@ from mbs_results.staging.data_cleaning import (
     run_live_or_frozen,
 )
 from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
-from mbs_results.utilities.utils import read_colon_separated_file
+from mbs_results.utilities.utils import (
+    convert_column_to_datetime,
+    read_colon_separated_file,
+)
 
 
 def create_form_type_spp_column(
@@ -38,29 +44,6 @@ def create_form_type_spp_column(
         idbr_to_spp_mapping
     )
     return contributors
-
-
-def create_mapper() -> dict:
-    """
-    placeholder function to create question and form mapping dict
-
-    Returns
-    -------
-    dict
-        dictionary containing question numbers and form id.
-    """
-    mapper = {
-        9: [40, 49],
-        10: [110],
-        11: [40, 49, 90],
-        12: [40],
-        13: [46, 47],
-        14: [42, 43],
-        15: [40],
-        16: [40],
-    }
-    warnings.warn("create_mapper needs to be fully defined and moved to config")
-    return mapper
 
 
 def read_and_combine_colon_sep_files(
@@ -248,3 +231,50 @@ def drop_derived_questions(
             ].index
         )
     return df
+
+
+def start_of_period_staging(
+    imputation_output: pd.DataFrame, config: dict
+) -> pd.DataFrame:
+
+    if config["current_period"] in imputation_output["period"].unique():
+
+        imputation_output = imputation_output.loc[
+            imputation_output["period"] == config["current_period"]
+        ]
+
+        imputation_output["period"] = convert_column_to_datetime(
+            imputation_output["period"]
+        ) + pd.DateOffset(months=1)
+
+        drop_cols = [
+            col
+            for col in config["finalsel_keep_cols"]
+            if col not in ["reference", "period"]
+        ]
+        imputation_output.drop(columns=drop_cols, inplace=True)
+
+        finalsel = read_and_combine_colon_sep_files(
+            config["sample_path"], config["sample_column_names"], config
+        )
+
+        finalsel = finalsel.loc[finalsel["period"] == config["period_selected"]]
+
+        finalsel = finalsel[config["finalsel_keep_cols"]]
+        finalsel = enforce_datatypes(
+            finalsel, keep_columns=config["finalsel_keep_cols"], **config
+        )
+
+        imputation_output = pd.merge(
+            left=imputation_output,
+            right=finalsel,
+            on=[config["period"], config["reference"]],
+            suffixes=["_imputation_output", "_finalsel"],
+            how="right",
+        )
+
+        imputation_output["period"] = (
+            imputation_output["period"].dt.strftime("%Y%m").astype(int)
+        )
+
+    return imputation_output
