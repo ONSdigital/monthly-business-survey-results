@@ -65,7 +65,7 @@ def detect_outlier(df, config):
     )
 
     # Remove groupby leftovers
-    post_win.reset_index(drop=True,inplace=True)
+    post_win.reset_index(drop=True, inplace=True)
 
     post_win = update_derived_weight_and_winsorised_value(
         post_win,
