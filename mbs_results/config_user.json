@@ -1,6 +1,6 @@
 {
     "config_paths": {
-        "platform": "local",
+        "platform": "network",
         "s3_bucket": "onscdp-dev-data01-5320d6ca",
         "local_drive_directory": "./",        
         "parent_path": "mbs_results_files/",        
@@ -26,5 +26,13 @@
         "back_data_finalsel_path": "finalsel009_202112",
         "sic_domain_mapping_path": "sic_domain_mapping.csv",
         "threshold_filepath": "form_domain_threshold_mapping.csv"
+    },
+
+    "user_data": {
+        "period_selected": 202303,
+        "current_period" : 202303,
+        "previous_period" : 202302,
+        "revision_period": 13
     }
+
   }

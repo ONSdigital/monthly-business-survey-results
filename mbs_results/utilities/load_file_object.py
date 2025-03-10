@@ -1,14 +1,9 @@
 import os
-import boto3
 import pandas as pd
 from typing import Union, Dict
-from io import BytesIO, StringIO
-from botocore.exceptions import ClientError
 from mbs_results import logger
 from mbs_results.utilities.s3_operations_utils import load_dataframe_from_s3
 
-# Assume config is a global or passed variable containing platform details
-# Example: config = {'platform': 'local'} or config = {'platform': 'network'}
 
 def load_file(
     config: Dict[str, str], 
@@ -20,18 +15,18 @@ def load_file(
     """
     Reads a file either from S3 or from the local file system depending on the platform specified in the config.
 
-    This function reads a file based on the specified platform in the `config` dictionary. If the platform is 'network',
-    the file is loaded from an S3 bucket. If the platform is 'local', the file is loaded from the local file system. 
+    This function reads a file based on the specified platform in the `config` dictionary. If the platform is 's3',
+    the file is loaded from an S3 bucket. If the platform is 'network', the file is loaded from the local file system. 
     The function automatically handles the compression (if provided) based on the file format.
 
     Parameters
     ----------
     config : dict
         A dictionary containing configuration settings. This should include:
-        - 'platform' (str): Specifies the platform to read from ('network' for S3 or 'local' for local file system).
-        - 's3_bucket' (str): The S3 bucket name (used only if platform is 'network').
+        - 'platform' (str): Specifies the platform to read from ('s3' for S3 or 'network' for local file system).
+        - 's3_bucket' (str): The S3 bucket name (used only if platform is 's3').
     file_path : str
-        The path to the file to be read. If the platform is 'network', this is the S3 key.
+        The path to the file to be read. If the platform is 's3', this is the S3 key.
     file_format : str
         The format of the file to be read. Supported formats are 'csv', 'json', and 'parquet'.
     compression : str, optional
@@ -51,7 +46,7 @@ def load_file(
     
     Example
     -------
-    config = {'platform': 'local', 's3_bucket': 'my-bucket'}
+    config = {'platform': 's3', 's3_bucket': 'my-bucket'}
     df = load_file(config, '/path/to/local/file.csv', 'csv')
     print(df.head())
 
@@ -59,27 +54,27 @@ def load_file(
 
     Notes
     -----
-    - The function supports reading from two platforms: 'network' (S3) or 'local'. If an invalid platform is provided,
+    - The function supports reading from two platforms: 's3' (S3) or 'network'. If an invalid platform is provided,
       a `ValueError` will be raised.
     - Supported file formats are 'csv', 'json', and 'parquet'. If an unsupported file format is specified, a `ValueError`
       will be raised.
     """
     
-    if config['platform'] == 'network':  # Read from S3
+    if config['platform'] == 's3':
         return load_dataframe_from_s3(
             bucket_name=config['s3_bucket'],
             s3_key=file_path,
             file_format=file_format,
             compression=compression
         )
-    elif config['platform'] == 'local':  # Read from local
+    elif config['platform'] == 'network': 
         return load_dataframe_locally(
             file_path=file_path,
             file_format=file_format,
             compression=compression
         )
     else:
-        raise ValueError("Unknown platform. Only 'network' (S3) or 'local' are supported.")
+        raise ValueError("Unknown platform. Only 's3' (S3) or 'network' are supported.")
     
 
 def load_dataframe_locally(

@@ -2,15 +2,13 @@ import json
 import os
 from pathlib import Path
 from typing import Dict, Any
-import boto3
-import raz_client
-from botocore.exceptions import ClientError
 from mbs_results import logger
 from mbs_results.utilities.s3_operations_utils import (
     connect_to_s3,
     create_folder_if_not_exists,
     create_s3_object,
     upload_dataframe_to_s3,
+    is_object_present
 )
 from mbs_results.utilities.save_file import save_file
 from mbs_results.utilities.load_file_object import load_file
@@ -55,7 +53,7 @@ def construct_path(config_data: Dict[str, str]) -> str:
         A dictionary with the same keys as the input, but with the full file paths
             constructed by joining the base directory with the relative paths
     """
-    # Extract the 'config' and 'file_paths' dictionaries from the loaded JSON data
+    
     config_paths = config_data["config_paths"]
     file_paths = config_data["file_paths"]
     
@@ -63,13 +61,13 @@ def construct_path(config_data: Dict[str, str]) -> str:
         # Get the parent directory based on the mapping
         root_dir = config_paths.get("s3_bucket")
         # Check if root_dir is None or an empty string
-        prod_run = False
+        data_stored_in_s3 = False
         if config_paths.get("s3_bucket") not in (None, "") and config_paths.get("platform") not in (
             None,
             "",
-            "local",
+            "network",
         ):
-            prod_run = True
+            data_stored_in_s3 = True
             root_dir = ""
             # Connect to s3 bucket in AWS cloud
         else:
@@ -83,7 +81,7 @@ def construct_path(config_data: Dict[str, str]) -> str:
                 )
         
         logger.info(f"{config_paths.get('platform')} Platform and {root_dir} parent directory in used")
-            # Concatenate the root directory with the parent directory
+            
 
     except KeyError:
         logger.info("Configuration does not contain 's3_bucket' or "
@@ -114,10 +112,10 @@ def construct_path(config_data: Dict[str, str]) -> str:
     )
 
     # Check if the directory_paths exist and create them
-    if prod_run:
-        s3_client = connect_to_s3('s3')
+    if data_stored_in_s3:
+        s3_client = connect_to_s3()
         s3_bucket = config_paths.get("s3_bucket")
-        for key, value in directory_path.items():
+        for key, value in directory_paths.items():
             create_folder_if_not_exists(s3_client, s3_bucket, str(value))
     else:
         for key, value in directory_paths.items():
@@ -149,7 +147,7 @@ def construct_path(config_data: Dict[str, str]) -> str:
 
         # Use pathlib to join paths properly (handles different OS path conventions)
         config[key] = Path(relative_path) / Path(value)
-        if prod_run:
+        if data_stored_in_s3:
             # [optional] check if the file exist, else create an empty file as placeholder
             object_status = is_object_present(s3_client, s3_bucket, str(config[key]))
             logger.info(f"Is the object {str(config[key])} present? {object_status}") 
@@ -189,12 +187,13 @@ def ensure_directory_exists(directory_path: Path) -> None:
 
 
 def load_config():
-    # Load the config file
-    config_file = Path("mbs_results/user_config.json")
+    config_file = Path("mbs_results/config_user.json")
     config_data = load_config_file(config_file=config_file)
 
     # Get all file paths and check directories
     config = construct_path(config_data)
+    
+    config.update(config_data['user_data'])
     
     # Update config with key-value pairs from config_data where the key 
     # doesn't already exisit in config
@@ -203,12 +202,43 @@ def load_config():
             config[key] = value
 
     # Load the constants file
-    config_constant_file = Path("mbs_results/constants.json")
-    config_constant_data = load_config_file(config_file=config_constant_file)
+    config_dev_file = Path("mbs_results/config_dev.json")
+    config_dev_data = load_config_file(config_file=config_dev_file)
 
     # Update the config dictionary with the constants
-    config.update(config_constant_data)
-
+    config.update(config_dev_data)
+    
+    
+    # Print all the dynamically constructed paths
+    for key, path in config.items():
+        logger.info(f"key: {key} | value: {path}")
+        
+    
+    # Create a dummy DataFrame with 5 columns and 10 rows of personal information
+    data = {
+        'Name': ['Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank', 'Grace', 'Hannah', 'Ivy', 'Jack'],
+        'Age': [25, 30, 22, 35, 29, 40, 31, 28, 26, 33],
+        'Gender': ['Female', 'Male', 'Male', 'Male', 'Female', 'Male', 'Female', 'Female', 'Female', 'Male'],
+        'City': ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'Austin'],
+        'Occupation': ['Engineer', 'Doctor', 'Artist', 'Teacher', 'Nurse', 'Developer', 'Scientist', 'Designer', 'Manager', 'Entrepreneur']
+    }
+    import pandas as pd
+    df = pd.DataFrame(data)
+    
+    save_file(df, config, 'csv', str(Path(config['output_path']) / 'dataframe_saved_to_csv.gzip'), compression='gzip')
+    save_file(df, config, 'json', str(Path(config['output_path']) / 'dataframe_saved_to_json.json'))
+    save_file(df, config, 'parquet', str(Path(config['output_path']) / 'dataframe_saved_to_parquet.parquet.gzip'), compression='gzip')
+    #save_file(df, config, 'pickle', str(Path(config['output_path']) / 'dataframe_saved_to_pickle.pickle'))
+    
+    logger.info(df.head())
+    
+    # load data from platform
+    df_read = load_file(config, str(Path(config['output_path']) / 'dataframe_saved_to_csv.gzip'), 'csv', compression='gzip')
+    logger.info(df_read)
+    df_read = load_file(config, str(Path(config['output_path']) / 'dataframe_saved_to_json.json'), 'json')
+    logger.info(df_read)
+    df_read = load_file(config, str(Path(config['output_path']) / 'dataframe_saved_to_parquet.parquet.gzip'), 'parquet')
+    logger.info(df_read)
     
     return config
     

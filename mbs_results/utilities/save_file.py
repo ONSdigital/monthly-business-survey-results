@@ -1,14 +1,8 @@
 import os
-import boto3
 import pandas as pd
 from typing import Union, Dict
-from io import BytesIO, StringIO
-from botocore.exceptions import ClientError
 from mbs_results import logger
 from mbs_results.utilities.s3_operations_utils import upload_dataframe_to_s3
-
-# Assume config is a global or passed variable containing platform details
-# Example: config = {'platform': 'local'} or config = {'platform': 'network'}
 
 def save_file(dataframe: pd.DataFrame,
               config: Dict[str, str],
@@ -32,24 +26,24 @@ def save_file(dataframe: pd.DataFrame,
     config : Dict[str, str]
         A dictionary containing configuration settings, including:
             - 'platform' : str
-                Specifies the platform ('network' for S3, 'local' for local storage).
+                Specifies the platform ('s3' for S3, 'network' for network or local storage).
             - 's3_bucket' : str
-                The name of the S3 bucket (used only if platform is 'network').
+                The name of the S3 bucket (used only if platform is 's3').
     file_format : str
         The file format to save the DataFrame as (e.g., 'csv', 'parquet', 'json').
     file_path : str
-        The path where the file should be saved. If 'network' is specified as the platform, this is the S3 key.
+        The path where the file should be saved. If 's3' is specified as the platform, this is the S3 key.
     index : bool, optional
         Whether to write the DataFrame's index to the file. Default is `False`.
     compression : Union[str, None], optional
         Compression format to use (e.g., 'gzip', 'zip'). Default is `None`.
 
     Raises:
-        ValueError: If an unsupported 'platform' value is provided in the config (not 'network' or 'local').
+        ValueError: If an unsupported 'platform' value is provided in the config (not 'network' or 's3').
 
     Example:
         save_file(dataframe=df,
-                  config={'platform': 'local', 's3_bucket': 'my-bucket'},
+                  config={'platform': 's3', 's3_bucket': 'my-bucket'},
                   file_format='csv',
                   file_path='/path/to/file.csv',
                   index=False,
@@ -59,7 +53,7 @@ def save_file(dataframe: pd.DataFrame,
     
     """
     
-    if config['platform'] == 'network':
+    if config['platform'] == 's3':
         upload_dataframe_to_s3(            
             bucket_name=config['s3_bucket'],
             s3_key=file_path,
@@ -68,7 +62,7 @@ def save_file(dataframe: pd.DataFrame,
             index=index,
             compression=compression
         )
-    elif config['platform'] == 'local':
+    elif config['platform'] == 'network':
         save_dataframe_locally(
             dataframe=dataframe,
             file_path=file_path,
@@ -77,7 +71,7 @@ def save_file(dataframe: pd.DataFrame,
             compression=compression
         )
     else:
-        raise ValueError(f"Unknown platform [{config['platform']}]. Only 'network' (S3) or 'local' are supported.")
+        raise ValueError(f"Unknown platform [{config['platform']}]. Only 's3' (S3) or 'network' are supported.")
     
 
 def save_dataframe_locally(

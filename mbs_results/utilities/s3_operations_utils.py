@@ -7,7 +7,7 @@ from typing import List, Union, Optional
 from io import BytesIO, StringIO
 from mbs_results import logger
 
-def connect_to_s3(s3_client: Optional[boto3.client] = None) -> boto3.client:
+def connect_to_s3() -> boto3.client:
     """
     Creates or returns an existing S3 client.
 
@@ -17,8 +17,7 @@ def connect_to_s3(s3_client: Optional[boto3.client] = None) -> boto3.client:
 
     Parameters
     ----------
-    s3_client : Optional[boto3.client], optional
-        An optional pre-existing S3 client to be used. If not provided, a new S3 client will be created.
+    None
 
     Returns
     -------
@@ -30,17 +29,13 @@ def connect_to_s3(s3_client: Optional[boto3.client] = None) -> boto3.client:
     # Use the function to create a new S3 client
     s3 = connect_to_s3()
 
-    # Or pass in an existing S3 client
-    existing_s3_client = boto3.client('s3')
-    s3 = connect_to_s3(existing_s3_client)
 
     Notes
     -----
-    - If the `s3_client` is not provided, the function will create a new client using `boto3.client("s3")`.
     - The client will be configured with a custom SSL certificate located at `/etc/pki/tls/certs/ca-bundle.crt`.
     - Logs a success message after successfully connecting to AWS S3.
     """
-    s3_client = s3_client or boto3.client("s3")
+    s3_client = boto3.client("s3")
     raz_client.configure_ranger_raz(s3_client, ssl_file='/etc/pki/tls/certs/ca-bundle.crt')
     logger.info("Successfully connected to AWS S3.")
     return s3_client
@@ -271,7 +266,7 @@ def upload_dataframe_to_s3(
             # Convert DataFrame to CSV (in-memory)
             file_obj = StringIO()
             dataframe.to_csv(file_obj, index=index, compression=compression)
-            file_obj.seek(0)  # Rewind the file object to the beginning for reading
+            file_obj.seek(0)  
             # Convert StringIO to bytes
             file_obj_bytes = file_obj.getvalue().encode('utf-8')
 
@@ -279,7 +274,7 @@ def upload_dataframe_to_s3(
             # Convert DataFrame to JSON (in-memory)
             file_obj = StringIO()
             dataframe.to_json(file_obj, orient='records', lines=True)
-            file_obj.seek(0)  # Rewind the file object to the beginning for reading
+            file_obj.seek(0) 
             # Convert StringIO to bytes
             file_obj_bytes = file_obj.getvalue().encode('utf-8')
 
@@ -287,7 +282,7 @@ def upload_dataframe_to_s3(
             # Convert DataFrame to Parquet (in-memory)
             file_obj = BytesIO()
             dataframe.to_parquet(file_obj, compression=compression)
-            file_obj.seek(0)  # Rewind the file object to the beginning for reading
+            file_obj.seek(0) 
             file_obj_bytes = file_obj.getvalue()
 
         else:
@@ -297,16 +292,13 @@ def upload_dataframe_to_s3(
         if file_obj_bytes is None or len(file_obj_bytes) == 0:
             raise ValueError(f"Failed to convert DataFrame to {file_format} format. The file is empty.")
 
-        # Upload the file to S3
         s3_client.put_object(Bucket=bucket_name, Key=s3_key, Body=file_obj_bytes, ContentType=f"application/{file_format}")
         logger.info(f"DataFrame uploaded to S3 at '{s3_key}' as {file_format} format.")
 
     except ClientError as e:
-        # Handle ClientError exceptions
         logger.error(f"ClientError occurred while uploading DataFrame to S3: {e}")
-        raise e  # Re-raise the original exception
+        raise e
     except Exception as e:
-        # Catch all other exceptions and raise a generic exception
         logger.error(f"An unexpected error occurred while uploading DataFrame to S3: {e}")
         raise Exception(f"Failed to upload DataFrame to S3 at {s3_key}. Error: {str(e)}")
     
@@ -386,7 +378,7 @@ def load_dataframe_from_s3(
             file_obj_str = file_obj.decode('utf-8')
             return pd.read_json(StringIO(file_obj_str), lines=True)
         elif file_format == 'parquet':
-            return pd.read_parquet(BytesIO(file_obj), compression=compression)
+            return pd.read_parquet(BytesIO(file_obj))
         else:
             raise ValueError("Invalid file format. Supported formats are 'csv', 'json', or 'parquet'.")
 
