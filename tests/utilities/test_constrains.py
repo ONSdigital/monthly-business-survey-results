@@ -221,8 +221,8 @@ scenarios = [
 @pytest.mark.parametrize("base_file_name", scenarios)
 def test_update_derived_weight_and_winsorised_value(filepath, base_file_name):
 
-    df_in = pd.read_csv(filepath / base_file_name / ".csv")
-    df_expected = pd.read_csv(filepath / base_file_name / "_expected.csv")
+    df_in = pd.read_csv(filepath / Path(base_file_name + ".csv"))
+    df_expected = pd.read_csv(filepath / Path(base_file_name + "_expected.csv"))
     df_actual = update_derived_weight_and_winsorised_value(
         df_in,
         "reference",
@@ -232,5 +232,7 @@ def test_update_derived_weight_and_winsorised_value(filepath, base_file_name):
         "outlier_weight",
         "winsorised_value",
     )
+
+    print(df_actual.columns)
 
     assert_frame_equal(df_actual, df_expected)

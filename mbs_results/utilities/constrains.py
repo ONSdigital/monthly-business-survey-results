@@ -498,6 +498,11 @@ def update_derived_weight_and_winsorised_value(
 
         derived_all.append(df_spp_id)
 
+    # case when nothing to update
+    if not derived_all:
+        df["post_winsorised"] = False
+        return df
+
     # post_win_derives has all references period question codes which need updating
     # unique values are identified by reference period questioncode
 
