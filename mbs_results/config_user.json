@@ -2,8 +2,8 @@
     "config_paths": {
         "platform": "network",
         "s3_bucket": "onscdp-dev-data01-5320d6ca",
-        "local_drive_directory": "./",        
-        "parent_path": "mbs_results_files/",        
+        "local_drive_directory": "./",
+        "parent_path": "mbs_results_files/",
         "input_path": "in/",
         "output_path": "out/",
         "mapping_path": "mapping_files/",

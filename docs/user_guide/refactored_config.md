@@ -81,7 +81,7 @@ The behaviour of the I/O is controlled by a `config`. It has the following key v
 * Store files in S3 Bucket
     * `"platform": "s3"`,
     * `"s3_bucket": "onscdp-dev-data01-5320d6ca"`
-    * `"parent_path": "bat/mbs_results_files/"`, 
+    * `"parent_path": "bat/mbs_results_files/"`,
 * Store files in local directory (network)
     * `"platform": "network"`,
     * `"local_drive_directory": "./"`
@@ -89,4 +89,4 @@ The behaviour of the I/O is controlled by a `config`. It has the following key v
 * Store files in local directory (PC)
     * `"platform": "network"`,
     * `"local_drive_directory": "D:/"`
-    * `"parent_path": "mbs_results_files/"`,   
+    * `"parent_path": "mbs_results_files/"`,

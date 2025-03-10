@@ -1,17 +1,18 @@
 import json
 import os
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
+
 from mbs_results import logger
+from mbs_results.utilities.load_file_object import load_file
 from mbs_results.utilities.s3_operations_utils import (
     connect_to_s3,
     create_folder_if_not_exists,
     create_s3_object,
+    is_object_present,
     upload_dataframe_to_s3,
-    is_object_present
 )
 from mbs_results.utilities.save_file import save_file
-from mbs_results.utilities.load_file_object import load_file
 
 
 def load_config_file(config_file: str) -> Dict[str, Any]:
@@ -34,7 +35,6 @@ def load_config_file(config_file: str) -> Dict[str, Any]:
 
 
 def construct_path(config_data: Dict[str, str]) -> str:
-    
     """
     Constructs the full path for each file using the provided configuration.
 
@@ -46,23 +46,25 @@ def construct_path(config_data: Dict[str, str]) -> str:
     ----------
     config_data : Dict[str, str]
         A dictionary containing configuration keys and their corresponding file paths.
-    
+
     Returns
     -------
     Dict[str, str]
         A dictionary with the same keys as the input, but with the full file paths
             constructed by joining the base directory with the relative paths
     """
-    
+
     config_paths = config_data["config_paths"]
     file_paths = config_data["file_paths"]
-    
+
     try:
         # Get the parent directory based on the mapping
         root_dir = config_paths.get("s3_bucket")
         # Check if root_dir is None or an empty string
         data_stored_in_s3 = False
-        if config_paths.get("s3_bucket") not in (None, "") and config_paths.get("platform") not in (
+        if config_paths.get("s3_bucket") not in (None, "") and config_paths.get(
+            "platform"
+        ) not in (
             None,
             "",
             "network",
@@ -73,19 +75,24 @@ def construct_path(config_data: Dict[str, str]) -> str:
         else:
             root_dir = config_paths.get("local_drive_directory", None)
             if root_dir is None:
-                logger.info("Configuration does not contain 's3_bucket' or "
-                    "'local_drive_directory' key.")
+                logger.info(
+                    "Configuration does not contain 's3_bucket' or "
+                    "'local_drive_directory' key."
+                )
                 raise KeyError(
                     "Configuration does not contain 's3_bucket' or "
                     "'local_drive_directory' key."
                 )
-        
-        logger.info(f"{config_paths.get('platform')} Platform and {root_dir} parent directory in used")
-            
+
+        logger.info(
+            f"{config_paths.get('platform')} Platform and {root_dir} parent directory in used"
+        )
 
     except KeyError:
-        logger.info("Configuration does not contain 's3_bucket' or "
-                    "'local_drive_directory' key.")
+        logger.info(
+            "Configuration does not contain 's3_bucket' or "
+            "'local_drive_directory' key."
+        )
         raise KeyError(
             "Configuration does not contain 's3_bucket' or 'local_drive_directory' key."
         )
@@ -150,8 +157,8 @@ def construct_path(config_data: Dict[str, str]) -> str:
         if data_stored_in_s3:
             # [optional] check if the file exist, else create an empty file as placeholder
             object_status = is_object_present(s3_client, s3_bucket, str(config[key]))
-            logger.info(f"Is the object {str(config[key])} present? {object_status}") 
-            if not object_status:     
+            logger.info(f"Is the object {str(config[key])} present? {object_status}")
+            if not object_status:
                 # Create the S3 object
                 create_s3_object(s3_client, s3_bucket, str(config[key]))
         logger.info(f"construct_path full_path for Key {key}: {config[key]}")
@@ -160,7 +167,7 @@ def construct_path(config_data: Dict[str, str]) -> str:
 
 def ensure_directory_exists(directory_path: Path) -> None:
     """
-    Ensures that the specified directory exists. If the directory does not exist, 
+    Ensures that the specified directory exists. If the directory does not exist,
     it creates it.
 
     This function checks whether the directory at the given path exists. If it
@@ -178,7 +185,7 @@ def ensure_directory_exists(directory_path: Path) -> None:
         This function does not return any value. It only log messages about
         the directory's status.
     """
-    
+
     if os.path.isdir(directory_path):
         logger.info(f"Directory {directory_path} exists")
     else:
@@ -192,12 +199,12 @@ def load_config():
 
     # Get all file paths and check directories
     config = construct_path(config_data)
-    
-    config.update(config_data['user_data'])
-    
-    # Update config with key-value pairs from config_data where the key 
+
+    config.update(config_data["user_data"])
+
+    # Update config with key-value pairs from config_data where the key
     # doesn't already exisit in config
-    for key, value in config_data['config_paths'].items():
+    for key, value in config_data["config_paths"].items():
         if key not in config:
             config[key] = value
 
@@ -207,41 +214,113 @@ def load_config():
 
     # Update the config dictionary with the constants
     config.update(config_dev_data)
-    
-    
+
     # Print all the dynamically constructed paths
     for key, path in config.items():
         logger.info(f"key: {key} | value: {path}")
-        
-    
+
     # Create a dummy DataFrame with 5 columns and 10 rows of personal information
     data = {
-        'Name': ['Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank', 'Grace', 'Hannah', 'Ivy', 'Jack'],
-        'Age': [25, 30, 22, 35, 29, 40, 31, 28, 26, 33],
-        'Gender': ['Female', 'Male', 'Male', 'Male', 'Female', 'Male', 'Female', 'Female', 'Female', 'Male'],
-        'City': ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia', 'San Antonio', 'San Diego', 'Dallas', 'Austin'],
-        'Occupation': ['Engineer', 'Doctor', 'Artist', 'Teacher', 'Nurse', 'Developer', 'Scientist', 'Designer', 'Manager', 'Entrepreneur']
+        "Name": [
+            "Alice",
+            "Bob",
+            "Charlie",
+            "David",
+            "Eve",
+            "Frank",
+            "Grace",
+            "Hannah",
+            "Ivy",
+            "Jack",
+        ],
+        "Age": [25, 30, 22, 35, 29, 40, 31, 28, 26, 33],
+        "Gender": [
+            "Female",
+            "Male",
+            "Male",
+            "Male",
+            "Female",
+            "Male",
+            "Female",
+            "Female",
+            "Female",
+            "Male",
+        ],
+        "City": [
+            "New York",
+            "Los Angeles",
+            "Chicago",
+            "Houston",
+            "Phoenix",
+            "Philadelphia",
+            "San Antonio",
+            "San Diego",
+            "Dallas",
+            "Austin",
+        ],
+        "Occupation": [
+            "Engineer",
+            "Doctor",
+            "Artist",
+            "Teacher",
+            "Nurse",
+            "Developer",
+            "Scientist",
+            "Designer",
+            "Manager",
+            "Entrepreneur",
+        ],
     }
     import pandas as pd
+
     df = pd.DataFrame(data)
-    
-    save_file(df, config, 'csv', str(Path(config['output_path']) / 'dataframe_saved_to_csv.gzip'), compression='gzip')
-    save_file(df, config, 'json', str(Path(config['output_path']) / 'dataframe_saved_to_json.json'))
-    save_file(df, config, 'parquet', str(Path(config['output_path']) / 'dataframe_saved_to_parquet.parquet.gzip'), compression='gzip')
-    #save_file(df, config, 'pickle', str(Path(config['output_path']) / 'dataframe_saved_to_pickle.pickle'))
-    
+
+    save_file(
+        df,
+        config,
+        "csv",
+        str(Path(config["output_path"]) / "dataframe_saved_to_csv.gzip"),
+        compression="gzip",
+    )
+    save_file(
+        df,
+        config,
+        "json",
+        str(Path(config["output_path"]) / "dataframe_saved_to_json.json"),
+    )
+    save_file(
+        df,
+        config,
+        "parquet",
+        str(Path(config["output_path"]) / "dataframe_saved_to_parquet.parquet.gzip"),
+        compression="gzip",
+    )
+    # save_file(df, config, 'pickle', str(Path(config['output_path']) / 'dataframe_saved_to_pickle.pickle'))
+
     logger.info(df.head())
-    
+
     # load data from platform
-    df_read = load_file(config, str(Path(config['output_path']) / 'dataframe_saved_to_csv.gzip'), 'csv', compression='gzip')
+    df_read = load_file(
+        config,
+        str(Path(config["output_path"]) / "dataframe_saved_to_csv.gzip"),
+        "csv",
+        compression="gzip",
+    )
     logger.info(df_read)
-    df_read = load_file(config, str(Path(config['output_path']) / 'dataframe_saved_to_json.json'), 'json')
+    df_read = load_file(
+        config,
+        str(Path(config["output_path"]) / "dataframe_saved_to_json.json"),
+        "json",
+    )
     logger.info(df_read)
-    df_read = load_file(config, str(Path(config['output_path']) / 'dataframe_saved_to_parquet.parquet.gzip'), 'parquet')
+    df_read = load_file(
+        config,
+        str(Path(config["output_path"]) / "dataframe_saved_to_parquet.parquet.gzip"),
+        "parquet",
+    )
     logger.info(df_read)
-    
+
     return config
-    
 
 
 # Example of how to use these functions

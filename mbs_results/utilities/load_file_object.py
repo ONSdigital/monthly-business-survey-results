@@ -1,22 +1,23 @@
 import os
+from typing import Dict, Union
+
 import pandas as pd
-from typing import Union, Dict
+
 from mbs_results import logger
 from mbs_results.utilities.s3_operations_utils import load_dataframe_from_s3
 
 
 def load_file(
-    config: Dict[str, str], 
-    file_path: str, 
-    file_format: str, 
-    compression: Union[str, None] = None
-    ) -> pd.DataFrame:
-    
+    config: Dict[str, str],
+    file_path: str,
+    file_format: str,
+    compression: Union[str, None] = None,
+) -> pd.DataFrame:
     """
     Reads a file either from S3 or from the local file system depending on the platform specified in the config.
 
     This function reads a file based on the specified platform in the `config` dictionary. If the platform is 's3',
-    the file is loaded from an S3 bucket. If the platform is 'network', the file is loaded from the local file system. 
+    the file is loaded from an S3 bucket. If the platform is 'network', the file is loaded from the local file system.
     The function automatically handles the compression (if provided) based on the file format.
 
     Parameters
@@ -43,7 +44,7 @@ def load_file(
     ------
     ValueError
         If an unsupported platform is provided in the config or if the file format is invalid.
-    
+
     Example
     -------
     config = {'platform': 's3', 's3_bucket': 'my-bucket'}
@@ -59,34 +60,29 @@ def load_file(
     - Supported file formats are 'csv', 'json', and 'parquet'. If an unsupported file format is specified, a `ValueError`
       will be raised.
     """
-    
-    if config['platform'] == 's3':
+
+    if config["platform"] == "s3":
         return load_dataframe_from_s3(
-            bucket_name=config['s3_bucket'],
+            bucket_name=config["s3_bucket"],
             s3_key=file_path,
             file_format=file_format,
-            compression=compression
+            compression=compression,
         )
-    elif config['platform'] == 'network': 
+    elif config["platform"] == "network":
         return load_dataframe_locally(
-            file_path=file_path,
-            file_format=file_format,
-            compression=compression
+            file_path=file_path, file_format=file_format, compression=compression
         )
     else:
         raise ValueError("Unknown platform. Only 's3' (S3) or 'network' are supported.")
-    
+
 
 def load_dataframe_locally(
-    file_path: str, 
-    file_format: str, 
-    compression: Union[str, None] = None
+    file_path: str, file_format: str, compression: Union[str, None] = None
 ) -> pd.DataFrame:
-    
     """
     Reads a DataFrame from the local file system in the specified format.
 
-    This function reads a file from the local file system and loads it into a pandas DataFrame. It supports 
+    This function reads a file from the local file system and loads it into a pandas DataFrame. It supports
     reading files in 'csv', 'json', and 'parquet' formats. Compression can be specified if the file is compressed.
 
     Parameters
@@ -127,17 +123,21 @@ def load_dataframe_locally(
     - The function automatically handles compression when specified, depending on the file format.
     - Supported file formats are 'csv', 'json', and 'parquet'. Any other file format will raise a `ValueError`.
     """
-    
+
     try:
-        if file_format == 'csv':
+        if file_format == "csv":
             return pd.read_csv(file_path, compression=compression)
-        elif file_format == 'json':
+        elif file_format == "json":
             return pd.read_json(file_path, lines=True)
-        elif file_format == 'parquet':
+        elif file_format == "parquet":
             return pd.read_parquet(file_path)
         else:
-            raise ValueError("Invalid file format. Supported formats are 'csv', 'json', or 'parquet'.")
-    
+            raise ValueError(
+                "Invalid file format. Supported formats are 'csv', 'json', or 'parquet'."
+            )
+
     except Exception as e:
-        logger.error(f"An error occurred while reading DataFrame locally from {file_path}: {e}")
+        logger.error(
+            f"An error occurred while reading DataFrame locally from {file_path}: {e}"
+        )
         raise e
