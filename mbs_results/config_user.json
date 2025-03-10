@@ -17,10 +17,6 @@
     "sic_domain_mapping_path": "",
     "threshold_filepath":"",
 
-    "back_data_type":"type",
-    "imputation_marker_col":"imputation_flags_adjustedresponse",
-
-
     "period_selected": 202303,
     "current_period" : 202303,
     "previous_period" : 202302,
