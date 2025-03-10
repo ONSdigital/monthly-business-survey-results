@@ -1,7 +1,7 @@
 {
     "back_data_type":"type",
     "imputation_marker_col":"imputation_flags_adjustedresponse",
-    
+
     "auxiliary": "frotover",
     "auxiliary_converted": "converted_frotover",
     "calibration_factor": "calibration_factor",

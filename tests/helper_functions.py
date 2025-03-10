@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import pandas as pd
+
 from mbs_results.utilities.merge_two_config_files import merge_two_config_files
 
 
@@ -39,9 +40,9 @@ def create_testing_config(file_paths):
 
     config = merge_two_config_files(
         config_user_path="mbs_results/config_user.json",
-        config_dev_path="mbs_results/config_dev.json"
-        )
-    
+        config_dev_path="mbs_results/config_dev.json",
+    )
+
     # update the file paths with those supplied from the test data
     config.update(file_paths)
 

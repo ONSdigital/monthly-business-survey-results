@@ -3,7 +3,7 @@ import json
 
 def merge_two_config_files(
     config_user_path="mbs_results/config_user.json",
-    config_dev_path="mbs_results/config_dev.json"
+    config_dev_path="mbs_results/config_dev.json",
 ):
     """
     Load and merge two configuration files: a user-specific config and a
@@ -12,10 +12,12 @@ def merge_two_config_files(
     Parameters
     ----------
     config_user_path : str, optional
-        Path to the user-specific configuration file (default is "mbs_results/config_user.json").
+        Path to the user-specific configuration file
+        (default is "mbs_results/config_user.json").
     config_dev_path : str, optional
-        Path to the dev-specific configuration file (default is "mbs_results/config_dev.json").
-    
+        Path to the dev-specific configuration file
+        (default is "mbs_results/config_dev.json").
+
     Returns
     -------
     config : Dict
