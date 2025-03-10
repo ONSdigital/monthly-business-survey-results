@@ -30,13 +30,11 @@ def period_zero_se_wrapper():
     # Read in back data
     back_data = read_and_process_back_data(config)
 
-    # back_data = enfoce_dtypes...()
-
     # Lots of "glueing" other functions together so df is in a format for estimation
     # Another method could be to look at imputation, and try to keep original imputation
     # markers.
 
-    # Have to drop derrived questions in this way, other method dropped "derived"
+    # Have to drop derived questions in this way, other method dropped "derived"
     # imputation markers, these are needed because a reference can change form type
     # i.e. have 46 as derived in one period, then 40 derived in next period and 46 used
     # to derive 40
@@ -161,8 +159,6 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
 
 
 if __name__ == "__main__":
-    # config = load_config(path="./mbs_results/config.json")
-    # qa_selective_editing_outputs(config)
     print("wrapper start")
     period_zero_se_wrapper()
     print("wrapper end")
