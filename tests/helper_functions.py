@@ -4,6 +4,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from mbs_results.utilities.merge_two_config_files import merge_two_config_files
+
 
 def load_and_format(filename):
     """Load csv as pandas dataframe and cast period column to datetime type"""
@@ -35,11 +37,14 @@ def does_not_raise():
 
 def create_testing_config(file_paths):
     """Copy config to testing directory and update file_paths"""
-    with open("mbs_results/config.json") as f:
-        config = json.load(f)
 
+    config = merge_two_config_files(
+        config_user_path="mbs_results/config_user.json",
+        config_dev_path="mbs_results/config_dev.json",
+    )
+
+    # update the file paths with those supplied from the test data
     config.update(file_paths)
 
     with open("config.json", "w") as f:
-
         json.dump(config, f)
