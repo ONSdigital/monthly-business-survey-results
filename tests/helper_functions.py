@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from pathlib import Path
 
 import pandas as pd
+from mbs_results.utilities.merge_two_config_files import merge_two_config_files
 
 
 def load_and_format(filename):
@@ -36,20 +37,13 @@ def does_not_raise():
 def create_testing_config(file_paths):
     """Copy config to testing directory and update file_paths"""
 
-    # merger the two config files into config.json
-    # Load the user config
-    with open("mbs_results/config_user.json", "r") as f:
-        user_config = json.load(f)
-
-    # Load the constants config
-    with open("mbs_results/config_constants.json", "r") as f:
-        constant_config = json.load(f)
-
-    # Merge both config files
-    config = {**user_config, **constant_config}
-
+    config = merge_two_config_files(
+        config_user_path="mbs_results/config_user.json",
+        config_dev_path="mbs_results/config_dev.json"
+        )
+    
+    # update the file paths with those supplied from the test data
     config.update(file_paths)
 
     with open("config.json", "w") as f:
-
         json.dump(config, f)

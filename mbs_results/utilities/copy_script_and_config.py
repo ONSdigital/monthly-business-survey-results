@@ -1,8 +1,10 @@
 import os
 import shutil
+import json
 
 import mbs_results
 from mbs_results.utilities.merge_two_config_files import merge_two_config_files
+from mbs_results import logger
 
 
 def copy_script_and_config():
@@ -26,11 +28,18 @@ def copy_script_and_config():
     main_path = os.path.join(target_path, "main.py")
     config_path = os.path.join(target_path, "config.json")
 
-    # Merge the config_user.json and config_constants.json
+    # Append main.py and config.json
+    config_user_path = os.path.join(target_path, "config_user.json")
+    config_dev_path = os.path.join(target_path, "config_dev.json")
+    
+    # Merge the config_user.json and config_dev.json
     # into config.json in the mbs_results dir
-    user_config_path = os.path.join(target_path, "config_user.json")
-    constants_config_path = os.path.join(target_path, "config_constants.json")
-    merge_two_config_files(user_config_path, constants_config_path, config_path)
+    config = merge_two_config_files(config_user_path, config_dev_path)
+    logger.info(f"{config_path} created from merging {config_user_path} and {config_dev_path}")
+    
+    # Dump the config.json  
+    with open(config_path, "w") as f:
+        json.dump(config, f)
 
     # Get the destination for the copy
     working_directory = os.getcwd()
@@ -38,3 +47,7 @@ def copy_script_and_config():
     # Copy the files
     shutil.copy(main_path, working_directory)
     shutil.copy(config_path, working_directory)
+    
+    # remove the config.json. 
+    # Note that config. json = concatenation of config_user.json and config_dev.json
+    os.remove(config_path)
