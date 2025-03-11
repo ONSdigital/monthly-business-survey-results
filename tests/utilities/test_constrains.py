@@ -215,6 +215,9 @@ scenarios = [
     "no_further_processing_required",
     "outlier_identified_example_1",
     "outlier_identified_example_2",
+    "outlier_identified_example_q46_q47",
+    "outlier_identified_example_derived_q42",
+    "outlier_identified_example_derived_q46",
 ]
 
 
