@@ -3,6 +3,7 @@ from mbs_results.main import run_mbs_main
 input_path = "tests/data/test_main/input/"
 
 test_config = {
+    "platform": "network",
     "bucket": "",
     "calibration_group_map_path": input_path
     + "test_cell_no_calibration_group_mapping.csv",
