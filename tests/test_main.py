@@ -1,7 +1,3 @@
-import os
-
-from helper_functions import create_testing_config
-
 from mbs_results.main import run_mbs_main
 
 input_path = "tests/data/test_main/input/"
@@ -29,12 +25,13 @@ test_config = {
 
 
 def test_main():
-    """Testing if main works, this test aims to check if all methods are
-    integrated together. Updating config to match testing data, also saving
-    config in tests directory.
     """
-    create_testing_config(test_config)
+    Test the main function to ensure all methods are integrated correctly.
+    Update the configuration to match the testing data and pass on the
+    config_user_test as a parameter to run_mbs_main. The config
+    dictionary will be updated in the mbs_results/utilites/inputs.py.
+    """
+    # Create config dictionary
+    config_user_test = test_config
 
-    run_mbs_main()
-
-    os.remove("config.json")
+    run_mbs_main(config_user_dict=config_user_test)
