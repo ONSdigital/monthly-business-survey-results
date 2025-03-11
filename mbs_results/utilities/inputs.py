@@ -1,6 +1,7 @@
 import os
-from mbs_results import logger
+
 import mbs_results
+from mbs_results import logger
 from mbs_results.utilities.merge_two_config_files import merge_two_config_files
 
 
