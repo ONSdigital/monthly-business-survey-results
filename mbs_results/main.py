@@ -1,5 +1,3 @@
-import logging
-
 from mbs_results.estimation.estimate import estimate
 from mbs_results.imputation.impute import impute
 from mbs_results.outlier_detection.detect_outlier import detect_outlier
@@ -15,14 +13,6 @@ from mbs_results.utilities.validation_checks import (
     validate_imputation,
     validate_outlier_detection,
     validate_staging,
-)
-
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    filename="main_logger.txt",
-    level=logging.DEBUG,
-    format="%(asctime)s %(levelname)s %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
 )
 
 
