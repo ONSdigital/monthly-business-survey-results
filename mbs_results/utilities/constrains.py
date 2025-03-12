@@ -428,3 +428,99 @@ def calculate_derived_outlier_weights(
     )
 
     return df_pre_winsorised
+
+
+def update_derived_weight_and_winsorised_value(
+    df: pd.DataFrame,
+    reference: str,
+    period: str,
+    question_code: str,
+    form_type_spp: str,
+    outlier_weight: str,
+    winsorised_value: str,
+) -> pd.DataFrame:
+    """Updates outlier weights and winsorised values to match  the components
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    reference : str
+        Column name containing reference.
+    period : str
+        Column name containing period.
+    question_code : str
+        Column name containing question code.
+    form_type_spp : str
+        Column name containing form type spp.
+    outlier_weight : str
+        Column name containing outlier weight (refered also as o-weight).
+    winsorised_value : str
+        Column name containing winsorised values (response * outlier weight).
+    Returns
+    -------
+    df : pd.Dataframe
+        Original dataframe with weights and winsorised values updated to match
+        components.
+    """
+    derive_map = create_derive_map(df, form_type_spp)
+
+    derived_all = []
+
+    for spp_id in derive_map:
+
+        df_spp_id = df[df[form_type_spp] == spp_id].copy()
+
+        df_spp_id = df_spp_id.pivot(
+            index=[reference, period], columns=question_code, values=winsorised_value
+        )
+
+        df_spp_id["post_winsorised"] = df_spp_id[
+            derive_map[spp_id]["derive"]
+        ] != df_spp_id[derive_map[spp_id]["from"]].sum(axis=1)
+
+        df_spp_id["post_win_o_weight"] = (
+            df_spp_id[derive_map[spp_id]["from"]].sum(axis=1)
+            / df_spp_id[derive_map[spp_id]["derive"]]
+        )
+
+        df_spp_id["post_winsorised_value"] = df_spp_id[derive_map[spp_id]["from"]].sum(
+            axis=1
+        )
+
+        df_spp_id = df_spp_id[
+            ["post_winsorised", "post_win_o_weight", "post_winsorised_value"]
+        ]
+
+        df_spp_id[question_code] = derive_map[spp_id]["derive"]
+
+        df_spp_id.reset_index(inplace=True)
+
+        derived_all.append(df_spp_id)
+
+    # case when nothing to update
+    if not derived_all:
+        df["post_winsorised"] = False
+        return df
+
+    # post_win_derives has all references period question codes which need updating
+    # unique values are identified by reference period questioncode
+
+    post_win_derives = pd.concat(derived_all)
+
+    df = pd.merge(
+        left=df,
+        right=post_win_derives,
+        how="left",
+        on=[reference, period, question_code],
+    )
+    # fill na with false
+    df["post_winsorised"] = df["post_winsorised"].fillna(0).astype("bool")
+
+    df.loc[df["post_winsorised"], outlier_weight] = df["post_win_o_weight"]
+
+    df.loc[df["post_winsorised"], winsorised_value] = df["post_winsorised_value"]
+
+    df.drop(columns=["post_win_o_weight", "post_winsorised_value"], inplace=True)
+
+    return df
