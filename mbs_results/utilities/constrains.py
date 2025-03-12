@@ -120,7 +120,9 @@ def constrain(
         For form id 13, question number 40 is created by summing 46,47.
         For form id 14, question number 40 is created by summing 42,43.
         For form id 15, question number 46 is created from 40.
+            # Todo: question number 47 (with value of 0) is also created
         For form id 16, question number 42 is created from 40.
+            # Todo: question number 43 (with value of 0) also created
 
     In addition for all form types (when question number is available):
 
@@ -307,8 +309,8 @@ def create_derive_map(df: pd.DataFrame, spp_form_id: str):
     derive_map = {
         13: {"derive": 40, "from": [46, 47]},
         14: {"derive": 40, "from": [42, 43]},
-        15: {"derive": 46, "from": [40]},
-        16: {"derive": 42, "from": [40]},
+        15: {"derive": 46, "from": [40, 47]}, # Needs to derive 46 and 47
+        16: {"derive": 42, "from": [40, 43]}, # Needs to derive 42 and 43
     }
     form_ids_present = df[spp_form_id].dropna().unique()
     ids_not_present = [x for x in derive_map.keys() if x not in form_ids_present]
