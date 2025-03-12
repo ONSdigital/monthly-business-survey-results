@@ -10,9 +10,6 @@ def join_l_values(df, l_values_path, classification_values_path, config):
     l_values = pd.read_csv(
         l_values_path, dtype={"question_no": "int64", "classification": "str"}
     )
-    # l_values = l_values.drop_duplicates(['question_no','classification'])
-
-    # l_values = l_values.drop(columns=["period"])
 
     # Merge on classification SIC map (merge on SIC to get classsificaion on df -> )
     classification_values = pd.read_csv(classification_values_path, dtype=str)
