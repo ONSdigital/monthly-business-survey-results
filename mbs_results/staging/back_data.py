@@ -111,10 +111,14 @@ def read_back_data(config: dict) -> pd.DataFrame:
     cp_period = cp_df[config["period"]].unique()
     finalsel_period = finalsel[config["period"]].unique()
 
-    qv_start_of_period = qv_period + pd.DateOffset(months=1) == finalsel_period
-    cp_start_of_period = cp_period + pd.DateOffset(months=1) == finalsel_period
+    qv_start_of_period_condition_met = (
+        qv_period + pd.DateOffset(months=1) == finalsel_period
+    )
+    cp_start_of_period_condition_met = (
+        cp_period + pd.DateOffset(months=1) == finalsel_period
+    )
 
-    if qv_start_of_period and cp_start_of_period:
+    if qv_start_of_period_condition_met and cp_start_of_period_condition_met:
 
         qv_df[config["period"]] = qv_df[config["period"]] + pd.DateOffset(months=1)
         cp_df[config["period"]] = cp_df[config["period"]] + pd.DateOffset(months=1)
@@ -130,7 +134,7 @@ def read_back_data(config: dict) -> pd.DataFrame:
         cp_df, finalsel, how=join_type, on=[config["period"], config["reference"]]
     )
 
-    if qv_start_of_period and cp_start_of_period:
+    if qv_start_of_period_condition_met and cp_start_of_period_condition_met:
         # Creating missing questions for period 0 SE process
 
         # Candidate to refactor into a function?
