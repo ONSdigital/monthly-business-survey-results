@@ -16,7 +16,7 @@ from mbs_results.utilities.validation_checks import qa_selective_editing_outputs
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename="test.txt",
+    filename="period_zero_se_wrapper.txt",
     level=logging.DEBUG,
     format="%(asctime)s %(levelname)s %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
@@ -24,6 +24,14 @@ logging.basicConfig(
 
 
 def period_zero_se_wrapper():
+    """
+    wrapper for selective editing outputs when using period zero data supplied from csw
+    function does some minor imputation processing to update cell_number and imputation
+    class using new idbr data.
+    Estimation and outlier detection is then run on the processed data.
+    Selective editing question and contributor files are then produced
+
+    """
 
     config = load_config(path="./mbs_results/config.json")
 
@@ -54,18 +62,18 @@ def period_zero_se_wrapper():
 
     additional_outputs_df = back_data_estimation[
         [
-            "reference",
-            "period",
-            "design_weight",
+            config["reference"],
+            config["period"],
+            config["design_weight"],
             "frosic2007",
-            "formtype",
-            "questioncode",
-            "frotover",
-            "calibration_factor",
-            "adjustedresponse",
+            config["form_id_idbr"],
+            config["question_no"],
+            config["auxiliary"],
+            config["calibration_factor"],
+            config["adjustedresponse"],
             "response",
             "froempment",
-            "cell_no",
+            config["cell_number"],
             "imputation_class",
             "imputed_and_derived_flag",
             "construction_link",
@@ -89,8 +97,6 @@ def period_zero_se_wrapper():
     produce_additional_outputs(config, additional_outputs_df)
 
     qa_selective_editing_outputs(config)
-
-    return back_data_outliering
 
 
 def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame:
