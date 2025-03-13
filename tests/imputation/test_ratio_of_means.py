@@ -110,13 +110,21 @@ class TestRatioOfMeans:
                 current_period=202001,
                 revision_period=10,
             )
+            actual_output = actual_output.drop(
+                columns=[
+                    "f_match_filtered_question",
+                    "f_match_filtered_question_count",
+                    "b_match_filtered_question_count",
+                ],
+                errors="ignore",
+            )
 
         actual_output = actual_output.rename(
             columns={
                 "default_link_b_match_question": "default_backward",
                 "default_link_f_match_question": "default_forward",
                 "default_link_flag_construction_matches": "default_construction",
-                "flag_construction_matches_pair_count": "flag_match_pair_count",
+                "flag_construction_matches_count": "flag_match_pair_count",
             }
         )
 
@@ -130,8 +138,8 @@ class TestRatioOfMeans:
                 "forward": "f_link_question",
                 "backward": "b_link_question",
                 "construction": "construction_link",
-                "count_forward": "f_match_question_pair_count",
-                "count_backward": "b_match_question_pair_count",
+                "count_forward": "f_match_question_count",
+                "count_backward": "b_match_question_count",
                 "count_construction": "flag_match_pair_count",
             }
         )
@@ -216,7 +224,6 @@ class TestRatioOfMeansManConstruction:
                 "default_link_b_match_question": "default_backward",
                 "default_link_f_match_question": "default_forward",
                 "default_link_flag_construction_matches": "default_construction",
-                "flag_construction_matches_pair_count": "flag_match_pair_count",
             }
         )
 
@@ -230,9 +237,9 @@ class TestRatioOfMeansManConstruction:
                 "forward": "f_link_question",
                 "backward": "b_link_question",
                 "construction": "construction_link",
-                "count_forward": "f_match_question_pair_count",
-                "count_backward": "b_match_question_pair_count",
-                "count_construction": "flag_match_pair_count",
+                "count_forward": "f_match_question_count",
+                "count_backward": "b_match_question_count",
+                "count_construction": "flag_construction_matches_count",
             }
         )
 
@@ -259,6 +266,7 @@ class TestRatioOfMeansManConstruction:
             errors="ignore",
             inplace=True,
         )
+
         expected_output = expected_output[actual_output.columns]
 
         actual_output = actual_output.sort_values(by=["identifier", "date"])
@@ -272,14 +280,14 @@ class TestRatioOfMeansManConstruction:
         ].str.lower()
         expected_output = expected_output.replace({"bi": "bir"})
 
-        expected_output["f_match_question_pair_count"] = expected_output[
-            "f_match_question_pair_count"
-        ].astype(float)
-        expected_output["b_match_question_pair_count"] = expected_output[
-            "b_match_question_pair_count"
-        ].astype(float)
-        expected_output["flag_match_pair_count"] = expected_output[
-            "flag_match_pair_count"
-        ].astype(float)
+        expected_output["f_match_question_count"] = expected_output[
+            "f_match_question_count"
+        ].astype(int)
+        expected_output["b_match_question_count"] = expected_output[
+            "b_match_question_count"
+        ].astype(int)
+        expected_output["flag_construction_matches_count"] = expected_output[
+            "flag_construction_matches_count"
+        ].astype(int)
 
         assert_frame_equal(expected_output, actual_output)
