@@ -198,7 +198,7 @@ def constrain(
         derived_null_values = pd.concat(derived_null_values_list)
     else:
         warnings.warn("No derived questions with zero value created")
-        derived_null_values =  pd.DataFrame(columns=["constrain_marker"])
+        derived_null_values = pd.DataFrame(columns=["constrain_marker"])
 
     pre_constrained = pd.concat([df, derived_values, derived_null_values])
     pre_constrained[f"pre_constrained_{target}"] = pre_constrained[target]
