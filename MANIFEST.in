@@ -1,2 +1,6 @@
+<<<<<<< HEAD
+=======
+include mbs_results/config.json
+>>>>>>> 904aef3 (Update MANIFEST.in)
 include mbs_results/configs/config_dev.json
 include mbs_results/configs/config_user.json
