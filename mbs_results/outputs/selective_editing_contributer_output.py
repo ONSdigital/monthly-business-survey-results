@@ -3,7 +3,7 @@ import pandas as pd
 from mbs_results.staging.merge_domain import merge_domain
 
 
-def get_selective_editing_contributer_output(
+def get_selective_editing_contributor_output(
     additional_outputs_df: pd.DataFrame,
     sic_domain_mapping_path: str,
     threshold_filepath: str,
@@ -44,16 +44,19 @@ def get_selective_editing_contributer_output(
 
     Examples
     --------
-    >> get_selective_editing_contributer_output(
+    >> get_selective_editing_contributor_output(
     >>        input_filepath=input_filepath,
     >>        domain_filepath=domain_filepath,
     >>        threshold_filepath=threshold_filepath,
     >>        period_selected=202201
     >> )
     """
-    questions_selected = [40, 49]
+    forms_ignored = [
+        "203",
+        "204",
+    ]  # IDBR for water form probably should use spp form type
     input_data = additional_outputs_df.loc[
-        additional_outputs_df[question_no].isin(questions_selected)
+        ~additional_outputs_df["formtype"].isin(forms_ignored)
     ]
     input_data = input_data[
         [period, reference, "design_weight", "frosic2007", "formtype"]
@@ -65,8 +68,11 @@ def get_selective_editing_contributer_output(
         sic_domain_mapping_path, dtype={"sic_5_digit": str, "domain": str}
     )
     threshold_mapping = pd.read_csv(
-        threshold_filepath, dtype={"formtype": str, "domain": str, "threshold": float}
+        threshold_filepath, dtype={"formtype": int, "domain": str, "threshold": float}
     )
+    # Loading as int to remove leading 0, converting back to str to match main df
+    threshold_mapping["formtype"] = threshold_mapping["formtype"].astype(str)
+
     # Threshold file contains multiple duplicate rows
     threshold_mapping.drop_duplicates(inplace=True)
 
