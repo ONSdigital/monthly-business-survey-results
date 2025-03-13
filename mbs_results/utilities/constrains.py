@@ -330,13 +330,13 @@ def create_derive_map(df: pd.DataFrame, spp_form_id: str):
     derive_map = {
         13: {"derive": 40, "from": [46, 47]},
         14: {"derive": 40, "from": [42, 43]},
-        15: {"derive": 46, "from": [40]}, # Needs to derive 46 and 47
-        16: {"derive": 42, "from": [40]}, # Needs to derive 42 and 43
+        15: {"derive": 46, "from": [40]},  # Needs to derive 46 and 47
+        16: {"derive": 42, "from": [40]},  # Needs to derive 42 and 43
     }
 
     derive_map_null = {
         15: {"derive": 47, "from": [40]},
-        16: {"derive": 43, "from": [40]}
+        16: {"derive": 43, "from": [40]},
     }
 
     form_ids_present = df[spp_form_id].dropna().unique()
