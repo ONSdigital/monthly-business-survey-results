@@ -5,18 +5,18 @@ period,reference,spp_form_id,question_no,target,pre_derived_target,pre_constrain
 202001,50,16,42,1,,1,1,sum[40]
 202002,50,16,42,2,,2,2,sum[40]
 202003,50,16,42,3,,3,3,sum[40]
-202001,50,16,43,0,,,0,Zero for winsorisation
-202002,50,16,43,0,,,0,Zero for winsorisation
-202003,50,16,43,0,,,0,Zero for winsorisation
+202001,50,16,43,0,,0,0,Zero for winsorisation
+202002,50,16,43,0,,0,0,Zero for winsorisation
+202003,50,16,43,0,,0,0,Zero for winsorisation
 202001,100,15,40,99,99,99,99,
 202002,100,15,40,200,200,200,200,
 202003,100,15,40,301,301,301,301,
 202001,100,15,46,99,,99,99,sum[40]
 202002,100,15,46,200,,200,200,sum[40]
 202003,100,15,46,301,,301,301,sum[40]
-202001,100,15,47,0,,,99,Zero for winsorisation
-202002,100,15,47,0,,,200,Zero for winsorisation
-202003,100,15,47,0,,,301,Zero for winsorisation
+202001,100,15,47,0,,0,0,Zero for winsorisation
+202002,100,15,47,0,,0,0,Zero for winsorisation
+202003,100,15,47,0,,0,0,Zero for winsorisation
 202001,200,13,40,300,,300,300,"sum[46, 47]"
 202002,200,13,40,300,,300,300,"sum[46, 47]"
 202003,200,13,40,300,,300,300,"sum[46, 47]"
