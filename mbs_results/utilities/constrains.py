@@ -164,6 +164,7 @@ def constrain(
             "frotover",
             "froempment",
             "frosic2007",
+            "formtype",
         ],
         verify_integrity=False,
     )
@@ -248,6 +249,7 @@ def derive_questions(
             "frotover",
             "froempment",
             "frosic2007",
+            "formtype",
         ],
         verify_integrity=False,
     )
@@ -407,6 +409,7 @@ def calculate_derived_outlier_weights(
     )
 
     updated_o_weight_bool = df_pre_winsorised[winsorised_target].isna()
+
     df_pre_winsorised.loc[updated_o_weight_bool, winsorised_target] = (
         post_win_derived.loc[updated_o_weight_bool, winsorised_target]
     )
