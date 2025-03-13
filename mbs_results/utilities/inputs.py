@@ -21,7 +21,7 @@ def load_config(config_user_dict=None):
 
     if config_user_dict is not None:
         config.update(config_user_dict)
-        logger.info("config dictionary updated with config user dictionary")
-    config["mbs_results_path"] = config["folder_path"] + config["mbs_file_name"]
-    logger.info("mbs_results_path added to config dictionary")
+        logger.info(
+            "config dictionary updated with config user dictionary from the testing"
+        )
     return config
