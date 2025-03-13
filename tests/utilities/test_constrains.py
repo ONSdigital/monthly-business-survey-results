@@ -81,6 +81,9 @@ def test_constrain_functionality(filepath):
             df[(df["question_no"] == 40) & (df["spp_form_id"].isin([13, 14]))].index
         )
         .drop(df[(df["question_no"] == 46) & (df["spp_form_id"].isin([15]))].index)
+        .drop(df[(df["question_no"] == 47) & (df["spp_form_id"].isin([15]))].index)
+        .drop(df[(df["question_no"] == 42) & (df["spp_form_id"].isin([16]))].index)
+        .drop(df[(df["question_no"] == 43) & (df["spp_form_id"].isin([16]))].index)
         .drop(
             columns=[
                 "pre_derived_target",
@@ -128,6 +131,7 @@ def test_constrain_functionality(filepath):
     df_expected_output["spp_form_id"] = df_expected_output["spp_form_id"].astype(
         "int64"
     )
+
     assert_frame_equal(df_output, df_expected_output)
 
 
