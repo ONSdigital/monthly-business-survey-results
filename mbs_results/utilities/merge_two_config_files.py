@@ -1,39 +1,48 @@
 import json
 
+from mbs_results import logger
+
+
+def load_config(config_file_path):
+    with open(config_file_path, "r") as f:
+        return json.load(f)
+
 
 def merge_two_config_files(
-    user_config_path="config_user.json",
-    constants_config_path="config_constants.json",
-    destination_path=None,
+    config_user_path="config_user.json",
+    config_dev_path="mbs_results/configs/config_dev.json",
 ):
     """
     Load and merge two configuration files: a user-specific config and a
-    constants config.
+    dev-specific config.
 
     Parameters
     ----------
-    user_config_path : str, optional
-        Path to the user-specific configuration file (default is "config_user.json").
-    constants_config_path : str, optional
-        Path to the constants configuration file (default is "config_constants.json")..
+    config_user_path : str, optional
+        Path to the user-specific configuration file
+        (default is "config_user.json").
+    config_dev_path : str, optional
+        Path to the dev-specific configuration file
+        (default is "mbs_results/configs/config_dev.json").
 
     Returns
     -------
-    Dict
+    config : Dict
         A dictionary containing the merged configuration.
     """
+    try:
+        config_user = load_config(config_user_path)
+        logger.info(f"Loaded user config from {config_user_path}")
+    except Exception as e:
+        logger.error(f"Error loading user config from {config_user_path}: {e}")
+        config_user = {}
 
-    # Load the user config
-    with open(user_config_path, "r") as f:
-        user_config = json.load(f)
+    try:
+        config_dev = load_config(config_dev_path)
+        logger.info(f"Loaded dev config from {config_dev_path}")
+    except Exception as e:
+        logger.error(f"Error loading dev config from {config_dev_path}: {e}")
+        config_dev = {}
 
-    # Load the constants config
-    with open(constants_config_path, "r") as f:
-        constant_config = json.load(f)
-
-    # Merge both config files
-    config = {**user_config, **constant_config}
-
-    # Dump the config.json in the destination_path
-    with open(destination_path, "w") as f:
-        json.dump(config, f)
+    config = {**config_user, **config_dev}
+    return config
