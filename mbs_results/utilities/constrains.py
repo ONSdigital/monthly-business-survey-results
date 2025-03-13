@@ -498,7 +498,7 @@ def update_derived_weight_and_winsorised_value(
         Original dataframe with weights and winsorised values updated to match
         components.
     """
-    derive_map = create_derive_map(df, form_type_spp)
+    derive_map = create_derive_map(df, form_type_spp)[0]
 
     derived_all = []
 
