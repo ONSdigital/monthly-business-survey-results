@@ -231,7 +231,34 @@ def drop_derived_questions(
 def start_of_period_staging(
     imputation_output: pd.DataFrame, config: dict
 ) -> pd.DataFrame:
+    """
+    Stages the imputation output at the start of a period based on the provided
+    configuration.
 
+    Parameters
+    ----------
+    imputation_output : pd.DataFrame
+        The DataFrame containing the imputation output.
+    config : dict
+        A dictionary containing configuration parameters. Expected keys include:
+        - "current_period": The current period to filter the imputation output.
+        - "finalsel_keep_cols": List of columns to keep in the final selection.
+        - "sample_path": Path to the sample files.
+        - "sample_column_names": Column names for the sample files.
+        - "period_selected": The period selected for final selection.
+        - "idbr_to_spp": Mapping from IDBR to SPP.
+        - "form_id_spp": Column name for form ID SPP.
+        - "form_id_idbr": Column name for form ID IDBR.
+        - "reference": Reference column name.
+        - "period": Period column name.
+        - "question_no": Question number column name.
+
+    Returns
+    -------
+    pd.DataFrame
+        The staged imputation output DataFrame with missing questions created and
+        merged with final selection.
+    """
     if config["current_period"] in imputation_output["period"].unique():
 
         imputation_output = imputation_output.loc[
@@ -260,16 +287,32 @@ def start_of_period_staging(
             finalsel, keep_columns=config["finalsel_keep_cols"], **config
         )
 
-        imputation_output = pd.merge(
-            left=imputation_output,
+        mapper = create_mapper()
+        idbr_to_spp_mapping = config["idbr_to_spp"]
+        finalsel[config["form_id_spp"]] = (
+            finalsel[config["form_id_idbr"]].astype(str).map(idbr_to_spp_mapping)
+        )
+
+        imputation_output_with_missing = create_missing_questions(
+            contributors_df=finalsel,
+            responses_df=imputation_output,
+            reference=config["reference"],
+            period=config["period"],
+            formid=config["form_id_spp"],
+            question_no=config["question_no"],
+            mapper=mapper,
+        )
+
+        imputation_output_with_missing = pd.merge(
+            left=imputation_output_with_missing,
             right=finalsel,
             on=[config["period"], config["reference"]],
             suffixes=["_imputation_output", "_finalsel"],
             how="right",
         )
 
-        imputation_output["period"] = (
-            imputation_output["period"].dt.strftime("%Y%m").astype(int)
+        imputation_output_with_missing["period"] = (
+            imputation_output_with_missing["period"].dt.strftime("%Y%m").astype(int)
         )
 
-    return imputation_output
+    return imputation_output_with_missing
