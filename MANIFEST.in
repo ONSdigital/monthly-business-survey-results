@@ -1,1 +1,3 @@
 include mbs_results/config.json
+include mbs_results/configs/config_dev.json
+include mbs_results/configs/config_user.json
