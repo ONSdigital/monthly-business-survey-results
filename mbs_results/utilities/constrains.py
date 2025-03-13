@@ -150,7 +150,7 @@ def constrain(
         Original dataframe with constrains.
     """
 
-    derive_map = create_derive_map(df, spp_form_id)
+    derive_map, derive_map_null = create_derive_map(df, spp_form_id)
 
     df[f"pre_derived_{target}"] = df[target]
 
@@ -178,15 +178,25 @@ def constrain(
         for form_type, derives in derive_map.items()
     ]
 
+    derived_null_values_list = [
+        sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
+        .assign(**{question_no: derives["derive"]})
+        .assign(**{spp_form_id: form_type})
+        .assign(**{target: 0})
+        .assign(**{"constrain_marker": "Zero for winsorisation"})
+        for form_type, derives in derive_map_null.items()
+    ]
+
+    if derived_null_values_list:
+        derived_null_values = pd.concat(derived_null_values_list)
+
     if derived_values_list:
-
         derived_values = pd.concat(derived_values_list)
-
     else:
         warnings.warn("No derived questions created")
         derived_values = pd.DataFrame(columns=["constrain_marker"])
 
-    pre_constrained = pd.concat([df, derived_values])
+    pre_constrained = pd.concat([df, derived_values, derived_null_values])
     pre_constrained[f"pre_constrained_{target}"] = pre_constrained[target]
 
     unique_q_numbers = pre_constrained[question_no].unique()
@@ -309,15 +319,21 @@ def create_derive_map(df: pd.DataFrame, spp_form_id: str):
     derive_map = {
         13: {"derive": 40, "from": [46, 47]},
         14: {"derive": 40, "from": [42, 43]},
-        15: {"derive": 46, "from": [40, 47]}, # Needs to derive 46 and 47
-        16: {"derive": 42, "from": [40, 43]}, # Needs to derive 42 and 43
+        15: {"derive": 46, "from": [40]}, # Needs to derive 46 and 47
+        16: {"derive": 42, "from": [40]}, # Needs to derive 42 and 43
     }
+
+    derive_map_null = {
+        15: {"derive": 47, "from": [40]},
+        16: {"derive": 43, "from": [40]}
+    }
+
     form_ids_present = df[spp_form_id].dropna().unique()
     ids_not_present = [x for x in derive_map.keys() if x not in form_ids_present]
     for key in ids_not_present:
         derive_map.pop(key)
 
-    return derive_map
+    return derive_map, derive_map_null
 
 
 def calculate_derived_outlier_weights(
