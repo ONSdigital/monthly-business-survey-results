@@ -10,6 +10,7 @@ from mbs_results.outputs.produce_additional_outputs import produce_additional_ou
 from mbs_results.staging.back_data import read_and_process_back_data
 from mbs_results.staging.data_cleaning import (
     convert_annual_thousands,
+    convert_cell_number,
     create_imputation_class,
 )
 from mbs_results.staging.stage_dataframe import drop_derived_questions
@@ -143,6 +144,8 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
         axis=1,
     )
 
+    # Convert cell number to not include NI
+    back_data = convert_cell_number(back_data, config["cell_number"])
     back_data = create_imputation_class(
         back_data, config["cell_number"], "imputation_class"
     )
