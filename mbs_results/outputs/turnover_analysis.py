@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 
-
 def create_turnover_output(
     additional_outputs_df: pd.DataFrame, current_period: int, **config
 ) -> pd.DataFrame:
@@ -48,10 +47,6 @@ def create_turnover_output(
 
     turnover_df["type"] = np.select(type_conditions, type_values)
 
-    # The error_res_code column exists in the turnover tool input but is ignored, and
-    # its purpose is not known. Adding as a constant zero column to prevent code used
-    # for producing tool from erroring.
-    turnover_df["error_res_code"] = 0
 
     # Check if referencename in data
     if "referencename" in turnover_df.columns:
@@ -67,9 +62,7 @@ def create_turnover_output(
                 "curr_grossed_value",
                 "outlier_weight",
                 "status",
-                "error_res_code",
                 "frotover",
-                "froempment",
                 "response",
             ]
         ]
@@ -88,9 +81,7 @@ def create_turnover_output(
                 "curr_grossed_value",
                 "outlier_weight",
                 "status",
-                "error_res_code",
                 "frotover",
-                "froempment",
                 "response",
             ]
         ]
