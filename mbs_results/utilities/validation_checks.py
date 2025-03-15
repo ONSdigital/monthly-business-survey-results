@@ -357,29 +357,4 @@ def qa_selective_editing_outputs(config: dict):
         else:
             logger.info(f"No nulls or NaNs detected in {dataframe_name} dataframe")
 
-    manual_edit_po = True
-    if manual_edit_po:
-        # MANUAL EDITING PO FOR SE OUTPUT (TEMP)
-        print("temp")
-        reference_mask = contributor_df["reference"] == 11513303775
-        contributor_df.loc[reference_mask, "domain_group"] = 63
-        contributor_df.loc[reference_mask, "threshold"] = 0.05
-
-        question_df.loc[
-            question_df["reference"] == 11513303775, "standardising_factor"
-        ] = 84125668231.64378
-
-        logger.warning("manual edit of post office")
-
-        contributor_df.to_csv(
-            config["output_path"]
-            + f"secontributors009_{period}_v{file_version_mbs}_po_filled.csv",
-            index=False,
-        )
-        question_df.to_csv(
-            config["output_path"]
-            + f"sequestions009_{period}_v{file_version_mbs}_po_filled.csv",
-            index=False,
-        )
-
     logger.info("QA of SE outputs finished")
