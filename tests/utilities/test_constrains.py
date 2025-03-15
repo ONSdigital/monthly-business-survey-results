@@ -70,7 +70,7 @@ def test_constrain_functionality(filepath):
         index_col=False,
     )
     # Creating dummy columns needed for constrains, not used other than setting as index
-    for col_name in ["cell_no", "frotover", "froempment", "frosic2007"]:
+    for col_name in ["cell_no", "converted_frotover", "froempment", "frosic2007"]:
         df[col_name] = 1
 
     df["target"] = df["target"].astype(float)
@@ -93,7 +93,7 @@ def test_constrain_functionality(filepath):
     )
 
     df_expected_output = df.drop(
-        columns=["cell_no", "frotover", "froempment", "frosic2007", "target"]
+        columns=["cell_no", "converted_frotover", "froempment", "frosic2007", "target"]
     ).rename(columns={"expected_target": "target"})
     df_expected_output["target"] = df_expected_output["target"].astype(float)
 
@@ -119,7 +119,8 @@ def test_constrain_functionality(filepath):
     ]
 
     df_output.drop(
-        columns=["cell_no", "frotover", "froempment", "frosic2007"], inplace=True
+        columns=["cell_no", "converted_frotover", "froempment", "frosic2007"],
+        inplace=True,
     )
     df_output = df_output[order].sort_values(by=order).reset_index(drop=True)
 
