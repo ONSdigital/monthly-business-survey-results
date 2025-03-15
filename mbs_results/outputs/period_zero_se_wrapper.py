@@ -59,7 +59,6 @@ def period_zero_se_wrapper():
         config["question_no"],
         config["form_id_spp"],
     )
-
     back_data_imputation = imputation_processing(back_data, config)
 
     # Running all of estimation and outliers
