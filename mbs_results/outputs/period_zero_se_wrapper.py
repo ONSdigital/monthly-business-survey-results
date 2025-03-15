@@ -36,6 +36,10 @@ def period_zero_se_wrapper():
     Selective editing question and contributor files are then produced
 
     """
+    # Issues:
+    # - Loading p1 IDBR files, which are used to calculate construction links?
+    # Double check which periods frotover and cell number should be used
+    # for construction links.
 
     config = load_config(path="./mbs_results/config.json")
 
