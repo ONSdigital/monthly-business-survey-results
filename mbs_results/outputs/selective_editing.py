@@ -117,6 +117,9 @@ def create_standardising_factor(
             predicted_value,
             imputation_marker,
             imputation_class,
+            a_weight,
+            o_weight,
+            g_weight,
         ]
     ]
 
@@ -154,7 +157,7 @@ def calculate_auxiliary_value(
         name of column in dataframe containing construction link variable
     imputation_class : str
         name of column in dataframe containing imputation class, where
-        there is one contruction link per imputation_class and period
+        there is one construction link per imputation_class and period
     calc_period : int
         period to take the weights for estimation of standardising factor in
         the format yyyymm
@@ -178,7 +181,16 @@ def calculate_auxiliary_value(
     q40["auxiliary_value"] = q40[frozen_turnover]
     q49["auxiliary_value"] = q49[frozen_turnover] * q49[construction_link]
 
-    keep_cols = [reference, period, question_no, "auxiliary_value", imputation_class]
+    keep_cols = [
+        reference,
+        period,
+        question_no,
+        "auxiliary_value",
+        imputation_class,
+        construction_link,
+        frozen_turnover,
+        "formtype",
+    ]
 
     output_df = pd.concat([q40[keep_cols], q49[keep_cols]])
 

@@ -1,5 +1,6 @@
 import pandas as pd
 
+from mbs_results.outputs.qa_output import save_intermediate_qa_output
 from mbs_results.staging.merge_domain import merge_domain
 
 
@@ -85,7 +86,12 @@ def get_selective_editing_contributor_output(
         threshold_mapping,
         on=["formtype", "domain"],
         how="left",
-    ).drop(columns=["formtype"])
+    )
+    save_intermediate_qa_output(
+        selective_editing_contributor_output, config, "se_contributors_full"
+    )
+
+    selective_editing_contributor_output.drop(columns=["formtype"], inplace=True)
 
     selective_editing_contributor_output = selective_editing_contributor_output.rename(
         columns={"reference": "ruref", "domain": "domain_group"}

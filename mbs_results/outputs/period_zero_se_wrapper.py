@@ -7,6 +7,7 @@ from mbs_results.imputation.calculate_imputation_link import calculate_imputatio
 from mbs_results.imputation.construction_matches import flag_construction_matches
 from mbs_results.outlier_detection.detect_outlier import detect_outlier
 from mbs_results.outputs.produce_additional_outputs import produce_additional_outputs
+from mbs_results.outputs.qa_output import save_intermediate_qa_output
 from mbs_results.staging.back_data import read_and_process_back_data
 from mbs_results.staging.data_cleaning import (
     convert_annual_thousands,
@@ -64,11 +65,16 @@ def period_zero_se_wrapper():
         config["form_id_spp"],
     )
     back_data_imputation = imputation_processing(back_data, config)
+    save_intermediate_qa_output(
+        back_data_imputation, config, "se_construction_link_calculations"
+    )
 
     # Running all of estimation and outliers
     back_data_estimation = estimate(back_data_imputation, config)
+    save_intermediate_qa_output(back_data_imputation, config, "se_estimation")
 
     back_data_outliering = detect_outlier(back_data_estimation, config)
+    save_intermediate_qa_output(back_data_imputation, config, "se_outliering")
 
     additional_outputs_df = back_data_estimation[
         [
