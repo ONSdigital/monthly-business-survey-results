@@ -24,11 +24,6 @@ def flag_construction_matches(dataframe, target, period, auxiliary, **kwargs):
         dataframe with additional flag_construction_matches column
     """
     if f"imputation_flags_{target}" in dataframe.columns:
-        print(dataframe[f"imputation_flags_{target}"])
-        print(
-            (dataframe[f"imputation_flags_{target}"] == "r")
-            | (dataframe[f"imputation_flags_{target}"].isna())
-        )
         dataframe["flag_construction_matches"] = pd.notna(
             dataframe[[target, period, auxiliary]]
         ).all(axis="columns") & (
