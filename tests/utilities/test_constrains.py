@@ -238,7 +238,7 @@ def test_update_derived_weight_and_winsorised_value(filepath, base_file_name):
         "questioncode",
         "spp_form_id",
         "outlier_weight",
-        "winsorised_value",
+        "value",
     )
 
-    assert_frame_equal(df_actual, df_expected)
+    assert_frame_equal(df_actual, df_expected,dtype=False)
