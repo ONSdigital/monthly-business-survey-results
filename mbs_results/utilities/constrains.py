@@ -120,7 +120,9 @@ def constrain(
         For form id 13, question number 40 is created by summing 46,47.
         For form id 14, question number 40 is created by summing 42,43.
         For form id 15, question number 46 is created from 40.
+            Question number 47 with derived value of 0 is also created from 40.
         For form id 16, question number 42 is created from 40.
+            Question number 43 with derived value of 0 also created
 
     In addition for all form types (when question number is available):
 
@@ -148,11 +150,11 @@ def constrain(
         Original dataframe with constrains.
     """
 
-    derive_map = create_derive_map(df, spp_form_id)
+    derive_map, derive_map_null = create_derive_map(df, spp_form_id)
 
     df[f"pre_derived_{target}"] = df[target]
 
-    # pre_derive_df has dimenesions as index, columns the values to be used when derived
+    # pre_derive_df has dimensions as index, columns the values to be used when derived
     # Hard coded columns are from finalsel files,
     pre_derive_df = df.set_index(
         [
@@ -168,6 +170,7 @@ def constrain(
         ],
         verify_integrity=False,
     )
+
     pre_derive_df = pre_derive_df[[target]]
 
     derived_values_list = [
@@ -177,15 +180,28 @@ def constrain(
         for form_type, derives in derive_map.items()
     ]
 
+    derived_null_values_list = [
+        sum_sub_df(pre_derive_df.loc[form_type], derives["from"])
+        .assign(**{question_no: derives["derive"]})
+        .assign(**{spp_form_id: form_type})
+        .assign(**{target: 0})
+        .assign(**{"constrain_marker": "Zero for winsorisation"})
+        for form_type, derives in derive_map_null.items()
+    ]
+
     if derived_values_list:
-
         derived_values = pd.concat(derived_values_list)
-
     else:
         warnings.warn("No derived questions created")
         derived_values = pd.DataFrame(columns=["constrain_marker"])
 
-    pre_constrained = pd.concat([df, derived_values])
+    if derived_null_values_list:
+        derived_null_values = pd.concat(derived_null_values_list)
+    else:
+        warnings.warn("No derived questions with zero value created")
+        derived_null_values = pd.DataFrame(columns=["constrain_marker"])
+
+    pre_constrained = pd.concat([df, derived_values, derived_null_values])
     pre_constrained[f"pre_constrained_{target}"] = pre_constrained[target]
 
     unique_q_numbers = pre_constrained[question_no].unique()
@@ -238,7 +254,8 @@ def derive_questions(
     pd.DataFrame
         Original dataframe with constrains.
     """
-    derive_map = create_derive_map(df, spp_form_id)
+    derive_map, _ = create_derive_map(df, spp_form_id)
+
     pre_derive_df = df.set_index(
         [
             spp_form_id,
@@ -253,6 +270,7 @@ def derive_questions(
         ],
         verify_integrity=False,
     )
+
     # Assuming default value of o-weight is 1
     pre_derive_df = pre_derive_df[[target]].fillna(value=0)
 
@@ -263,6 +281,7 @@ def derive_questions(
         # Create a task on Backlog to fix this.
         for form_type, derives in derive_map.items()
     ]
+
     if derived_values_list:
         derived_values = pd.concat(derived_values_list)
 
@@ -301,23 +320,36 @@ def create_derive_map(df: pd.DataFrame, spp_form_id: str):
 
     Returns
     -------
-    dict
-        Derived question mapping in a dictionary.
+    (dict, dict)
+        Derived question mapping in tuple of dict.
+        First dict in the tuple contains derived question mappings for real values.
+        Second dict in the tuple contains derived question mappings for null values.
         Removes form IDs which are not present in dataframe
     """
 
     derive_map = {
         13: {"derive": 40, "from": [46, 47]},
         14: {"derive": 40, "from": [42, 43]},
-        15: {"derive": 46, "from": [40]},
-        16: {"derive": 42, "from": [40]},
+        15: {"derive": 46, "from": [40]},  # Needs to derive 46 and 47
+        16: {"derive": 42, "from": [40]},  # Needs to derive 42 and 43
     }
+
+    derive_map_null = {
+        15: {"derive": 47, "from": [40]},
+        16: {"derive": 43, "from": [40]},
+    }
+
     form_ids_present = df[spp_form_id].dropna().unique()
+
     ids_not_present = [x for x in derive_map.keys() if x not in form_ids_present]
     for key in ids_not_present:
         derive_map.pop(key)
 
-    return derive_map
+    ids_not_present = [x for x in derive_map_null.keys() if x not in form_ids_present]
+    for key in ids_not_present:
+        derive_map_null.pop(key)
+
+    return derive_map, derive_map_null
 
 
 def calculate_derived_outlier_weights(
@@ -431,3 +463,99 @@ def calculate_derived_outlier_weights(
     )
 
     return df_pre_winsorised
+
+
+def update_derived_weight_and_winsorised_value(
+    df: pd.DataFrame,
+    reference: str,
+    period: str,
+    question_code: str,
+    form_type_spp: str,
+    outlier_weight: str,
+    winsorised_value: str,
+) -> pd.DataFrame:
+    """Updates outlier weights and winsorised values to match  the components
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    reference : str
+        Column name containing reference.
+    period : str
+        Column name containing period.
+    question_code : str
+        Column name containing question code.
+    form_type_spp : str
+        Column name containing form type spp.
+    outlier_weight : str
+        Column name containing outlier weight (refered also as o-weight).
+    winsorised_value : str
+        Column name containing winsorised values (response * outlier weight).
+    Returns
+    -------
+    df : pd.Dataframe
+        Original dataframe with weights and winsorised values updated to match
+        components.
+    """
+    derive_map, _ = create_derive_map(df, form_type_spp)
+
+    derived_all = []
+
+    for spp_id in derive_map:
+
+        df_spp_id = df[df[form_type_spp] == spp_id].copy()
+
+        df_spp_id = df_spp_id.pivot(
+            index=[reference, period], columns=question_code, values=winsorised_value
+        )
+
+        df_spp_id["post_winsorised"] = df_spp_id[
+            derive_map[spp_id]["derive"]
+        ] != df_spp_id[derive_map[spp_id]["from"]].sum(axis=1)
+
+        df_spp_id["post_win_o_weight"] = (
+            df_spp_id[derive_map[spp_id]["from"]].sum(axis=1)
+            / df_spp_id[derive_map[spp_id]["derive"]]
+        )
+
+        df_spp_id["post_winsorised_value"] = df_spp_id[derive_map[spp_id]["from"]].sum(
+            axis=1
+        )
+
+        df_spp_id = df_spp_id[
+            ["post_winsorised", "post_win_o_weight", "post_winsorised_value"]
+        ]
+
+        df_spp_id[question_code] = derive_map[spp_id]["derive"]
+
+        df_spp_id.reset_index(inplace=True)
+
+        derived_all.append(df_spp_id)
+
+    # case when nothing to update
+    if not derived_all:
+        df["post_winsorised"] = False
+        return df
+
+    # post_win_derives has all references period question codes which need updating
+    # unique values are identified by reference period questioncode
+
+    post_win_derives = pd.concat(derived_all)
+
+    df = pd.merge(
+        left=df,
+        right=post_win_derives,
+        how="left",
+        on=[reference, period, question_code],
+    )
+    # fill na with false
+    df["post_winsorised"] = df["post_winsorised"].fillna(0).astype("bool")
+
+    df.loc[df["post_winsorised"], outlier_weight] = df["post_win_o_weight"]
+
+    df.loc[df["post_winsorised"], winsorised_value] = df["post_winsorised_value"]
+
+    df.drop(columns=["post_win_o_weight", "post_winsorised_value"], inplace=True)
+
+    return df

@@ -115,13 +115,15 @@ def test_create_imputation_class(filepath):
 
 def test_convert_cell_number(filepath):
 
-    expected_output = pd.read_csv(filepath / "test_convert_cell_number.csv")
+    df = pd.read_csv(filepath / "test_convert_cell_number.csv")
 
-    df_in = expected_output.drop(columns=["cell_number"]).rename(
-        columns={"ni_gb_cell_number": "cell_number"}
-    )
+    df_in = df.drop(columns=["expected"])
 
     actual_output = convert_cell_number(df_in, "cell_number")
+
+    expected_output = df.drop(columns=["cell_number"]).rename(
+        columns={"expected": "cell_number"}
+    )
 
     assert_frame_equal(actual_output, expected_output)
 
@@ -193,7 +195,7 @@ def test_filter_out_questions(mock_to_csv, filepath):
     )
 
     # testing if pandas export was called once
-    mock_to_csv.assert_called_once_with("export.csv", index=False)
+    mock_to_csv.assert_called_once_with("export.csv", index=False, date_format="%Y%m")
 
     assert_frame_equal(actual_output, expected_output)
 

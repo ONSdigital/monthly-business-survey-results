@@ -1,7 +1,7 @@
 import pandas as pd
 
 from mbs_results.outlier_detection.winsorisation import winsorise
-from mbs_results.utilities.constrains import calculate_derived_outlier_weights
+from mbs_results.utilities.constrains import update_derived_weight_and_winsorised_value
 
 
 def join_l_values(df, l_values_path, classification_values_path, config):
@@ -53,13 +53,16 @@ def detect_outlier(df, config):
             "l_value",
         )
     )
-    post_win = calculate_derived_outlier_weights(
+
+    # Remove groupby leftovers
+    post_win.reset_index(drop=True, inplace=True)
+
+    post_win = update_derived_weight_and_winsorised_value(
         post_win,
-        config["period"],
         config["reference"],
-        config["target"],
+        config["period"],
         config["question_no"],
-        "form_type_spp",
+        config["form_id_spp"],
         "outlier_weight",
         "new_target_variable",
     )

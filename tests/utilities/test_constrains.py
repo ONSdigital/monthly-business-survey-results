@@ -9,6 +9,7 @@ from mbs_results.utilities.constrains import (
     constrain,
     replace_values_index_based,
     sum_sub_df,
+    update_derived_weight_and_winsorised_value,
 )
 
 
@@ -81,6 +82,9 @@ def test_constrain_functionality(filepath):
             df[(df["question_no"] == 40) & (df["spp_form_id"].isin([13, 14]))].index
         )
         .drop(df[(df["question_no"] == 46) & (df["spp_form_id"].isin([15]))].index)
+        .drop(df[(df["question_no"] == 47) & (df["spp_form_id"].isin([15]))].index)
+        .drop(df[(df["question_no"] == 42) & (df["spp_form_id"].isin([16]))].index)
+        .drop(df[(df["question_no"] == 43) & (df["spp_form_id"].isin([16]))].index)
         .drop(
             columns=[
                 "pre_derived_target",
@@ -128,6 +132,7 @@ def test_constrain_functionality(filepath):
     df_expected_output["spp_form_id"] = df_expected_output["spp_form_id"].astype(
         "int64"
     )
+
     assert_frame_equal(df_output, df_expected_output)
 
 
@@ -208,3 +213,31 @@ def test_calculate_derived_outlier_weights_missing(filepath):
     df = df.sort_values(by=sorting_by).reset_index(drop=True)
 
     assert_frame_equal(df, df_output)
+
+
+scenarios = [
+    "no_further_processing_required",
+    "outlier_identified_example_1",
+    "outlier_identified_example_2",
+    "outlier_identified_example_q46_q47",
+    "outlier_identified_example_derived_q42",
+    "outlier_identified_example_derived_q46",
+]
+
+
+@pytest.mark.parametrize("base_file_name", scenarios)
+def test_update_derived_weight_and_winsorised_value(filepath, base_file_name):
+
+    df_in = pd.read_csv(filepath / Path(base_file_name + ".csv"))
+    df_expected = pd.read_csv(filepath / Path(base_file_name + "_expected.csv"))
+    df_actual = update_derived_weight_and_winsorised_value(
+        df_in,
+        "reference",
+        "period",
+        "questioncode",
+        "spp_form_id",
+        "outlier_weight",
+        "winsorised_value",
+    )
+
+    assert_frame_equal(df_actual, df_expected)
