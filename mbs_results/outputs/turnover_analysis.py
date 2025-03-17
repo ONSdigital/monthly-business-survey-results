@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 
+
 def create_turnover_output(
     additional_outputs_df: pd.DataFrame, current_period: int, **config
 ) -> pd.DataFrame:
@@ -46,7 +47,6 @@ def create_turnover_output(
     type_values = [1, 2, 3]
 
     turnover_df["type"] = np.select(type_conditions, type_values)
-
 
     # Check if referencename in data
     if "referencename" in turnover_df.columns:
