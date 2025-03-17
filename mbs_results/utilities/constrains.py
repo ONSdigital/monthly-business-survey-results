@@ -472,7 +472,8 @@ def update_derived_weight_and_winsorised_value(
     question_code: str,
     form_type_spp: str,
     outlier_weight: str,
-    winsorised_value: str,
+    target: str,
+    tolerance = 3 
 ) -> pd.DataFrame:
     """Updates outlier weights and winsorised values to match  the components
 
@@ -490,8 +491,12 @@ def update_derived_weight_and_winsorised_value(
         Column name containing form type spp.
     outlier_weight : str
         Column name containing outlier weight (refered also as o-weight).
-    winsorised_value : str
-        Column name containing winsorised values (response * outlier weight).
+    target : str
+        Column name containing target value.
+    target : str
+        Tolerance to check if update should take place, if the absolute 
+        difference of winsorised value and sum of components is less than 
+        tolerance post_winsorised will be set to False.
     Returns
     -------
     df : pd.Dataframe
@@ -502,12 +507,14 @@ def update_derived_weight_and_winsorised_value(
 
     derived_all = []
 
+    df["winsorised_value"] =  df[outlier_weight] * df[target]
+
     for spp_id in derive_map:
 
         df_spp_id = df[df[form_type_spp] == spp_id].copy()
 
         df_spp_id = df_spp_id.pivot(
-            index=[reference, period], columns=question_code, values=winsorised_value
+            index=[reference, period], columns=question_code, values="winsorised_value"
         )
 
         df_spp_id["post_winsorised"] = df_spp_id[
@@ -549,12 +556,15 @@ def update_derived_weight_and_winsorised_value(
         how="left",
         on=[reference, period, question_code],
     )
+
+    df.loc[abs(df["post_winsorised_value"] - df["winsorised_value"]) <= pow(10,-tolerance), "post_winsorised"] = False
+
     # fill na with false
     df["post_winsorised"] = df["post_winsorised"].fillna(0).astype("bool")
 
     df.loc[df["post_winsorised"], outlier_weight] = df["post_win_o_weight"]
 
-    df.loc[df["post_winsorised"], winsorised_value] = df["post_winsorised_value"]
+    df.loc[df["post_winsorised"], "winsorised_value"] = df["post_winsorised_value"]
 
     df.drop(columns=["post_win_o_weight", "post_winsorised_value"], inplace=True)
 
