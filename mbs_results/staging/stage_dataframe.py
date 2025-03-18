@@ -15,6 +15,7 @@ from mbs_results.staging.data_cleaning import (
     run_live_or_frozen,
 )
 from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
+from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.utils import (
     convert_column_to_datetime,
     read_colon_separated_file,
@@ -275,6 +276,30 @@ def start_of_period_staging(
 
         imputation_output["period"] = (
             imputation_output["period"].dt.strftime("%Y%m").astype(int)
+        )
+
+        idbr_to_spp_mapping = config["idbr_to_spp"]
+        imputation_output[config["form_id_spp"]] = (
+            imputation_output[config["form_id_idbr"]]
+            .astype(str)
+            .map(idbr_to_spp_mapping)
+        )
+
+        imputation_output = constrain(
+            df=imputation_output,
+            period=config["period"],
+            reference=config["reference"],
+            target=config["target"],
+            question_no=config["question_no"],
+            spp_form_id=config["form_id_spp"],
+        )
+        imputation_output["imputed_and_derived_flag"] = imputation_output.apply(
+            lambda row: (
+                "d"
+                if "sum" in str(row["constrain_marker"]).lower()
+                else row[f"imputation_flags_{config['target']}"]
+            ),
+            axis=1,
         )
 
     return imputation_output

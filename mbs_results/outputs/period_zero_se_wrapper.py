@@ -17,7 +17,6 @@ from mbs_results.staging.stage_dataframe import (
     drop_derived_questions,
     start_of_period_staging,
 )
-from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.inputs import load_config
 from mbs_results.utilities.validation_checks import qa_selective_editing_outputs
 
@@ -155,24 +154,6 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
             predictive_variable=config["auxiliary_converted"],
             **config,
         )
-    )
-
-    back_data = constrain(
-        df=back_data,
-        period=config["period"],
-        reference=config["reference"],
-        target=config["target"],
-        question_no=config["question_no"],
-        spp_form_id=config["form_id_spp"],
-    )
-
-    back_data["imputed_and_derived_flag"] = back_data.apply(
-        lambda row: (
-            "d"
-            if "sum" in str(row["constrain_marker"]).lower()
-            else row[f"imputation_flags_{config['target']}"]
-        ),
-        axis=1,
     )
 
     # Changing period back into int. Read_colon_sep_file should be updated to enforce
