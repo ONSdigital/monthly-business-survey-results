@@ -48,7 +48,6 @@ def period_zero_se_wrapper():
 
     # Read in back data
     back_data = read_and_process_back_data(config)
-    back_data.to_csv("back_data.csv")
     # Lots of "glueing" other functions together so df is in a format for estimation
     # Another method could be to look at imputation, and try to keep original imputation
     # markers.
