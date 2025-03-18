@@ -2,10 +2,10 @@ import warnings
 
 import pandas as pd
 
-from mbs_results.staging.create_missing_questions import (
-    create_mapper,
-    create_missing_questions,
-)
+# from mbs_results.staging.create_missing_questions import (
+#     create_mapper,
+#     create_missing_questions,
+# )
 from mbs_results.staging.data_cleaning import enforce_datatypes
 from mbs_results.utilities.utils import (
     convert_column_to_datetime,
@@ -107,53 +107,53 @@ def read_back_data(config: dict) -> pd.DataFrame:
 
     join_type = "left"
 
-    qv_period = qv_df[config["period"]].unique()
-    cp_period = cp_df[config["period"]].unique()
-    finalsel_period = finalsel[config["period"]].unique()
+    # qv_period = qv_df[config["period"]].unique()
+    # cp_period = cp_df[config["period"]].unique()
+    # finalsel_period = finalsel[config["period"]].unique()
 
-    qv_start_of_period_condition_met = (
-        qv_period + pd.DateOffset(months=1) == finalsel_period
-    )
-    cp_start_of_period_condition_met = (
-        cp_period + pd.DateOffset(months=1) == finalsel_period
-    )
+    # qv_start_of_period_condition_met = (
+    #     qv_period + pd.DateOffset(months=1) == finalsel_period
+    # )
+    # cp_start_of_period_condition_met = (
+    #     cp_period + pd.DateOffset(months=1) == finalsel_period
+    # )
 
-    if qv_start_of_period_condition_met and cp_start_of_period_condition_met:
+    # if qv_start_of_period_condition_met and cp_start_of_period_condition_met:
 
-        qv_df[config["period"]] = qv_df[config["period"]] + pd.DateOffset(months=1)
-        cp_df[config["period"]] = cp_df[config["period"]] + pd.DateOffset(months=1)
+    #     qv_df[config["period"]] = qv_df[config["period"]] + pd.DateOffset(months=1)
+    #     cp_df[config["period"]] = cp_df[config["period"]] + pd.DateOffset(months=1)
 
-        join_type = "right"
+    #     join_type = "right"
 
-        warnings.warn(
-            "finalsel period is 1 month later than qv_and_cp period. "
-            "Treating as start of period processing."
-        )
+    #     warnings.warn(
+    #         "finalsel period is 1 month later than qv_and_cp period. "
+    #         "Treating as start of period processing."
+    #     )
 
     cp_finalsel = pd.merge(
         cp_df, finalsel, how=join_type, on=[config["period"], config["reference"]]
     )
 
-    if qv_start_of_period_condition_met and cp_start_of_period_condition_met:
-        # Creating missing questions for period 0 SE process
+    # if qv_start_of_period_condition_met and cp_start_of_period_condition_met:
+    #     # Creating missing questions for period 0 SE process
 
-        # Candidate to refactor into a function?
-        mapper_question = create_mapper()
-        idbr_to_spp_mapping = config["idbr_to_spp"]
-        cp_finalsel[config["form_id_spp"]] = (
-            cp_finalsel[config["form_id_idbr"]].astype(str).map(idbr_to_spp_mapping)
-        )
+    #     # Candidate to refactor into a function?
+    #     mapper_question = create_mapper()
+    #     idbr_to_spp_mapping = config["idbr_to_spp"]
+    #     cp_finalsel[config["form_id_spp"]] = (
+    #         cp_finalsel[config["form_id_idbr"]].astype(str).map(idbr_to_spp_mapping)
+    #     )
 
-        qv_df = create_missing_questions(
-            cp_finalsel,
-            qv_df,
-            config["reference"],
-            config["period"],
-            config["form_id_spp"],
-            "question_no",
-            mapper_question,
-        )
-        qv_df["question_no"] = qv_df["question_no"].astype(int)
+    #     qv_df = create_missing_questions(
+    #         cp_finalsel,
+    #         qv_df,
+    #         config["reference"],
+    #         config["period"],
+    #         config["form_id_spp"],
+    #         "question_no",
+    #         mapper_question,
+    #     )
+    #     qv_df["question_no"] = qv_df["question_no"].astype(int)
 
     qv_and_cp = pd.merge(
         qv_df, cp_finalsel, how="right", on=[config["period"], config["reference"]]
