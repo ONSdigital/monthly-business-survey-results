@@ -34,6 +34,7 @@ base_scenarios = [
     "25_class_change_C_FI_FI",
     "26_C_FI_FI_NS_BI_BI_R_filtered",
     "27_BI_BI_R_NS_R_FI_FI_filtered",
+    "29_mixed_data_filtered",
     "30_class_change_C_C_FI_filtered",
     "31_no_response",
     "32_divide_by_zero",
