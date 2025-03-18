@@ -64,6 +64,6 @@ def detect_outlier(df, config):
         config["question_no"],
         config["form_id_spp"],
         "outlier_weight",
-        "new_target_variable",
+        config["target"],
     )
     return post_win
