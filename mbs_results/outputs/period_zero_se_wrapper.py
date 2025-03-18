@@ -13,7 +13,10 @@ from mbs_results.staging.data_cleaning import (
     convert_cell_number,
     create_imputation_class,
 )
-from mbs_results.staging.stage_dataframe import drop_derived_questions
+from mbs_results.staging.stage_dataframe import (
+    drop_derived_questions,
+    start_of_period_staging,
+)
 from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.inputs import load_config
 from mbs_results.utilities.validation_checks import qa_selective_editing_outputs
@@ -45,10 +48,7 @@ def period_zero_se_wrapper():
 
     # Read in back data
     back_data = read_and_process_back_data(config)
-    # back_data[config["auxiliary"]+"_original"] = back_data[onfig["auxiliary"]].copy()
-    back_data[config["auxiliary_converted"]] = back_data[config["auxiliary"]].copy()
-    back_data = convert_annual_thousands(back_data, config["auxiliary_converted"])
-
+    back_data.to_csv("back_data.csv")
     # Lots of "glueing" other functions together so df is in a format for estimation
     # Another method could be to look at imputation, and try to keep original imputation
     # markers.
@@ -65,9 +65,14 @@ def period_zero_se_wrapper():
     )
     back_data_imputation = imputation_processing(back_data, config)
 
+    back_data_imputation = start_of_period_staging(back_data_imputation, config)
+
+    # Aux has been dropped and new aux is from next period, re-converting
+    back_data[config["auxiliary_converted"]] = back_data[config["auxiliary"]].copy()
+    back_data = convert_annual_thousands(back_data, config["auxiliary_converted"])
+
     # Running all of estimation and outliers
     back_data_estimation = estimate(back_data_imputation, config)
-
     back_data_outliering = detect_outlier(back_data_estimation, config)
 
     additional_outputs_df = back_data_estimation[
@@ -129,14 +134,9 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
         construction link.
     """
 
-    back_data["imputed_and_derived_flag"] = back_data.apply(
-        lambda row: (
-            "d"
-            if "sum" in str(row["constrain_marker"]).lower()
-            else row[f"imputation_flags_{config['target']}"]
-        ),
-        axis=1,
-    )
+    # Convert Aux to £'s monthly
+    back_data[config["auxiliary_converted"]] = back_data[config["auxiliary"]].copy()
+    back_data = convert_annual_thousands(back_data, config["auxiliary_converted"])
 
     # Convert cell number to not include NI
     back_data = convert_cell_number(back_data, config["cell_number"])
@@ -165,6 +165,15 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
         target=config["target"],
         question_no=config["question_no"],
         spp_form_id=config["form_id_spp"],
+    )
+
+    back_data["imputed_and_derived_flag"] = back_data.apply(
+        lambda row: (
+            "d"
+            if "sum" in str(row["constrain_marker"]).lower()
+            else row[f"imputation_flags_{config['target']}"]
+        ),
+        axis=1,
     )
 
     # Changing period back into int. Read_colon_sep_file should be updated to enforce
