@@ -493,10 +493,10 @@ def update_derived_weight_and_winsorised_value(
         Column name containing outlier weight (refered also as o-weight).
     target : str
         Column name containing target value.
-    target : str
+    tolerance: int
         Tolerance to check if update should take place, if the absolute
         difference of winsorised value and sum of components is less than
-        tolerance post_winsorised will be set to False.
+        10**(-tolerance) post_winsorised will be set to False.
     Returns
     -------
     df : pd.Dataframe
