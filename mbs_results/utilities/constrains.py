@@ -473,7 +473,7 @@ def update_derived_weight_and_winsorised_value(
     form_type_spp: str,
     outlier_weight: str,
     target: str,
-    tolerance = 3 
+    tolerance=3,
 ) -> pd.DataFrame:
     """Updates outlier weights and winsorised values to match  the components
 
@@ -494,8 +494,8 @@ def update_derived_weight_and_winsorised_value(
     target : str
         Column name containing target value.
     target : str
-        Tolerance to check if update should take place, if the absolute 
-        difference of winsorised value and sum of components is less than 
+        Tolerance to check if update should take place, if the absolute
+        difference of winsorised value and sum of components is less than
         tolerance post_winsorised will be set to False.
     Returns
     -------
@@ -507,7 +507,7 @@ def update_derived_weight_and_winsorised_value(
 
     derived_all = []
 
-    df["winsorised_value"] =  df[outlier_weight] * df[target]
+    df["winsorised_value"] = df[outlier_weight] * df[target]
 
     for spp_id in derive_map:
 
@@ -557,7 +557,11 @@ def update_derived_weight_and_winsorised_value(
         on=[reference, period, question_code],
     )
 
-    df.loc[abs(df["post_winsorised_value"] - df["winsorised_value"]) <= pow(10,-tolerance), "post_winsorised"] = False
+    df.loc[
+        abs(df["post_winsorised_value"] - df["winsorised_value"])
+        <= pow(10, -tolerance),
+        "post_winsorised",
+    ] = False
 
     # fill na with false
     df["post_winsorised"] = df["post_winsorised"].fillna(0).astype("bool")
