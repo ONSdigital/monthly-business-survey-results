@@ -129,15 +129,6 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
         construction link.
     """
 
-    back_data = constrain(
-        df=back_data,
-        period=config["period"],
-        reference=config["reference"],
-        target=config["target"],
-        question_no=config["question_no"],
-        spp_form_id=config["form_id_spp"],
-    )
-
     back_data["imputed_and_derived_flag"] = back_data.apply(
         lambda row: (
             "d"
@@ -165,6 +156,15 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
             predictive_variable=config["auxiliary_converted"],
             **config,
         )
+    )
+
+    back_data = constrain(
+        df=back_data,
+        period=config["period"],
+        reference=config["reference"],
+        target=config["target"],
+        question_no=config["question_no"],
+        spp_form_id=config["form_id_spp"],
     )
 
     # Changing period back into int. Read_colon_sep_file should be updated to enforce
