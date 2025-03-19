@@ -20,11 +20,11 @@
 | period_selected | The most recent period to include in the outputs. | int | Any int in the form `yyyymm`. |
 | current_period | The most recent period to include in the outputs (same as above). | int | Any int in the form `yyyymm`. |
 | previous_period | The previous period to use as a reference | int | Any int in the form `yyyymm`. |
-| revision_period | The number of months to use as a revision period. | int | Any int in the form `yyyymm`. |
+| revision_period | The number of months to use as a revision period. | int | Any int in the form `mm` or `m` (does not need to be zero-padded). |
 
 
 ## Guidance for use
-As an end user, you will only need to change the user config (named config_user.json) - you just need to update the filepaths and period information in the user config. Note: for ONS users, you can find example filepaths in the Confluence documentation.
+As an end user, you will only need to change the user config (named `config_user.json`) - you just need to update the filepaths and period information in the user config. Note: for ONS users, you can find example filepaths in the Confluence documentation.
 
 # Dev Config
 | Parameter | Description | Default | Data Type | Acceptable Values |
@@ -65,14 +65,14 @@ As an end user, you will only need to change the user config (named config_user.
 | idbr_to_spp | Mapping between IDBR and SPP. | `{"201": 9, "202": 9, "203": 10, "204": 10, "205": 11, "216": 11, "106": 12, "111": 12, "117": 13, "167": 13, "123": 14, "173": 14, "817": 15, "867": 15, "823": 16, "873": 16}` | dict | A dictionary in the format `{"IDBR_value": SPP_value}` where IDBR value is a string and SPP value is an int. |
 | csw_to_spp_columns | Mapping of CSW to SPP columns. | `{"returned_value":"response", "adjusted_value":"adjustedresponse", "question_no":"questioncode"}` | dict | A dictionary in the format `{"CSW_col_name": "SPP_col_name"}`. |
 | type_to_imputation_marker | A dictionary mapper mapping type to imputation marker. | `{"0": "r", "1": "r", "2": "derived", "3": "fir", "4": "bir", "5": "c", "6": "mc", "10": "r", "11": "r", "12": "derived", "13": "fir" }` | dict | A dictionary in the format `{"type":"imputation_marker"}` where imputation marker is a value found in the imputation_marker_col. |
-| additional_outputs | A list of additional outputs to produce after the pipeline has run. | [] | list | Any of the additional outputs listed in mbs_results/outputs/produce_additional_outputs.py within the produce_additional_outputs function. See below for information on how to generate additional outputs. Currently: `"selective_editing_contributor"`, `"selective_editing_question"`, `"turnover_output"`, `"weighted_adj_val_time_series"`, `"produce_ocea_srs_outputs"`, `"create_imputation_link_output"` or `["all"]` to produce all additional outputs. |
+| additional_outputs | A list of additional outputs to produce after the pipeline has run. | [] | list | Any of the additional outputs listed in `mbs_results/outputs/produce_additional_outputs.py` within the `produce_additional_outputs` function. See below for information on how to generate additional outputs. Currently: `"selective_editing_contributor"`, `"selective_editing_question"`, `"turnover_output"`, `"weighted_adj_val_time_series"`, `"produce_ocea_srs_outputs"`, `"create_imputation_link_output"` or `["all"]` to produce all additional outputs. |
 ## Usage
 
 
-**Adding new columns**: To add new columns throughout the pipeline, you will need to add it to one of the keep_cols, i.e. finalsel_keep_cols, responses_keep_cols or contributors_keep_cols **and** you will also need to add it to the master_column_type_dict parameter.
+**Adding new columns**: To add new columns throughout the pipeline, you will need to add it to one of the keep_cols, i.e. `finalsel_keep_cols`, `responses_keep_cols` or `contributors_keep_cols` **and** you will also need to add it to the `master_column_type_dict` parameter.
 
 
-**Generating additional outputs**: To generate additional outputs, as well as adding the name of the additional output to the additional_outputs parameter, you will also need to ensure the additional output is listed in the dictionary [here](https://github.com/ONSdigital/monthly-business-survey-results/blob/main/mbs_results/outputs/produce_additional_outputs.py#L92) in the format {"output_name": function_to_produce_output} (ensuring that you've imported function_to_produce_output at the top of the script.)
+**Generating additional outputs**: To generate additional outputs, as well as adding the name of the additional output to the `additional_outputs` parameter, you will also need to ensure the additional output is listed in the dictionary [here](https://github.com/ONSdigital/monthly-business-survey-results/blob/main/mbs_results/outputs/produce_additional_outputs.py#L92) in the format `{"output_name": function_to_produce_output}` (ensuring that you've imported `function_to_produce_output` at the top of the script.)
 
 ## Updating
 Please update this when you can - for example, if anything is added/removed from the config, or some of the sensible default values change, update this as part of your pull request.
