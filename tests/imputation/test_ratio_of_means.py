@@ -45,7 +45,7 @@ base_scenarios = [
 
 pre_defined_link_scenarios = ["19_link_columns", "28_link_columns_filtered"]
 
-mannual_constructions_scenarios = [
+manual_constructions_scenarios = [
     "rom_test_data_case_mc_1",
     "rom_test_data_case_mc_2",
     "rom_test_data_case_mc_3",
@@ -128,8 +128,8 @@ def test_ratio_of_means_with_links(link_scenario):
     assert_frame_equal(actual_output, expected_output, check_dtype=False)
 
 
-@pytest.mark.parametrize("mc_base_file_name", mannual_constructions_scenarios)
-def test_ratio_of_means_with_mannual_constructions(mc_base_file_name):
+@pytest.mark.parametrize("mc_base_file_name", manual_constructions_scenarios)
+def test_ratio_of_means_with_manual_constructions(mc_base_file_name):
 
     df = load_and_format(scenario_path_prefix + mc_base_file_name + "_input.csv")
 
