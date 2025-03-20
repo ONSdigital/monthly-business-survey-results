@@ -308,9 +308,10 @@ def start_of_period_staging(
             mapper=mapper,
         )
 
-        imputation_output_with_missing = pd.merge(
-            left=imputation_output_with_missing,
-            right=finalsel,
+        imputation_output_with_missing = imputation_output_with_missing.drop(
+            columns=config["form_id_spp"]
+        ).merge(
+            finalsel,
             on=[config["period"], config["reference"]],
             suffixes=["_imputation_output", "_finalsel"],
             how="right",
