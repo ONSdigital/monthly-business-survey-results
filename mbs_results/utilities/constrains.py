@@ -473,7 +473,7 @@ def update_derived_weight_and_winsorised_value(
     form_type_spp: str,
     outlier_weight: str,
     target: str,
-    tolerance=3,
+    tolerance=5,
 ) -> pd.DataFrame:
     """Updates outlier weights and winsorised values to match  the components
 
