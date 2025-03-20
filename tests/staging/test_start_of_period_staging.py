@@ -10,7 +10,7 @@ from mbs_results.staging.stage_dataframe import start_of_period_staging
 
 @pytest.fixture(scope="class")
 def filepath():
-    return Path(r"tests\data\outputs\selective_editing")
+    return Path("tests/data/outputs/selective_editing")
 
 
 @pytest.fixture(scope="class")
@@ -25,7 +25,7 @@ def start_of_period_staging_output(filepath):
     return pd.read_csv(filepath / "start_of_period_staging_output.csv", index_col=False)
 
 
-input_path = r"tests/data/test_main/input/"
+input_path = "tests/data/test_main/input/"
 
 config = {
     "period_selected": 202202,
