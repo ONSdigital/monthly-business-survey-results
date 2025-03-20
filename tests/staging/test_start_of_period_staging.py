@@ -134,14 +134,6 @@ class TestStartOfPeriodStaging:
             expected_output["period"].dt.strftime("%Y%m").astype(int)
         )
 
-        print("expected", expected_output.columns)
-        # Convert period to datetime
-
-        # expected_output = expected_output[sorted(expected_output.columns)]
-        expected_output.to_csv("expected_output.csv", index=False)
-
         actual_output = start_of_period_staging(imputation_output, config)
-        # actual_output = actual_output[sorted(actual_output.columns)]
-        actual_output.to_csv("actual_output.csv", index=False)
 
         assert_frame_equal(actual_output, expected_output, check_like=True)
