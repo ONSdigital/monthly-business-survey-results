@@ -285,14 +285,6 @@ def start_of_period_staging(
         ]
         imputation_output = imputation_output[keep_columns]
 
-        # drop_cols = [
-        #     col
-        #     for col in config["finalsel_keep_cols"]
-        #     if col not in ["reference", "period"]
-        # ]
-        # imputation_output.drop(columns=drop_cols, inplace=True, errors="ignore")
-        print(imputation_output.dtypes)
-
         finalsel = read_and_combine_colon_sep_files(
             config["sample_path"], config["sample_column_names"], config
         )
