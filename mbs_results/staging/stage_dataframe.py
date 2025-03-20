@@ -274,12 +274,24 @@ def start_of_period_staging(
             imputation_output["period"]
         ) + pd.DateOffset(months=1)
 
-        drop_cols = [
-            col
-            for col in config["finalsel_keep_cols"]
-            if col not in ["reference", "period"]
+        keep_columns = [
+            "period",
+            "reference",
+            "adjustedresponse",
+            "response",
+            "construction_link",
+            "questioncode",
+            "imputed_and_derived_flag",
         ]
-        imputation_output.drop(columns=drop_cols, inplace=True, errors="ignore")
+        imputation_output = imputation_output[keep_columns]
+
+        # drop_cols = [
+        #     col
+        #     for col in config["finalsel_keep_cols"]
+        #     if col not in ["reference", "period"]
+        # ]
+        # imputation_output.drop(columns=drop_cols, inplace=True, errors="ignore")
+        print(imputation_output.dtypes)
 
         finalsel = read_and_combine_colon_sep_files(
             config["sample_path"], config["sample_column_names"], config
@@ -292,12 +304,12 @@ def start_of_period_staging(
             finalsel, keep_columns=config["finalsel_keep_cols"], **config
         )
 
-        mapper = create_mapper()
         idbr_to_spp_mapping = config["idbr_to_spp"]
         finalsel[config["form_id_spp"]] = (
             finalsel[config["form_id_idbr"]].astype(str).map(idbr_to_spp_mapping)
         )
 
+        mapper = create_mapper()
         imputation_output_with_missing = create_missing_questions(
             contributors_df=finalsel,
             responses_df=imputation_output,
@@ -306,6 +318,9 @@ def start_of_period_staging(
             formid=config["form_id_spp"],
             question_no=config["question_no"],
             mapper=mapper,
+        )
+        imputation_output_with_missing[config["question_no"]] = (
+            imputation_output_with_missing[config["question_no"]].astype(int)
         )
 
         imputation_output_with_missing = imputation_output_with_missing.drop(

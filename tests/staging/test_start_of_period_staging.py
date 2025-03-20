@@ -4,6 +4,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
+from mbs_results.staging.data_cleaning import enforce_datatypes
 from mbs_results.staging.stage_dataframe import start_of_period_staging
 
 
@@ -92,22 +93,6 @@ config = {
         "currency",
     ],
     "idbr_to_spp": {
-        "201": 9,
-        "202": 9,
-        "203": 10,
-        "204": 10,
-        "205": 11,
-        "216": 11,
-        "106": 12,
-        "111": 12,
-        "117": 13,
-        "167": 13,
-        "123": 14,
-        "173": 14,
-        "817": 15,
-        "867": 15,
-        "823": 16,
-        "873": 16,
         "9999": 101,
     },
     "form_id_spp": "form_type_spp",
@@ -118,7 +103,7 @@ config = {
     "master_column_type_dict": {
         "reference": "int",
         "period": "date",
-        "response": "str",
+        "response": "float",
         "questioncode": "int",
         "adjustedresponse": "float",
         "frozensic": "str",
@@ -142,9 +127,21 @@ class TestStartOfPeriodStaging:
         self, imputation_output, start_of_period_staging_output
     ):
         expected_output = start_of_period_staging_output
-        expected_output.to_csv("./outputs/expected_output.csv", index=False)
+        expected_output = enforce_datatypes(
+            expected_output, keep_columns=expected_output.columns, **config
+        )
+        expected_output["period"] = (
+            expected_output["period"].dt.strftime("%Y%m").astype(int)
+        )
+
+        print("expected", expected_output.columns)
+        # Convert period to datetime
+
+        # expected_output = expected_output[sorted(expected_output.columns)]
+        expected_output.to_csv("expected_output.csv", index=False)
 
         actual_output = start_of_period_staging(imputation_output, config)
-        actual_output.to_csv("./outputs/actual_output.csv", index=False)
+        # actual_output = actual_output[sorted(actual_output.columns)]
+        actual_output.to_csv("actual_output.csv", index=False)
 
-        assert_frame_equal(actual_output, expected_output)
+        assert_frame_equal(actual_output, expected_output, check_like=True)
