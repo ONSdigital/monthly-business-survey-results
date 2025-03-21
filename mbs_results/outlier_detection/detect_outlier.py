@@ -73,7 +73,7 @@ def detect_outlier(df, config):
     )
 
     # Replace outlier weights
-    post_win = relace_outlier_weights(
+    post_win = replace_outlier_weights(
         post_win,
         config["reference"],
         config["period"],
