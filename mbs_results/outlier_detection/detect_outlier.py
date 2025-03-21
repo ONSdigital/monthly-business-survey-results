@@ -78,7 +78,7 @@ def detect_outlier(df, config):
         config["reference"],
         config["period"],
         config["question_no"],
-        "outlier_weight"
+        "outlier_weight",
         config["manual_outlier_path"]
     )
     
