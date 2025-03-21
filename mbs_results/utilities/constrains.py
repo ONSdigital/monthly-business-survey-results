@@ -473,7 +473,7 @@ def update_derived_weight_and_winsorised_value(
     form_type_spp: str,
     outlier_weight: str,
     target: str,
-    tolerance=3,
+    tolerance=5,
 ) -> pd.DataFrame:
     """Updates outlier weights and winsorised values to match  the components
 
@@ -514,27 +514,31 @@ def update_derived_weight_and_winsorised_value(
         df_spp_id = df[df[form_type_spp] == spp_id].copy()
 
         df_spp_id = df_spp_id.pivot(
-            index=[reference, period], columns=question_code, values="winsorised_value"
+            index=[reference, period],
+            columns=question_code,
+            values=["winsorised_value", target],
         )
 
-        df_spp_id["post_winsorised"] = df_spp_id[
+        df_spp_id["post_winsorised"] = df_spp_id["winsorised_value"][
             derive_map[spp_id]["derive"]
-        ] != df_spp_id[derive_map[spp_id]["from"]].sum(axis=1)
+        ] != df_spp_id["winsorised_value"][derive_map[spp_id]["from"]].sum(axis=1)
 
         df_spp_id["post_win_o_weight"] = (
-            df_spp_id[derive_map[spp_id]["from"]].sum(axis=1)
-            / df_spp_id[derive_map[spp_id]["derive"]]
+            df_spp_id["winsorised_value"][derive_map[spp_id]["from"]].sum(axis=1)
+            / df_spp_id[target][derive_map[spp_id]["derive"]]
         )
 
-        df_spp_id["post_winsorised_value"] = df_spp_id[derive_map[spp_id]["from"]].sum(
-            axis=1
-        )
+        df_spp_id["post_winsorised_value"] = df_spp_id["winsorised_value"][
+            derive_map[spp_id]["from"]
+        ].sum(axis=1)
 
         df_spp_id = df_spp_id[
             ["post_winsorised", "post_win_o_weight", "post_winsorised_value"]
         ]
 
         df_spp_id[question_code] = derive_map[spp_id]["derive"]
+
+        df_spp_id.columns = df_spp_id.columns.droplevel(1)
 
         df_spp_id.reset_index(inplace=True)
 

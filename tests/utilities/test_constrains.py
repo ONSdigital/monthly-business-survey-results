@@ -223,6 +223,8 @@ scenarios = [
     "outlier_identified_example_q46_q47",
     "outlier_identified_example_derived_q42",
     "outlier_identified_example_derived_q46",
+    "outlier_identifies_non_contributor",
+    "outlier_identifies_example_3",
 ]
 
 
