@@ -593,7 +593,7 @@ def replace_outlier_weights(
 
     try:
         manual_outliers = pd.read_csv(manual_outlier_path)
-    except FileNotFoundException as e:
+    except OSError as e:
         warnings.warn(e)
         manual_outliers = None
 
