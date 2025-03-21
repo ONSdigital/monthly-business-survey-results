@@ -513,7 +513,7 @@ def update_derived_weight_and_winsorised_value(
 
         df_spp_id = df[df[form_type_spp] == spp_id].copy()
 
-        df_spp_id = df_spp_id.pivot(
+        df_spp_id = df_spp_id.pivot_table(
             index=[reference, period], columns=question_code, values="winsorised_value"
         )
 
@@ -571,5 +571,43 @@ def update_derived_weight_and_winsorised_value(
     df.loc[df["post_winsorised"], "winsorised_value"] = df["post_winsorised_value"]
 
     df.drop(columns=["post_win_o_weight", "post_winsorised_value"], inplace=True)
+
+    return df
+
+
+def replace_outlier_weights(
+    df: pd.DataFrame,
+    reference: str,
+    period: str,
+    question_code: str,
+    outlier_weight: str,
+    manual_outlier_path: str
+    ):
+    """
+    # Todo: Overwrite calculated outlier weights with manual outlier weights
+        - Read manual outlier CSV
+        - If empty, log it and skip
+        - If not empty, move outlier column to pre_manual_outlier
+        - Update outlier weights with manual outliers using .loc[] = manual_outlier
+    """
+
+    try:
+        manual_outliers = pd.read_csv(manual_outlier_path)
+    except FileNotFoundException as e:
+        warnings.warn(e)
+        manual_outliers = None
+
+    if manual_outliers is not None:
+        
+        df = df.merge(
+            manual_outliers,
+            how="left",
+            on=[reference, period, question_code]
+        )
+
+        df = df.drop(columns=[outlier_weight])
+
+    else:
+        warnings.warn("No manual outliers")
 
     return df
