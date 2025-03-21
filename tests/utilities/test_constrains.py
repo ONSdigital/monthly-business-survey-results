@@ -10,6 +10,7 @@ from mbs_results.utilities.constrains import (
     replace_values_index_based,
     sum_sub_df,
     update_derived_weight_and_winsorised_value,
+    replace_outlier_weights
 )
 
 
@@ -242,3 +243,45 @@ def test_update_derived_weight_and_winsorised_value(filepath, base_file_name):
     )
 
     assert_frame_equal(df_actual, df_expected)
+
+def test_replace_outlier_weights(filepath):
+
+    df = pd.read_csv(
+        filepath / "test_replace_outliers.csv",
+        index_col=False
+    )
+
+    df_in = df.drop(columns=["manual_outlier_weight"])
+
+    df_expected = df.drop(columns=["outlier_weight"])
+
+    df_actual = replace_outlier_weights(
+        df_in,
+        "reference",
+        "period",
+        "question_no",
+        "outlier_weight",
+        filepath / "test_manual_outliers_file.csv"
+    )
+
+    assert_frame_equal(df_actual, df_expected)
+
+def test_no_manual_outliers(filepath):
+
+    df = pd.read_csv(
+        filepath / "test_replace_outliers.csv",
+        index_col=False
+    )
+
+    df_in = df.drop(columns=["manual_outlier_weight"])
+
+    df_actual = replace_outlier_weights(
+        df_in,
+        "reference",
+        "period",
+        "question_no",
+        "outlier_weight",
+        ""
+    )
+
+    assert_frame_equal(df_actual, df_in)
