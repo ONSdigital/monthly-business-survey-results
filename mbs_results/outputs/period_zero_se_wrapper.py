@@ -66,7 +66,7 @@ def period_zero_se_wrapper():
     back_data_imputation = imputation_processing(back_data, config)
 
     # create_se_outputs(back_data_imputation, config) ## Need to check the output of
-    # this!
+    # this (future work to refactor pipeline next sprint)
 
     back_data_imputation = start_of_period_staging(back_data_imputation, config)
 
