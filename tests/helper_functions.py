@@ -19,8 +19,8 @@ def load_filter(filter_path):
 
         df = pd.read_csv(my_file)
 
-        if "date" in df.columns:
-            df["date"] = pd.to_datetime(df["date"], format="%Y%m")
+        if "period" in df.columns:
+            df["period"] = pd.to_datetime(df["period"], format="%Y%m")
 
         return df
 
