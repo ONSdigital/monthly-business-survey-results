@@ -11,6 +11,10 @@ from mbs_results.outputs.selective_editing_contributer_output import (
 from mbs_results.outputs.selective_editing_question_output import (
     create_selective_editing_question_output,
 )
+from mbs_results.staging.data_cleaning import (
+    convert_cell_number,
+    create_imputation_class,
+)
 from mbs_results.staging.stage_dataframe import start_of_period_staging
 from mbs_results.utilities.validation_checks import qa_selective_editing_outputs
 
@@ -63,6 +67,15 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
         A DataFrame containing the selective editing outputs.
     """
     imputation_output = start_of_period_staging(imputation_output, config)
+
+    imputation_output.rename(
+        columns={"imputed_and_derived_flag": "imputation_flags_adjustedresponse"},
+        inplace=True,
+    )
+    imputation_output = convert_cell_number(imputation_output, config["cell_number"])
+    imputation_output = create_imputation_class(
+        imputation_output, config["cell_number"], "imputation_class"
+    )
 
     # Create missing questions
 
