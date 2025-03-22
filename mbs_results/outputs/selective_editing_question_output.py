@@ -77,7 +77,7 @@ def create_selective_editing_question_output(
         reference="reference",
         period="period",
         question_no="questioncode",
-        frozen_turnover="frotover",
+        frozen_turnover="converted_frotover",
         construction_link="construction_link",
         imputation_class="imputation_class",
         period_selected=period_selected,

@@ -8,9 +8,15 @@ from mbs_results.imputation.construction_matches import flag_construction_matche
 from mbs_results.outlier_detection.detect_outlier import detect_outlier
 from mbs_results.outputs.produce_additional_outputs import produce_additional_outputs
 from mbs_results.staging.back_data import read_and_process_back_data
-from mbs_results.staging.data_cleaning import create_imputation_class
-from mbs_results.staging.stage_dataframe import drop_derived_questions
-from mbs_results.utilities.constrains import constrain
+from mbs_results.staging.data_cleaning import (
+    convert_annual_thousands,
+    convert_cell_number,
+    create_imputation_class,
+)
+from mbs_results.staging.stage_dataframe import (
+    drop_derived_questions,
+    start_of_period_staging,
+)
 from mbs_results.utilities.inputs import load_config
 from mbs_results.utilities.validation_checks import qa_selective_editing_outputs
 
@@ -22,6 +28,8 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
+# from mbs_results.outputs.selective_editing_outputs import create_se_outputs
+
 
 def period_zero_se_wrapper():
     """
@@ -32,12 +40,15 @@ def period_zero_se_wrapper():
     Selective editing question and contributor files are then produced
 
     """
+    # Issues:
+    # - Loading p1 IDBR files, which are used to calculate construction links?
+    # Double check which periods frotover and cell number should be used
+    # for construction links.
 
     config = load_config(path="./mbs_results/config.json")
 
     # Read in back data
     back_data = read_and_process_back_data(config)
-
     # Lots of "glueing" other functions together so df is in a format for estimation
     # Another method could be to look at imputation, and try to keep original imputation
     # markers.
@@ -52,12 +63,19 @@ def period_zero_se_wrapper():
         config["question_no"],
         config["form_id_spp"],
     )
-
     back_data_imputation = imputation_processing(back_data, config)
+
+    # create_se_outputs(back_data_imputation, config) ## Need to check the output of
+    # this (future work to refactor pipeline next sprint)
+
+    back_data_imputation = start_of_period_staging(back_data_imputation, config)
+
+    # Aux has been dropped and new aux is from next period, re-converting
+    back_data[config["auxiliary_converted"]] = back_data[config["auxiliary"]].copy()
+    back_data = convert_annual_thousands(back_data, config["auxiliary_converted"])
 
     # Running all of estimation and outliers
     back_data_estimation = estimate(back_data_imputation, config)
-
     back_data_outliering = detect_outlier(back_data_estimation, config)
 
     additional_outputs_df = back_data_estimation[
@@ -68,9 +86,9 @@ def period_zero_se_wrapper():
             "frosic2007",
             config["form_id_idbr"],
             config["question_no"],
-            config["auxiliary"],
+            config["auxiliary_converted"],
             config["calibration_factor"],
-            config["adjustedresponse"],
+            config["target"],
             "response",
             "froempment",
             config["cell_number"],
@@ -119,36 +137,28 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
         construction link.
     """
 
-    back_data = constrain(
-        df=back_data,
-        period=config["period"],
-        reference=config["reference"],
-        target=config["target"],
-        question_no=config["question_no"],
-        spp_form_id=config["form_id_spp"],
-    )
+    # Convert Aux to £'s monthly
+    back_data[config["auxiliary_converted"]] = back_data[config["auxiliary"]].copy()
+    back_data = convert_annual_thousands(back_data, config["auxiliary_converted"])
 
-    back_data["imputed_and_derived_flag"] = back_data.apply(
-        lambda row: (
-            "d"
-            if "sum" in str(row["constrain_marker"]).lower()
-            else row[f"imputation_flags_{config['target']}"]
-        ),
-        axis=1,
-    )
-
+    # Convert cell number to not include NI
+    back_data = convert_cell_number(back_data, config["cell_number"])
     back_data = create_imputation_class(
         back_data, config["cell_number"], "imputation_class"
     )
 
     # Run apply_imputation_link function to get construction links
     back_data_cons_matches = flag_construction_matches(back_data, **config)
-    back_data_imputation = calculate_imputation_link(
-        back_data_cons_matches,
-        match_col="flag_construction_matches",
-        link_col="construction_link",
-        predictive_variable=config["auxiliary"],
-        **config,
+
+    # group by question number then apply this function
+    back_data_imputation = back_data_cons_matches.groupby(config["question_no"]).apply(
+        lambda df: calculate_imputation_link(
+            df,
+            match_col="flag_construction_matches",
+            link_col="construction_link",
+            predictive_variable=config["auxiliary_converted"],
+            **config,
+        )
     )
 
     # Changing period back into int. Read_colon_sep_file should be updated to enforce
