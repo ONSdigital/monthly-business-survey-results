@@ -1,5 +1,5 @@
-identifier,date,group,output,marker,forward,backward,construction,count_forward,count_backward,count_construction,default_forward,default_backward,default_construction
-10001,202001,100,3892,R,1,1,147.88764,0,0,3,true,true,false
-10002,202001,100,3873,R,1,1,147.88764,0,0,3,true,true,false
-10003,202001,100,5397,R,1,1,147.88764,0,0,3,true,true,false
-10004,202001,100,10500.022472,C,1,1,147.88764,0,0,3,true,true,false
+identifier,period,group,question,other,imputation_flags_question,is_backdata,backdata_question,backdata_flags_question,question_man,f_link_question,default_link_f_match_question,b_link_question,default_link_b_match_question,construction_link,default_link_flag_construction_matches,f_match_question_count,b_match_question_count,flag_construction_matches_count
+10001,202001,100,3892.0,1,r,False,,,,1.0,True,1.0,True,147.8876404494382,False,0,0,3
+10002,202001,100,3873.0,75,r,False,,,,1.0,True,1.0,True,147.8876404494382,False,0,0,3
+10003,202001,100,5397.0,13,r,False,,,,1.0,True,1.0,True,147.8876404494382,False,0,0,3
+10004,202001,100,10500.022471910113,71,c,False,,,,1.0,True,1.0,True,147.8876404494382,False,0,0,3
