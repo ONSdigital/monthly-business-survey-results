@@ -582,13 +582,30 @@ def replace_outlier_weights(
     question_code: str,
     outlier_weight: str,
     manual_outlier_path: str
-    ):
+    ) -> pd.DataFrame:
     """
-    # Todo: Overwrite calculated outlier weights with manual outlier weights
-        - Read manual outlier CSV
-        - If empty, log it and skip
-        - If not empty, move outlier column to pre_manual_outlier
-        - Update outlier weights with manual outliers using .loc[] = manual_outlier
+    Overwrite calculated outlier weights with manual outlier weights
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    reference : str
+        Column name containing reference.
+    period : str
+        Column name containing period.
+    question_code : str
+        Column name containing question code.
+    outlier_weight : str
+        Column name containing outlier weight (refered also as o-weight).
+    manual_outlier_path : str
+        String containing file path to manual outliers file.
+    
+    Returns
+    -------
+    df : pd.Dataframe
+        Original dataframe with weights updated to equal those supplied
+        in the manual outliers file, if it exists.
     """
 
     try:
