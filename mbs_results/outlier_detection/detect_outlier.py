@@ -38,8 +38,7 @@ def join_l_values(df, l_values_path, classification_values_path, config):
 
 def detect_outlier(df, config):
     """
-    # Todo docstrings
-    # Todo add additional function to overwrite outlier weights
+    # Todo: docstrings
     """
     pre_win = join_l_values(
         df, config["l_values_path"], config["classification_values_path"], config
