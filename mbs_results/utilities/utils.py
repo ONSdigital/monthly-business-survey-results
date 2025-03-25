@@ -84,7 +84,7 @@ def append_filter_out_questions(
     return df
 
 
-def intermediate_file(prefix, config):
+def get_versioned_filename(prefix, config):
 
     file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
     snapshot_name = config["mbs_file_name"].split(".")[0]

@@ -5,7 +5,10 @@ from importlib import metadata
 
 import pandas as pd
 
-from mbs_results.utilities.utils import append_filter_out_questions, intermediate_file
+from mbs_results.utilities.utils import (
+    append_filter_out_questions,
+    get_versioned_filename,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -240,21 +243,21 @@ def validate_staging(df: pd.DataFrame, config: dict):
 def validate_imputation(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post imputation")
     output_path = config["output_path"]
-    imputation_filename = intermediate_file("imputation", config)
+    imputation_filename = get_versioned_filename("imputation", config)
     df.to_csv(output_path + imputation_filename, index=False)
 
 
 def validate_estimation(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post estimation")
     output_path = config["output_path"]
-    estimate_filename = intermediate_file("estimation_output", config)
+    estimate_filename = get_versioned_filename("estimation_output", config)
     df.to_csv(output_path + estimate_filename, index=False)
 
 
 def validate_outlier_detection(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post outliering")
     output_path = config["output_path"]
-    outlier_filename = intermediate_file("outlier_output", config)
+    outlier_filename = get_versioned_filename("outlier_output", config)
 
     # Must be same as save_full_path argument of filter_out_questions() (in staging)
     # Path must be full path containing directory and file name

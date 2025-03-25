@@ -1,5 +1,3 @@
-from importlib import metadata
-
 import pandas as pd
 
 from mbs_results.estimation.estimate import estimate
@@ -13,7 +11,7 @@ from mbs_results.staging.data_cleaning import (
     create_imputation_class,
 )
 from mbs_results.staging.stage_dataframe import start_of_period_staging
-from mbs_results.utilities.utils import intermediate_file
+from mbs_results.utilities.utils import get_versioned_filename
 from mbs_results.utilities.validation_checks import qa_selective_editing_outputs
 
 
@@ -35,7 +33,7 @@ def load_imputation_output(config: dict) -> pd.DataFrame:
         A DataFrame containing the imputation output data.
     """
     output_path = config["output_path"]
-    imputation_filename = intermediate_file("imputation_output", config)
+    imputation_filename = get_versioned_filename("imputation_output", config)
 
     imputation_output = pd.read_csv(output_path + imputation_filename)
 
