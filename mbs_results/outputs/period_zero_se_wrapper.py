@@ -6,7 +6,9 @@ from mbs_results.estimation.estimate import estimate
 from mbs_results.imputation.calculate_imputation_link import calculate_imputation_link
 from mbs_results.imputation.construction_matches import flag_construction_matches
 from mbs_results.outlier_detection.detect_outlier import detect_outlier
-from mbs_results.outputs.produce_additional_outputs import produce_additional_outputs
+from mbs_results.outputs.produce_additional_outputs import (
+    produce_selective_editing_outputs,
+)
 from mbs_results.staging.back_data import read_and_process_back_data
 from mbs_results.staging.data_cleaning import (
     convert_annual_thousands,
@@ -112,7 +114,7 @@ def period_zero_se_wrapper():
 
     additional_outputs_df.drop_duplicates(inplace=True)
 
-    produce_additional_outputs(config, additional_outputs_df)
+    produce_selective_editing_outputs(config, additional_outputs_df)
 
     qa_selective_editing_outputs(config)
 

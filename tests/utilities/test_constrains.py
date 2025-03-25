@@ -82,6 +82,9 @@ def test_constrain_functionality(filepath):
             df[(df["question_no"] == 40) & (df["spp_form_id"].isin([13, 14]))].index
         )
         .drop(df[(df["question_no"] == 46) & (df["spp_form_id"].isin([15]))].index)
+        .drop(df[(df["question_no"] == 47) & (df["spp_form_id"].isin([15]))].index)
+        .drop(df[(df["question_no"] == 42) & (df["spp_form_id"].isin([16]))].index)
+        .drop(df[(df["question_no"] == 43) & (df["spp_form_id"].isin([16]))].index)
         .drop(
             columns=[
                 "pre_derived_target",
@@ -130,6 +133,7 @@ def test_constrain_functionality(filepath):
     df_expected_output["spp_form_id"] = df_expected_output["spp_form_id"].astype(
         "int64"
     )
+
     assert_frame_equal(df_output, df_expected_output)
 
 
@@ -219,6 +223,8 @@ scenarios = [
     "outlier_identified_example_q46_q47",
     "outlier_identified_example_derived_q42",
     "outlier_identified_example_derived_q46",
+    "outlier_identifies_non_contributor",
+    "outlier_identifies_example_3",
 ]
 
 
@@ -234,7 +240,7 @@ def test_update_derived_weight_and_winsorised_value(filepath, base_file_name):
         "questioncode",
         "spp_form_id",
         "outlier_weight",
-        "winsorised_value",
+        "value",
     )
 
     assert_frame_equal(df_actual, df_expected)
