@@ -12,6 +12,7 @@ from mbs_results.outputs.selective_editing_question_output import (
     create_selective_editing_question_output,
 )
 from mbs_results.staging.stage_dataframe import start_of_period_staging
+from mbs_results.utilities.utils import intermediate_file
 from mbs_results.utilities.validation_checks import qa_selective_editing_outputs
 
 
@@ -33,9 +34,7 @@ def load_imputation_output(config: dict) -> pd.DataFrame:
         A DataFrame containing the imputation output data.
     """
     output_path = config["output_path"]
-    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
-    snapshot_name = config["mbs_file_name"].split(".")[0]
-    imputation_filename = f"imputation_output_v{file_version_mbs}_{snapshot_name}.csv"
+    imputation_filename = intermediate_file("imputation_output", config)
 
     imputation_output = pd.read_csv(output_path + imputation_filename)
 
