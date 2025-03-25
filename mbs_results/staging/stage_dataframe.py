@@ -282,7 +282,7 @@ def start_of_period_staging(
             "response",
             "construction_link",
             "questioncode",
-            "imputed_and_derived_flag",
+            "imputation_flags_adjustedresponse",
         ]
         imputation_output = imputation_output[keep_columns]
 
@@ -329,28 +329,60 @@ def start_of_period_staging(
             imputation_output_with_missing["period"].dt.strftime("%Y%m").astype(int)
         )
 
-        idbr_to_spp_mapping = config["idbr_to_spp"]
-        imputation_output[config["form_id_spp"]] = (
-            imputation_output[config["form_id_idbr"]]
-            .astype(str)
-            .map(idbr_to_spp_mapping)
+        imputation_output_with_missing[config["auxiliary_converted"]] = (
+            imputation_output_with_missing[config["auxiliary"]].copy()
+        )
+        imputation_output_with_missing = convert_annual_thousands(
+            imputation_output_with_missing, config["auxiliary_converted"]
         )
 
-        imputation_output = constrain(
-            df=imputation_output,
+        imputation_output_with_missing.to_csv("pre_constrain.csv")
+
+        # Keep only questions present in next period and not current period
+        dropped_questions = imputation_output_with_missing[
+            ~imputation_output_with_missing.apply(
+                lambda row: any(
+                    row[config["question_no"]] in questions
+                    for form_id, questions in mapper.items()
+                    if row[config["form_id_spp"]] == form_id
+                ),
+                axis=1,
+            )
+        ]
+        dropped_questions.to_csv(config["output_path"] + "dropped_previous_period.csv")
+
+        # Keep only the rows that match the condition
+        imputation_output_with_missing = imputation_output_with_missing[
+            imputation_output_with_missing.apply(
+                lambda row: any(
+                    row[config["question_no"]] in questions
+                    for form_id, questions in mapper.items()
+                    if row[config["form_id_spp"]] == form_id
+                ),
+                axis=1,
+            )
+        ]
+
+        imputation_output_with_missing = constrain(
+            df=imputation_output_with_missing,
             period=config["period"],
             reference=config["reference"],
             target=config["target"],
             question_no=config["question_no"],
             spp_form_id=config["form_id_spp"],
         )
-        imputation_output["imputed_and_derived_flag"] = imputation_output.apply(
-            lambda row: (
-                "d"
-                if "sum" in str(row["constrain_marker"]).lower()
-                else row[f"imputation_flags_{config['target']}"]
-            ),
-            axis=1,
+        imputation_output_with_missing["imputed_and_derived_flag"] = (
+            imputation_output_with_missing.apply(
+                lambda row: (
+                    "d"
+                    if "sum" in str(row["constrain_marker"]).lower()
+                    else row[f"imputation_flags_{config['target']}"]
+                ),
+                axis=1,
+            )
+        )
+        imputation_output_with_missing.drop(
+            columns=f"imputation_flags_{config['target']}", inplace=True
         )
 
     return imputation_output_with_missing

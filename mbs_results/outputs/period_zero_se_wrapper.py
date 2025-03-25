@@ -2,25 +2,17 @@ import logging
 
 import pandas as pd
 
-from mbs_results.estimation.estimate import estimate
 from mbs_results.imputation.calculate_imputation_link import calculate_imputation_link
 from mbs_results.imputation.construction_matches import flag_construction_matches
-from mbs_results.outlier_detection.detect_outlier import detect_outlier
-from mbs_results.outputs.produce_additional_outputs import (
-    produce_selective_editing_outputs,
-)
+from mbs_results.outputs.selective_editing_outputs import create_se_outputs
 from mbs_results.staging.back_data import read_and_process_back_data
 from mbs_results.staging.data_cleaning import (
     convert_annual_thousands,
     convert_cell_number,
     create_imputation_class,
 )
-from mbs_results.staging.stage_dataframe import (
-    drop_derived_questions,
-    start_of_period_staging,
-)
+from mbs_results.staging.stage_dataframe import drop_derived_questions
 from mbs_results.utilities.inputs import load_config
-from mbs_results.utilities.validation_checks import qa_selective_editing_outputs
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -29,8 +21,6 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
-
-# from mbs_results.outputs.selective_editing_outputs import create_se_outputs
 
 
 def period_zero_se_wrapper():
@@ -47,13 +37,10 @@ def period_zero_se_wrapper():
     # Double check which periods frotover and cell number should be used
     # for construction links.
 
-    config = load_config(path="./mbs_results/config.json")
+    config = load_config(None)
 
     # Read in back data
     back_data = read_and_process_back_data(config)
-    # Lots of "glueing" other functions together so df is in a format for estimation
-    # Another method could be to look at imputation, and try to keep original imputation
-    # markers.
 
     # Have to drop derived questions in this way, other method dropped "derived"
     # imputation markers, these are needed because a reference can change form type
@@ -67,56 +54,7 @@ def period_zero_se_wrapper():
     )
     back_data_imputation = imputation_processing(back_data, config)
 
-    # create_se_outputs(back_data_imputation, config) ## Need to check the output of
-    # this (future work to refactor pipeline next sprint)
-
-    back_data_imputation = start_of_period_staging(back_data_imputation, config)
-
-    # Aux has been dropped and new aux is from next period, re-converting
-    back_data[config["auxiliary_converted"]] = back_data[config["auxiliary"]].copy()
-    back_data = convert_annual_thousands(back_data, config["auxiliary_converted"])
-
-    # Running all of estimation and outliers
-    back_data_estimation = estimate(back_data_imputation, config)
-    back_data_outliering = detect_outlier(back_data_estimation, config)
-
-    additional_outputs_df = back_data_estimation[
-        [
-            config["reference"],
-            config["period"],
-            config["design_weight"],
-            "frosic2007",
-            config["form_id_idbr"],
-            config["question_no"],
-            config["auxiliary_converted"],
-            config["calibration_factor"],
-            config["target"],
-            "response",
-            "froempment",
-            config["cell_number"],
-            "imputation_class",
-            "imputed_and_derived_flag",
-            "construction_link",
-        ]
-    ]
-    additional_outputs_df.rename(
-        columns={"imputed_and_derived_flag": "imputation_flags_adjustedresponse"},
-        inplace=True,
-    )
-
-    additional_outputs_df = additional_outputs_df.merge(
-        back_data_outliering[["reference", "period", "questioncode", "outlier_weight"]],
-        how="left",
-        on=["reference", "period", "questioncode"],
-    )
-
-    additional_outputs_df["formtype"] = additional_outputs_df["formtype"].astype(str)
-
-    additional_outputs_df.drop_duplicates(inplace=True)
-
-    produce_selective_editing_outputs(config, additional_outputs_df)
-
-    qa_selective_editing_outputs(config)
+    create_se_outputs(back_data_imputation, config)
 
 
 def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame:
@@ -162,6 +100,8 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
             **config,
         )
     )
+
+    back_data_imputation = back_data_imputation.reset_index(drop=True)
 
     # Changing period back into int. Read_colon_sep_file should be updated to enforce
     # data types as per the config.
