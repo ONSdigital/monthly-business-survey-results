@@ -17,10 +17,12 @@ import tomli
 # Set up logging
 OutgoingLogger = logging.getLogger(__name__)
 
-
-# config_path = os.path.join("src", "developer_config.yaml")
-
-
+# Set up default config
+config_default = {
+    "platform": "s3", 
+    "bucket": "onscdp-dev-data01-5320d6ca",
+    "ssl_file": "/etc/pki/tls/certs/ca-bundle.crt",
+}
 def get_schema_headers(config: dict):
     """
     Extracts the schema headers from the provided configuration.
@@ -319,4 +321,4 @@ def run_export(config: dict):
 
 
 if __name__ == "__main__":
-    run_export(config={})
+    run_export(config=config_default)
