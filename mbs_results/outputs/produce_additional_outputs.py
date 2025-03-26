@@ -45,7 +45,7 @@ def get_additional_outputs_df(
             "frosic2007",
             "formtype",
             "questioncode",
-            "frotover",
+            "converted_frotover",
             "calibration_factor",
             "adjustedresponse",
             "status",
