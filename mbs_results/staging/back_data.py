@@ -13,7 +13,7 @@ def is_back_data_date_ok(
     back_data_period: pd.Series,
     first_period: pd.Timestamp,
     current_period: int,
-    revision_period: int,
+    revision_window: int,
 ):
     """
     Applies checks on period 0 (back data period)
@@ -29,7 +29,7 @@ def is_back_data_date_ok(
         First period in staged data.
     current_period : int
         Period of pipeline run.
-    revision_period : int
+    revision_window : int
         Revision length of staged data.
 
     Raises
@@ -52,7 +52,7 @@ def is_back_data_date_ok(
     if len(back_data_period.unique()) != 1:
         raise ValueError("Too many dates in back data, must have only 1")
 
-    if period_0 != current_period - pd.DateOffset(months=revision_period):
+    if period_0 != current_period - pd.DateOffset(months=revision_window):
         raise ValueError("Back data period doesn't match the revision period")
 
     if first_period != period_0 + pd.DateOffset(months=1):
@@ -156,7 +156,7 @@ def append_back_data(staged_data: pd.DataFrame, config: dict) -> pd.DataFrame:
         back_data[config["period"]],
         first_period,
         config["current_period"],
-        config["revision_period"],
+        config["revision_window"],
     )
 
     staged_and_back_data = pd.concat([back_data, staged_data], ignore_index=True)

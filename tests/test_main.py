@@ -22,7 +22,7 @@ test_config = {
     "period_selected": 202206,
     "current_period": 202206,
     "previous_period": 202205,
-    "revision_period": 6,
+    "revision_window": 6,
 }
 
 
