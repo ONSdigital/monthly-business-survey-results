@@ -10,6 +10,8 @@ from mbs_results.staging.create_missing_questions import (
 )
 from mbs_results.staging.data_cleaning import (
     convert_annual_thousands,
+    convert_cell_number,
+    create_imputation_class,
     enforce_datatypes,
     filter_out_questions,
     run_live_or_frozen,
@@ -283,8 +285,11 @@ def start_of_period_staging(
             "construction_link",
             "questioncode",
             "imputation_flags_adjustedresponse",
+            "imputation_class",
         ]
-        imputation_output = imputation_output[keep_columns]
+        imputation_output = imputation_output[keep_columns].rename(
+            columns={"imputation_class": "imputation_class_prev_period"}
+        )
 
         finalsel = read_and_combine_colon_sep_files(
             config["sample_path"], config["sample_column_names"], config
@@ -336,8 +341,6 @@ def start_of_period_staging(
             imputation_output_with_missing, config["auxiliary_converted"]
         )
 
-        imputation_output_with_missing.to_csv("pre_constrain.csv")
-
         # Keep only questions present in next period and not current period
         dropped_questions = imputation_output_with_missing[
             ~imputation_output_with_missing.apply(
@@ -385,4 +388,37 @@ def start_of_period_staging(
             columns=f"imputation_flags_{config['target']}", inplace=True
         )
 
+        imputation_output_with_missing = new_questions_construction_values(
+            imputation_output_with_missing, config
+        )
+
     return imputation_output_with_missing
+
+
+def new_questions_construction_values(df, config):
+    df.to_csv("before_copy_over_cell_number.csv")
+    df = convert_cell_number(df, config["cell_number"])
+    df = create_imputation_class(df, config["cell_number"], "imputation_class")
+    prev_period_imp_class = "imputation_class_prev_period"
+    current_period_imp_class = "imputation_class"
+    df[prev_period_imp_class] = df[prev_period_imp_class].combine_first(
+        df[current_period_imp_class]
+    )
+
+    # df.groupby(["period", "questioncode", prev_period_imp_class])
+    # .apply(lambda grouped: print(grouped["construction_link"].notna().unique()))
+
+    # # Current changes
+    # df.groupby(["period", "questioncode", prev_period_imp_class])
+    # .apply(lambda grouped: print(grouped["construction_link"]) if
+    # grouped["construction_link"].nunique() > 1 else None)
+
+    df["construction_link"] = df.groupby(
+        ["period", "questioncode", prev_period_imp_class]
+    )["construction_link"].transform(lambda group: group.ffill().bfill())
+
+    # Can drop after sign off, just for testing
+    # df.drop(columns=[config["cell_number"]+"_prev_period", config["cell_number"],
+    # "imputation_class"], inplace=True)
+    df.to_csv("missing_con_link.csv")
+    return df
