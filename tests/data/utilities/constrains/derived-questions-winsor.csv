@@ -1,4 +1,4 @@
-reference,period,aux,sampled,target_variable,new_target_variable,outlier_weight,question_no,spp_form_id,default_o_weight,constrain_marker,post_wins_marker,cell_no,frotover,froempment,frosic2007,formtype
+reference,period,aux,sampled,target_variable,new_target_variable,outlier_weight,question_no,spp_form_id,default_o_weight,constrain_marker,post_wins_marker,cell_no,converted_frotover,froempment,frosic2007,formtype
 101,202401,10,0,12,12,1,46,13,False,,False,1,1,1,1,111
 101,202401,23,1,20,20,1,47,13,False,,False,1,1,1,1,111
 101,202401,41,1,20,20,1,48,13,False,,False,1,1,1,1,111
