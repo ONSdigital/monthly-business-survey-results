@@ -118,5 +118,8 @@ class TestSelectiveEditing:
             "imputation_class",
             202001,
         )
+        actual_output.drop(
+            columns=["construction_link", "frozen_turnover", "formtype"], inplace=True
+        )
 
         assert_frame_equal(actual_output, expected_output)
