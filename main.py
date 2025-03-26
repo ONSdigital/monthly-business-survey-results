@@ -23,7 +23,6 @@ from mbs_results.utilities.validation_checks import (
 
 
 def run_mbs_main():
-    set_trace()
     config = load_config()
     validate_config(config)
 

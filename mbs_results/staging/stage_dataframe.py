@@ -98,7 +98,8 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     print("Staging started")
     period = config["period"]
     reference = config["reference"]
-
+    from ipdb import set_trace
+    set_trace()
     contributors, responses = get_dfs_from_spp(
         config["folder_path"] + config["mbs_file_name"],
         config["platform"],
