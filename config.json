@@ -1,6 +1,6 @@
 {
-    "platform" : "network",
-    "bucket" : "",
+    "platform" : "s3",
+    "bucket" : "onscdp-dev-data01-5320d6ca",
 
     "calibration_group_map_path": "",
     "classification_values_path": "",

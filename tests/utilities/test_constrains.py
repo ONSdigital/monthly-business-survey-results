@@ -70,7 +70,7 @@ def test_constrain_functionality(filepath):
         index_col=False,
     )
     # Creating dummy columns needed for constrains, not used other than setting as index
-    for col_name in ["cell_no", "frotover", "froempment", "frosic2007"]:
+    for col_name in ["cell_no", "converted_frotover", "froempment", "frosic2007"]:
         df[col_name] = 1
 
     df["target"] = df["target"].astype(float)
@@ -96,7 +96,7 @@ def test_constrain_functionality(filepath):
     )
 
     df_expected_output = df.drop(
-        columns=["cell_no", "frotover", "froempment", "frosic2007", "target"]
+        columns=["cell_no", "converted_frotover", "froempment", "frosic2007", "target"]
     ).rename(columns={"expected_target": "target"})
     df_expected_output["target"] = df_expected_output["target"].astype(float)
 
@@ -122,7 +122,8 @@ def test_constrain_functionality(filepath):
     ]
 
     df_output.drop(
-        columns=["cell_no", "frotover", "froempment", "frosic2007"], inplace=True
+        columns=["cell_no", "converted_frotover", "froempment", "frosic2007"],
+        inplace=True,
     )
     df_output = df_output[order].sort_values(by=order).reset_index(drop=True)
 
@@ -222,6 +223,8 @@ scenarios = [
     "outlier_identified_example_q46_q47",
     "outlier_identified_example_derived_q42",
     "outlier_identified_example_derived_q46",
+    "outlier_identifies_non_contributor",
+    "outlier_identifies_example_3",
 ]
 
 
@@ -237,7 +240,7 @@ def test_update_derived_weight_and_winsorised_value(filepath, base_file_name):
         "questioncode",
         "spp_form_id",
         "outlier_weight",
-        "winsorised_value",
+        "value",
     )
 
     assert_frame_equal(df_actual, df_expected)

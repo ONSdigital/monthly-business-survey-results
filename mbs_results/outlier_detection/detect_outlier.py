@@ -45,7 +45,7 @@ def detect_outlier(df, config):
             df,
             "calibration_group",
             config["period"],
-            config["auxiliary"],
+            config["auxiliary_converted"],
             config["census"],
             "design_weight",
             "calibration_factor",
@@ -64,6 +64,6 @@ def detect_outlier(df, config):
         config["question_no"],
         config["form_id_spp"],
         "outlier_weight",
-        "new_target_variable",
+        config["target"],
     )
     return post_win
