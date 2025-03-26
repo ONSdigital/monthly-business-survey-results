@@ -3,6 +3,10 @@ import json
 import boto3
 import pandas as pd
 import raz_client
+
+from idbr import set_trace
+
+set_trace()
 from rdsa_utils.cdp.helpers.s3_utils import load_json
 
 
