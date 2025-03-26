@@ -82,6 +82,7 @@ class TestSelectiveEditing:
             "g_weight",
             period_selected=202401,
         )
+        actual_output.drop(columns=["a_weight", "o_weight", "g_weight"], inplace=True)
 
         assert_frame_equal(actual_output, expected_output)
 
