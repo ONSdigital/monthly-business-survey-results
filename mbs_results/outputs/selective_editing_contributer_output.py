@@ -11,7 +11,8 @@ def get_selective_editing_contributor_output(
     question_no: str,
     period: str,
     reference: str,
-    **config
+    output_path: str,
+    **config,
 ) -> pd.DataFrame:
     """
     Returns a dataframe containing period, reference, domain_group, and
@@ -34,6 +35,8 @@ def get_selective_editing_contributor_output(
         Column name containing date information.
     reference : str
         Column name containing reference.
+    output_path : str
+        path to save output files.
     **config: Dict
           main pipeline configuration. Can be used to input the entire config dictionary
 
@@ -85,7 +88,12 @@ def get_selective_editing_contributor_output(
         threshold_mapping,
         on=["formtype", "domain"],
         how="left",
-    ).drop(columns=["formtype"])
+    )
+    selective_editing_contributor_output.to_csv(
+        output_path + "se_contributor_full_" + f"se_period_{period_selected}.csv",
+        index=False,
+    )
+    selective_editing_contributor_output.drop(columns=["formtype"], inplace=True)
 
     selective_editing_contributor_output = selective_editing_contributor_output.rename(
         columns={"reference": "ruref", "domain": "domain_group"}

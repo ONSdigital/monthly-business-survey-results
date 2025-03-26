@@ -352,7 +352,11 @@ def start_of_period_staging(
                 axis=1,
             )
         ]
-        dropped_questions.to_csv(config["output_path"] + "dropped_previous_period.csv")
+        dropped_questions.to_csv(
+            config["output_path"]
+            + "dropped_previous_period_"
+            + f"se_period_{config['period_selected']}.csv"
+        )
 
         # Keep only the rows that match the condition
         imputation_output_with_missing = imputation_output_with_missing[
