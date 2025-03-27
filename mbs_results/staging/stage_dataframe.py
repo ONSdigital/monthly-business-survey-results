@@ -392,15 +392,14 @@ def start_of_period_staging(
             columns=f"imputation_flags_{config['target']}", inplace=True
         )
 
-        imputation_output_with_missing = new_questions_construction_values(
+        imputation_output_with_missing = new_questions_construction_link(
             imputation_output_with_missing, config
         )
 
     return imputation_output_with_missing
 
 
-def new_questions_construction_values(df, config):
-    df.to_csv("before_copy_over_cell_number.csv")
+def new_questions_construction_link(df, config):
     df = convert_cell_number(df, config["cell_number"])
     df = create_imputation_class(df, config["cell_number"], "imputation_class")
     prev_period_imp_class = "imputation_class_prev_period"
@@ -418,11 +417,10 @@ def new_questions_construction_values(df, config):
     # grouped["construction_link"].nunique() > 1 else None)
 
     df["construction_link"] = df.groupby(
-        ["period", "questioncode", prev_period_imp_class]
+        [config["period"], config["question_no"], prev_period_imp_class]
     )["construction_link"].transform(lambda group: group.ffill().bfill())
 
     # Can drop after sign off, just for testing
     # df.drop(columns=[config["cell_number"]+"_prev_period", config["cell_number"],
     # "imputation_class"], inplace=True)
-    df.to_csv("missing_con_link.csv")
     return df
