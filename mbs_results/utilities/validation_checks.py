@@ -247,12 +247,41 @@ def validate_imputation(df: pd.DataFrame, config: dict):
 
 
 def validate_estimation(df: pd.DataFrame, config: dict):
-    warnings.warn("A placeholder function for validating dataframe post estimation")
-    output_path = config["output_path"]
-    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
-    snapshot_name = config["mbs_file_name"].split(".")[0]
-    estimate_filename = f"estimation_output_v{file_version_mbs}_{snapshot_name}.csv"
-    df.to_csv(output_path + estimate_filename, index=False)
+    """
+    Validates the estimation output.
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        the main dataframe after running the estimation part of the pipeline
+    config: Dict
+        The config dictionary.
+
+
+    Raises
+    ------
+    ValueError
+        ValueError if there are any null values in either the census or sampled columns.
+    """
+
+    # Placeholder code - commenting out for now
+
+    # output_path = config["output_path"]
+    # file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
+    # snapshot_name = config["mbs_file_name"].split(".")[0]
+    # estimate_filename = f"estimation_output_v{file_version_mbs}_{snapshot_name}.csv"
+
+    census_nas = df[config["census"]].isna().sum()
+    if census_nas > 0:
+        raise ValueError(
+            f'There are {census_nas} NA(s) in the {config["census"]} column.'
+        )
+
+    sampled_nas = df[config["sampled"]].isna().sum()
+    if sampled_nas > 0:
+        raise ValueError(
+            f'There are {sampled_nas} NA(s) in the {config["sampled"]} column.'
+        )
 
 
 def validate_outlier_detection(df: pd.DataFrame, config: dict):

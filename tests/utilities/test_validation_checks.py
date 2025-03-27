@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -6,6 +7,7 @@ from mbs_results.utilities.validation_checks import (
     period_and_reference_not_given,
     validate_config_datatype_input,
     validate_config_repeated_datatypes,
+    validate_estimation,
     validate_indices,
 )
 
@@ -97,3 +99,33 @@ def test_validate_config_repeated_datatypes():
     }
     with pytest.raises(ValueError):
         validate_config_repeated_datatypes(**test_config)
+
+
+class TestValidateEstimation:
+
+    test_config = {
+        "census": "is_census",
+        "sampled": "is_sampled",
+    }
+
+    def test_validate_estimation_null_census(self):
+        test_data_dict = {
+            "is_sampled": [True, False, False, True, False],
+            "is_census": [False, True, True, np.nan, False],
+        }
+
+        test_data = pd.DataFrame(data=test_data_dict)
+
+        with pytest.raises(ValueError):
+            validate_estimation(df=test_data, config=self.test_config)
+
+    def test_validate_estimation_null_sampled(self):
+        test_data_dict = {
+            "is_sampled": [True, False, False, np.nan, False],
+            "is_census": [False, True, True, False, False],
+        }
+
+        test_data = pd.DataFrame(data=test_data_dict)
+
+        with pytest.raises(ValueError):
+            validate_estimation(df=test_data, config=self.test_config)
