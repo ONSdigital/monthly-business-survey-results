@@ -78,6 +78,7 @@ def detect_outlier(df, config):
         config["period"],
         config["question_no"],
         "outlier_weight",
+        "manual_outlier_weight" # Todo: this should probably be derived from the config?
         config["manual_outlier_path"]
     )
     
