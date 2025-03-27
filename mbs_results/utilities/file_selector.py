@@ -106,7 +106,7 @@ def find_files(config: dict) -> Tuple:
                     f"Missing universe file {universe_file} for period: {period}"
                 )
                 raise FileNotFoundError(
-                    f"Missing universe file {universe_file} for period: {period}"
+                    f"Missing universe file for period: {period}"
                 )
             universe_files.append(universe_file)
 
@@ -115,7 +115,7 @@ def find_files(config: dict) -> Tuple:
                     f"Missing finalsel file {finalsel_file} for period: {period}"
                 )
                 raise FileNotFoundError(
-                    f"Missing finalsel file {finalsel_file} for period: {period}"
+                    f"Missing finalsel file for period: {period}"
                 )
             finalsel_files.append(finalsel_file)
 
