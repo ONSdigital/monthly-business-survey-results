@@ -1,0 +1,4 @@
+﻿reference,period,spp_form_id,questioncode,value,outlier_weight,winsorised_value,post_winsorised
+1,202001,14,42,400,0.6,240.0,FALSE
+1,202001,14,43,500,0.42,210.0,FALSE
+1,202001,14,40,900,0.5,450.0,TRUE
