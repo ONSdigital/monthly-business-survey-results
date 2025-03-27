@@ -106,6 +106,8 @@ class TestValidateEstimation:
     test_config = {
         "census": "is_census",
         "sampled": "is_sampled",
+        "mbs_file_name": "test_snaphot.json",
+        "output_path": "tests/data/utilities/validation_checks/outputs/",
     }
 
     def test_validate_estimation_null_census(self):

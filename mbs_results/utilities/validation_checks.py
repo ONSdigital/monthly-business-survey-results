@@ -264,12 +264,10 @@ def validate_estimation(df: pd.DataFrame, config: dict):
         ValueError if there are any null values in either the census or sampled columns.
     """
 
-    # Placeholder code - commenting out for now
-
-    # output_path = config["output_path"]
-    # file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
-    # snapshot_name = config["mbs_file_name"].split(".")[0]
-    # estimate_filename = f"estimation_output_v{file_version_mbs}_{snapshot_name}.csv"
+    output_path = config["output_path"]
+    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
+    snapshot_name = config["mbs_file_name"].split(".")[0]
+    estimate_filename = f"estimation_output_v{file_version_mbs}_{snapshot_name}.csv"
 
     census_nas = df[config["census"]].isna().sum()
     if census_nas > 0:
@@ -282,6 +280,8 @@ def validate_estimation(df: pd.DataFrame, config: dict):
         raise ValueError(
             f'There are {sampled_nas} NA(s) in the {config["sampled"]} column.'
         )
+
+    df.to_csv(output_path + estimate_filename, index=False)
 
 
 def validate_outlier_detection(df: pd.DataFrame, config: dict):
