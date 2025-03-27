@@ -581,6 +581,7 @@ def replace_outlier_weights(
     period: str,
     question_code: str,
     outlier_weight: str,
+    manual_outlier_weight: str,
     manual_outlier_path: str
     ) -> pd.DataFrame:
     """
@@ -598,6 +599,9 @@ def replace_outlier_weights(
         Column name containing question code.
     outlier_weight : str
         Column name containing outlier weight (refered also as o-weight).
+    manual_outlier_weight : str
+        Column name containing manual outlier weight, ingested from the
+        manual outliers file
     manual_outlier_path : str
         String containing file path to manual outliers file.
     
@@ -609,22 +613,41 @@ def replace_outlier_weights(
     """
 
     try:
-        manual_outliers = pd.read_csv(manual_outlier_path)
+        manual_outlier_df = pd.read_csv(manual_outlier_path)
+        # Todo: validate(manual_outlier_df)
+        """
+        manual_outlier_df should contain columns: reference, period,
+        question_code, manual_outlier
+
+        eg:
+
+        if(validate(manual_outlier_df) == False): 
+            manual_outlier_df = None
+            warnings.warn(f"The manual outlier file found at {manual_outlier_path} was not valid")
+
+        """
     except OSError as e:
         warnings.warn(e)
-        manual_outliers = None
+        manual_outlier_df = None
 
-    if manual_outliers is not None:
+    if manual_outlier_df is not None:
         
         df = df.merge(
-            manual_outliers,
+            manual_outlier_df,
             how="left",
             on=[reference, period, question_code]
         )
 
-        df = df.drop(columns=[outlier_weight])
+        # Create pre_manual_outlier column that is a copy of outlier_weight
+        df["pre_manual_outlier"] = df[outlier_weight]
+        
+        # Overwrite outlier_weight with manual_outlier, if it exists for that record 
+        df.loc[~df[manual_outlier_weight].isna(), outlier_weight] = df[manual_outlier_weight]
+
+        # Is there any requirement to drop manual_outlier after this?
+        df = df.drop(columns=[manual_outlier_weight])
 
     else:
-        warnings.warn("No manual outliers")
+        warnings.warn("No valid manual outlier file was specifed in the configuration")
 
     return df

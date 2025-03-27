@@ -247,13 +247,17 @@ def test_update_derived_weight_and_winsorised_value(filepath, base_file_name):
 def test_replace_outlier_weights(filepath):
 
     df = pd.read_csv(
-        filepath / "test_replace_outliers.csv",
+        filepath / "test_replace_outliers_in.csv",
         index_col=False
     )
 
     df_in = df.drop(columns=["manual_outlier_weight"])
+    df_manual_outliers = df.drop(columns=["post_winsorised", "outlier_weight"])
 
-    df_expected = df.drop(columns=["outlier_weight"])
+    df_expected = pd.read_csv(
+        filepath / "test_replace_outliers_out.csv",
+        index_col = False
+    )
 
     df_actual = replace_outlier_weights(
         df_in,
@@ -261,7 +265,8 @@ def test_replace_outlier_weights(filepath):
         "period",
         "question_no",
         "outlier_weight",
-        filepath / "test_manual_outliers_file.csv"
+        "manual_outlier_weight",
+        filepath / "manual_outliers.csv"
     )
 
     assert_frame_equal(df_actual, df_expected)
@@ -269,11 +274,12 @@ def test_replace_outlier_weights(filepath):
 def test_no_manual_outliers(filepath):
 
     df = pd.read_csv(
-        filepath / "test_replace_outliers.csv",
+        filepath / "test_replace_outliers_in.csv",
         index_col=False
     )
 
     df_in = df.drop(columns=["manual_outlier_weight"])
+    df_manual_outliers = df.drop(columns=["post_winsorised", "outlier_weight"])
 
     df_actual = replace_outlier_weights(
         df_in,
@@ -281,6 +287,7 @@ def test_no_manual_outliers(filepath):
         "period",
         "question_no",
         "outlier_weight",
+        "manual_outlier_weight",
         ""
     )
 
