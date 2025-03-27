@@ -5,6 +5,7 @@ from importlib import metadata
 
 import pandas as pd
 
+from mbs_results.staging.stage_dataframe import read_and_combine_colon_sep_files
 from mbs_results.utilities.utils import append_filter_out_questions
 
 logger = logging.getLogger(__name__)
@@ -356,5 +357,27 @@ def qa_selective_editing_outputs(config: dict):
                 )
         else:
             logger.info(f"No nulls or NaNs detected in {dataframe_name} dataframe")
+
+        finalsel = read_and_combine_colon_sep_files(
+            config["sample_path"], config["sample_column_names"], config
+        )
+
+        finalsel = finalsel.loc[finalsel["period"] == config["period_selected"]]
+
+        contributor_period_unmatched = contributor_df[
+            contributor_df["period"] == finalsel["period"].unique()
+        ]
+        question_period_unmatched = question_df[
+            question_df["period"] == finalsel["period"].unique()
+        ]
+
+        if len(contributor_period_unmatched) > 0 and len(question_period_unmatched) > 0:
+            logger.warning(
+                "finalsel period does not match the SE output periods"
+                "contributor period unmatched: {contributor_period_unmatched}"
+                "question period unmatched: {question_period_unmatched}"
+            )
+        else:
+            logger.info("finalsel period matches the SE output periods")
 
     logger.info("QA of SE outputs finished")
