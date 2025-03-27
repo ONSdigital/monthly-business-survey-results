@@ -45,7 +45,7 @@ class TestRatioOfMeans:
             auxiliary="other",
             question_no="questioncode",
             current_period=202003,
-            revision_period=2,
+            revision_window=2,
         )
 
         actual_output = actual_output.rename(

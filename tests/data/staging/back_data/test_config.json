@@ -1,6 +1,6 @@
 {
     "current_period" : 202303,
-    "revision_period": 13,
+    "revision_window": 13,
     "period": "period",
     "reference": "reference",
     "back_data_type":"type",
