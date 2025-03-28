@@ -1,9 +1,7 @@
 import os
-from typing import List, Tuple
-from datetime import (
-    datetime,
-    timedelta
-)
+from datetime import datetime, timedelta
+from typing import List
+
 from mbs_results import logger
 
 
@@ -24,9 +22,10 @@ def generate_expected_periods(current_period: int, revision_window: int) -> List
     List[str]
         List of expected YYYYMM formatted strings.
     """
-    logger.info("Generating expected periods for review window starting from "
-                f"{current_period} for {revision_window} months"
-                )
+    logger.info(
+        "Generating expected periods for review window starting from "
+        f"{current_period} for {revision_window} months"
+    )
     current_period = datetime.strptime(str(current_period), "%Y%m")
     expected_periods = [current_period.strftime("%Y%m")]
 
@@ -40,10 +39,7 @@ def generate_expected_periods(current_period: int, revision_window: int) -> List
 
 
 def validate_files(
-    file_dir: str,
-    file_prefix: str,
-    expected_periods: List[str],
-    file_type: str
+    file_dir: str, file_prefix: str, expected_periods: List[str], file_type: str
 ) -> List[str]:
     """
     Validate the existence of files for the given periods and return the list
@@ -121,9 +117,7 @@ def find_files(config: dict, file_type: str) -> List[str]:
         If the file_type is not one of "universe" or "finalsel".
     """
 
-    logger.info(
-        f"Starting file selection for file type: {file_type}"
-    )
+    logger.info(f"Starting file selection for file type: {file_type}")
 
     current_period = config["current_period"]
     revision_window = config["revision_window"]

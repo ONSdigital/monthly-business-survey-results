@@ -1,9 +1,12 @@
 import os
-import pytest
 from unittest.mock import patch
+
+import pytest
+
 from mbs_results.utilities.file_selector import (
-    find_files, generate_expected_periods,
-    validate_files
+    find_files,
+    generate_expected_periods,
+    validate_files,
 )
 
 
@@ -14,7 +17,7 @@ def mock_config():
         "population_path": "tests/data/file_selector/universe023_*",
         "sample_path": "tests/data/file_selector/finalsel023_*",
         "current_period": 201810,
-        "revision_window": 5
+        "revision_window": 5,
     }
 
 
@@ -52,8 +55,7 @@ def test_find_files_missing_universe(mock_join, mock_isfile, mock_config):
     mock_isfile.side_effect = lambda path: "universe" not in path
 
     with pytest.raises(
-            FileNotFoundError,
-            match="Missing universe file for period: 201810"
+        FileNotFoundError, match="Missing universe file for period: 201810"
     ):
         find_files(mock_config, file_type="universe")
 
@@ -66,8 +68,7 @@ def test_find_files_missing_finalsel(mock_join, mock_isfile, mock_config):
     mock_isfile.side_effect = lambda path: "finalsel" not in path
 
     with pytest.raises(
-        FileNotFoundError,
-        match="Missing finalsel file for period: 201810"
+        FileNotFoundError, match="Missing finalsel file for period: 201810"
     ):
         find_files(mock_config, file_type="finalsel")
 
@@ -90,9 +91,8 @@ def test_validate_files(mock_isfile):
     file_type = "universe"
 
     expected_files = [
-        os.path.normpath(
-            f"{file_dir}/{file_prefix}_{period}"
-        ) for period in expected_periods
+        os.path.normpath(f"{file_dir}/{file_prefix}_{period}")
+        for period in expected_periods
     ]
     print("expected files:")
     print(expected_files)
