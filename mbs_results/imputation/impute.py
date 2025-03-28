@@ -43,8 +43,9 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
     # Two options for loading MC:
     warnings.warn("Need to pick one method of loading manual constructions")
     try:
-        manual_constructions = read_csv_wrapper(config["manual_constructions_path"],config["platform"],
-        config["bucket"])
+        manual_constructions = read_csv_wrapper(
+            config["manual_constructions_path"], config["platform"], config["bucket"]
+        )
         if manual_constructions.empty:
             manual_constructions = None
         # We could implement above, or the other method of loading mc:

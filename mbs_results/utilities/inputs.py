@@ -1,13 +1,18 @@
 import os
+import re
 from typing import List
+
+import boto3
+import pandas as pd
+import raz_client
+from rdsa_utils.cdp.helpers.s3_utils import load_csv
 
 import mbs_results
 from mbs_results import logger
 from mbs_results.utilities.merge_two_config_files import merge_two_config_files
-from rdsa_utils.cdp.helpers.s3_utils import load_csv
-import boto3
-import raz_client
-import pandas as pd
+from mbs_results.utilities.utils import validate_colon_file_columns
+
+
 def load_config(config_user_dict=None):
     # Get the directory where mbs_results is installed
     parent_dir = os.path.dirname(mbs_results.__file__)
@@ -29,6 +34,7 @@ def load_config(config_user_dict=None):
         )
     return config
 
+
 def read_csv_wrapper(
     filepath: str,
     import_platform: str = "network",
@@ -37,13 +43,13 @@ def read_csv_wrapper(
     **kwargs,
 ) -> pd.DataFrame:
     """
-    Load a CSV file from an S3 bucket or from a network path into a Pandas 
+    Load a CSV file from an S3 bucket or from a network path into a Pandas
     DataFrame.
 
     Parameters
     ----------
     filepath
-        The key (full path and filename) of the CSV file in the S3 bucket or 
+        The key (full path and filename) of the CSV file in the S3 bucket or
         in the network.
     bucket_name : str, optional
         The name of the S3 bucket,needed when `import_platform` is set to
@@ -70,19 +76,17 @@ def read_csv_wrapper(
             client, ssl_file="/etc/pki/tls/certs/ca-bundle.crt"
         )
         df = load_csv(
-            client = client,
-            bucket_name = bucket_name,
-            filepath = filepath,
-            **kwargs)
-        
+            client=client, bucket_name=bucket_name, filepath=filepath, **kwargs
+        )
+
         return df
 
     if import_platform == "network":
         df = pd.read_csv(filepath, **kwargs)
-        return df 
-    
+        return df
+
     raise Exception("platform must either be 's3' or 'network'")
-    
+
 
 def read_colon_separated_file(
     filepath: str,
@@ -95,13 +99,13 @@ def read_colon_separated_file(
     **kwargs,
 ) -> pd.DataFrame:
     """
-    Load a CSV file from an S3 bucket or from a network path into a Pandas 
+    Load a CSV file from an S3 bucket or from a network path into a Pandas
     DataFrame.
 
     Parameters
     ----------
     filepath
-        The key (full path and filename) of the CSV file in the S3 bucket or 
+        The key (full path and filename) of the CSV file in the S3 bucket or
         in the network.
     client : boto3.client, optional
          The boto3 S3 client instance, needed when `import_platform` is set to
@@ -117,7 +121,7 @@ def read_colon_separated_file(
     pd.DataFrame
         Pandas DataFrame containing the data from a colon seperated file.
     """
-    usecols = None #pd.read_csv default load all columns
+    usecols = None  # pd.read_csv default load all columns
 
     if keep_columns:
 
@@ -128,15 +132,24 @@ def read_colon_separated_file(
         # ordered column names (myst align with usecols)
         column_names = [x for _, x in sorted(zip(usecols, keep_columns))]
 
-    validate_colon_file_columns(filepath,column_names,import_platform,client,bucket_name)
-    
+    validate_colon_file_columns(
+        filepath, column_names, import_platform, client, bucket_name
+    )
+
     df = read_csv_wrapper(
-        filepath,import_platform,client,bucket_name,sep=":",names=column_names,usecols=usecols)
-    
+        filepath,
+        import_platform,
+        client,
+        bucket_name,
+        sep=":",
+        names=column_names,
+        usecols=usecols,
+    )
+
     date_string = re.findall(r"_(\d{6})", filepath)
 
-    #Get pattern from end, to avoid issues when path has dates 
-    #e.g. path_190812/file_202301 should return 202301
+    # Get pattern from end, to avoid issues when path has dates
+    # e.g. path_190812/file_202301 should return 202301
 
     df[period] = int(date_string[-1])
 

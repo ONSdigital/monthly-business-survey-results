@@ -1,4 +1,5 @@
 import pandas as pd
+
 from mbs_results.utilities.inputs import read_csv_wrapper
 
 
@@ -36,9 +37,8 @@ def replace_l_values(
         Additional flag column showing which values have been overwritten
     """
     l_values_overwrite = read_csv_wrapper(
-        l_values_overwrite_path,
-        config["platform"],
-        config["bucket"])
+        l_values_overwrite_path, config["platform"], config["bucket"]
+    )
 
     l_values_overwrite[strata] = l_values_overwrite[strata].astype(str)
     l_values_overwrite[question_no] = l_values_overwrite[question_no].astype(str)

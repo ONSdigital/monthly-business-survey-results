@@ -3,11 +3,11 @@ import warnings
 import pandas as pd
 
 from mbs_results.staging.data_cleaning import enforce_datatypes
+from mbs_results.utilities.inputs import read_csv_wrapper
 from mbs_results.utilities.utils import (
     convert_column_to_datetime,
     read_colon_separated_file,
 )
-from mbs_results.utilities.inputs import read_csv_wrapper
 
 
 def is_back_data_date_ok(
@@ -84,17 +84,14 @@ def read_back_data(config: dict) -> pd.DataFrame:
         Back data with all column as in source, period is converted to datetime.
     """
 
-
-    qv_df = read_csv_wrapper(config["back_data_qv_path"],config["platform"],
-        config["bucket"]).drop(
-        columns=["cell_no", "classification"], errors="ignore"
-    )
+    qv_df = read_csv_wrapper(
+        config["back_data_qv_path"], config["platform"], config["bucket"]
+    ).drop(columns=["cell_no", "classification"], errors="ignore")
     qv_df[config["period"]] = convert_column_to_datetime(qv_df[config["period"]])
 
-    cp_df = read_csv_wrapper(config["back_data_cp_path"],config["platform"],
-        config["bucket"]).drop(
-        columns=["cell_no", "classification"], errors="ignore"
-    )
+    cp_df = read_csv_wrapper(
+        config["back_data_cp_path"], config["platform"], config["bucket"]
+    ).drop(columns=["cell_no", "classification"], errors="ignore")
     cp_df[config["period"]] = convert_column_to_datetime(cp_df[config["period"]])
 
     finalsel = read_colon_separated_file(

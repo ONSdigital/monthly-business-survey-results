@@ -1,8 +1,10 @@
 from typing import List
 
+import boto3
 import pandas as pd
 
 from mbs_results.utilities.inputs import read_csv_wrapper
+
 
 def convert_column_to_datetime(dates):
     """
@@ -18,6 +20,7 @@ def convert_column_to_datetime(dates):
     """
     return pd.to_datetime(dates, format="%Y%m")
 
+
 def validate_colon_file_columns(
     filepath: str,
     column_names: List[str],
@@ -30,7 +33,7 @@ def validate_colon_file_columns(
     Parameters
     ----------
     filepath
-        The key (full path and filename) of the CSV file in the S3 bucket or 
+        The key (full path and filename) of the CSV file in the S3 bucket or
         in the network.
     column_names : List[str]
         list of column names in data file.
@@ -46,20 +49,27 @@ def validate_colon_file_columns(
     Raises
     ------
     Exception
-       If length of columns is not alligned with the number of columns when 
+       If length of columns is not alligned with the number of columns when
        the dataframe is loaded.
     """
 
     df = read_csv_wrapper(
-        filepath,import_platform,client,bucket_name,sep=":",names=column_names,nrows=1)
-    
+        filepath,
+        import_platform,
+        client,
+        bucket_name,
+        sep=":",
+        names=column_names,
+        nrows=1,
+    )
+
     if len(df.columns) is not len(column_names):
-        raise Exception("Length of `column_names` is: ",
-                        len(column_names),
-                          "does not match the columns in file: ",
-                          filepath)
-
-
+        raise Exception(
+            "Length of `column_names` is: ",
+            len(column_names),
+            "does not match the columns in file: ",
+            filepath,
+        )
 
 
 def append_filter_out_questions(
