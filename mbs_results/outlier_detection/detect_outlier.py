@@ -2,6 +2,7 @@ import pandas as pd
 
 from mbs_results.outlier_detection.winsorisation import winsorise
 from mbs_results.utilities.constrains import update_derived_weight_and_winsorised_value
+from mbs_results.utilities.constrains import replace_outlier_weights
 
 
 def join_l_values(df, l_values_path, classification_values_path, config):
@@ -36,6 +37,9 @@ def join_l_values(df, l_values_path, classification_values_path, config):
 
 
 def detect_outlier(df, config):
+    """
+    # Todo: docstrings
+    """
     pre_win = join_l_values(
         df, config["l_values_path"], config["classification_values_path"], config
     )
@@ -66,4 +70,16 @@ def detect_outlier(df, config):
         "outlier_weight",
         config["target"],
     )
+
+    # Replace outlier weights
+    post_win = replace_outlier_weights(
+        post_win,
+        config["reference"],
+        config["period"],
+        config["question_no"],
+        "outlier_weight",
+        "manual_outlier_weight", # Todo: this should probably be derived from the config?
+        config["manual_outlier_path"]
+    )
+    
     return post_win

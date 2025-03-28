@@ -3,6 +3,7 @@ import warnings
 from typing import List
 
 import pandas as pd
+from mbs_results.utilities.validation_checks import validate_manual_outlier_df
 
 
 def replace_values_index_based(
@@ -512,7 +513,7 @@ def update_derived_weight_and_winsorised_value(
     for spp_id in derive_map:
 
         df_spp_id = df[df[form_type_spp] == spp_id].copy()
-
+        
         df_spp_id = df_spp_id.pivot(
             index=[reference, period],
             columns=question_code,
@@ -577,3 +578,91 @@ def update_derived_weight_and_winsorised_value(
     df.drop(columns=["post_win_o_weight", "post_winsorised_value"], inplace=True)
 
     return df
+
+
+def replace_outlier_weights(
+    df: pd.DataFrame,
+    reference: str,
+    period: str,
+    question_code: str,
+    outlier_weight: str,
+    manual_outlier_weight: str,
+    manual_outlier_path: str
+    ) -> pd.DataFrame:
+    """
+    Overwrite calculated outlier weights with manual outlier weights
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    reference : str
+        Column name containing reference.
+    period : str
+        Column name containing period.
+    question_code : str
+        Column name containing question code.
+    outlier_weight : str
+        Column name containing outlier weight (refered also as o-weight).
+    manual_outlier_weight : str
+        Column name containing manual outlier weight, ingested from the
+        manual outliers file
+    manual_outlier_path : str
+        String containing file path to manual outliers file.
+    
+    Returns
+    -------
+    df : pd.Dataframe
+        Original dataframe with weights updated to equal those supplied
+        in the manual outliers file, if it exists.
+    """
+
+    if not manual_outlier_path:
+        warnings.warn("No manual outlier file has been specified in the configuration, skipping stage")
+        manual_outlier_df = None
+
+        return df
+
+    else:
+        # We don't wrap this in any error handling, because it should
+        # fail and read_csv will raise the appropriate Exception for us 
+        manual_outlier_df = pd.read_csv(manual_outlier_path)
+
+        validate_manual_outlier_df(manual_outlier_df)
+        
+        # Use an outer join to log unmatched manual outlier weights
+        unmatched_df = df.merge(
+            manual_outlier_df,
+            how="outer",
+            on=[reference, period, question_code],
+            indicator=True,
+        )
+
+        unmatched_df = unmatched_df[unmatched_df["_merge"]=='right_only']
+        
+        if len(unmatched_df) > 0:
+            logger.warning(
+                f"There are {len(unmatched_df)} unmatched references in the"
+                " ingested manual outlier data"
+                f"Unmatched references: {unmatched_df}"
+            )
+
+        # Todo: Cant get the cross join to preserve DataFrame order
+
+        # Use left join to combine manual outlier weights with derived weights
+        df = df.merge(
+            manual_outlier_df,
+            how="left",
+            on=[reference, period, question_code],
+        )
+
+        # Create pre_manual_outlier column that is a copy of outlier_weight
+        df["pre_manual_outlier"] = df[outlier_weight]
+        
+        # Overwrite outlier_weight with manual_outlier, if it exists for that record 
+        df.loc[~df[manual_outlier_weight].isna(), outlier_weight] = df[manual_outlier_weight]
+
+        # Is there any requirement to drop manual_outlier after this?
+        df = df.drop(columns=[manual_outlier_weight])
+
+        return df
