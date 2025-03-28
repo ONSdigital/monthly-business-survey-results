@@ -1,3 +1,4 @@
+import getpass
 import os
 
 import mbs_results
@@ -41,8 +42,6 @@ def load_config(config_user_dict=None):
     config_user_path = "./mbs_results/configs/config_user.json"
     config_dev_path = os.path.join(parent_dir, "configs", "config_dev.json")
 
-    username = os.getlogin()
-
     config = merge_two_config_files(config_user_path, config_dev_path)
     logger.info(
         f"config dictionary created from merging {config_user_path} "
@@ -55,6 +54,7 @@ def load_config(config_user_dict=None):
             "config dictionary updated with config user dictionary from the testing"
         )
 
+    username = getpass.getuser()
     config = replace_username_in_dict(config, username)
 
     return config
