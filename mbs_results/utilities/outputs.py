@@ -1,6 +1,6 @@
+import boto3
 import pandas as pd
 import raz_client
-import boto3
 from rdsa_utils.cdp.helpers.s3_utils import write_csv
 
 
@@ -12,7 +12,7 @@ def write_csv_wrapper(
     **kwargs,
 ) -> pd.DataFrame:
     """
-    Save a pandas dataframe as a CSV file in a path from S3 bucket or to a 
+    Save a pandas dataframe as a CSV file in a path from S3 bucket or to a
     network path.
 
     Parameters
@@ -43,13 +43,13 @@ def write_csv_wrapper(
         raz_client.configure_ranger_raz(
             client, ssl_file="/etc/pki/tls/certs/ca-bundle.crt"
         )
-        
-        write_csv(client,bucket_name, df, save_path,**kwargs)
+
+        write_csv(client, bucket_name, df, save_path, **kwargs)
         return True
 
     if import_platform == "network":
-         
-        df.to_csv(save_path,**kwargs)
+
+        df.to_csv(save_path, **kwargs)
         return True
 
     raise Exception("platform must either be 's3' or 'network'")

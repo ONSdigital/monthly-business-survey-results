@@ -163,7 +163,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         save_full_path=config["output_path"]
         + snapshot_name
         + "_filter_out_questions.csv",
-        **config
+        **config,
     )
 
     df = drop_derived_questions(
