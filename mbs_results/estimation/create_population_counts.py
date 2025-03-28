@@ -1,5 +1,7 @@
 import pandas as pd
 
+from mbs_results.utilities.outputs import write_csv_wrapper
+
 
 def calculate_turnover_sum_count(
     df: pd.DataFrame, period: str, strata: str, colname: str, **config
@@ -81,7 +83,14 @@ def create_population_count_output(
     combined = pd.merge(df_population, df_sampled, on=[period, strata])
 
     if save_output:
-        combined.to_csv(output_path + "population_counts.csv", index=False)
+        write_csv_wrapper(
+            combined,
+            output_path + "population_counts.csv",
+            config["platform"],
+            config["bucket"],
+            index=False,
+        )
+
         return
     else:
         return combined

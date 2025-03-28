@@ -33,7 +33,13 @@ class TestReplaceLValue:
             "tests/data/outlier_detection/replace_l_values/replace_l_values.csv"
         )
         df_output = replace_l_values(
-            df_input, "strata", "question_no", "l_value", replace_l_values_path,platform="network",bucket=None
+            df_input,
+            "strata",
+            "question_no",
+            "l_value",
+            replace_l_values_path,
+            platform="network",
+            bucket=None,
         )
 
         df_output = df_output.sort_values(by=["question_no"]).reset_index(drop=True)

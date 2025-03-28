@@ -5,6 +5,7 @@ from importlib import metadata
 
 import pandas as pd
 
+from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.utils import append_filter_out_questions
 
 logger = logging.getLogger(__name__)
@@ -243,7 +244,13 @@ def validate_imputation(df: pd.DataFrame, config: dict):
     file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
     snapshot_name = config["mbs_file_name"].split(".")[0]
     imputation_filename = f"imputation_output_v{file_version_mbs}_{snapshot_name}.csv"
-    df.to_csv(output_path + imputation_filename, index=False)
+    write_csv_wrapper(
+        df,
+        output_path + imputation_filename,
+        config["platform"],
+        config["bucket"],
+        index=False,
+    )
 
 
 def validate_estimation(df: pd.DataFrame, config: dict):
@@ -281,7 +288,13 @@ def validate_estimation(df: pd.DataFrame, config: dict):
             f'There are {sampled_nas} NA(s) in the {config["sampled"]} column.'
         )
 
-    df.to_csv(output_path + estimate_filename, index=False)
+    write_csv_wrapper(
+        df,
+        output_path + estimate_filename,
+        config["platform"],
+        config["bucket"],
+        index=False,
+    )
 
 
 def validate_outlier_detection(df: pd.DataFrame, config: dict):
@@ -302,7 +315,13 @@ def validate_outlier_detection(df: pd.DataFrame, config: dict):
     )
 
     df = append_filter_out_questions(df, filtered_questions_path)
-    df.to_csv(output_path + outlier_filename, index=False)
+    write_csv_wrapper(
+        df,
+        output_path + outlier_filename,
+        config["platform"],
+        config["bucket"],
+        index=False,
+    )
 
 
 def qa_selective_editing_outputs(config: dict):
