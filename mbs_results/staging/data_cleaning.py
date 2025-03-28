@@ -3,6 +3,8 @@ from typing import List
 
 import pandas as pd
 
+from mbs_results.utilities.inputs import read_csv_wrapper
+from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.utils import convert_column_to_datetime
 from mbs_results.utilities.validation_checks import (  # validate_manual_constructions,
     validate_indices,
@@ -167,7 +169,9 @@ def load_manual_constructions(
     pd.DataFrame
         dataframe with correctly formatted column datatypes.
     """
-    manual_constructions = pd.read_csv(manual_constructions_path)
+    manual_constructions = read_csv_wrapper(
+        manual_constructions_path, config["platform"], config["bucket"]
+    )
     manual_constructions[period] = convert_column_to_datetime(
         manual_constructions[period]
     )
@@ -455,7 +459,11 @@ def is_census(calibration_group: pd.Series, extra_bands: List) -> pd.Series:
 
 
 def filter_out_questions(
-    df: pd.DataFrame, column: str, questions_to_filter: List[int], save_full_path: str
+    df: pd.DataFrame,
+    column: str,
+    questions_to_filter: List[int],
+    save_full_path: str,
+    **config,
 ) -> pd.DataFrame:
     """
     Removes questions defined in `questions_to_filter` from df. The removed
@@ -471,7 +479,8 @@ def filter_out_questions(
         List of questions to removes.
     save_full_path : str
         Full path to save removeed values, e.g. `folder1/folder2/mydata.csv`.
-
+    config
+        Main configuration of pipeline.
     Returns
     -------
     keep_questions_df : pd.DataFrame
@@ -487,7 +496,14 @@ def filter_out_questions(
 
     keep_questions_df = df[~df[column].isin(questions_to_filter)]
 
-    filter_out_questions_df.to_csv(save_full_path, index=False, date_format="%Y%m")
+    write_csv_wrapper(
+        filter_out_questions_df,
+        save_full_path,
+        config["platform"],
+        config["bucket"],
+        index=False,
+        date_format="%Y%m",
+    )
 
     keep_questions_df.reset_index(drop=True, inplace=True)
 
