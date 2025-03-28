@@ -39,107 +39,116 @@ def generate_expected_periods(current_period: int, revision_window: int) -> List
     return expected_periods
 
 
-def find_files(config: dict) -> Tuple:
+def validate_files(
+    file_dir: str,
+    file_prefix: str,
+    expected_periods: List[str],
+    file_type: str
+) -> List[str]:
     """
-    Function find_files finds and validates universe and finalsel files based on
+    Validate the existence of files for the given periods and return the list
+    of valid files.
+
+    Parameters
+    ----------
+    file_dir : str
+        Directory where the files are located.
+    file_prefix : str
+        Prefix of the file names.
+    expected_periods : List[str]
+        List of expected periods in YYYYMM format.
+    file_type : str
+        Type of file being validated ("universe" or "finalsel").
+
+    Returns
+    -------
+    List[str]
+        List of valid file paths.
+
+    Raises
+    ------
+    FileNotFoundError
+        If any file is missing for the expected periods.
+    """
+    valid_files = []
+    for period in expected_periods:
+        file_name = (
+            f"{file_prefix}_{period}.csv"
+            if file_type == "finalsel"
+            else f"{file_prefix}_{period}"
+        )
+        file_path = os.path.join(file_dir, file_name)
+        if os.path.isfile(file_path):
+            valid_files.append(file_path)
+        else:
+            logger.error(f"Missing {file_type} file {file_path} for period: {period}")
+            raise FileNotFoundError(f"Missing {file_type} file for period: {period}")
+    return valid_files
+
+
+def find_files(config: dict, file_type: str) -> List[str]:
+    """
+    Function find_files finds and validates universe or finalsel files based on
     the given configuration.
 
     Parameters
     ----------
     config : dict
-        Dictionary containing the following keys of interest, among other keys:
+        Dictionary containing the following keys of interest:
         - population_path : str
             File prefix pattern for universe files (e.g. "universe009_*").
-            This contains population frame data
+            This contains population frame data.
         - sample_path : str
             File prefix pattern for finalsel files (e.g. "finalsel009_*").
-            This contains sample data
+            This contains sample data.
         - current_period : int
-            Starting period in YYYYMM format (e.g. "202401")
+            Starting period in YYYYMM format (e.g. "202401").
         - revision_window : int
             Number of months to include in the sequence of expected YYYYMM.
+    file_type : str
+        One of ["universe", "finalsel"]. Determines which file type to scan.
 
     Returns
     -------
-    Tuple[List[str], List[str]]: (universe_files, finalsel_files)
-        List of universe files and list of finalsel files matching file paths.
+    List[str]
+        List of file paths matching the specified file type.
 
     Raises
     ------
-    `FileNotFoundError`
-        If any of the universe or finalsel files are missing for the expected periods.
-    `ValueError`
-        If the umber of universe files or finalsel files does not match the expected
-        review window.
+    FileNotFoundError
+        If any of the files are missing for the expected periods.
+    ValueError
+        If the file_type is not one of "universe" or "finalsel".
     """
 
-    logger.info("Starting file selection based on the given configuration")
-    population_path = config["population_path"]
-    sample_path = config["sample_path"]
+    logger.info(
+        f"Starting file selection for file type: {file_type}"
+    )
+
     current_period = config["current_period"]
     revision_window = config["revision_window"]
 
     expected_periods = generate_expected_periods(current_period, revision_window)
 
-    universe_prefix = population_path.split("_*")[0]
-    finalsel_prefix = sample_path.split("_*")[0]
-
-    # Get the parent directory of the population and sample files
-    population_file_dir = os.path.dirname(population_path)
-    sample_file_dir = os.path.dirname(sample_path)
-
-    universe_files = []
-    finalsel_files = []
-
     try:
-        # Loop through the expected periods and check if the corresponding files exist
-        for period in expected_periods:
-            universe_file = os.path.join(
-                population_file_dir, f"{universe_prefix}_{period}"
-            )
-            finalsel_file = os.path.join(
-                sample_file_dir, f"{finalsel_prefix}_{period}.csv"
-            )
+        if file_type == "universe":
+            population_path = config["population_path"]
+            file_prefix = population_path.split("_*")[0]
+            file_dir = os.path.dirname(population_path)
 
-            if not os.path.isfile(universe_file):
-                logger.error(
-                    f"Missing universe file {universe_file} for period: {period}"
-                )
-                raise FileNotFoundError(
-                    f"Missing universe file for period: {period}"
-                )
-            universe_files.append(universe_file)
-
-            if not os.path.isfile(finalsel_file):
-                logger.error(
-                    f"Missing finalsel file {finalsel_file} for period: {period}"
-                )
-                raise FileNotFoundError(
-                    f"Missing finalsel file for period: {period}"
-                )
-            finalsel_files.append(finalsel_file)
-
-        if (
-            len(universe_files) == revision_window
-            and len(finalsel_files) == revision_window
-        ):
-            logger.info(
-                "Successfully found all files for both universe and finalsel files"
-            )
-            logger.info(f"Length of Universe files: {len(universe_files)}")
-            logger.info(f"Length of Finalsel files: {len(finalsel_files)}")
-            return universe_files, finalsel_files
+        elif file_type == "finalsel":
+            sample_path = config["sample_path"]
+            file_prefix = sample_path.split("_*")[0]
+            file_dir = os.path.dirname(sample_path)
         else:
-            logger.error(
-                "Number of universe files or finalsel files does not match the "
-                "expected review window"
-            )
-            logger.info(f"Length of Universe files: {len(universe_files)}")
-            logger.info(f"Length of Finalsel files: {len(finalsel_files)}")
-            raise ValueError(
-                "Number of universe files or finalsel files does not match "
-                "the expected review window"
-            )
+            logger.error("Invalid file type. Expected 'universe' or 'finalsel'")
+            raise ValueError("Invalid file type. Expected 'universe' or 'finalsel'")
+
+        valid_files = validate_files(file_dir, file_prefix, expected_periods, file_type)
+
+        logger.info("File selection completed successfully")
+        return valid_files
+
     except FileNotFoundError as e:
         logger.exception(f"An error occured during file selection: {e}")
         raise e
