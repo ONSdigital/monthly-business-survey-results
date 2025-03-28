@@ -92,7 +92,7 @@ def read_back_data(config: dict) -> pd.DataFrame:
     cp_df[config["period"]] = convert_column_to_datetime(cp_df[config["period"]])
 
     finalsel = read_colon_separated_file(
-        config["back_data_finalsel_path"], config["sample_column_names"]
+        filepath = config["back_data_finalsel_path"], column_names = config["sample_column_names"],import_platform =config["platform"], bucket_name =config["bucket"]
     )
     finalsel = finalsel[config["finalsel_keep_cols"]]
     finalsel = enforce_datatypes(
