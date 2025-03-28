@@ -38,7 +38,6 @@ def validate_colon_file_columns(
     filepath: str,
     column_names: List[str],
     import_platform: str = "network",
-    client: boto3.client = None,
     bucket_name: str = None,
 ) -> pd.DataFrame:
     """Check if column_names match the columns in filepath.
@@ -50,9 +49,8 @@ def validate_colon_file_columns(
         in the network.
     column_names : List[str]
         list of column names in data file.
-    client : boto3.client, optional
-         The boto3 S3 client instance, needed when `import_platform` is set to
-         `s3`, he default is None.
+    import_platform : str
+        Platform to import from. Must be either 's3' or 'network'
     bucket_name : str, optional
         The name of the S3 bucket,needed when `import_platform` is set to
          `s3`. The default is None.
@@ -69,7 +67,6 @@ def validate_colon_file_columns(
     df = read_csv_wrapper(
         filepath,
         import_platform,
-        client,
         bucket_name,
         sep=":",
         names=column_names,
@@ -89,7 +86,6 @@ def read_csv_wrapper(
     filepath: str,
     import_platform: str = "network",
     bucket_name: str = None,
-    client: boto3.client = None,
     **kwargs,
 ) -> pd.DataFrame:
     """
@@ -101,12 +97,11 @@ def read_csv_wrapper(
     filepath
         The key (full path and filename) of the CSV file in the S3 bucket or
         in the network.
+    import_platform : str
+        Platform to import from. Must be either 's3' or 'network'
     bucket_name : str, optional
         The name of the S3 bucket,needed when `import_platform` is set to
          `s3`. The default is None.
-    client : boto3.client, optional
-         The boto3 S3 client instance, needed when `import_platform` is set to
-         `s3`, the default is None.
     kwargs
         Additional keyword arguments to pass to the `pd.read_csv` method.
 
@@ -144,9 +139,7 @@ def read_colon_separated_file(
     keep_columns: List[str] = None,
     period="period",
     import_platform: str = "network",
-    client: boto3.client = None,
     bucket_name: str = None,
-    **kwargs,
 ) -> pd.DataFrame:
     """
     Load a CSV file from an S3 bucket or from a network path into a Pandas
@@ -157,39 +150,45 @@ def read_colon_separated_file(
     filepath
         The key (full path and filename) of the CSV file in the S3 bucket or
         in the network.
-    client : boto3.client, optional
-         The boto3 S3 client instance, needed when `import_platform` is set to
-         `s3`, he default is None.
+    column_names : List[str]
+        list of column names in data file
+    keep_columns : List[str], optional
+        list of column names to keep, must be a subset of column_names.
+    import_platform : str
+        Platform to import from. Must be either 's3' or 'network'
     bucket_name : str, optional
         The name of the S3 bucket,needed when `import_platform` is set to
          `s3`. The default is None.
-    kwargs
-        Additional keyword arguments to pass to the `pd.read_csv` method.
 
     Returns
     -------
     pd.DataFrame
         Pandas DataFrame containing the data from a colon seperated file.
+    Raises
+    ------
+    Exception
+       If `keep_columns` is provided then raises an exception when it's not a
+       subset of `column_names`
     """
     usecols = None  # pd.read_csv default load all columns
 
     if keep_columns:
 
+        if set(keep_columns).issubset(set(column_names)):
+            raise Exception(keep_columns, " must be a subset of ", column_names)
+
         # position of columns to keep
         usecols = [column_names.index(x) for x in keep_columns]
 
         # pd.reader ingores order, usecols=[2,0,1] is same as [0,1,2]
-        # ordered column names (myst align with usecols)
+        # ordered column names (must align with usecols)
         column_names = [x for _, x in sorted(zip(usecols, keep_columns))]
 
-    validate_colon_file_columns(
-        filepath, column_names, import_platform, client, bucket_name
-    )
+    validate_colon_file_columns(filepath, column_names, import_platform, bucket_name)
 
     df = read_csv_wrapper(
         filepath,
         import_platform,
-        client,
         bucket_name,
         sep=":",
         names=column_names,
