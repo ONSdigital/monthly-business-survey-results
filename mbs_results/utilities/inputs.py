@@ -10,7 +10,6 @@ from rdsa_utils.cdp.helpers.s3_utils import load_csv
 import mbs_results
 from mbs_results import logger
 from mbs_results.utilities.merge_two_config_files import merge_two_config_files
-from mbs_results.utilities.utils import validate_colon_file_columns
 
 
 def load_config(config_user_dict=None):
@@ -33,6 +32,57 @@ def load_config(config_user_dict=None):
             "config dictionary updated with config user dictionary from the testing"
         )
     return config
+
+
+def validate_colon_file_columns(
+    filepath: str,
+    column_names: List[str],
+    import_platform: str = "network",
+    client: boto3.client = None,
+    bucket_name: str = None,
+) -> pd.DataFrame:
+    """Check if column_names match the columns in filepath.
+
+    Parameters
+    ----------
+    filepath
+        The key (full path and filename) of the CSV file in the S3 bucket or
+        in the network.
+    column_names : List[str]
+        list of column names in data file.
+    client : boto3.client, optional
+         The boto3 S3 client instance, needed when `import_platform` is set to
+         `s3`, he default is None.
+    bucket_name : str, optional
+        The name of the S3 bucket,needed when `import_platform` is set to
+         `s3`. The default is None.
+    kwargs
+        Additional keyword arguments to pass to the `pd.read_csv` method.
+
+    Raises
+    ------
+    Exception
+       If length of columns is not alligned with the number of columns when
+       the dataframe is loaded.
+    """
+
+    df = read_csv_wrapper(
+        filepath,
+        import_platform,
+        client,
+        bucket_name,
+        sep=":",
+        names=column_names,
+        nrows=1,
+    )
+
+    if len(df.columns) is not len(column_names):
+        raise Exception(
+            "Length of `column_names` is: ",
+            len(column_names),
+            "does not match the columns in file: ",
+            filepath,
+        )
 
 
 def read_csv_wrapper(
