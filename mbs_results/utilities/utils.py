@@ -1,9 +1,8 @@
-import re
-from io import BytesIO
 from typing import List
 
 import pandas as pd
 
+from mbs_results.utilities.inputs import read_csv_wrapper
 
 def convert_column_to_datetime(dates):
     """
@@ -19,34 +18,48 @@ def convert_column_to_datetime(dates):
     """
     return pd.to_datetime(dates, format="%Y%m")
 
-
-def read_colon_separated_file(
-    filepath: str, column_names: List[str], period="period"
+def validate_colon_file_columns(
+    filepath: str,
+    column_names: List[str],
+    import_platform: str = "network",
+    client: boto3.client = None,
+    bucket_name: str = None,
 ) -> pd.DataFrame:
-    """
-    Read data stored as text file, columns separated by colon and any amount of
-    white space, and return the data as a dataframe with an additional column
-    containing the date derived from the six numbers at the end of the filename,
-    preceded by an underscore, eg `_202401`.
+    """Check if column_names match the columns in filepath.
 
     Parameters
     ----------
-    filepath : str
-        location of data file to read
+    filepath
+        The key (full path and filename) of the CSV file in the S3 bucket or 
+        in the network.
     column_names : List[str]
-        list of column names in data file
+        list of column names in data file.
+    client : boto3.client, optional
+         The boto3 S3 client instance, needed when `import_platform` is set to
+         `s3`, he default is None.
+    bucket_name : str, optional
+        The name of the S3 bucket,needed when `import_platform` is set to
+         `s3`. The default is None.
+    kwargs
+        Additional keyword arguments to pass to the `pd.read_csv` method.
 
-    Return
+    Raises
     ------
-    pd.DataFrame
+    Exception
+       If length of columns is not alligned with the number of columns when 
+       the dataframe is loaded.
     """
-    with open(filepath, mode="rb") as file:
-        buffer = BytesIO(file.read())
-        df = pd.read_csv(buffer, sep=r"\s*:\s*", names=column_names, engine="python")
-        date_string = re.findall(r"_(\d{6})", filepath)
-        df[period] = int(date_string[0])
 
-    return df
+    df = read_csv_wrapper(
+        filepath,import_platform,client,bucket_name,sep=":",names=column_names,nrows=1)
+    
+    if len(df.columns) is not len(column_names):
+        raise Exception("Length of `column_names` is: ",
+                        len(column_names),
+                          "does not match the columns in file: ",
+                          filepath)
+
+
 
 
 def append_filter_out_questions(

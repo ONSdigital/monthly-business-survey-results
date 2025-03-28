@@ -7,6 +7,7 @@ from mbs_results.utilities.utils import (
     convert_column_to_datetime,
     read_colon_separated_file,
 )
+from mbs_results.utilities.inputs import read_csv_wrapper
 
 
 def is_back_data_date_ok(
@@ -83,12 +84,15 @@ def read_back_data(config: dict) -> pd.DataFrame:
         Back data with all column as in source, period is converted to datetime.
     """
 
-    qv_df = pd.read_csv(config["back_data_qv_path"]).drop(
+
+    qv_df = read_csv_wrapper(config["back_data_qv_path"],config["platform"],
+        config["bucket"]).drop(
         columns=["cell_no", "classification"], errors="ignore"
     )
     qv_df[config["period"]] = convert_column_to_datetime(qv_df[config["period"]])
 
-    cp_df = pd.read_csv(config["back_data_cp_path"]).drop(
+    cp_df = read_csv_wrapper(config["back_data_cp_path"],config["platform"],
+        config["bucket"]).drop(
         columns=["cell_no", "classification"], errors="ignore"
     )
     cp_df[config["period"]] = convert_column_to_datetime(cp_df[config["period"]])

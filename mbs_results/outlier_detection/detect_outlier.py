@@ -2,17 +2,23 @@ import pandas as pd
 
 from mbs_results.outlier_detection.winsorisation import winsorise
 from mbs_results.utilities.constrains import update_derived_weight_and_winsorised_value
+from mbs_results.utilities.inputs import read_csv_wrapper
 
 
 def join_l_values(df, l_values_path, classification_values_path, config):
     """Read l values, classifications and drop duplicates and period"""
 
-    l_values = pd.read_csv(
-        l_values_path, dtype={"question_no": "int64", "classification": "str"}
-    )
+    l_values =read_csv_wrapper(
+        l_values_path,
+        config["platform"],
+        config["bucket"], 
+        dtype={"question_no": "int64", "classification": "str"})
 
     # Merge on classification SIC map (merge on SIC to get classsificaion on df -> )
-    classification_values = pd.read_csv(classification_values_path, dtype=str)
+    classification_values = read_csv_wrapper(
+        classification_values_path,
+        config["platform"],
+        config["bucket"], dtype=str)
 
     df = pd.merge(
         df,

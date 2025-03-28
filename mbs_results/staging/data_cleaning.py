@@ -7,6 +7,7 @@ from mbs_results.utilities.utils import convert_column_to_datetime
 from mbs_results.utilities.validation_checks import (  # validate_manual_constructions,
     validate_indices,
 )
+from mbs_results.utilities.inputs import read_csv_wrapper
 
 
 def filter_responses(df, reference, period, last_update):
@@ -167,7 +168,8 @@ def load_manual_constructions(
     pd.DataFrame
         dataframe with correctly formatted column datatypes.
     """
-    manual_constructions = pd.read_csv(manual_constructions_path)
+    manual_constructions =read_csv_wrapper(manual_constructions_path,config["platform"],
+        config["bucket"])
     manual_constructions[period] = convert_column_to_datetime(
         manual_constructions[period]
     )
