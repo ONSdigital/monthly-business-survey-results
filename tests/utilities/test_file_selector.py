@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -21,11 +22,9 @@ def mock_config():
     }
 
 
-@patch("os.path.isfile")
-@patch("os.path.join")
-def test_find_files_universe(mock_join, mock_isfile, mock_config):
+@patch("pathlib.Path.is_file")
+def test_find_files_universe(mock_isfile, mock_config):
     """Test case where all expected files exits"""
-    mock_join.side_effect = lambda dir, file: f"{dir}/{file}"
     mock_isfile.return_value = True
 
     valid_files = find_files(mock_config, file_type="universe")
@@ -34,12 +33,10 @@ def test_find_files_universe(mock_join, mock_isfile, mock_config):
     assert all("universe023" in file for file in valid_files)
 
 
-@patch("os.path.isfile")
-@patch("os.path.join")
-def test_find_files_finalsel(mock_join, mock_isfile, mock_config):
+@patch("pathlib.Path.is_file")
+def test_find_files_finalsel(mock_isfile, mock_config):
     """Test case where all expected finalsel files exist"""
-    mock_join.side_effect = lambda dir, file: f"{dir}/{file}"
-    mock_isfile.return_value = True  # Simulate all files exist
+    mock_isfile.return_value = True
 
     valid_files = find_files(mock_config, file_type="finalsel")
 
@@ -47,12 +44,14 @@ def test_find_files_finalsel(mock_join, mock_isfile, mock_config):
     assert all("finalsel023" in file for file in valid_files)
 
 
-@patch("os.path.isfile")
-@patch("os.path.join")
-def test_find_files_missing_universe(mock_join, mock_isfile, mock_config):
+@patch("pathlib.Path.is_file")
+def test_find_files_missing_universe(mock_isfile, mock_config):
     """Test case where a universe file is missing"""
-    mock_join.side_effect = lambda dir, file: f"{dir}/{file}"
-    mock_isfile.side_effect = lambda path: "universe" not in path
+
+    def is_file_side_effect():
+        return False
+
+    mock_isfile.side_effect = is_file_side_effect
 
     with pytest.raises(
         FileNotFoundError, match="Missing universe file for period: 201810"
@@ -60,12 +59,14 @@ def test_find_files_missing_universe(mock_join, mock_isfile, mock_config):
         find_files(mock_config, file_type="universe")
 
 
-@patch("os.path.isfile")
-@patch("os.path.join")
-def test_find_files_missing_finalsel(mock_join, mock_isfile, mock_config):
+@patch("pathlib.Path.is_file")
+def test_find_files_missing_finalsel(mock_isfile, mock_config):
     """Test case where a finalsel file is missing"""
-    mock_join.side_effect = lambda dir, file: f"{dir}/{file}"
-    mock_isfile.side_effect = lambda path: "finalsel" not in path
+
+    def is_file_side_effect():
+        return False
+
+    mock_isfile.side_effect = is_file_side_effect
 
     with pytest.raises(
         FileNotFoundError, match="Missing finalsel file for period: 201810"
@@ -81,18 +82,17 @@ def test_generate_expected_periods():
     assert expected_periods == ["202303", "202304", "202305"]
 
 
-@patch("os.path.isfile")
+@patch("pathlib.Path.is_file")
 def test_validate_files(mock_isfile):
     """Test the validate_files function"""
     mock_isfile.return_value = True
-    file_dir = "tests/data/file_selector"
+    file_dir = Path("tests/data/file_selector")
     file_prefix = "universe023"
     expected_periods = ["201810", "201811", "201812", "201901", "201902"]
     file_type = "universe"
 
     expected_files = [
-        os.path.normpath(f"{file_dir}/{file_prefix}_{period}")
-        for period in expected_periods
+        str(file_dir / f"{file_prefix}_{period}") for period in expected_periods
     ]
     print("expected files:")
     print(expected_files)
