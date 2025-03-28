@@ -97,7 +97,9 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
             match_col="flag_construction_matches",
             link_col="construction_link",
             predictive_variable=config["auxiliary_converted"],
-            **config,
+            strata="imputation_class",
+            target=config["target"],
+            period=config["period"],
         )
     )
 
