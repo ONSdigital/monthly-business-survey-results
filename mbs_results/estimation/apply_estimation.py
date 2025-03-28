@@ -11,6 +11,7 @@ from mbs_results.estimation.create_population_counts import (
 )
 from mbs_results.estimation.pre_processing_estimation import get_estimation_data
 from mbs_results.staging.data_cleaning import is_census
+from mbs_results.utilities.file_selector import find_files
 
 # from mbs_results.estimation.validate_estimation import validate_estimation
 
@@ -50,8 +51,8 @@ def apply_estimation(
     `ValueError`
 
     """
-    population_files = glob.glob(population_path)
-    sample_files = glob.glob(sample_path)
+    population_files = find_files(config, file_type="universe")
+    sample_files = find_files(config, file_type="finalsel")
 
     estimation_df_list = []
 

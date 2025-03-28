@@ -20,6 +20,7 @@ from mbs_results.utilities.utils import (
     convert_column_to_datetime,
     read_colon_separated_file,
 )
+from mbs_results.utilities.file_selector import find_files
 
 
 def create_form_type_spp_column(
@@ -67,10 +68,12 @@ def read_and_combine_colon_sep_files(
     pd.DataFrame
         combined colon separated files returned as one dataframe.
     """
+    sample_files = find_files(config, file_type="finalsel")
+
     df = pd.concat(
         [
             read_colon_separated_file(f, column_names, period=config["period"])
-            for f in glob.glob(folder_path)
+            for f in sample_files
         ],
         ignore_index=True,
     )
