@@ -3,6 +3,7 @@ import warnings
 from typing import List
 
 import pandas as pd
+from mbs_results.utilities.validation_checks import validate_manual_outlier_df
 
 
 def replace_values_index_based(
@@ -616,30 +617,43 @@ def replace_outlier_weights(
         in the manual outliers file, if it exists.
     """
 
-    try:
-        manual_outlier_df = pd.read_csv(manual_outlier_path)
-        # Todo: validate(manual_outlier_df)
-        """
-        manual_outlier_df should contain columns: reference, period,
-        question_code, manual_outlier
-
-        eg:
-
-        if(validate(manual_outlier_df) == False): 
-            manual_outlier_df = None
-            warnings.warn(f"The manual outlier file found at {manual_outlier_path} was not valid")
-
-        """
-    except OSError as e:
-        warnings.warn(e)
+    if not manual_outlier_path:
+        warnings.warn("No manual outlier file has been specified in the configuration, skipping stage")
         manual_outlier_df = None
 
-    if manual_outlier_df is not None:
+        return df
+
+    else:
+        # We don't wrap this in any error handling, because it should
+        # fail and read_csv will raise the appropriate Exception for us 
+        manual_outlier_df = pd.read_csv(manual_outlier_path)
+
+        validate_manual_outlier_df(manual_outlier_df)
         
+        # Use an outer join to log unmatched manual outlier weights
+        unmatched_df = df.merge(
+            manual_outlier_df,
+            how="outer",
+            on=[reference, period, question_code],
+            indicator=True,
+        )
+
+        unmatched_df = unmatched_df[unmatched_df["_merge"]=='right_only']
+        
+        if len(unmatched_df) > 0:
+            logger.warning(
+                f"There are {len(unmatched_df)} unmatched references in the"
+                " ingested manual outlier data"
+                f"Unmatched references: {unmatched_df}"
+            )
+
+        # Todo: Cant get the cross join to preserve DataFrame order
+
+        # Use left join to combine manual outlier weights with derived weights
         df = df.merge(
             manual_outlier_df,
             how="left",
-            on=[reference, period, question_code]
+            on=[reference, period, question_code],
         )
 
         # Create pre_manual_outlier column that is a copy of outlier_weight
@@ -651,7 +665,4 @@ def replace_outlier_weights(
         # Is there any requirement to drop manual_outlier after this?
         df = df.drop(columns=[manual_outlier_weight])
 
-    else:
-        warnings.warn("No valid manual outlier file was specifed in the configuration")
-
-    return df
+        return df
