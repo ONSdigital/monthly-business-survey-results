@@ -49,10 +49,10 @@ testdata = [
 
 # Parametrize the test case
 @pytest.mark.parametrize(
-    "back_data_period,first_period,current_period,revision_period,expected", testdata
+    "back_data_period,first_period,current_period,revision_window,expected", testdata
 )
 def test_is_back_data_date_ok_raises_error(
-    back_data_period, first_period, current_period, revision_period, expected
+    back_data_period, first_period, current_period, revision_window, expected
 ):
     """
     Testing dates, if no Value error is raised then we check if True is
@@ -62,11 +62,11 @@ def test_is_back_data_date_ok_raises_error(
     if expected:
         with pytest.raises(expected):
             is_back_data_date_ok(
-                back_data_period, first_period, current_period, revision_period
+                back_data_period, first_period, current_period, revision_window
             )
     else:
         assert is_back_data_date_ok(
-            back_data_period, first_period, current_period, revision_period
+            back_data_period, first_period, current_period, revision_window
         )
 
 

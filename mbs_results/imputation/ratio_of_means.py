@@ -390,7 +390,7 @@ def ratio_of_means(
     strata: str,
     auxiliary: str,
     current_period: int,
-    revision_period: int,
+    revision_window: int,
     question_no: str,
     filters: pd.DataFrame = None,
     manual_constructions: pd.DataFrame = None,
@@ -423,7 +423,7 @@ def ratio_of_means(
         Column name containing auxiliary information (sic).
     current_period: int
         Value with current period to be imputed as int.
-    revision_period: int
+    revision_window: int
         Value containing the amount of periods for imputation.
     question_no: str
         Column name containing question_no
@@ -448,7 +448,7 @@ def ratio_of_means(
     # These arguments are used from the majority of functions
 
     # TODO: Consider more elegant solution, or define function arguments explicitly
-    back_data_period = calculate_back_data_period(current_period, revision_period)
+    back_data_period = calculate_back_data_period(current_period, revision_window)
     if f"imputation_flags_{target}" in df.columns:
         df = process_backdata(df, target, period, back_data_period)
 
@@ -562,9 +562,9 @@ def ratio_of_means(
     return df
 
 
-def calculate_back_data_period(current_period, revision_period) -> str:
+def calculate_back_data_period(current_period, revision_window) -> str:
     current_period = pd.to_datetime(current_period, format="%Y%m")
     back_data_period = (
-        (current_period - pd.DateOffset(months=revision_period)).date().strftime("%Y%m")
+        (current_period - pd.DateOffset(months=revision_window)).date().strftime("%Y%m")
     )
     return back_data_period
