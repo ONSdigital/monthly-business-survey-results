@@ -49,8 +49,10 @@ def apply_estimation(
     `ValueError`
 
     """
-    population_files = find_files(config, file_type="universe")
-    sample_files = find_files(config, file_type="finalsel")
+    population_files = find_files(
+        config, file_type="universe", population_path=population_path
+    )
+    sample_files = find_files(config, file_type="finalsel", sample_path=sample_path)
 
     estimation_df_list = []
 

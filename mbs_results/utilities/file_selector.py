@@ -30,7 +30,7 @@ def generate_expected_periods(current_period: int, revision_window: int) -> List
     expected_periods = [current_period.strftime("%Y%m")]
 
     for i in range(1, revision_window):
-        current_period += timedelta(days=31)
+        current_period -= timedelta(days=31)
         expected_periods.append(current_period.strftime("%Y%m"))
 
     logger.info(f"Generated expected periods: {expected_periods}")
@@ -86,27 +86,35 @@ def validate_files(
     return valid_files
 
 
-def find_files(config: dict, file_type: str) -> List[str]:
+def find_files(
+    config: dict,
+    file_type: str,
+    population_path: str = None,
+    sample_path: str = None,
+) -> List[str]:
     """
-    Function find_files finds and validates universe or finalsel files based on
-    the given configuration.
+    Find and validate universe or finalsel files based on the given configuration.
 
     Parameters
     ----------
     config : dict
         Dictionary containing the following keys of interest:
-        - population_path : str
-            File prefix pattern for universe files (e.g. "universe009_*").
+        - population_path : str, optional
+            File prefix pattern for universe files (e.g., "universe009_*").
             This contains population frame data.
-        - sample_path : str
-            File prefix pattern for finalsel files (e.g. "finalsel009_*").
+        - sample_path : str, optional
+            File prefix pattern for finalsel files (e.g., "finalsel009_*").
             This contains sample data.
         - current_period : int
-            Starting period in YYYYMM format (e.g. "202401").
+            Starting period in YYYYMM format (e.g., 202401).
         - revision_window : int
             Number of months to include in the sequence of expected YYYYMM.
     file_type : str
         One of ["universe", "finalsel"]. Determines which file type to scan.
+    population_path : str, optional
+        Default path for universe files if not provided in the config.
+    sample_path : str, optional
+        Default path for finalsel files if not provided in the config.
 
     Returns
     -------
@@ -120,7 +128,6 @@ def find_files(config: dict, file_type: str) -> List[str]:
     ValueError
         If the file_type is not one of "universe" or "finalsel".
     """
-
     logger.info(f"Starting file selection for file type: {file_type}")
 
     current_period = config["current_period"]
@@ -130,12 +137,12 @@ def find_files(config: dict, file_type: str) -> List[str]:
 
     try:
         if file_type == "universe":
-            population_path = Path(config["population_path"])
+            population_path = Path(config.get("population_path", population_path))
             file_prefix = population_path.stem.split("_*")[0]
             file_dir = population_path.parent
 
         elif file_type == "finalsel":
-            sample_path = Path(config["sample_path"])
+            sample_path = Path(config.get("sample_path", sample_path))
             file_prefix = sample_path.stem.split("_*")[0]
             file_dir = sample_path.parent
         else:
