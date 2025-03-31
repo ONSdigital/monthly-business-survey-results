@@ -4,6 +4,7 @@ import warnings
 from importlib import metadata
 
 import pandas as pd
+import numpy as np
 
 from mbs_results.utilities.utils import append_filter_out_questions
 
@@ -275,6 +276,7 @@ def validate_outlier_detection(df: pd.DataFrame, config: dict):
     df = append_filter_out_questions(df, filtered_questions_path)
     df.to_csv(output_path + outlier_filename, index=False)
 
+
 def validate_manual_outlier_df(df: pd.DataFrame) -> bool:
     warnings.warn("A placeholder function for validating ingested manual outliers")
 
@@ -286,13 +288,19 @@ def validate_manual_outlier_df(df: pd.DataFrame) -> bool:
         ]).issubset(df.columns):
 
         # Check data types match
-        if (df.dtypes == ["int64", "int64", "int64", "float64"]).all():
+        if (df.dtypes.to_dict() == {
+            "reference": np.int64,
+            "period": np.int64,
+            "question_no": np.int64,
+            "manual_outlier_weight": np.float64,
+            }):
 
             # Check reference, period and question_no have no missing
             if df[["reference", "period", "question_no"]].isna().all().all() == False:
 
-                # Check all manual_outlier_weight is <= 1
-                if df["manual_outlier_weight"].max() <= 1:
+                # Check all manual_outlier_weight is <= 1 and >= 0
+                if ((df["manual_outlier_weight"].max() <= 1.0) and 
+                    (df["manual_outlier_weight"].min() >= 0.0)):
                     return True
                 else:
                     raise Exception("Manual outlier weights are invalid (> 1)")
@@ -302,8 +310,6 @@ def validate_manual_outlier_df(df: pd.DataFrame) -> bool:
             raise Exception("Manual outlier data is not of the correct type")
     else:
         raise Exception("Manual outlier data does not have the correct columns")
-
-
 
 
 def qa_selective_editing_outputs(config: dict):

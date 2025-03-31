@@ -624,8 +624,6 @@ def replace_outlier_weights(
         return df
 
     else:
-        # We don't wrap this in any error handling, because it should
-        # fail and read_csv will raise the appropriate Exception for us 
         manual_outlier_df = pd.read_csv(manual_outlier_path)
 
         validate_manual_outlier_df(manual_outlier_df)
@@ -647,7 +645,7 @@ def replace_outlier_weights(
                 f"Unmatched references: {unmatched_df}"
             )
 
-        # Todo: Cant get the cross join to preserve DataFrame order
+        # Todo: Cant get the outer join to preserve DataFrame order
 
         # Use left join to combine manual outlier weights with derived weights
         df = df.merge(
