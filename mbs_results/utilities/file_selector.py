@@ -74,11 +74,6 @@ def validate_files(
         file_with_ext = file_dir / f"{base_file_name}.csv"
         file_without_ext = file_dir / base_file_name
 
-        print(f"period: {period}")
-        print(f"base_file_name: {base_file_name}")
-        print(f"file_with_ext: {file_with_ext}")
-        print(f"file_without_ext: {file_without_ext}")
-
         # Check if the files exist
         if file_without_ext.is_file():
             valid_files.append(str(file_without_ext))
@@ -133,30 +128,19 @@ def find_files(config: dict, file_type: str) -> List[str]:
 
     expected_periods = generate_expected_periods(current_period, revision_window)
 
-    print(f"current_period: {current_period}")
-    print(f"revision_window: {revision_window}")
-    print(f"expected_periods: {expected_periods}")
-
     try:
         if file_type == "universe":
             population_path = Path(config["population_path"])
             file_prefix = population_path.stem.split("_*")[0]
             file_dir = population_path.parent
-            print(f"population_path: {population_path}")
 
         elif file_type == "finalsel":
             sample_path = Path(config["sample_path"])
             file_prefix = sample_path.stem.split("_*")[0]
             file_dir = sample_path.parent
-            print(f"sample_path: {sample_path}")
         else:
             logger.error("Invalid file type. Expected 'universe' or 'finalsel'")
             raise ValueError("Invalid file type. Expected 'universe' or 'finalsel'")
-
-        print(f"file_dir: {file_dir}")
-        print(f"file_prefix: {file_prefix}")
-        print(f"expected_periods: {expected_periods}")
-        print(f"file_type: {file_type}")
 
         valid_files = validate_files(file_dir, file_prefix, expected_periods, file_type)
 
