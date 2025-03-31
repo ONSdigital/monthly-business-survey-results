@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta
-from pathlib import Path
+import os
 from typing import List
 
 from mbs_results import logger
@@ -26,12 +25,16 @@ def generate_expected_periods(current_period: int, revision_window: int) -> List
         "Generating expected periods for review window starting from "
         f"{current_period} for {revision_window} months"
     )
-    current_period = datetime.strptime(str(current_period), "%Y%m")
-    expected_periods = [current_period.strftime("%Y%m")]
+    current_year = current_period // 100
+    current_month = current_period % 100
 
-    for i in range(1, revision_window):
-        current_period -= timedelta(days=31)
-        expected_periods.append(current_period.strftime("%Y%m"))
+    expected_periods = []
+    for _ in range(revision_window):
+        expected_periods.append(f"{current_year:04d}{current_month:02d}")
+        current_month -= 1
+        if current_month == 0:
+            current_month = 12
+            current_year -= 1
 
     logger.info(f"Generated expected periods: {expected_periods}")
 
@@ -67,18 +70,18 @@ def validate_files(
         If any file is missing for the expected periods.
     """
     valid_files = []
-    file_dir = Path(file_dir)
+    file_dir = os.path.normpath(file_dir)
 
     for period in expected_periods:
         base_file_name = f"{file_prefix}_{period}"
-        file_with_ext = file_dir / f"{base_file_name}.csv"
-        file_without_ext = file_dir / base_file_name
+        file_with_ext = os.path.join(file_dir, f"{base_file_name}.csv")
+        file_without_ext = os.path.join(file_dir, base_file_name)
 
         # Check if the files exist
-        if file_without_ext.is_file():
-            valid_files.append(str(file_without_ext))
-        elif file_with_ext.is_file():
-            valid_files.append(str(file_with_ext))
+        if os.path.isfile(file_without_ext):
+            valid_files.append(file_without_ext)
+        elif os.path.isfile(file_with_ext):
+            valid_files.append(file_with_ext)
         else:
             logger.error(f"Missing {file_type} file for period: {period}")
             raise FileNotFoundError(f"Missing {file_type} file for period: {period}")
@@ -137,14 +140,16 @@ def find_files(
 
     try:
         if file_type == "universe":
-            population_path = Path(config.get("population_path", population_path))
-            file_prefix = population_path.stem.split("_*")[0]
-            file_dir = population_path.parent
+            population_path = config.get("population_path", population_path)
+            population_path = os.path.normpath(population_path)
+            file_prefix = os.path.basename(population_path).split("_*")[0]
+            file_dir = os.path.dirname(population_path)
 
         elif file_type == "finalsel":
-            sample_path = Path(config.get("sample_path", sample_path))
-            file_prefix = sample_path.stem.split("_*")[0]
-            file_dir = sample_path.parent
+            sample_path = config.get("sample_path", sample_path)
+            sample_path = os.path.normpath(sample_path)
+            file_prefix = os.path.basename(sample_path).split("_*")[0]
+            file_dir = os.path.dirname(sample_path)
         else:
             logger.error("Invalid file type. Expected 'universe' or 'finalsel'")
             raise ValueError("Invalid file type. Expected 'universe' or 'finalsel'")

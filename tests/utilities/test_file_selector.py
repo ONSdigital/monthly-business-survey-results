@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -22,7 +21,7 @@ def mock_config():
     }
 
 
-@patch("pathlib.Path.is_file")
+@patch("os.path.isfile")
 def test_find_files_universe(mock_isfile, mock_config):
     """Test case where all expected files exits"""
     mock_isfile.return_value = True
@@ -33,7 +32,7 @@ def test_find_files_universe(mock_isfile, mock_config):
     assert all("universe023" in file for file in valid_files)
 
 
-@patch("pathlib.Path.is_file")
+@patch("os.path.isfile")
 def test_find_files_finalsel(mock_isfile, mock_config):
     """Test case where all expected finalsel files exist"""
     mock_isfile.return_value = True
@@ -44,12 +43,12 @@ def test_find_files_finalsel(mock_isfile, mock_config):
     assert all("finalsel023" in file for file in valid_files)
 
 
-@patch("pathlib.Path.is_file")
+@patch("os.path.isfile")
 def test_find_files_missing_universe(mock_isfile, mock_config):
     """Test case where a universe file is missing"""
 
-    def is_file_side_effect():
-        return False
+    def is_file_side_effect(path):
+        return "universe" not in path
 
     mock_isfile.side_effect = is_file_side_effect
 
@@ -59,12 +58,12 @@ def test_find_files_missing_universe(mock_isfile, mock_config):
         find_files(mock_config, file_type="universe")
 
 
-@patch("pathlib.Path.is_file")
+@patch("os.path.isfile")
 def test_find_files_missing_finalsel(mock_isfile, mock_config):
     """Test case where a finalsel file is missing"""
 
-    def is_file_side_effect():
-        return False
+    def is_file_side_effect(path):
+        return "finalsel" not in path
 
     mock_isfile.side_effect = is_file_side_effect
 
@@ -79,20 +78,21 @@ def test_generate_expected_periods():
     revision_window = 3
     expected_periods = generate_expected_periods(current_period, revision_window)
 
-    assert expected_periods == ["202303", "202304", "202305"]
+    assert expected_periods == ["202303", "202302", "202301"]
 
 
-@patch("pathlib.Path.is_file")
+@patch("os.path.isfile")
 def test_validate_files(mock_isfile):
     """Test the validate_files function"""
     mock_isfile.return_value = True
-    file_dir = Path("tests/data/file_selector")
+    file_dir = os.path.normpath("tests/data/file_selector")
     file_prefix = "universe023"
-    expected_periods = ["201810", "201811", "201812", "201901", "201902"]
+    expected_periods = ["201810", "201809", "201808", "201807", "201806"]
     file_type = "universe"
 
     expected_files = [
-        str(file_dir / f"{file_prefix}_{period}") for period in expected_periods
+        os.path.normpath(os.path.join(file_dir, f"{file_prefix}_{period}"))
+        for period in expected_periods
     ]
     valid_files = validate_files(file_dir, file_prefix, expected_periods, file_type)
     valid_files = [os.path.normpath(file) for file in valid_files]
