@@ -20,7 +20,7 @@
 | period_selected | The most recent period to include in the outputs. | int | Any int in the form `yyyymm`. |
 | current_period | The most recent period to include in the outputs (same as above). | int | Any int in the form `yyyymm`. |
 | previous_period | The previous period to use as a reference | int | Any int in the form `yyyymm`. |
-| revision_period | The number of months to use as a revision period. | int | Any int in the form `mm` or `m` (does not need to be zero-padded). |
+| revision_window | The number of months to use as a revision window. | int | Any int in the form `mm` or `m` (does not need to be zero-padded). |
 
 
 ## Guidance for use

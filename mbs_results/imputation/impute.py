@@ -57,7 +57,7 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
             target=config["target"],
             period=config["period"],
             current_period=config["current_period"],
-            revision_period=config["revision_period"],
+            revision_window=config["revision_window"],
             question_no=config["question_no"],
             strata="imputation_class",
             auxiliary=config["auxiliary_converted"],

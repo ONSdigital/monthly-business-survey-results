@@ -85,7 +85,7 @@ def test_ratio_of_means(base_file_name):
         question_no="questioncode",
         filters=filter_df,
         current_period=202001,
-        revision_period=10,
+        revision_window=10,
     )
 
     assert_frame_equal(actual_output, expected_output, check_dtype=False)
@@ -122,7 +122,7 @@ def test_ratio_of_means_with_links(link_scenario):
             "construction": "construction_link",
         },
         current_period=202001,
-        revision_period=10,
+        revision_window=10,
     )
 
     assert_frame_equal(actual_output, expected_output, check_dtype=False)
@@ -156,7 +156,7 @@ def test_ratio_of_means_with_manual_constructions(mc_base_file_name):
         question_no="question_no",
         manual_constructions=manual_constructions,
         current_period=202001,
-        revision_period=10,
+        revision_window=10,
     )
 
     assert_frame_equal(actual_output, expected_output, check_dtype=False)

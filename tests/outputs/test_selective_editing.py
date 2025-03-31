@@ -104,7 +104,7 @@ class TestSelectiveEditing:
 
         expected_output = calculate_auxiliary_value_output
         expected_output["auxiliary_value"] = expected_output["auxiliary_value"].astype(
-            float
+            int
         )
 
         actual_output = calculate_auxiliary_value(
