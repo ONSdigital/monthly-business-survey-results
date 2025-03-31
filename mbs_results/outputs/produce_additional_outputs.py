@@ -15,6 +15,7 @@ from mbs_results.outputs.turnover_analysis import create_turnover_output
 from mbs_results.outputs.weighted_adj_val_time_series import (
     get_weighted_adj_val_time_series,
 )
+from mbs_results.utilities.utils import get_versioned_filename
 
 
 def get_additional_outputs_df(
@@ -102,10 +103,8 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
     if additional_outputs is None:
         return
 
-    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
-    snapshot_name = config["mbs_file_name"].split(".")[0]
     for output in additional_outputs:
-        filename = f"{output}_v{file_version_mbs}_{snapshot_name}.csv"
+        filename = get_versioned_filename(output, config)
         additional_outputs[output].to_csv(config["output_path"] + filename, index=False)
         print(config["output_path"] + filename + " saved")
 
