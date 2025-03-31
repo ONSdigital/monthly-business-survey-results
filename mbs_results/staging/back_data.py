@@ -2,10 +2,6 @@ import warnings
 
 import pandas as pd
 
-from mbs_results.staging.create_missing_questions import (
-    create_mapper,
-    create_missing_questions,
-)
 from mbs_results.staging.data_cleaning import enforce_datatypes
 from mbs_results.utilities.utils import (
     convert_column_to_datetime,
@@ -17,7 +13,7 @@ def is_back_data_date_ok(
     back_data_period: pd.Series,
     first_period: pd.Timestamp,
     current_period: int,
-    revision_period: int,
+    revision_window: int,
 ):
     """
     Applies checks on period 0 (back data period)
@@ -33,7 +29,7 @@ def is_back_data_date_ok(
         First period in staged data.
     current_period : int
         Period of pipeline run.
-    revision_period : int
+    revision_window : int
         Revision length of staged data.
 
     Raises
@@ -56,8 +52,8 @@ def is_back_data_date_ok(
     if len(back_data_period.unique()) != 1:
         raise ValueError("Too many dates in back data, must have only 1")
 
-    if period_0 != current_period - pd.DateOffset(months=revision_period):
-        raise ValueError("Back data period doesn't match the revision period")
+    if period_0 != current_period - pd.DateOffset(months=revision_window):
+        raise ValueError("Back data period doesn't match the revision window")
 
     if first_period != period_0 + pd.DateOffset(months=1):
         raise ValueError(
@@ -107,53 +103,9 @@ def read_back_data(config: dict) -> pd.DataFrame:
 
     join_type = "left"
 
-    qv_period = qv_df[config["period"]].unique()
-    cp_period = cp_df[config["period"]].unique()
-    finalsel_period = finalsel[config["period"]].unique()
-
-    qv_start_of_period_condition_met = (
-        qv_period + pd.DateOffset(months=1) == finalsel_period
-    )
-    cp_start_of_period_condition_met = (
-        cp_period + pd.DateOffset(months=1) == finalsel_period
-    )
-
-    if qv_start_of_period_condition_met and cp_start_of_period_condition_met:
-
-        qv_df[config["period"]] = qv_df[config["period"]] + pd.DateOffset(months=1)
-        cp_df[config["period"]] = cp_df[config["period"]] + pd.DateOffset(months=1)
-
-        join_type = "right"
-
-        warnings.warn(
-            "finalsel period is 1 month later than qv_and_cp period. "
-            "Treating as start of period processing."
-        )
-
     cp_finalsel = pd.merge(
         cp_df, finalsel, how=join_type, on=[config["period"], config["reference"]]
     )
-
-    if qv_start_of_period_condition_met and cp_start_of_period_condition_met:
-        # Creating missing questions for period 0 SE process
-
-        # Candidate to refactor into a function?
-        mapper_question = create_mapper()
-        idbr_to_spp_mapping = config["idbr_to_spp"]
-        cp_finalsel[config["form_id_spp"]] = (
-            cp_finalsel[config["form_id_idbr"]].astype(str).map(idbr_to_spp_mapping)
-        )
-
-        qv_df = create_missing_questions(
-            cp_finalsel,
-            qv_df,
-            config["reference"],
-            config["period"],
-            config["form_id_spp"],
-            "question_no",
-            mapper_question,
-        )
-        qv_df["question_no"] = qv_df["question_no"].astype(int)
 
     qv_and_cp = pd.merge(
         qv_df, cp_finalsel, how="right", on=[config["period"], config["reference"]]
@@ -204,7 +156,7 @@ def append_back_data(staged_data: pd.DataFrame, config: dict) -> pd.DataFrame:
         back_data[config["period"]],
         first_period,
         config["current_period"],
-        config["revision_period"],
+        config["revision_window"],
     )
 
     staged_and_back_data = pd.concat([back_data, staged_data], ignore_index=True)

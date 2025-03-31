@@ -5,7 +5,10 @@ from importlib import metadata
 
 import pandas as pd
 
-from mbs_results.utilities.utils import append_filter_out_questions
+from mbs_results.utilities.utils import (
+    append_filter_out_questions,
+    get_versioned_filename,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -240,27 +243,48 @@ def validate_staging(df: pd.DataFrame, config: dict):
 def validate_imputation(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post imputation")
     output_path = config["output_path"]
-    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
-    snapshot_name = config["mbs_file_name"].split(".")[0]
-    imputation_filename = f"imputation_output_v{file_version_mbs}_{snapshot_name}.csv"
+    imputation_filename = get_versioned_filename("imputation", config)
     df.to_csv(output_path + imputation_filename, index=False)
 
 
 def validate_estimation(df: pd.DataFrame, config: dict):
-    warnings.warn("A placeholder function for validating dataframe post estimation")
+    """
+    Validates the estimation output.
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        the main dataframe after running the estimation part of the pipeline
+    config: Dict
+        The config dictionary.
+
+
+    Raises
+    ------
+    ValueError
+        ValueError if there are any null values in either the census or sampled columns.
+    """
     output_path = config["output_path"]
-    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
-    snapshot_name = config["mbs_file_name"].split(".")[0]
-    estimate_filename = f"estimation_output_v{file_version_mbs}_{snapshot_name}.csv"
+    estimate_filename = get_versioned_filename("estimation_output", config)
+    census_nas = df[config["census"]].isna().sum()
+    if census_nas > 0:
+        raise ValueError(
+            f'There are {census_nas} NA(s) in the {config["census"]} column.'
+        )
+
+    sampled_nas = df[config["sampled"]].isna().sum()
+    if sampled_nas > 0:
+        raise ValueError(
+            f'There are {sampled_nas} NA(s) in the {config["sampled"]} column.'
+        )
+
     df.to_csv(output_path + estimate_filename, index=False)
 
 
 def validate_outlier_detection(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post outliering")
     output_path = config["output_path"]
-    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
-    snapshot_name = config["mbs_file_name"].split(".")[0]
-    outlier_filename = f"outlier_output_v{file_version_mbs}_{snapshot_name}.csv"
+    outlier_filename = get_versioned_filename("outlier_output", config)
 
     # Must be same as save_full_path argument of filter_out_questions() (in staging)
     # Path must be full path containing directory and file name
@@ -386,30 +410,5 @@ def qa_selective_editing_outputs(config: dict):
                 )
         else:
             logger.info(f"No nulls or NaNs detected in {dataframe_name} dataframe")
-
-    manual_edit_po = True
-    if manual_edit_po:
-        # MANUAL EDITING PO FOR SE OUTPUT (TEMP)
-        print("temp")
-        reference_mask = contributor_df["reference"] == 11513303775
-        contributor_df.loc[reference_mask, "domain_group"] = 63
-        contributor_df.loc[reference_mask, "threshold"] = 0.05
-
-        question_df.loc[
-            question_df["reference"] == 11513303775, "standardising_factor"
-        ] = 84125668231.64378
-
-        logger.warning("manual edit of post office")
-
-        contributor_df.to_csv(
-            config["output_path"]
-            + f"secontributors009_{period}_v{file_version_mbs}_po_filled.csv",
-            index=False,
-        )
-        question_df.to_csv(
-            config["output_path"]
-            + f"sequestions009_{period}_v{file_version_mbs}_po_filled.csv",
-            index=False,
-        )
 
     logger.info("QA of SE outputs finished")
