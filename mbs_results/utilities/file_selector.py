@@ -1,7 +1,10 @@
 import os
 from typing import List
 
+import boto3
 import pandas as pd
+import raz_client
+from rdsa_utils.cdp.helpers.s3_utils import list_files
 
 from mbs_results import logger
 
@@ -42,7 +45,11 @@ def generate_expected_periods(current_period: int, revision_window: int) -> List
 
 
 def validate_files(
-    file_dir: str, file_prefix: str, expected_periods: List[str], file_type: str
+    file_dir: str,
+    file_prefix: str,
+    expected_periods: List[str],
+    file_type: str,
+    config: dict,
 ) -> List[str]:
     """
     Validate the existence of files for the given periods and return the list
@@ -69,22 +76,62 @@ def validate_files(
     FileNotFoundError
         If any file is missing for the expected periods.
     """
-    valid_files = []
-    file_dir = os.path.normpath(file_dir)
+    if config["platform"] == "s3":
+        client = boto3.client("s3")
+        raz_client.configure_ranger_raz(
+            client, ssl_file="/etc/pki/tls/certs/ca-bundle.crt"
+        )
+        files_in_storage_system = list_files(
+            client=client,
+            bucket_name=config["bucket_name"],
+            prefix=file_dir + file_prefix,
+        )
+        # LIST FILES IN S3
 
-    for period in expected_periods:
-        base_file_name = f"{file_prefix}_{period}"
-        file_with_ext = os.path.join(file_dir, f"{base_file_name}.csv")
-        file_without_ext = os.path.join(file_dir, base_file_name)
+    elif config["platform"] == "network":
+        # list files in windows dir
+        file_dir = os.path.normpath(file_dir)
+        files_in_storage_system = [
+            f for f in os.listdir(file_dir) if f.startswith(file_prefix)
+        ]
+    else:
+        raise Exception("platform must either be 's3' or 'network'")
 
-        # Check if the files exist
-        if os.path.isfile(file_without_ext):
-            valid_files.append(file_without_ext)
-        elif os.path.isfile(file_with_ext):
-            valid_files.append(file_with_ext)
-        else:
-            logger.error(f"Missing {file_type} file for period: {period}")
-            raise FileNotFoundError(f"Missing {file_type} file for period: {period}")
+    print(files_in_storage_system)
+    valid_files = [
+        f
+        for f in files_in_storage_system
+        if f.split(".")[0].endswith(tuple(expected_periods))
+    ]
+    print(len(valid_files))
+    print(len(expected_periods))
+    print(valid_files)
+    print(expected_periods)
+    if len(valid_files) != len(expected_periods):
+        found_periods = [f.split("_")[-1] for f in files_in_storage_system]
+        missing_periods = set(expected_periods) - set(found_periods)
+
+        logger.error(f"Missing {file_type} file for period(s): {missing_periods}")
+        raise FileNotFoundError(
+            f"Missing {file_type} file for period(s): {missing_periods}"
+        )
+
+    # valid_files = []
+    # file_dir = os.path.normpath(file_dir)
+
+    # for period in expected_periods:
+    #     base_file_name = f"{file_prefix}_{period}"
+    #     file_with_ext = os.path.join(file_dir, f"{base_file_name}.csv")
+    #     file_without_ext = os.path.join(file_dir, base_file_name)
+
+    #     # Check if the files exist
+    #     if os.path.isfile(file_without_ext):
+    #         valid_files.append(file_without_ext)
+    #     elif os.path.isfile(file_with_ext):
+    #         valid_files.append(file_with_ext)
+    #     else:
+    #         logger.error(f"Missing {file_type} file for period: {period}")
+    #         raise FileNotFoundError(f"Missing {file_type} file for period: {period}")
 
     return valid_files
 
@@ -154,7 +201,9 @@ def find_files(
             logger.error("Invalid file type. Expected 'universe' or 'finalsel'")
             raise ValueError("Invalid file type. Expected 'universe' or 'finalsel'")
 
-        valid_files = validate_files(file_dir, file_prefix, expected_periods, file_type)
+        valid_files = validate_files(
+            file_dir, file_prefix, expected_periods, file_type, config
+        )
 
         logger.info("File selection completed successfully")
         return valid_files

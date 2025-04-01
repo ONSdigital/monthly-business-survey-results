@@ -14,10 +14,11 @@ from mbs_results.utilities.file_selector import (
 def mock_config():
     """Fixture to provide a mock configuration dictionary for tests"""
     return {
-        "population_path": "tests/data/file_selector/universe023_*",
-        "sample_path": "tests/data/file_selector/finalsel023_*",
+        "population_path": "tests/data/file_selector/universe023",
+        "sample_path": "tests/data/file_selector/finalsel023",
         "current_period": 201810,
         "revision_window": 5,
+        "platform": "network",
     }
 
 
