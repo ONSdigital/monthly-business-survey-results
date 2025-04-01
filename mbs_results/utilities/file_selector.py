@@ -1,6 +1,8 @@
 import os
 from typing import List
 
+import pandas as pd
+
 from mbs_results import logger
 
 
@@ -25,16 +27,14 @@ def generate_expected_periods(current_period: int, revision_window: int) -> List
         "Generating expected periods for review window starting from "
         f"{current_period} for {revision_window} months"
     )
-    current_year = current_period // 100
-    current_month = current_period % 100
 
-    expected_periods = []
-    for _ in range(revision_window):
-        expected_periods.append(f"{current_year:04d}{current_month:02d}")
-        current_month -= 1
-        if current_month == 0:
-            current_month = 12
-            current_year -= 1
+    current_period = pd.to_datetime(current_period, format="%Y%m")
+    end_period = current_period - pd.DateOffset(months=revision_window - 1)
+    expected_periods = (
+        pd.date_range(end=end_period, start=current_period, freq="-1MS")
+        .strftime("%Y%m")
+        .tolist()
+    )
 
     logger.info(f"Generated expected periods: {expected_periods}")
 
@@ -103,10 +103,10 @@ def find_files(
     config : dict
         Dictionary containing the following keys of interest:
         - population_path : str, optional
-            File prefix pattern for universe files (e.g., "universe009_*").
+            File prefix pattern for universe files (e.g., "universe009").
             This contains population frame data.
         - sample_path : str, optional
-            File prefix pattern for finalsel files (e.g., "finalsel009_*").
+            File prefix pattern for finalsel files (e.g., "finalsel009").
             This contains sample data.
         - current_period : int
             Starting period in YYYYMM format (e.g., 202401).
