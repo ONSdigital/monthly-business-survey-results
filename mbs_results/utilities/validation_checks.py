@@ -342,8 +342,8 @@ def qa_selective_editing_outputs(config: dict):
 
     if len(unmatched_references) > 0:
         logger.warning(
-            f"There are {len(unmatched_references)} unmatched references in the"
-            " contributor and question SE outputs"
+            f"There are {len(unmatched_references)} unmatched references in the "
+            "contributor and question SE outputs "
             f"unmatched references {unmatched_references}"
         )
 
@@ -409,13 +409,13 @@ def qa_selective_editing_outputs(config: dict):
     if len(missed) > 0:
         logger.warning(
             f"There are {len(missed)} unmatched references in the "
-            "contributor and question SE outputs"
+            "finalsel and SE outputs "
             f"unmatched references {missed['reference'].unique()}"
         )
     if len(excluded) > 0:
         logger.info(
             f"There are {len(excluded)} unmatched references in the "
-            "contributor and question SE outputs with water formtypes"
+            "finalsel and SE outputs with water formtypes"
         )
 
     logger.info("QA of SE outputs finished")
