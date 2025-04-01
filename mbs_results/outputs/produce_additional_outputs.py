@@ -38,30 +38,7 @@ def get_additional_outputs_df(
 
     """
 
-    additional_outputs_df = estimation_output[
-        [
-            "reference",
-            "period",
-            "design_weight",
-            "frosic2007",
-            "formtype",
-            "questioncode",
-            "converted_frotover",
-            "calibration_factor",
-            "adjustedresponse",
-            "status",
-            "response",
-            "froempment",
-            "cell_no",
-            "imputation_class",
-            "imputation_flags_adjustedresponse",
-            "f_link_adjustedresponse",
-            "b_link_adjustedresponse",
-            "construction_link",
-        ]
-    ]
-
-    additional_outputs_df = additional_outputs_df.merge(
+    additional_outputs_df = estimation_output.merge(
         outlier_output[["reference", "period", "questioncode", "outlier_weight"]],
         how="left",
         on=["reference", "period", "questioncode"],
