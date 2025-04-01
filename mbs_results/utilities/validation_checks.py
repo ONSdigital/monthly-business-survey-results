@@ -301,39 +301,48 @@ def validate_outlier_detection(df: pd.DataFrame, config: dict):
     df.to_csv(output_path + outlier_filename, index=False)
 
 
-def validate_manual_outlier_df(df: pd.DataFrame) -> bool:
+def validate_manual_outlier_df(
+    df: pd.DataFrame,
+    reference: str,
+    period: str,
+    question_code: str,
+    manual_outlier_weight: str,
+    ) -> bool:
     warnings.warn("A placeholder function for validating ingested manual outliers")
-
-    # Todo: Verbose nested if-else block, should be rewritten to something cleaner
 
     # Check required columns exist
     if set([
-        "reference","period","question_no","manual_outlier_weight"
+        reference, period, question_code, manual_outlier_weight
         ]).issubset(df.columns):
 
-        # Check data types match
-        if (df.dtypes.to_dict() == {
-            "reference": np.int64,
-            "period": np.int64,
-            "question_no": np.int64,
-            "manual_outlier_weight": np.float64,
+        # Force column order:
+        df = df[[reference, period, question_code, manual_outlier_weight]]
+
+        # Check if data types do not match
+        if (df.dtypes.to_dict() != {
+            reference: np.int64,
+            period: np.int64,
+            question_code: np.int64,
+            manual_outlier_weight: np.float64,
             }):
 
-            # Check reference, period and question_no have no missing
-            if df[["reference", "period", "question_no"]].isna().all().all() == False:
-
-                # Check all manual_outlier_weight is <= 1 and >= 0
-                if ((df["manual_outlier_weight"].max() <= 1.0) and 
-                    (df["manual_outlier_weight"].min() >= 0.0)):
-                    return True
-                else:
-                    raise Exception("Manual outlier weights are invalid (> 1)")
-            else:
-                raise Exception("Manual outlier weights are not linked to reponse records")
-        else:
             raise Exception("Manual outlier data is not of the correct type")
+
+        # Check if reference, period and question code have missing
+        if df[[reference, period, question_code]].isna().all().all() == True:
+
+            raise Exception("Manual outlier weights are not linked to reponse records")
+
+        # Check if all manual_outlier_weight is > 1 or < 0
+        if ((df[manual_outlier_weight].max() > 1.0) or 
+            (df[manual_outlier_weight].min() < 0.0)):
+
+            raise Exception("Manual outlier weights are invalid")
+
     else:
         raise Exception("Manual outlier data does not have the correct columns")
+
+    return True
 
 
 def qa_selective_editing_outputs(config: dict):

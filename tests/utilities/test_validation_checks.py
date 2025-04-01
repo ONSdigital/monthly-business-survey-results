@@ -119,22 +119,36 @@ def test_validate_manual_outlier_returns_exc(input_data):
     print(input_df)
 
     with pytest.raises(Exception):
-        validate_manual_outlier_df(input_df)
+        validate_manual_outlier_df(
+            input_df,
+            "reference",
+            "period",
+            "question_no",
+            "manual_outlier_weight")
 
-def test_validate_manual_outlier_returns_true():
-    
-    input_data = {
-        "reference": 10,
-        "period": 2022,
-        "question_no": 40,
-        "manual_outlier_weight": 0.9,
-    }
+
+@pytest.mark.parametrize(
+    "input_data",
+    [
+    {"reference": 10, "period": 2022, "question_no": 40, "manual_outlier_weight": 0.9},
+    {"reference": 10, "period": 2022, "question_no": 40, "manual_outlier_weight": 0.0},
+    {"reference": 10, "period": 2022, "question_no": 40, "manual_outlier_weight": 1.0},
+    {"question_no": 40, "reference": 10, "period": 2022, "manual_outlier_weight": 0.9},
+    ],
+)
+def test_validate_manual_outlier_returns_true(input_data):
 
     input_df = pd.DataFrame([input_data])
 
     print(input_df.dtypes)
 
-    assert validate_manual_outlier_df(input_df) is True
+    assert validate_manual_outlier_df(
+            input_df,
+            "reference",
+            "period",
+            "question_no",
+            "manual_outlier_weight") is True
+
 
 class TestValidateEstimation:
 

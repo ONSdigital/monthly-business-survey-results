@@ -626,7 +626,12 @@ def replace_outlier_weights(
     else:
         manual_outlier_df = pd.read_csv(manual_outlier_path)
 
-        validate_manual_outlier_df(manual_outlier_df)
+        validate_manual_outlier_df(
+            manual_outlier_df,
+            reference,
+            period,
+            question_code,
+            manual_outlier_weight)
         
         # Use an outer join to log unmatched manual outlier weights
         unmatched_df = df.merge(
