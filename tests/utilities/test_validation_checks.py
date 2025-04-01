@@ -123,8 +123,7 @@ def test_validate_manual_outlier_returns_exc(input_data):
             input_df,
             "reference",
             "period",
-            "question_no",
-            "manual_outlier_weight")
+            "question_no")
 
 
 @pytest.mark.parametrize(
@@ -146,8 +145,7 @@ def test_validate_manual_outlier_returns_true(input_data):
             input_df,
             "reference",
             "period",
-            "question_no",
-            "manual_outlier_weight") is True
+            "question_no") is True
 
 
 class TestValidateEstimation:

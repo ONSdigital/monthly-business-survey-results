@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
+import logging
 
 from mbs_results.utilities.constrains import (
     calculate_derived_outlier_weights,
@@ -246,6 +247,7 @@ def test_update_derived_weight_and_winsorised_value(filepath, base_file_name):
 
     assert_frame_equal(df_actual, df_expected)
 
+
 def test_replace_outlier_weights(filepath):
 
     df = pd.read_csv(
@@ -267,11 +269,11 @@ def test_replace_outlier_weights(filepath):
         "period",
         "question_no",
         "outlier_weight",
-        "manual_outlier_weight",
-        filepath / "manual_outliers.csv"
+        filepath / "manual_outliers.csv",
     )
 
     assert_frame_equal(df_actual, df_expected)
+
 
 def test_no_manual_outliers(filepath):
 
@@ -289,8 +291,36 @@ def test_no_manual_outliers(filepath):
         "period",
         "question_no",
         "outlier_weight",
-        "manual_outlier_weight",
-        ""
+        "",
     )
 
     assert_frame_equal(df_actual, df_in)
+
+def test_manual_outliers_unmatched_warning(filepath, caplog):
+
+    df = pd.read_csv(
+        filepath / "test_replace_outliers_in.csv",
+        index_col=False
+    )
+
+    df_in = df.drop(columns=["manual_outlier_weight"])
+    df_manual_outliers = df.drop(columns=["post_winsorised", "outlier_weight"])
+
+    df_expected = pd.read_csv(
+        filepath / "test_replace_outliers_out.csv",
+        index_col = False
+    )
+
+    with caplog.at_level(logging.WARN):
+        df_actual = replace_outlier_weights(
+            df_in,
+            "reference",
+            "period",
+            "question_no",
+            "outlier_weight",
+            filepath / "manual_outliers.csv",
+        )
+
+    assert "There are 1 unmatched references" in caplog.text
+
+

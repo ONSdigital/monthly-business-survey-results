@@ -306,24 +306,27 @@ def validate_manual_outlier_df(
     reference: str,
     period: str,
     question_code: str,
-    manual_outlier_weight: str,
     ) -> bool:
-    warnings.warn("A placeholder function for validating ingested manual outliers")
+    """
+    Function to perform a set of validation checks on the ingested
+    manual outlier data that is used to overwrite post-winsorisation
+    derived outliers
+    """
 
     # Check required columns exist
     if set([
-        reference, period, question_code, manual_outlier_weight
+        reference, period, question_code, "manual_outlier_weight"
         ]).issubset(df.columns):
 
         # Force column order:
-        df = df[[reference, period, question_code, manual_outlier_weight]]
+        df = df[[reference, period, question_code, "manual_outlier_weight"]]
 
         # Check if data types do not match
         if (df.dtypes.to_dict() != {
             reference: np.int64,
             period: np.int64,
             question_code: np.int64,
-            manual_outlier_weight: np.float64,
+            "manual_outlier_weight": np.float64,
             }):
 
             raise Exception("Manual outlier data is not of the correct type")
@@ -334,8 +337,8 @@ def validate_manual_outlier_df(
             raise Exception("Manual outlier weights are not linked to reponse records")
 
         # Check if all manual_outlier_weight is > 1 or < 0
-        if ((df[manual_outlier_weight].max() > 1.0) or 
-            (df[manual_outlier_weight].min() < 0.0)):
+        if ((df["manual_outlier_weight"].max() > 1.0) or 
+            (df["manual_outlier_weight"].min() < 0.0)):
 
             raise Exception("Manual outlier weights are invalid")
 

@@ -1,9 +1,12 @@
 import operator
 import warnings
 from typing import List
+import logging
 
 import pandas as pd
 from mbs_results.utilities.validation_checks import validate_manual_outlier_df
+
+logger = logging.getLogger(__name__)
 
 
 def replace_values_index_based(
@@ -586,7 +589,6 @@ def replace_outlier_weights(
     period: str,
     question_code: str,
     outlier_weight: str,
-    manual_outlier_weight: str,
     manual_outlier_path: str
     ) -> pd.DataFrame:
     """
@@ -630,8 +632,7 @@ def replace_outlier_weights(
             manual_outlier_df,
             reference,
             period,
-            question_code,
-            manual_outlier_weight)
+            question_code)
         
         # Use an outer join to log unmatched manual outlier weights
         unmatched_df = df.merge(
@@ -642,12 +643,16 @@ def replace_outlier_weights(
         )
 
         unmatched_df = unmatched_df[unmatched_df["_merge"]=='right_only']
+        unmatched_df = unmatched_df[
+            [reference, period, question_code, "manual_outlier_weight"]
+        ]
         
         if len(unmatched_df) > 0:
             logger.warning(
-                f"There are {len(unmatched_df)} unmatched references in the"
+                f"\nThere are {len(unmatched_df)} unmatched references in the"
                 " ingested manual outlier data"
-                f"Unmatched references: {unmatched_df}"
+                "\nUnmatched references:\n"
+                f"{unmatched_df}"
             )
 
         # Todo: Cant get the outer join to preserve DataFrame order
@@ -663,9 +668,8 @@ def replace_outlier_weights(
         df["pre_manual_outlier"] = df[outlier_weight]
         
         # Overwrite outlier_weight with manual_outlier, if it exists for that record 
-        df.loc[~df[manual_outlier_weight].isna(), outlier_weight] = df[manual_outlier_weight]
+        df.loc[~df["manual_outlier_weight"].isna(), outlier_weight] = df["manual_outlier_weight"]
 
-        # Is there any requirement to drop manual_outlier after this?
-        df = df.drop(columns=[manual_outlier_weight])
+        df = df.drop(columns=["manual_outlier_weight"])
 
         return df
