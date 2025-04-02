@@ -291,11 +291,12 @@ def start_of_period_staging(
             columns={"imputation_class": "imputation_class_prev_period"}
         )
 
-        finalsel = read_and_combine_colon_sep_files(
-            config["sample_path"], config["sample_column_names"], config
+        finalsel_path = config["sample_path"].replace(
+            "*", f"009_{config['period_selected']}"
         )
-
-        finalsel = finalsel.loc[finalsel["period"] == config["period_selected"]]
+        finalsel = read_colon_separated_file(
+            finalsel_path, config["sample_column_names"], config["period"]
+        )
 
         finalsel = finalsel[config["finalsel_keep_cols"]]
         finalsel = enforce_datatypes(
