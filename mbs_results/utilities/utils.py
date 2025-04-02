@@ -1,3 +1,7 @@
+import re
+from importlib import metadata
+from io import BytesIO
+from typing import List
 import pandas as pd
 
 
@@ -48,3 +52,12 @@ def append_filter_out_questions(
         )
 
     return df
+
+
+def get_versioned_filename(prefix, config):
+
+    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
+    snapshot_name = config["mbs_file_name"].split(".")[0]
+    filename = f"{prefix}_v{file_version_mbs}_{snapshot_name}.csv"
+
+    return filename
