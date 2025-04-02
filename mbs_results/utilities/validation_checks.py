@@ -6,7 +6,6 @@ from importlib import metadata
 import pandas as pd
 
 from mbs_results.utilities.outputs import write_csv_wrapper
-
 from mbs_results.utilities.utils import (
     append_filter_out_questions,
     get_versioned_filename,
@@ -248,6 +247,7 @@ def validate_imputation(df: pd.DataFrame, config: dict):
 
     imputation_filename = get_versioned_filename("imputation", config)
     df.to_csv(output_path + imputation_filename, index=False)
+
 
 def validate_estimation(df: pd.DataFrame, config: dict):
     """
