@@ -3,8 +3,8 @@ import os
 import warnings
 from importlib import metadata
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 
 from mbs_results.utilities.utils import (
     append_filter_out_questions,
@@ -306,7 +306,7 @@ def validate_manual_outlier_df(
     reference: str,
     period: str,
     question_code: str,
-    ) -> bool:
+) -> bool:
     """
     Function to perform a set of validation checks on the ingested
     manual outlier data that is used to overwrite post-winsorisation
@@ -314,31 +314,32 @@ def validate_manual_outlier_df(
     """
 
     # Check required columns exist
-    if set([
-        reference, period, question_code, "manual_outlier_weight"
-        ]).issubset(df.columns):
+    if set([reference, period, question_code, "manual_outlier_weight"]).issubset(
+        df.columns
+    ):
 
         # Force column order:
         df = df[[reference, period, question_code, "manual_outlier_weight"]]
 
         # Check if data types do not match
-        if (df.dtypes.to_dict() != {
+        if df.dtypes.to_dict() != {
             reference: np.int64,
             period: np.int64,
             question_code: np.int64,
             "manual_outlier_weight": np.float64,
-            }):
+        }:
 
             raise Exception("Manual outlier data is not of the correct type")
 
         # Check if reference, period and question code have missing
-        if df[[reference, period, question_code]].isna().all().all() == True:
+        if df[[reference, period, question_code]].isna().all().all():
 
             raise Exception("Manual outlier weights are not linked to reponse records")
 
         # Check if all manual_outlier_weight is > 1 or < 0
-        if ((df["manual_outlier_weight"].max() > 1.0) or 
-            (df["manual_outlier_weight"].min() < 0.0)):
+        if (df["manual_outlier_weight"].max() > 1.0) or (
+            df["manual_outlier_weight"].min() < 0.0
+        ):
 
             raise Exception("Manual outlier weights are invalid")
 

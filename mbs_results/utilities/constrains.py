@@ -1,9 +1,10 @@
+import logging
 import operator
 import warnings
 from typing import List
-import logging
 
 import pandas as pd
+
 from mbs_results.utilities.validation_checks import validate_manual_outlier_df
 
 logger = logging.getLogger(__name__)
@@ -516,7 +517,7 @@ def update_derived_weight_and_winsorised_value(
     for spp_id in derive_map:
 
         df_spp_id = df[df[form_type_spp] == spp_id].copy()
-        
+
         df_spp_id = df_spp_id.pivot(
             index=[reference, period],
             columns=question_code,
@@ -589,8 +590,8 @@ def replace_outlier_weights(
     period: str,
     question_code: str,
     outlier_weight: str,
-    manual_outlier_path: str
-    ) -> pd.DataFrame:
+    manual_outlier_path: str,
+) -> pd.DataFrame:
     """
     Overwrite calculated outlier weights with manual outlier weights
 
@@ -611,7 +612,7 @@ def replace_outlier_weights(
         manual outliers file
     manual_outlier_path : str
         String containing file path to manual outliers file.
-    
+
     Returns
     -------
     df : pd.Dataframe
@@ -620,7 +621,10 @@ def replace_outlier_weights(
     """
 
     if not manual_outlier_path:
-        warnings.warn("No manual outlier file has been specified in the configuration, skipping stage")
+        warnings.warn(
+            "No manual outlier file has been specified in the configuration,"
+            " skipping stage"
+        )
         manual_outlier_df = None
 
         return df
@@ -628,12 +632,8 @@ def replace_outlier_weights(
     else:
         manual_outlier_df = pd.read_csv(manual_outlier_path)
 
-        validate_manual_outlier_df(
-            manual_outlier_df,
-            reference,
-            period,
-            question_code)
-        
+        validate_manual_outlier_df(manual_outlier_df, reference, period, question_code)
+
         # Use an outer join to log unmatched manual outlier weights
         unmatched_df = df.merge(
             manual_outlier_df,
@@ -642,11 +642,11 @@ def replace_outlier_weights(
             indicator=True,
         )
 
-        unmatched_df = unmatched_df[unmatched_df["_merge"]=='right_only']
+        unmatched_df = unmatched_df[unmatched_df["_merge"] == "right_only"]
         unmatched_df = unmatched_df[
             [reference, period, question_code, "manual_outlier_weight"]
         ]
-        
+
         if len(unmatched_df) > 0:
             logger.warning(
                 f"\nThere are {len(unmatched_df)} unmatched references in the"
@@ -664,9 +664,11 @@ def replace_outlier_weights(
 
         # Create pre_manual_outlier column that is a copy of outlier_weight
         df["pre_manual_outlier"] = df[outlier_weight]
-        
-        # Overwrite outlier_weight with manual_outlier, if it exists for that record 
-        df.loc[~df["manual_outlier_weight"].isna(), outlier_weight] = df["manual_outlier_weight"]
+
+        # Overwrite outlier_weight with manual_outlier, if it exists for that record
+        df.loc[~df["manual_outlier_weight"].isna(), outlier_weight] = df[
+            "manual_outlier_weight"
+        ]
 
         df = df.drop(columns=["manual_outlier_weight"])
 
