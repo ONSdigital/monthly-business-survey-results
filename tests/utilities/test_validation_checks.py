@@ -9,6 +9,7 @@ from mbs_results.utilities.validation_checks import (
     validate_config_repeated_datatypes,
     validate_estimation,
     validate_indices,
+    validate_manual_outlier_df,
 )
 
 
@@ -99,6 +100,87 @@ def test_validate_config_repeated_datatypes():
     }
     with pytest.raises(ValueError):
         validate_config_repeated_datatypes(**test_config)
+
+
+@pytest.mark.parametrize(
+    "input_data",
+    [
+        {"reference": 10, "period": 2022, "manual_outlier_weight": 1.0},
+        {
+            "reference": 10,
+            "period": "2022",
+            "question_no": 40,
+            "manual_outlier_weight": 1.0,
+        },
+        {
+            "reference": None,
+            "period": 2022,
+            "question_no": 40,
+            "manual_outlier_weight": 1.0,
+        },
+        {
+            "reference": 10,
+            "period": 2022,
+            "question_no": 40,
+            "manual_outlier_weight": 1.1,
+        },
+        {
+            "reference": 10,
+            "period": 2022,
+            "question_no": 40,
+            "manual_outlier_weight": -0.1,
+        },
+    ],
+)
+def test_validate_manual_outlier_returns_exc(input_data):
+
+    input_df = pd.DataFrame([input_data])
+
+    print(input_df)
+
+    with pytest.raises(Exception):
+        validate_manual_outlier_df(input_df, "reference", "period", "question_no")
+
+
+@pytest.mark.parametrize(
+    "input_data",
+    [
+        {
+            "reference": 10,
+            "period": 2022,
+            "question_no": 40,
+            "manual_outlier_weight": 0.9,
+        },
+        {
+            "reference": 10,
+            "period": 2022,
+            "question_no": 40,
+            "manual_outlier_weight": 0.0,
+        },
+        {
+            "reference": 10,
+            "period": 2022,
+            "question_no": 40,
+            "manual_outlier_weight": 1.0,
+        },
+        {
+            "question_no": 40,
+            "reference": 10,
+            "period": 2022,
+            "manual_outlier_weight": 0.9,
+        },
+    ],
+)
+def test_validate_manual_outlier_returns_true(input_data):
+
+    input_df = pd.DataFrame([input_data])
+
+    print(input_df.dtypes)
+
+    assert (
+        validate_manual_outlier_df(input_df, "reference", "period", "question_no")
+        is True
+    )
 
 
 class TestValidateEstimation:
