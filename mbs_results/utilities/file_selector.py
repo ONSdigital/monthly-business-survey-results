@@ -45,10 +45,9 @@ def generate_expected_periods(current_period: int, revision_window: int) -> List
 
 
 def validate_files(
-    file_dir: str,
+    file_path: str,
     file_prefix: str,
     expected_periods: List[str],
-    file_type: str,
     config: dict,
 ) -> List[str]:
     """
@@ -57,14 +56,12 @@ def validate_files(
 
     Parameters
     ----------
-    file_dir : str
-        Directory where the files are located.
+    file_path : str
+        "c:/path/to/your/files/" or "s3://bucket-name/path/to/your/files"
     file_prefix : str
-        Prefix of the file names.
+        Prefix of the file names (e.g. "finalsel" or "qv").
     expected_periods : List[str]
         List of expected periods in YYYYMM format.
-    file_type : str
-        Type of file being validated ("universe" or "finalsel").
 
     Returns
     -------
@@ -84,63 +81,49 @@ def validate_files(
         files_in_storage_system = list_files(
             client=client,
             bucket_name=config["bucket_name"],
-            prefix=file_dir + file_prefix,
+            prefix=file_path + file_prefix,
         )
         # LIST FILES IN S3
 
     elif config["platform"] == "network":
         # list files in windows dir
-        file_dir = os.path.normpath(file_dir)
+        file_path = os.path.normpath(file_path)
         files_in_storage_system = [
-            f for f in os.listdir(file_dir) if f.startswith(file_prefix)
+            os.path.join(file_path, f)
+            for f in os.listdir(file_path)
+            if f.startswith(file_prefix)
         ]
     else:
         raise Exception("platform must either be 's3' or 'network'")
 
-    print(files_in_storage_system)
     valid_files = [
         f
         for f in files_in_storage_system
         if f.split(".")[0].endswith(tuple(expected_periods))
     ]
-    print(len(valid_files))
-    print(len(expected_periods))
+    print("Should be full paths")
     print(valid_files)
-    print(expected_periods)
+
     if len(valid_files) != len(expected_periods):
         found_periods = [f.split("_")[-1] for f in files_in_storage_system]
-        missing_periods = set(expected_periods) - set(found_periods)
-
-        logger.error(f"Missing {file_type} file for period(s): {missing_periods}")
-        raise FileNotFoundError(
-            f"Missing {file_type} file for period(s): {missing_periods}"
+        missing_periods = list(set(expected_periods) - set(found_periods))
+        error_string = (
+            rf"Missing {file_prefix} file for periods: {', '.join(missing_periods)}"
         )
-
-    # valid_files = []
-    # file_dir = os.path.normpath(file_dir)
-
-    # for period in expected_periods:
-    #     base_file_name = f"{file_prefix}_{period}"
-    #     file_with_ext = os.path.join(file_dir, f"{base_file_name}.csv")
-    #     file_without_ext = os.path.join(file_dir, base_file_name)
-
-    #     # Check if the files exist
-    #     if os.path.isfile(file_without_ext):
-    #         valid_files.append(file_without_ext)
-    #     elif os.path.isfile(file_with_ext):
-    #         valid_files.append(file_with_ext)
-    #     else:
-    #         logger.error(f"Missing {file_type} file for period: {period}")
-    #         raise FileNotFoundError(f"Missing {file_type} file for period: {period}")
+        print(type(error_string))
+        logger.error(error_string)
+        # period(s): [2021, 2022, 2023]
+        raise FileNotFoundError(error_string)
 
     return valid_files
 
 
 def find_files(
+    file_path: str,
+    file_prefix: str,
+    current_period: int,
+    revision_window: int,
     config: dict,
-    file_type: str,
-    population_path: str = None,
-    sample_path: str = None,
 ) -> List[str]:
     """
     Find and validate universe or finalsel files based on the given configuration.
@@ -178,36 +161,21 @@ def find_files(
     ValueError
         If the file_type is not one of "universe" or "finalsel".
     """
-    logger.info(f"Starting file selection for file type: {file_type}")
-
-    current_period = config["current_period"]
-    revision_window = config["revision_window"]
+    logger.info(f"Starting file selection for file type: {file_prefix}")
 
     expected_periods = generate_expected_periods(current_period, revision_window)
+    # try:
 
-    try:
-        if file_type == "universe":
-            population_path = config.get("population_path", population_path)
-            population_path = os.path.normpath(population_path)
-            file_prefix = os.path.basename(population_path).split("_*")[0]
-            file_dir = os.path.dirname(population_path)
+    valid_files = validate_files(
+        file_path=file_path,
+        file_prefix=file_prefix,
+        expected_periods=expected_periods,
+        config=config,
+    )
 
-        elif file_type == "finalsel":
-            sample_path = config.get("sample_path", sample_path)
-            sample_path = os.path.normpath(sample_path)
-            file_prefix = os.path.basename(sample_path).split("_*")[0]
-            file_dir = os.path.dirname(sample_path)
-        else:
-            logger.error("Invalid file type. Expected 'universe' or 'finalsel'")
-            raise ValueError("Invalid file type. Expected 'universe' or 'finalsel'")
+    logger.info("File selection completed successfully")
+    return valid_files
 
-        valid_files = validate_files(
-            file_dir, file_prefix, expected_periods, file_type, config
-        )
-
-        logger.info("File selection completed successfully")
-        return valid_files
-
-    except FileNotFoundError as e:
-        logger.exception(f"An error occurred during file selection: {e}")
-        raise e
+    # except FileNotFoundError as e:
+    #     logger.exception(f"An error occurred during file selection: {e}")
+    #     raise e
