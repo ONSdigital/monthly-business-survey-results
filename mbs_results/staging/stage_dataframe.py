@@ -47,9 +47,7 @@ def create_form_type_spp_column(
     return contributors
 
 
-def read_and_combine_colon_sep_files(
-    folder_path: str, column_names: list, config: dict
-) -> pd.DataFrame:
+def read_and_combine_colon_sep_files(column_names: list, config: dict) -> pd.DataFrame:
     """
     reads in and combined colon separated files from the specified folder path
 
@@ -67,7 +65,13 @@ def read_and_combine_colon_sep_files(
     pd.DataFrame
         combined colon separated files returned as one dataframe.
     """
-    sample_files = find_files(config, file_type="finalsel")
+    sample_files = find_files(
+        file_path=config["folder_path"],
+        file_prefix=config["sample_prefix"],
+        current_period=config["current_period"],
+        revision_window=config["revision_window"],
+        config=config,
+    )
 
     df = pd.concat(
         [
@@ -118,9 +122,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         responses, keep_columns=config["responses_keep_cols"], **config
     )
 
-    finalsel = read_and_combine_colon_sep_files(
-        config["sample_path"], config["sample_column_names"], config
-    )
+    finalsel = read_and_combine_colon_sep_files(config["sample_column_names"], config)
 
     finalsel = finalsel[config["finalsel_keep_cols"]]
     finalsel = enforce_datatypes(

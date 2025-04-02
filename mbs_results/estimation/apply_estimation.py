@@ -15,12 +15,7 @@ from mbs_results.utilities.file_selector import find_files
 
 
 def apply_estimation(
-    population_path,
-    sample_path,
-    calibration_group,
-    census_extra_calibration_group,
-    period,
-    **config
+    calibration_group, census_extra_calibration_group, period, **config
 ):
     """
     Read population frame and sample, merge key variables onto df then derive
@@ -33,7 +28,7 @@ def apply_estimation(
     sample_path : str
         filepath for sample data
     calibration_group: str
-        column name of dimension contaning calibration group values
+        column name of dimension containing calibration group values
     census_extra_calibration_group: list
         calibration groups which are census but not band 4 or 5
     period : str
@@ -50,9 +45,19 @@ def apply_estimation(
 
     """
     population_files = find_files(
-        config, file_type="universe", population_path=population_path
+        file_path=config["folder_path"],
+        file_prefix=config["population_prefix"],
+        current_period=config["current_period"],
+        revision_window=config["revision_window"],
+        config=config,
     )
-    sample_files = find_files(config, file_type="finalsel", sample_path=sample_path)
+    sample_files = find_files(
+        file_path=config["folder_path"],
+        file_prefix=config["sample_prefix"],
+        current_period=config["current_period"],
+        revision_window=config["revision_window"],
+        config=config,
+    )
 
     estimation_df_list = []
 

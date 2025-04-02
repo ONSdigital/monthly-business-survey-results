@@ -101,16 +101,14 @@ def validate_files(
         for f in files_in_storage_system
         if f.split(".")[0].endswith(tuple(expected_periods))
     ]
-    print("Should be full paths")
-    print(valid_files)
 
     if len(valid_files) != len(expected_periods):
         found_periods = [f.split("_")[-1] for f in files_in_storage_system]
         missing_periods = list(set(expected_periods) - set(found_periods))
+        missing_periods = sorted(missing_periods)
         error_string = (
             rf"Missing {file_prefix} file for periods: {', '.join(missing_periods)}"
         )
-        print(type(error_string))
         logger.error(error_string)
         # period(s): [2021, 2022, 2023]
         raise FileNotFoundError(error_string)
