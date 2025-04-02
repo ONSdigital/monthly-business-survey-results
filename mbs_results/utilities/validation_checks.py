@@ -9,6 +9,7 @@ import pandas as pd
 from mbs_results.utilities.utils import (
     append_filter_out_questions,
     get_versioned_filename,
+    read_colon_separated_file,
 )
 
 logger = logging.getLogger(__name__)
@@ -380,8 +381,8 @@ def qa_selective_editing_outputs(config: dict):
     question_df = pd.read_csv(se_question_path).rename(columns={"ruref": "reference"})
 
     # Checking that references match
-    contributor_unique_reference = contributor_df["reference"].unique().tolist()
-    question_unique_reference = question_df["reference"].unique().tolist()
+    contributor_unique_reference = contributor_df["reference"].tolist()
+    question_unique_reference = question_df["reference"].tolist()
     unmatched_references = list(
         set(contributor_unique_reference).symmetric_difference(
             set(question_unique_reference)
@@ -390,8 +391,8 @@ def qa_selective_editing_outputs(config: dict):
 
     if len(unmatched_references) > 0:
         logger.warning(
-            f"There are {len(unmatched_references)} unmatched references in the"
-            " contributor and question SE outputs"
+            f"There are {len(unmatched_references)} unmatched references in the "
+            "contributor and question SE outputs "
             f"unmatched references {unmatched_references}"
         )
 
@@ -429,5 +430,41 @@ def qa_selective_editing_outputs(config: dict):
                 )
         else:
             logger.info(f"No nulls or NaNs detected in {dataframe_name} dataframe")
+
+    finalsel_path = config["sample_path"].replace(
+        "*", f"009_{config['period_selected']}"
+    )
+    finalsel = read_colon_separated_file(
+        finalsel_path, config["sample_column_names"], config["period"]
+    )
+    finalsel["formtype"] = finalsel["formtype"].astype(int)
+
+    finalsel_unique_reference = set(finalsel["reference"].tolist())
+
+    unmatched_contributor = list(
+        finalsel_unique_reference.symmetric_difference(contributor_unique_reference)
+    )
+    unmatched_question = list(
+        finalsel_unique_reference.symmetric_difference(question_unique_reference)
+    )
+
+    excluded_formtype = [203, 204]
+
+    mask = finalsel["reference"].isin(unmatched_contributor + unmatched_question)
+
+    excluded = finalsel[mask & finalsel["formtype"].isin(excluded_formtype)]
+    missed = finalsel[mask & ~finalsel["formtype"].isin(excluded_formtype)]
+
+    if len(missed) > 0:
+        logger.warning(
+            f"There are {len(missed)} unmatched references in the "
+            "finalsel and SE outputs "
+            f"unmatched references {missed['reference'].unique()}"
+        )
+    if len(excluded) > 0:
+        logger.info(
+            f"There are {len(excluded)} unmatched references in the "
+            "finalsel and SE outputs with water formtypes"
+        )
 
     logger.info("QA of SE outputs finished")
