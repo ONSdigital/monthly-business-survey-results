@@ -83,7 +83,7 @@ def test_generate_expected_periods():
 
 
 @patch("os.path.isfile")
-def test_validate_files(mock_isfile):
+def test_validate_files(mock_isfile, mock_config):
     """Test the validate_files function"""
     mock_isfile.return_value = True
     file_dir = os.path.normpath("tests/data/file_selector")
@@ -95,7 +95,9 @@ def test_validate_files(mock_isfile):
         os.path.normpath(os.path.join(file_dir, f"{file_prefix}_{period}"))
         for period in expected_periods
     ]
-    valid_files = validate_files(file_dir, file_prefix, expected_periods, file_type)
+    valid_files = validate_files(
+        file_dir, file_prefix, expected_periods, file_type, mock_config
+    )
     valid_files = [os.path.normpath(file) for file in valid_files]
 
     assert len(valid_files) == len(expected_periods)
