@@ -655,8 +655,6 @@ def replace_outlier_weights(
                 f"{unmatched_df}"
             )
 
-        # Todo: Cant get the outer join to preserve DataFrame order
-
         # Use left join to combine manual outlier weights with derived weights
         df = df.merge(
             manual_outlier_df,
