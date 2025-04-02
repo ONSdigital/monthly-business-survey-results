@@ -17,9 +17,7 @@
 | back_data_finalsel_path | The filepath for the file containing final selection backdata. | string | Any filepath. |
 | sic_domain_mapping_path | The filepath for the data containing the mapping from SIC codes to domains. | string | Any filepath. |
 | threshold_filepath | The filepath for the data containing thresholds for selective editing. | string | Any filepath. |
-| period_selected | The most recent period to include in the outputs. | int | Any int in the form `yyyymm`. |
 | current_period | The most recent period to include in the outputs (same as above). | int | Any int in the form `yyyymm`. |
-| previous_period | The previous period to use as a reference | int | Any int in the form `yyyymm`. |
 | revision_window | The number of months to use as a revision window. | int | Any int in the form `mm` or `m` (does not need to be zero-padded). |
 
 
