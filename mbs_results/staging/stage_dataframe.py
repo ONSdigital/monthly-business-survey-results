@@ -253,7 +253,6 @@ def start_of_period_staging(
         - "finalsel_keep_cols": List of columns to keep in the final selection.
         - "sample_path": Path to the sample files.
         - "sample_column_names": Column names for the sample files.
-        - "period_selected": The period selected for final selection.
         - "idbr_to_spp": Mapping from IDBR to SPP.
         - "form_id_spp": Column name for form ID SPP.
         - "form_id_idbr": Column name for form ID IDBR.
@@ -267,6 +266,15 @@ def start_of_period_staging(
         The staged imputation output DataFrame with missing questions created and
         merged with final selection.
     """
+
+    # Derive period_selected as next month of current period
+    current_period = pd.to_datetime(config["current_period"], format="%Y%m")
+
+    period_selected = current_period + pd.DateOffset(months=1)
+
+    # Saving in the dictionary so it can easilly be accessed
+    config["period_selected"] = int(period_selected.strftime("%Y%m"))
+
     if config["current_period"] in imputation_output["period"].unique():
 
         imputation_output = imputation_output.loc[
