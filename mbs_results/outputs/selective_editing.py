@@ -117,6 +117,9 @@ def create_standardising_factor(
             predicted_value,
             imputation_marker,
             imputation_class,
+            a_weight,
+            o_weight,
+            g_weight,
         ]
     ]
 
@@ -176,7 +179,16 @@ def calculate_auxiliary_value(
     q40["auxiliary_value"] = q40[frozen_turnover]
     q49["auxiliary_value"] = q49[frozen_turnover] * q49[construction_link]
 
-    keep_cols = [reference, period, question_no, "auxiliary_value", imputation_class]
+    keep_cols = [
+        reference,
+        period,
+        question_no,
+        "auxiliary_value",
+        imputation_class,
+        construction_link,
+        frozen_turnover,
+        "formtype",
+    ]
 
     output_df = pd.concat([q40[keep_cols], q49[keep_cols]])
 

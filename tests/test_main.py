@@ -12,6 +12,7 @@ test_config = {
     "l_values_path": input_path
     + "test_classification_question_number_l_value_mapping.csv",
     "manual_constructions_path": input_path + "test_manual_constructions.csv",
+    "manual_outlier_path": "",
     "mbs_file_name": "test_snaphot.json",
     "output_path": "tests/data/test_main/output/",
     "population_prefix": "test_universe009",
@@ -19,9 +20,7 @@ test_config = {
     "back_data_qv_path": input_path + "test_qv_009_202112.csv",
     "back_data_cp_path": input_path + "test_cp_009_202112.csv",
     "back_data_finalsel_path": input_path + "test_finalsel009_202112",
-    "period_selected": 202206,
     "current_period": 202206,
-    "previous_period": 202205,
     "revision_window": 6,
 }
 
