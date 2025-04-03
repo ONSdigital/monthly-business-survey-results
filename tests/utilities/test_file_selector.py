@@ -44,7 +44,7 @@ def test_find_files_universe(mock_isfile, mock_config):
 def test_find_files_finalsel(mock_isfile, mock_config):
     """Test case where all expected finalsel files exist"""
     mock_isfile.return_value = True
-
+    print(mock_config["revision_window"])
     valid_files = find_files(
         file_path=mock_config["folder_path"],
         file_prefix=mock_config["sample_prefix"],
@@ -52,6 +52,8 @@ def test_find_files_finalsel(mock_isfile, mock_config):
         revision_window=mock_config["revision_window"],
         config=mock_config,
     )
+    print(valid_files)
+    print(mock_config["revision_window"])
 
     assert len(valid_files) == mock_config["revision_window"]
     assert all("finalsel023" in file for file in valid_files)
@@ -83,6 +85,23 @@ def test_find_files_missing_finalsel(mock_config):
             file_prefix=mock_config["sample_prefix"],
             current_period=mock_config["current_period"],
             revision_window=mock_config["revision_window"] + 2,
+            config=mock_config,
+        )
+
+
+def test_find_files_duplicate_finalsel(mock_config):
+    """Test case where a finalsel file is missing by adding two to revision window"""
+    # setting current period to 201903 as this has duplicate files
+    mock_config["current_period"] = 201903
+
+    with pytest.raises(
+        FileExistsError, match="Duplicate finalsel files found for periods: 201903"
+    ):
+        find_files(
+            file_path=mock_config["folder_path"],
+            file_prefix=mock_config["sample_prefix"],
+            current_period=mock_config["current_period"],
+            revision_window=mock_config["revision_window"],
             config=mock_config,
         )
 

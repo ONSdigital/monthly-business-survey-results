@@ -113,7 +113,7 @@ def validate_files(
         if f.split(".")[0].endswith(tuple(expected_periods))
     ]
 
-    if len(valid_files) != len(expected_periods):
+    if len(valid_files) < len(expected_periods):
         found_periods = [f.split("_")[-1] for f in files_in_storage_system]
         missing_periods = list(set(expected_periods) - set(found_periods))
         missing_periods = sorted(missing_periods)
@@ -122,6 +122,23 @@ def validate_files(
         )
         logger.error(error_string)
         raise FileNotFoundError(error_string)
+    elif len(valid_files) > len(expected_periods):
+        # Check for duplicate files with the same period
+        period_counts = {}
+        for f in files_in_storage_system:
+            period = f.split("_")[-1].split(".")[0]
+            period_counts[period] = period_counts.get(period, 0) + 1
+
+        duplicate_periods = [
+            period for period, count in period_counts.items() if count > 1
+        ]
+        if duplicate_periods:
+            error_string = (
+                rf"Duplicate {file_prefix} files found for periods: "
+                + rf"{', '.join(duplicate_periods)}"
+            )
+            logger.error(error_string)
+            raise FileExistsError(error_string)
 
     return valid_files
 
