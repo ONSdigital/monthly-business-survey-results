@@ -115,8 +115,5 @@ def test_validate_files(mock_isfile, mock_config):
     )
     valid_files = [os.path.normpath(file) for file in valid_files]
 
-    print(expected_files)
-    print(valid_files)
-
     assert len(valid_files) == len(expected_periods)
     assert all(file in valid_files for file in expected_files)
