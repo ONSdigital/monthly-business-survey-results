@@ -295,9 +295,8 @@ def validate_outlier_detection(df: pd.DataFrame, config: dict):
     snapshot_name = os.path.splitext(config["mbs_file_name"])[0]
 
     filtered_questions_path = (
-        config["output_path"] + snapshot_name + "filter_out_questions.csv"
+        config["output_path"] + snapshot_name + "_filter_out_questions.csv"
     )
-
     df = append_filter_out_questions(df, filtered_questions_path)
     df.to_csv(output_path + outlier_filename, index=False)
 
