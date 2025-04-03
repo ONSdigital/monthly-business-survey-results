@@ -1,4 +1,3 @@
-import glob
 import warnings
 
 import pandas as pd
@@ -20,6 +19,7 @@ from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.inputs import read_colon_separated_file
 from mbs_results.utilities.utils import convert_column_to_datetime
+from mbs_results.utilities.file_selector import find_files
 
 
 def create_form_type_spp_column(
@@ -47,9 +47,7 @@ def create_form_type_spp_column(
     return contributors
 
 
-def read_and_combine_colon_sep_files(
-    folder_path: str, column_names: list, config: dict
-) -> pd.DataFrame:
+def read_and_combine_colon_sep_files(column_names: list, config: dict) -> pd.DataFrame:
     """
     reads in and combined colon separated files from the specified folder path
 
@@ -67,10 +65,18 @@ def read_and_combine_colon_sep_files(
     pd.DataFrame
         combined colon separated files returned as one dataframe.
     """
+    sample_files = find_files(
+        file_path=config["folder_path"],
+        file_prefix=config["sample_prefix"],
+        current_period=config["current_period"],
+        revision_window=config["revision_window"],
+        config=config,
+    )
+
     df = pd.concat(
         [
             read_colon_separated_file(f, column_names, period=config["period"])
-            for f in glob.glob(folder_path)
+            for f in sample_files
         ],
         ignore_index=True,
     )
@@ -116,9 +122,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         responses, keep_columns=config["responses_keep_cols"], **config
     )
 
-    finalsel = read_and_combine_colon_sep_files(
-        config["sample_path"], config["sample_column_names"], config
-    )
+    finalsel = read_and_combine_colon_sep_files(config["sample_column_names"], config)
 
     finalsel = finalsel[config["finalsel_keep_cols"]]
     finalsel = enforce_datatypes(
@@ -252,7 +256,6 @@ def start_of_period_staging(
         - "finalsel_keep_cols": List of columns to keep in the final selection.
         - "sample_path": Path to the sample files.
         - "sample_column_names": Column names for the sample files.
-        - "period_selected": The period selected for final selection.
         - "idbr_to_spp": Mapping from IDBR to SPP.
         - "form_id_spp": Column name for form ID SPP.
         - "form_id_idbr": Column name for form ID IDBR.
@@ -266,6 +269,15 @@ def start_of_period_staging(
         The staged imputation output DataFrame with missing questions created and
         merged with final selection.
     """
+
+    # Derive period_selected as next month of current period
+    current_period = pd.to_datetime(config["current_period"], format="%Y%m")
+
+    period_selected = current_period + pd.DateOffset(months=1)
+
+    # Saving in the dictionary so it can easilly be accessed
+    config["period_selected"] = int(period_selected.strftime("%Y%m"))
+
     if config["current_period"] in imputation_output["period"].unique():
 
         imputation_output = imputation_output.loc[
@@ -290,11 +302,12 @@ def start_of_period_staging(
             columns={"imputation_class": "imputation_class_prev_period"}
         )
 
-        finalsel = read_and_combine_colon_sep_files(
-            config["sample_path"], config["sample_column_names"], config
+        finalsel_path = config["sample_path"].replace(
+            "*", f"009_{config['period_selected']}"
         )
-
-        finalsel = finalsel.loc[finalsel["period"] == config["period_selected"]]
+        finalsel = read_colon_separated_file(
+            finalsel_path, config["sample_column_names"], config["period"]
+        )
 
         finalsel = finalsel[config["finalsel_keep_cols"]]
         finalsel = enforce_datatypes(

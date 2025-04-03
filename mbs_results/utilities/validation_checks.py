@@ -3,12 +3,14 @@ import os
 import warnings
 from importlib import metadata
 
+import numpy as np
 import pandas as pd
 
 from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.utils import (
     append_filter_out_questions,
     get_versioned_filename,
+    read_colon_separated_file,
 )
 
 logger = logging.getLogger(__name__)
@@ -301,9 +303,8 @@ def validate_outlier_detection(df: pd.DataFrame, config: dict):
     snapshot_name = os.path.splitext(config["mbs_file_name"])[0]
 
     filtered_questions_path = (
-        config["output_path"] + snapshot_name + "filter_out_questions.csv"
+        config["output_path"] + snapshot_name + "_filter_out_questions.csv"
     )
-
     df = append_filter_out_questions(df, filtered_questions_path)
     write_csv_wrapper(
         df,
@@ -312,6 +313,54 @@ def validate_outlier_detection(df: pd.DataFrame, config: dict):
         config["bucket"],
         index=False,
     )
+
+
+def validate_manual_outlier_df(
+    df: pd.DataFrame,
+    reference: str,
+    period: str,
+    question_code: str,
+) -> bool:
+    """
+    Function to perform a set of validation checks on the ingested
+    manual outlier data that is used to overwrite post-winsorisation
+    derived outliers
+    """
+
+    # Check required columns exist
+    if set([reference, period, question_code, "manual_outlier_weight"]).issubset(
+        df.columns
+    ):
+
+        # Force column order:
+        df = df[[reference, period, question_code, "manual_outlier_weight"]]
+
+        # Check if data types do not match
+        if df.dtypes.to_dict() != {
+            reference: np.int64,
+            period: np.int64,
+            question_code: np.int64,
+            "manual_outlier_weight": np.float64,
+        }:
+
+            raise Exception("Manual outlier data is not of the correct type")
+
+        # Check if reference, period and question code have missing
+        if df[[reference, period, question_code]].isna().all().all():
+
+            raise Exception("Manual outlier weights are not linked to reponse records")
+
+        # Check if all manual_outlier_weight is > 1 or < 0
+        if (df["manual_outlier_weight"].max() > 1.0) or (
+            df["manual_outlier_weight"].min() < 0.0
+        ):
+
+            raise Exception("Manual outlier weights are invalid")
+
+    else:
+        raise Exception("Manual outlier data does not have the correct columns")
+
+    return True
 
 
 def qa_selective_editing_outputs(config: dict):
@@ -345,8 +394,8 @@ def qa_selective_editing_outputs(config: dict):
     question_df = pd.read_csv(se_question_path).rename(columns={"ruref": "reference"})
 
     # Checking that references match
-    contributor_unique_reference = contributor_df["reference"].unique().tolist()
-    question_unique_reference = question_df["reference"].unique().tolist()
+    contributor_unique_reference = contributor_df["reference"].tolist()
+    question_unique_reference = question_df["reference"].tolist()
     unmatched_references = list(
         set(contributor_unique_reference).symmetric_difference(
             set(question_unique_reference)
@@ -355,8 +404,8 @@ def qa_selective_editing_outputs(config: dict):
 
     if len(unmatched_references) > 0:
         logger.warning(
-            f"There are {len(unmatched_references)} unmatched references in the"
-            " contributor and question SE outputs"
+            f"There are {len(unmatched_references)} unmatched references in the "
+            "contributor and question SE outputs "
             f"unmatched references {unmatched_references}"
         )
 
@@ -394,5 +443,41 @@ def qa_selective_editing_outputs(config: dict):
                 )
         else:
             logger.info(f"No nulls or NaNs detected in {dataframe_name} dataframe")
+
+    finalsel_path = config["sample_path"].replace(
+        "*", f"009_{config['period_selected']}"
+    )
+    finalsel = read_colon_separated_file(
+        finalsel_path, config["sample_column_names"], config["period"]
+    )
+    finalsel["formtype"] = finalsel["formtype"].astype(int)
+
+    finalsel_unique_reference = set(finalsel["reference"].tolist())
+
+    unmatched_contributor = list(
+        finalsel_unique_reference.symmetric_difference(contributor_unique_reference)
+    )
+    unmatched_question = list(
+        finalsel_unique_reference.symmetric_difference(question_unique_reference)
+    )
+
+    excluded_formtype = [203, 204]
+
+    mask = finalsel["reference"].isin(unmatched_contributor + unmatched_question)
+
+    excluded = finalsel[mask & finalsel["formtype"].isin(excluded_formtype)]
+    missed = finalsel[mask & ~finalsel["formtype"].isin(excluded_formtype)]
+
+    if len(missed) > 0:
+        logger.warning(
+            f"There are {len(missed)} unmatched references in the "
+            "finalsel and SE outputs "
+            f"unmatched references {missed['reference'].unique()}"
+        )
+    if len(excluded) > 0:
+        logger.info(
+            f"There are {len(excluded)} unmatched references in the "
+            "finalsel and SE outputs with water formtypes"
+        )
 
     logger.info("QA of SE outputs finished")

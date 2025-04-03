@@ -5,6 +5,7 @@ from mbs_results.utilities.constrains import update_derived_weight_and_winsorise
 from mbs_results.utilities.inputs import read_csv_wrapper
 
 
+
 def join_l_values(df, l_values_path, classification_values_path, config):
     """Read l values, classifications and drop duplicates and period"""
 
@@ -42,6 +43,9 @@ def join_l_values(df, l_values_path, classification_values_path, config):
 
 
 def detect_outlier(df, config):
+    """
+    # Todo: docstrings
+    """
     pre_win = join_l_values(
         df, config["l_values_path"], config["classification_values_path"], config
     )
@@ -72,4 +76,15 @@ def detect_outlier(df, config):
         "outlier_weight",
         config["target"],
     )
+
+    # Replace outlier weights
+    post_win = replace_outlier_weights(
+        post_win,
+        config["reference"],
+        config["period"],
+        config["question_no"],
+        "outlier_weight",
+        config["manual_outlier_path"],
+    )
+
     return post_win
