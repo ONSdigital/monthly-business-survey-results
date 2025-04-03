@@ -111,7 +111,7 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
     back_data_imputation["period"] = (
         back_data_imputation["period"].dt.strftime("%Y%m").astype("int")
     )
-    back_data_imputation["frosic2007"] = back_data_imputation["frosic2007"].astype(
+    back_data_imputation[config["sic"]] = back_data_imputation[config["sic"]].astype(
         "str"
     )
 

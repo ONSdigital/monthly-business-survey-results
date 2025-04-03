@@ -121,7 +121,6 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     finalsel = read_and_combine_colon_sep_files(
         config["sample_path"], config["sample_column_names"], config
     )
-
     finalsel = finalsel[config["finalsel_keep_cols"]]
     finalsel = enforce_datatypes(
         finalsel, keep_columns=config["finalsel_keep_cols"], **config

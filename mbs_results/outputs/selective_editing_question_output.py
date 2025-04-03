@@ -54,7 +54,7 @@ def create_selective_editing_question_output(
     df_with_domain = merge_domain(
         input_df=input_data,
         domain_mapping=sic_domain_mapping,
-        sic_input="frosic2007",
+        sic_input=config["sic"],
         sic_mapping="sic_5_digit",
     )
 

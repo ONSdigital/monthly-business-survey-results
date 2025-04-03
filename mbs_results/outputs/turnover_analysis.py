@@ -53,7 +53,7 @@ def create_turnover_output(
 
         turnover_df = turnover_df[
             [
-                "frosic2007",
+                config["sic"],
                 "cell_no",
                 "reference",
                 "referencename",
@@ -72,7 +72,7 @@ def create_turnover_output(
 
         turnover_df = turnover_df[
             [
-                "frosic2007",
+                config["sic"],
                 "cell_no",
                 "reference",
                 "referencename",

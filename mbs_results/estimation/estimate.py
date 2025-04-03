@@ -26,7 +26,7 @@ def estimate(df: pd.DataFrame, config: dict) -> pd.DataFrame:
     warnings.warn("Estimate is slowest stage")
     estimate_df = apply_estimation(**config)
     # estimate_df = correct_values()
-    estimate_df = estimate_df.drop(columns=["cell_no", "frotover", "frosic2007"])
+    estimate_df = estimate_df.drop(columns=["cell_no", "frotover", config["sic"]])
     post_estimate = pd.merge(
         df, estimate_df, how="left", on=[config["period"], config["reference"]]
     )

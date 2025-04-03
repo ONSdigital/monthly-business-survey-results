@@ -1,5 +1,7 @@
 import pandas as pd
 
+from mbs_results.utilities.inputs import load_config
+
 
 def merge_counts(
     input_df: pd.DataFrame,
@@ -163,7 +165,7 @@ def format_imputation_link(df: pd.DataFrame) -> pd.DataFrame:
     Parameters
     ----------
     df : pd.DataFrame
-        Dataframe containing frosic2007, cell_no, questioncode, imputation_link,
+        Dataframe containing currently selected sic column, cell_no, questioncode, imputation_link, # noqa: E501
         imputation_flags_adjustedresponse and count_imps.
 
     Returns
@@ -172,10 +174,10 @@ def format_imputation_link(df: pd.DataFrame) -> pd.DataFrame:
         Dataframe formatted according to the requirements for the imputation_link
         output.
     """
-
+    config = load_config(None)
     df = df[
         [
-            "frosic2007",
+            config["sic"],
             "cell_no",
             "questioncode",
             "imputation_link",
@@ -187,7 +189,7 @@ def format_imputation_link(df: pd.DataFrame) -> pd.DataFrame:
 
     renamed_df = df.rename(
         columns={
-            "frosic2007": "sic",
+            config["sic"]: "sic",
             "cell_no": "cell",
             "questioncode": "Question",
             "imputation_flags_adjustedresponse": "link_type",

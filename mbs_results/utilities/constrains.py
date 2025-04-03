@@ -5,6 +5,7 @@ from typing import List
 
 import pandas as pd
 
+from mbs_results.utilities.inputs import load_config
 from mbs_results.utilities.validation_checks import validate_manual_outlier_df
 
 logger = logging.getLogger(__name__)
@@ -154,7 +155,7 @@ def constrain(
     final_constrained : pd.DataFrame
         Original dataframe with constrains.
     """
-
+    config = load_config(None)
     derive_map, derive_map_null = create_derive_map(df, spp_form_id)
 
     df[f"pre_derived_{target}"] = df[target]
@@ -170,7 +171,7 @@ def constrain(
             "cell_no",
             "converted_frotover",
             "froempment",
-            "frosic2007",
+            config["sic"],
             "formtype",
         ],
         verify_integrity=False,

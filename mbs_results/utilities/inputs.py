@@ -24,4 +24,9 @@ def load_config(config_user_dict=None):
         logger.info(
             "config dictionary updated with config user dictionary from the testing"
         )
+
+    logger.info("Appending config files with selected sic column name")
+    config["finalsel_keep_cols"].append(config["sic"])
+    config["population_keep_columns"].append(config["sic"])
+
     return config

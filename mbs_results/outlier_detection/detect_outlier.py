@@ -20,7 +20,7 @@ def join_l_values(df, l_values_path, classification_values_path, config):
     df = pd.merge(
         df,
         classification_values,
-        left_on="frosic2007",
+        left_on=config["sic"],
         right_on="sic_5_digit",
         how="left",
     )

@@ -1,5 +1,7 @@
 import pandas as pd
 
+from mbs_results.utilities.inputs import load_config
+
 
 def produce_ocea_srs_outputs(additional_outputs_df: pd.DataFrame) -> pd.DataFrame:
     """Produces outputs for OCEA/SRS
@@ -14,12 +16,12 @@ def produce_ocea_srs_outputs(additional_outputs_df: pd.DataFrame) -> pd.DataFram
       output_df
           MBS output formatted according to SRS/OCEA requirements
     """
-
+    config = load_config(None)
     output_df = additional_outputs_df[
         [
             "reference",
             "period",
-            "frosic2007",
+            config["sic"],
             "response",
             "adjustedresponse",
             "outlier_weight",
@@ -34,7 +36,7 @@ def produce_ocea_srs_outputs(additional_outputs_df: pd.DataFrame) -> pd.DataFram
         {
             "reference": "Ruref",
             "period": "Period",
-            "frosic2007": "SIC",
+            config["sic"]: "SIC",
             "response": "return",
             "adjustedresponse": "adjusted",
             "calibration_factor": "gweight",
