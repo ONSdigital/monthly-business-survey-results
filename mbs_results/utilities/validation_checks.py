@@ -6,9 +6,8 @@ from importlib import metadata
 import numpy as np
 import pandas as pd
 
-from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.inputs import read_colon_separated_file
-
+from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.utils import (
     append_filter_out_questions,
     get_versioned_filename,

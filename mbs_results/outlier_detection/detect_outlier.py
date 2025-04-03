@@ -8,7 +8,6 @@ from mbs_results.utilities.constrains import (
 from mbs_results.utilities.inputs import read_csv_wrapper
 
 
-
 def join_l_values(df, l_values_path, classification_values_path, config):
     """Read l values, classifications and drop duplicates and period"""
 
