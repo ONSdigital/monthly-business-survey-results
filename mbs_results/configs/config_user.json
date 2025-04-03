@@ -1,6 +1,5 @@
 {
-    "bucket" : "",
-
+    "bucket": "",
     "calibration_group_map_path": "",
     "classification_values_path": "",
     "folder_path": "",
@@ -11,14 +10,11 @@
     "output_path": "",
     "population_path": "",
     "sample_path": "",
-    "back_data_qv_path":"",
-    "back_data_cp_path":"",
-    "back_data_finalsel_path":"",
+    "back_data_qv_path": "",
+    "back_data_cp_path": "",
+    "back_data_finalsel_path": "",
     "sic_domain_mapping_path": "",
-    "threshold_filepath":"",
-
-    "period_selected": 202303,
-    "current_period" : 202303,
-    "previous_period" : 202302,
+    "threshold_filepath": "",
+    "current_period": 202303,
     "revision_window": 13
 }
