@@ -1,7 +1,10 @@
 import pandas as pd
 
 from mbs_results.outlier_detection.winsorisation import winsorise
-from mbs_results.utilities.constrains import update_derived_weight_and_winsorised_value
+from mbs_results.utilities.constrains import (
+    replace_outlier_weights,
+    update_derived_weight_and_winsorised_value,
+)
 from mbs_results.utilities.inputs import read_csv_wrapper
 
 
