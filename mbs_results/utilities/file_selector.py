@@ -57,11 +57,13 @@ def validate_files(
     Parameters
     ----------
     file_path : str
-        "c:/path/to/your/files/" or "s3://bucket-name/path/to/your/files"
+        "c:/path/to/your/files/" or "/path/to/your/files/"
     file_prefix : str
         Prefix of the file names (e.g. "finalsel" or "qv").
     expected_periods : List[str]
         List of expected periods in YYYYMM format.
+    config : dict
+        main config file for pipeline
 
     Returns
     -------
@@ -72,8 +74,18 @@ def validate_files(
     ------
     FileNotFoundError
         If any file is missing for the expected periods.
+
+    Example
+    -------
+    >>> file_path = "c:/data/"
+    >>> file_prefix = "finalsel"
+    >>> expected_periods = ["202301", "202302", "202303"]
+    >>> config = {"platform": "network"}
+    >>> validate_files(file_path, file_prefix, expected_periods, config)
+    ['c:/data/finalsel_202301', 'c:/data/finalsel_202302', 'c:/data/finalsel_202303']
     """
     if config["platform"] == "s3":
+        # list files in windows s3 bucket
         client = boto3.client("s3")
         raz_client.configure_ranger_raz(
             client, ssl_file="/etc/pki/tls/certs/ca-bundle.crt"
@@ -83,7 +95,6 @@ def validate_files(
             bucket_name=config["bucket_name"],
             prefix=file_path + file_prefix,
         )
-        # LIST FILES IN S3
 
     elif config["platform"] == "network":
         # list files in windows dir
@@ -110,7 +121,6 @@ def validate_files(
             rf"Missing {file_prefix} file for periods: {', '.join(missing_periods)}"
         )
         logger.error(error_string)
-        # period(s): [2021, 2022, 2023]
         raise FileNotFoundError(error_string)
 
     return valid_files
@@ -124,29 +134,25 @@ def find_files(
     config: dict,
 ) -> List[str]:
     """
-    Find and validate universe or finalsel files based on the given configuration.
+    Find and validate files with the 'prefix_YYYYMM' format files based on the
+    given configuration.
 
     Parameters
     ----------
+
+    file_path : str
+        Default path for data files to find.
+    file_prefix
+        Prefix of filename to find (e.g. "universe", "finalsel", "qv")
+    current_period: int
+        current period in YYYYMM format.
+    revision_window: int
+        Number of months to include in the sequence of expected YYYYMM.
+        1 <= revision_window
     config : dict
         Dictionary containing the following keys of interest:
-        - population_path : str, optional
-            File prefix pattern for universe files (e.g., "universe009").
-            This contains population frame data.
-        - sample_path : str, optional
-            File prefix pattern for finalsel files (e.g., "finalsel009").
-            This contains sample data.
-        - current_period : int
-            Starting period in YYYYMM format (e.g., 202401).
-        - revision_window : int
-            Number of months to include in the sequence of expected YYYYMM.
-    file_type : str
-        One of ["universe", "finalsel"]. Determines which file type to scan.
-    population_path : str, optional
-        Default path for universe files if not provided in the config.
-    sample_path : str, optional
-        Default path for finalsel files if not provided in the config.
-
+        platform - either "s3" or "network"
+        bucket_name - S3 bucket name for file storage. (optional)
     Returns
     -------
     List[str]
@@ -156,13 +162,10 @@ def find_files(
     ------
     FileNotFoundError
         If any of the files are missing for the expected periods.
-    ValueError
-        If the file_type is not one of "universe" or "finalsel".
     """
     logger.info(f"Starting file selection for file type: {file_prefix}")
 
     expected_periods = generate_expected_periods(current_period, revision_window)
-    # try:
 
     valid_files = validate_files(
         file_path=file_path,
@@ -173,7 +176,3 @@ def find_files(
 
     logger.info("File selection completed successfully")
     return valid_files
-
-    # except FileNotFoundError as e:
-    #     logger.exception(f"An error occurred during file selection: {e}")
-    #     raise e
