@@ -63,7 +63,6 @@
         "froempment",
         "frosic2007",
         "frotover",
-        "period",
         "reference"
     ],
 
@@ -82,7 +81,7 @@
         "selmkr", "inclexcl"
     ],
     "population_keep_columns": [
-        "reference", "region", "frotover", "cell_no", "period", "frosic2007"
+        "reference", "region", "frotover", "cell_no", "frosic2007"
     ],
 
     "sample_column_names": [
@@ -95,7 +94,7 @@
         "tradstyle2","tradstyle3","contact","telephone","fax","seltype","inclexcl",
         "cell_no","formtype","cso_tel","currency"
     ],
-    "sample_keep_columns": ["reference", "period"],
+    "sample_keep_columns": ["reference"],
 
     "idbr_to_spp": {"201":9,
                     "202":9,

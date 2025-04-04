@@ -1,47 +1,38 @@
+import pandas as pd
+
 from mbs_results.staging.data_cleaning import convert_cell_number
-from mbs_results.utilities.utils import read_colon_separated_file
+from mbs_results.utilities.inputs import read_colon_separated_file
 
 
 def get_estimation_data(
-    population_file,
-    sample_file,
-    period,
-    population_column_names,
-    sample_column_names,
-    population_keep_columns,
-    sample_keep_columns,
-    calibration_group_map,
-    reference,
-    cell_number,
-    **config
+    population_file: str,
+    sample_file: str,
+    calibration_group_map: pd.DataFrame,
+    config: dict,
 ):
-    """
-    Get the input data required to run estimation.
+    """Get the input data required to run estimation.
 
     Parameters
     ----------
     population_file: pd.DataFrame
-        file path to the folder containing the population frames
-    sample_path: pd.DataFrame
-        file path to the folder containing the sample data
-    population_column_names: List[str]
-        list of column names for the population frames
-    sample_column_names: List[str]
-        list of column names for the sample data
-    population_keep_columns: List[str]
-        list of names of columns to keep from population frame
-    sample_keep_columns: List[str]
-        list of names of columns to keep from sample
+        File path to the folder containing the population frames.
+    sample_file: pd.DataFrame
+        File path to the folder containing the sample data.
     calibration_group_map: pd.DataFrame
-        dataframe containing map between cell number and calibration group
-    period: Str
-        the name of the period column
-    reference: Str
-        the name of the reference column
-    cell_number: Str
-        the name of the cell number column
-    **config: Dict
-       main pipeline configuration. Can be used to input the entire config dictionary
+        Dataframe containing map between cell number and calibration group.
+    config : dict
+        Dictionary containing the following keys of interest:
+        platform - either "s3" or "network"
+        bucket_name - S3 bucket name for file storage. (optional)
+        population_column_names: list of column names for the population frames
+    sample_column_names: list of column names for the sample data
+    population_keep_columns: list of names of columns to keep from population frame
+    sample_keep_columns: list of names of columns to keep from sample
+    calibration_group_map: dataframe containing map between cell number and
+                            calibration group
+    period: the name of the period column
+    reference: the name of the reference column
+    cell_number: the name of the cell number column
 
     Returns
     -------
@@ -49,16 +40,31 @@ def get_estimation_data(
         population frame containing period and sampled columns.
 
     """
-    population_df = read_colon_separated_file(population_file, population_column_names)
+    population_df = read_colon_separated_file(
+        filepath=population_file,
+        column_names=config["population_column_names"],
+        keep_columns=config["population_keep_columns"],
+        period=config["period"],
+        import_platform=config["platform"],
+        bucket_name=config["bucket"],
+    )
 
-    population_df = population_df[population_keep_columns]
-
-    sample_df = read_colon_separated_file(sample_file, sample_column_names)
-
-    sample_df = sample_df[sample_keep_columns]
+    sample_df = read_colon_separated_file(
+        filepath=sample_file,
+        column_names=config["sample_column_names"],
+        keep_columns=config["sample_keep_columns"],
+        period=config["period"],
+        import_platform=config["platform"],
+        bucket_name=config["bucket"],
+    )
 
     estimation_data = derive_estimation_variables(
-        population_df, sample_df, calibration_group_map, period, reference, cell_number
+        population_df,
+        sample_df,
+        calibration_group_map,
+        config["period"],
+        config["reference"],
+        config["cell_number"],
     )
 
     return estimation_data

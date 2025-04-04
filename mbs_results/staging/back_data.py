@@ -3,10 +3,8 @@ import warnings
 import pandas as pd
 
 from mbs_results.staging.data_cleaning import enforce_datatypes
-from mbs_results.utilities.utils import (
-    convert_column_to_datetime,
-    read_colon_separated_file,
-)
+from mbs_results.utilities.inputs import read_colon_separated_file, read_csv_wrapper
+from mbs_results.utilities.utils import convert_column_to_datetime
 
 
 def is_back_data_date_ok(
@@ -83,23 +81,26 @@ def read_back_data(config: dict) -> pd.DataFrame:
         Back data with all column as in source, period is converted to datetime.
     """
 
-    qv_df = pd.read_csv(config["back_data_qv_path"]).drop(
-        columns=["cell_no", "classification"], errors="ignore"
-    )
+    qv_df = read_csv_wrapper(
+        config["back_data_qv_path"], config["platform"], config["bucket"]
+    ).drop(columns=["cell_no", "classification"], errors="ignore")
     qv_df[config["period"]] = convert_column_to_datetime(qv_df[config["period"]])
 
-    cp_df = pd.read_csv(config["back_data_cp_path"]).drop(
-        columns=["cell_no", "classification"], errors="ignore"
-    )
+    cp_df = read_csv_wrapper(
+        config["back_data_cp_path"], config["platform"], config["bucket"]
+    ).drop(columns=["cell_no", "classification"], errors="ignore")
     cp_df[config["period"]] = convert_column_to_datetime(cp_df[config["period"]])
 
     finalsel = read_colon_separated_file(
-        config["back_data_finalsel_path"], config["sample_column_names"]
+        filepath=config["back_data_finalsel_path"],
+        column_names=config["sample_column_names"],
+        keep_columns=config["finalsel_keep_cols"],
+        import_platform=config["platform"],
+        bucket_name=config["bucket"],
     )
-    finalsel = finalsel[config["finalsel_keep_cols"]]
-    finalsel = enforce_datatypes(
-        finalsel, keep_columns=config["finalsel_keep_cols"], **config
-    )
+    # keep columns is applied in data reading from source, enforcing dtypes
+    # in all columns of finalsel
+    finalsel = enforce_datatypes(finalsel, keep_columns=list(finalsel), **config)
 
     join_type = "left"
 

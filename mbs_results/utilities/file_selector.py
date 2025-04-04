@@ -92,7 +92,7 @@ def validate_files(
         )
         files_in_storage_system = list_files(
             client=client,
-            bucket_name=config["bucket_name"],
+            bucket_name=config["bucket"],
             prefix=file_path + file_prefix,
         )
 
