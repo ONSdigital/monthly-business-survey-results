@@ -100,7 +100,6 @@ def read_back_data(config: dict) -> pd.DataFrame:
     )
     # keep columns is applied in data reading from source, enforcing dtypes
     # in all columns of finalsel
-    print(list(finalsel))
     finalsel = enforce_datatypes(finalsel, keep_columns=list(finalsel), **config)
 
     join_type = "left"
