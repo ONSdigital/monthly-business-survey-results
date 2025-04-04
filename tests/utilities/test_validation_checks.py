@@ -223,9 +223,13 @@ def config():
     return {
         "period_selected": "202301",
         "output_path": "/path/to/output/",
-        "sample_path": "/path/to/sample/*",
+        "folder_path": "path/to/sample/",
+        "sample_prefix": "sample",
+        "sample_path": "/path/to/sample/",
         "sample_column_names": ["reference", "formtype"],
-        "period": "202301",
+        "current_period": "202301",
+        "revision_window": 1,
+        "platform": "network",
     }
 
 
@@ -263,18 +267,22 @@ def mock_read_csv():
 
 
 @pytest.fixture
-def mock_read_colon_separated_file():
+def mock_read_and_combine_colon_sep_files():
     with patch(
-        "mbs_results.utilities.validation_checks.read_colon_separated_file"
-    ) as mock_read_colon_separated_file:
-        mock_read_colon_separated_file.return_value = pd.DataFrame(
-            {"reference": [1, 2, 3, 4, 5], "formtype": [201, 202, 203, 204, 205]}
+        "mbs_results.utilities.utils.read_and_combine_colon_sep_files"
+    ) as mock_read_and_combine_colon_sep_files:
+        mock_read_and_combine_colon_sep_files.return_value = pd.DataFrame(
+            {"reference": [1, 2, 3, 4, 5], "form_type": [201, 202, 203, 204, 205]}
         )
-        yield mock_read_colon_separated_file
+        yield mock_read_and_combine_colon_sep_files
 
 
 def test_qa_selective_editing_outputs(
-    config, mock_metadata, mock_logger, mock_read_csv, mock_read_colon_separated_file
+    config,
+    mock_metadata,
+    mock_logger,
+    mock_read_csv,
+    mock_read_and_combine_colon_sep_files,
 ):
     qa_selective_editing_outputs(config)
 

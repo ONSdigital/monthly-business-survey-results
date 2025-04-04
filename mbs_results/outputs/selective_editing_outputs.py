@@ -56,7 +56,15 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
     pd.DataFrame
         A DataFrame containing the selective editing outputs.
     """
-    imputation_output = start_of_period_staging(imputation_output, config)
+    # copying config to make changes after staging
+
+    config_se = config.copy()
+    config_se["selective_editing_period"] = (
+        pd.to_datetime(config_se["current_period"], format="%Y%m")
+        + pd.DateOffset(months=1)
+    ).strftime("%Y%m")
+
+    imputation_output = start_of_period_staging(imputation_output, config_se)
 
     imputation_output.rename(
         columns={"imputed_and_derived_flag": "imputation_flags_adjustedresponse"},
@@ -64,24 +72,23 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
     )
 
     imputation_output.to_csv(
-        config["output_path"]
-        + f"post_imputation_processing_{config['period_selected']}.csv",
+        config_se["output_path"]
+        + f"post_imputation_processing_{config_se['period_selected']}.csv",
         index=False,
     )
 
-    # Create missing questions
+    estimation_output = estimate(imputation_output, config_se)
 
-    estimation_output = estimate(imputation_output, config)
-
-    outlier_output = detect_outlier(estimation_output, config)
+    outlier_output = detect_outlier(estimation_output, config_se)
 
     se_outputs_df = get_additional_outputs_df(estimation_output, outlier_output)
 
     se_outputs_df.to_csv(
-        config["output_path"] + f"se_outputs_full_df_{config['period_selected']}.csv",
+        config_se["output_path"]
+        + f"se_outputs_full_df_{config_se['period_selected']}.csv",
         index=False,
     )
 
-    produce_selective_editing_outputs(config, se_outputs_df)
+    produce_selective_editing_outputs(config_se, se_outputs_df)
 
-    qa_selective_editing_outputs(config)
+    qa_selective_editing_outputs(config_se)

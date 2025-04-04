@@ -1,9 +1,12 @@
+import os
 import re
 from importlib import metadata
 from io import BytesIO
 from typing import List
 
 import pandas as pd
+
+from mbs_results.utilities.file_selector import find_files
 
 
 def convert_column_to_datetime(dates):
@@ -91,3 +94,79 @@ def get_versioned_filename(prefix, config):
     filename = f"{prefix}_v{file_version_mbs}_{snapshot_name}.csv"
 
     return filename
+
+
+def read_and_combine_colon_sep_files(column_names: list, config: dict) -> pd.DataFrame:
+    """
+    reads in and combined colon separated files from the specified folder path
+
+    Parameters
+    ----------
+    folder_path : str
+        folder path containing the colon separated files
+    column_names : list
+        list of column names in colon separated file
+    config : dict
+        main pipeline config containing period column name
+
+    Returns
+    -------
+    pd.DataFrame
+        combined colon separated files returned as one dataframe.
+    """
+    sample_files = find_files(
+        file_path=config["folder_path"],
+        file_prefix=config["sample_prefix"],
+        current_period=config["current_period"],
+        revision_window=config["revision_window"],
+        config=config,
+    )
+
+    df = pd.concat(
+        [
+            read_colon_separated_file(f, column_names, period=config["period"])
+            for f in sample_files
+        ],
+        ignore_index=True,
+    )
+    return df
+
+
+def get_snapshot_alternate_path(config):
+    """
+    Check if snapshot_alternate_path is provided in the config and use this to load the
+    snapshot. If snapshot_alternate_path is not provided, snapshot will be loaded from
+    the folder_path.
+    Also checks that folder path ends in a slash, appends one if not included.
+    Does not overwrite the folder_path in the config.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration dictionary containing the snapshot_alternate_path and folder_path
+        keys
+
+    Returns
+    -------
+    str
+        The path to the folder where the snapshot is located. If snapshot_alternate_path
+        is not provided, returns the folder_path.
+    """
+
+    snapshot_file_path = config.get("snapshot_alternate_path_OPTIONAL") or config.get(
+        "folder_path"
+    )
+    snapshot_file_path = os.path.normpath(snapshot_file_path)
+    if not snapshot_file_path.endswith(os.sep):
+        snapshot_file_path += os.sep
+    return snapshot_file_path
+
+
+if __name__ == "__main__":
+    # Example usage
+    from mbs_results.utilities.inputs import load_config
+
+    config = load_config(None)
+
+    returned = get_snapshot_alternate_path(config)
+    print(returned)

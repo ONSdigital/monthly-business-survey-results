@@ -1,3 +1,4 @@
+import logging
 import warnings
 
 import pandas as pd
@@ -17,10 +18,10 @@ from mbs_results.staging.data_cleaning import (
 )
 from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.constrains import constrain
-from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.utils import (
     convert_column_to_datetime,
-    read_colon_separated_file,
+    get_snapshot_alternate_path,
+    read_and_combine_colon_sep_files,
 )
 
 
@@ -49,42 +50,6 @@ def create_form_type_spp_column(
     return contributors
 
 
-def read_and_combine_colon_sep_files(column_names: list, config: dict) -> pd.DataFrame:
-    """
-    reads in and combined colon separated files from the specified folder path
-
-    Parameters
-    ----------
-    folder_path : str
-        folder path containing the colon separated files
-    column_names : list
-        list of column names in colon separated file
-    config : dict
-        main pipeline config containing period column name
-
-    Returns
-    -------
-    pd.DataFrame
-        combined colon separated files returned as one dataframe.
-    """
-    sample_files = find_files(
-        file_path=config["folder_path"],
-        file_prefix=config["sample_prefix"],
-        current_period=config["current_period"],
-        revision_window=config["revision_window"],
-        config=config,
-    )
-
-    df = pd.concat(
-        [
-            read_colon_separated_file(f, column_names, period=config["period"])
-            for f in sample_files
-        ],
-        ignore_index=True,
-    )
-    return df
-
-
 def stage_dataframe(config: dict) -> pd.DataFrame:
     """
     wrapper function to stage and pre process the dataframe, ready to be passed onto the
@@ -107,8 +72,10 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     period = config["period"]
     reference = config["reference"]
 
+    snapshot_file_path = get_snapshot_alternate_path(config)
+
     contributors, responses = get_dfs_from_spp(
-        config["folder_path"] + config["mbs_file_name"],
+        snapshot_file_path + config["mbs_file_name"],
         config["platform"],
         config["bucket"],
     )
@@ -284,7 +251,9 @@ def start_of_period_staging(
         imputation_output = imputation_output.loc[
             imputation_output["period"] == config["current_period"]
         ]
-
+        logging.info(
+            "Setting current_period to the period for SE outputs. Overwriting SEconfig"
+        )
         imputation_output["period"] = convert_column_to_datetime(
             imputation_output["period"]
         ) + pd.DateOffset(months=1)
@@ -303,13 +272,15 @@ def start_of_period_staging(
             columns={"imputation_class": "imputation_class_prev_period"}
         )
 
-        finalsel_path = config["sample_path"].replace(
-            "*", f"009_{config['period_selected']}"
-        )
-        finalsel = read_colon_separated_file(
-            finalsel_path, config["sample_column_names"], config["period"]
-        )
+        config["current_period"] = config["selective_editing_period"]
 
+        # finalsel_path = config["sample_path"].replace(
+        #     "*", f"009_{config['period_selected']}"
+        # )
+
+        finalsel = read_and_combine_colon_sep_files(
+            config["sample_column_names"], config
+        )
         finalsel = finalsel[config["finalsel_keep_cols"]]
         finalsel = enforce_datatypes(
             finalsel, keep_columns=config["finalsel_keep_cols"], **config

@@ -9,7 +9,7 @@ import pandas as pd
 from mbs_results.utilities.utils import (
     append_filter_out_questions,
     get_versioned_filename,
-    read_colon_separated_file,
+    read_and_combine_colon_sep_files,
 )
 
 logger = logging.getLogger(__name__)
@@ -430,12 +430,7 @@ def qa_selective_editing_outputs(config: dict):
         else:
             logger.info(f"No nulls or NaNs detected in {dataframe_name} dataframe")
 
-    finalsel_path = config["sample_path"].replace(
-        "*", f"009_{config['period_selected']}"
-    )
-    finalsel = read_colon_separated_file(
-        finalsel_path, config["sample_column_names"], config["period"]
-    )
+    finalsel = read_and_combine_colon_sep_files(config["sample_column_names"], config)
     finalsel["formtype"] = finalsel["formtype"].astype(int)
 
     finalsel_unique_reference = set(finalsel["reference"].tolist())
