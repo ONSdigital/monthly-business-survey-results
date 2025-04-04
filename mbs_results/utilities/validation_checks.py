@@ -248,7 +248,14 @@ def validate_imputation(df: pd.DataFrame, config: dict):
     output_path = config["output_path"]
 
     imputation_filename = get_versioned_filename("imputation", config)
-    df.to_csv(output_path + imputation_filename, index=False)
+
+    write_csv_wrapper(
+        df=df,
+        save_path=output_path + imputation_filename,
+        import_platform=config["platform"],
+        bucket_name=config["bucket"],
+        index=False,
+    )
 
 
 def validate_estimation(df: pd.DataFrame, config: dict):

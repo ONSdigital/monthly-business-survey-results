@@ -174,7 +174,7 @@ def read_colon_separated_file(
 
     if keep_columns:
 
-        if set(keep_columns).issubset(set(column_names)):
+        if not set(keep_columns).issubset(set(column_names)):
             raise Exception(keep_columns, " must be a subset of ", column_names)
 
         # position of columns to keep

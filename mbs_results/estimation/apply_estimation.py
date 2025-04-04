@@ -58,10 +58,7 @@ def apply_estimation(config):
 
     for population_file, sample_file in zip(population_files, sample_files):
         estimation_data = get_estimation_data(
-            population_file,
-            sample_file,
-            calibration_group_map=calibration_group_map,
-            **config
+            population_file, sample_file, calibration_group_map, config
         )
 
         census_df = estimation_data[

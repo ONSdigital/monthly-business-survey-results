@@ -94,13 +94,14 @@ def read_back_data(config: dict) -> pd.DataFrame:
     finalsel = read_colon_separated_file(
         filepath=config["back_data_finalsel_path"],
         column_names=config["sample_column_names"],
+        keep_columns=config["finalsel_keep_cols"],
         import_platform=config["platform"],
         bucket_name=config["bucket"],
     )
-    finalsel = finalsel[config["finalsel_keep_cols"]]
-    finalsel = enforce_datatypes(
-        finalsel, keep_columns=config["finalsel_keep_cols"], **config
-    )
+    # keep columns is applied in data reading from source, enforcing dtypes
+    # in all columns of finalsel
+    print(list(finalsel))
+    finalsel = enforce_datatypes(finalsel, keep_columns=list(finalsel), **config)
 
     join_type = "left"
 
