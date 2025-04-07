@@ -269,10 +269,10 @@ def mock_read_csv():
 @pytest.fixture
 def mock_read_and_combine_colon_sep_files():
     with patch(
-        "mbs_results.utilities.utils.read_and_combine_colon_sep_files"
+        "mbs_results.utilities.validation_checks.read_and_combine_colon_sep_files"
     ) as mock_read_and_combine_colon_sep_files:
         mock_read_and_combine_colon_sep_files.return_value = pd.DataFrame(
-            {"reference": [1, 2, 3, 4, 5], "form_type": [201, 202, 203, 204, 205]}
+            {"reference": [1, 2, 3, 4, 5], "formtype": [201, 202, 203, 204, 205]}
         )
         yield mock_read_and_combine_colon_sep_files
 
