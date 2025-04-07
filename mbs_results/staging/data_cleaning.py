@@ -416,6 +416,7 @@ def convert_cell_number(df: pd.DataFrame, cell_number: str):
     """
     df[cell_number] = (
         df[cell_number]
+        .astype(int)
         .astype(str)
         .map(lambda x: str(5) + x[1:] if x[0] == str(7) else x)
         .astype(int)
