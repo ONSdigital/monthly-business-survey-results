@@ -18,10 +18,8 @@ from mbs_results.staging.data_cleaning import (
 from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.file_selector import find_files
-from mbs_results.utilities.utils import (
-    convert_column_to_datetime,
-    read_colon_separated_file,
-)
+from mbs_results.utilities.inputs import read_colon_separated_file
+from mbs_results.utilities.utils import convert_column_to_datetime
 
 
 def create_form_type_spp_column(
@@ -49,7 +47,7 @@ def create_form_type_spp_column(
     return contributors
 
 
-def read_and_combine_colon_sep_files(column_names: list, config: dict) -> pd.DataFrame:
+def read_and_combine_colon_sep_files(config: dict) -> pd.DataFrame:
     """
     reads in and combined colon separated files from the specified folder path
 
@@ -74,10 +72,16 @@ def read_and_combine_colon_sep_files(column_names: list, config: dict) -> pd.Dat
         revision_window=config["revision_window"],
         config=config,
     )
-
     df = pd.concat(
         [
-            read_colon_separated_file(f, column_names, period=config["period"])
+            read_colon_separated_file(
+                filepath=f,
+                column_names=config["sample_column_names"],
+                keep_columns=config["finalsel_keep_cols"],
+                period=config["period"],
+                import_platform=config["platform"],
+                bucket_name=config["bucket"],
+            )
             for f in sample_files
         ],
         ignore_index=True,
@@ -124,12 +128,11 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         responses, keep_columns=config["responses_keep_cols"], **config
     )
 
-    finalsel = read_and_combine_colon_sep_files(config["sample_column_names"], config)
+    finalsel = read_and_combine_colon_sep_files(config)
 
-    finalsel = finalsel[config["finalsel_keep_cols"]]
-    finalsel = enforce_datatypes(
-        finalsel, keep_columns=config["finalsel_keep_cols"], **config
-    )
+    # keep columns is applied in data reading from source, enforcing dtypes
+    # in all columns of finalsel
+    finalsel = enforce_datatypes(finalsel, keep_columns=list(finalsel), **config)
 
     # Filter contributors files here to temp fix this overlap
 
@@ -171,6 +174,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         save_full_path=config["output_path"]
         + snapshot_name
         + "_filter_out_questions.csv",
+        **config,
     )
 
     df = drop_derived_questions(

@@ -9,6 +9,7 @@ from mbs_results.staging.data_cleaning import (
     load_manual_constructions,
 )
 from mbs_results.utilities.constrains import constrain
+from mbs_results.utilities.inputs import read_csv_wrapper
 
 
 def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
@@ -42,7 +43,9 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
     # Two options for loading MC:
     warnings.warn("Need to pick one method of loading manual constructions")
     try:
-        manual_constructions = pd.read_csv(config["manual_constructions_path"])
+        manual_constructions = read_csv_wrapper(
+            config["manual_constructions_path"], config["platform"], config["bucket"]
+        )
         if manual_constructions.empty:
             manual_constructions = None
         # We could implement above, or the other method of loading mc:
