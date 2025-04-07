@@ -28,7 +28,7 @@ desireable to reduce the effect of these businesses. This is known as outlier
 treatment. This method applies a technique known as one-sided Winsorisation.
 The objective of the method is to introduce a small bias, while reducing the
 variance. This is intended to reduce the mean squared error of the total, a
-measure of overall accuracy. The method works for stratified combined ratio 
+measure of overall accuracy. The method works for stratified combined ratio
 estimation, commonly used in business surveys.
 
 The method uses a pre-calculated parameter, 'L-value' that must be supplied
@@ -65,8 +65,8 @@ Input records must include the following fields:
 Industrial Classification by size)
 * Target Variable - Numeric - the value to be treated
 * Design Weight - Numeric - a supplied weight that reflects the sampling design
-* Calibration Factor - Numeric - a weight that maintains the estimated calibration totals. 
-* Auxiliary - Numeric - a secondary value used for prediction in ratio estimation. 
+* Calibration Factor - Numeric - a weight that maintains the estimated calibration totals.
+* Auxiliary - Numeric - a secondary value used for prediction in ratio estimation.
 
 
 ### 5.2 Output Records
@@ -144,7 +144,7 @@ a given business.
 
 **$n_h$** or **$n_j$** - the sample size for stratum $h$ or calibration group $j$.
 These values are inputs to the calculation of the _design weight_ that is passed
-to Winsorisation.  
+to Winsorisation.
 **$N_h$** or **$N_j$** - the population size for stratum $h$ or calibration group
 $j$. These values are inputs to the calculation of the _design weight_ that is
 passed to Winsorisation.
