@@ -95,8 +95,7 @@ Winsorisation.
 
 * If design weight multiplied by calibration factor
 is less than or equal to 1 the target value is not
-Winsorised, the associated oultier weight is set to
-1.
+Winsorised, the associated outlier weight is set to 1.
 
 ##### Ratio Estimation
 
