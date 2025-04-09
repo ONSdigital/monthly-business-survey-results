@@ -417,27 +417,50 @@ def start_of_period_staging(
 
 
 def new_questions_construction_link(df, config):
-    df = convert_cell_number(df, config["cell_number"])
-    df = create_imputation_class(df, config["cell_number"], "imputation_class")
+    """
+    Updates the 'construction_link' based on previous the previous period's imputation
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The input DataFrame containing the data to be processed.
+    config : dict
+        A dictionary containing configuration parameters. Expected keys include:
+        - "cell_number" : str
+            The column name for cell numbers.
+        - "question_no" : str
+            The column name for question numbers.
+        - "period" : str
+            The column name for the period.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The transformed DataFrame with updated 'construction_link' values.
+    """
     prev_period_imp_class = "imputation_class_prev_period"
     current_period_imp_class = "imputation_class"
+    cell_no = config["cell_number"]
+    question_no = config["question_no"]
+
+    df = convert_cell_number(df, cell_no)
+    df = create_imputation_class(df, cell_no, current_period_imp_class)
+
     df[prev_period_imp_class] = df[prev_period_imp_class].combine_first(
         df[current_period_imp_class]
     )
 
-    # df.groupby(["period", "questioncode", prev_period_imp_class])
-    # .apply(lambda grouped: print(grouped["construction_link"].notna().unique()))
-
-    # # Current changes
-    # df.groupby(["period", "questioncode", prev_period_imp_class])
-    # .apply(lambda grouped: print(grouped["construction_link"]) if
-    # grouped["construction_link"].nunique() > 1 else None)
-
     df["construction_link"] = df.groupby(
-        [config["period"], config["question_no"], prev_period_imp_class]
+        [config["period"], question_no, prev_period_imp_class]
     )["construction_link"].transform(lambda group: group.ffill().bfill())
+
+    df.loc[df[question_no] == 49, "construction_link"] = (
+        df.loc[df[question_no] == 49, "construction_link"]
+        / df.loc[df[question_no] == 49, "matched_pair_count"]
+    )
 
     # Can drop after sign off, just for testing
     # df.drop(columns=[config["cell_number"]+"_prev_period", config["cell_number"],
     # "imputation_class"], inplace=True)
+
     return df
