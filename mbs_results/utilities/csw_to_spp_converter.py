@@ -9,7 +9,7 @@ from typing import List
 
 import pandas as pd
 
-from mbs_results.utilities.utils import read_and_combine_colon_sep_files
+from mbs_results.staging.stage_dataframe import read_and_combine_colon_sep_files
 
 
 def create_snapshot(

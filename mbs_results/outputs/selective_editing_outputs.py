@@ -6,9 +6,11 @@ from mbs_results.outputs.produce_additional_outputs import (
     get_additional_outputs_df,
     produce_selective_editing_outputs,
 )
+from mbs_results.outputs.selective_editing_validations import (
+    qa_selective_editing_outputs,
+)
 from mbs_results.staging.stage_dataframe import start_of_period_staging
 from mbs_results.utilities.utils import get_versioned_filename
-from mbs_results.utilities.validation_checks import qa_selective_editing_outputs
 
 
 def load_imputation_output(config: dict) -> pd.DataFrame:
