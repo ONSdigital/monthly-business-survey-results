@@ -69,8 +69,6 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
         index=False,
     )
 
-    # Create missing questions
-
     estimation_output = estimate(imputation_output, config)
 
     outlier_output = detect_outlier(estimation_output, config)
