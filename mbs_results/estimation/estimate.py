@@ -24,7 +24,7 @@ def estimate(df: pd.DataFrame, config: dict) -> pd.DataFrame:
         returns post estimation dataframe
     """
     warnings.warn("Estimate is slowest stage")
-    estimate_df = apply_estimation(**config)
+    estimate_df = apply_estimation(config)
     # estimate_df = correct_values()
     estimate_df = estimate_df.drop(columns=["cell_no", "frotover", config["sic"]])
     post_estimate = pd.merge(

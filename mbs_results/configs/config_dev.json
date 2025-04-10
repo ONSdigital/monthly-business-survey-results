@@ -66,7 +66,6 @@
         "cell_no",
         "froempment",
         "frotover",
-        "period",
         "reference"
     ],
 
@@ -85,7 +84,7 @@
         "selmkr", "inclexcl"
     ],
     "population_keep_columns": [
-        "reference", "region", "frotover", "cell_no", "period"
+        "reference", "region", "frotover", "cell_no"
     ],
 
     "sample_column_names": [
@@ -98,7 +97,7 @@
         "tradstyle2","tradstyle3","contact","telephone","fax","seltype","inclexcl",
         "cell_no","formtype","cso_tel","currency"
     ],
-    "sample_keep_columns": ["reference", "period"],
+    "sample_keep_columns": ["reference"],
 
     "idbr_to_spp": {"201":9,
                     "202":9,
