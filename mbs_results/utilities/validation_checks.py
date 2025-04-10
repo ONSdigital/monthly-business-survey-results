@@ -6,10 +6,11 @@ from importlib import metadata
 import numpy as np
 import pandas as pd
 
+from mbs_results.staging.stage_dataframe import read_and_combine_colon_sep_files
+from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.utils import (
     append_filter_out_questions,
     get_versioned_filename,
-    read_and_combine_colon_sep_files,
 )
 
 logger = logging.getLogger(__name__)
@@ -245,8 +246,16 @@ def validate_staging(df: pd.DataFrame, config: dict):
 def validate_imputation(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post imputation")
     output_path = config["output_path"]
+
     imputation_filename = get_versioned_filename("imputation", config)
-    df.to_csv(output_path + imputation_filename, index=False)
+
+    write_csv_wrapper(
+        df=df,
+        save_path=output_path + imputation_filename,
+        import_platform=config["platform"],
+        bucket_name=config["bucket"],
+        index=False,
+    )
 
 
 def validate_estimation(df: pd.DataFrame, config: dict):
@@ -280,7 +289,13 @@ def validate_estimation(df: pd.DataFrame, config: dict):
             f'There are {sampled_nas} NA(s) in the {config["sampled"]} column.'
         )
 
-    df.to_csv(output_path + estimate_filename, index=False)
+    write_csv_wrapper(
+        df,
+        output_path + estimate_filename,
+        config["platform"],
+        config["bucket"],
+        index=False,
+    )
 
 
 def validate_outlier_detection(df: pd.DataFrame, config: dict):
@@ -298,7 +313,13 @@ def validate_outlier_detection(df: pd.DataFrame, config: dict):
         config["output_path"] + snapshot_name + "_filter_out_questions.csv"
     )
     df = append_filter_out_questions(df, filtered_questions_path)
-    df.to_csv(output_path + outlier_filename, index=False)
+    write_csv_wrapper(
+        df,
+        output_path + outlier_filename,
+        config["platform"],
+        config["bucket"],
+        index=False,
+    )
 
 
 def validate_manual_outlier_df(

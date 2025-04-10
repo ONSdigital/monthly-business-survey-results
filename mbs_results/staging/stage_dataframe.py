@@ -18,10 +18,11 @@ from mbs_results.staging.data_cleaning import (
 )
 from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.constrains import constrain
+from mbs_results.utilities.file_selector import find_files
+from mbs_results.utilities.inputs import read_colon_separated_file
 from mbs_results.utilities.utils import (
     convert_column_to_datetime,
     get_snapshot_alternate_path,
-    read_and_combine_colon_sep_files,
 )
 
 
@@ -48,6 +49,48 @@ def create_form_type_spp_column(
         idbr_to_spp_mapping
     )
     return contributors
+
+
+def read_and_combine_colon_sep_files(config: dict) -> pd.DataFrame:
+    """
+    reads in and combined colon separated files from the specified folder path
+
+    Parameters
+    ----------
+    folder_path : str
+        folder path containing the colon separated files
+    column_names : list
+        list of column names in colon separated file
+    config : dict
+        main pipeline config containing period column name
+
+    Returns
+    -------
+    pd.DataFrame
+        combined colon separated files returned as one dataframe.
+    """
+    sample_files = find_files(
+        file_path=config["folder_path"],
+        file_prefix=config["sample_prefix"],
+        current_period=config["current_period"],
+        revision_window=config["revision_window"],
+        config=config,
+    )
+    df = pd.concat(
+        [
+            read_colon_separated_file(
+                filepath=f,
+                column_names=config["sample_column_names"],
+                keep_columns=config["finalsel_keep_cols"],
+                period=config["period"],
+                import_platform=config["platform"],
+                bucket_name=config["bucket"],
+            )
+            for f in sample_files
+        ],
+        ignore_index=True,
+    )
+    return df
 
 
 def stage_dataframe(config: dict) -> pd.DataFrame:
@@ -91,12 +134,11 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         responses, keep_columns=config["responses_keep_cols"], **config
     )
 
-    finalsel = read_and_combine_colon_sep_files(config["sample_column_names"], config)
+    finalsel = read_and_combine_colon_sep_files(config)
 
-    finalsel = finalsel[config["finalsel_keep_cols"]]
-    finalsel = enforce_datatypes(
-        finalsel, keep_columns=config["finalsel_keep_cols"], **config
-    )
+    # keep columns is applied in data reading from source, enforcing dtypes
+    # in all columns of finalsel
+    finalsel = enforce_datatypes(finalsel, keep_columns=list(finalsel), **config)
 
     # Filter contributors files here to temp fix this overlap
 
@@ -138,6 +180,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         save_full_path=config["output_path"]
         + snapshot_name
         + "_filter_out_questions.csv",
+        **config,
     )
 
     df = drop_derived_questions(
@@ -384,27 +427,51 @@ def start_of_period_staging(
 
 
 def new_questions_construction_link(df, config):
-    df = convert_cell_number(df, config["cell_number"])
-    df = create_imputation_class(df, config["cell_number"], "imputation_class")
+    """
+    Updates the 'construction_link' based on previous the previous period's imputation
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The input DataFrame containing the data to be processed.
+    config : dict
+        A dictionary containing configuration parameters. Expected keys include:
+        - "cell_number" : str
+            The column name for cell numbers.
+        - "question_no" : str
+            The column name for question numbers.
+        - "period" : str
+            The column name for the period.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The transformed DataFrame with updated 'construction_link' values.
+    """
     prev_period_imp_class = "imputation_class_prev_period"
     current_period_imp_class = "imputation_class"
+    cell_no = config["cell_number"]
+    question_no = config["question_no"]
+
+    df = convert_cell_number(df, cell_no)
+    df = create_imputation_class(df, cell_no, current_period_imp_class)
+
     df[prev_period_imp_class] = df[prev_period_imp_class].combine_first(
         df[current_period_imp_class]
     )
 
-    # df.groupby(["period", "questioncode", prev_period_imp_class])
-    # .apply(lambda grouped: print(grouped["construction_link"].notna().unique()))
-
-    # # Current changes
-    # df.groupby(["period", "questioncode", prev_period_imp_class])
-    # .apply(lambda grouped: print(grouped["construction_link"]) if
-    # grouped["construction_link"].nunique() > 1 else None)
+    # Update q49 construction link to be construction_link / matched_pairs
+    df.loc[df[question_no] == 49, "construction_link"] = (
+        df.loc[df[question_no] == 49, "construction_link"]
+        / df.loc[df[question_no] == 49, "flag_construction_matches_count"]
+    )
 
     df["construction_link"] = df.groupby(
-        [config["period"], config["question_no"], prev_period_imp_class]
+        [config["period"], question_no, prev_period_imp_class]
     )["construction_link"].transform(lambda group: group.ffill().bfill())
 
     # Can drop after sign off, just for testing
     # df.drop(columns=[config["cell_number"]+"_prev_period", config["cell_number"],
     # "imputation_class"], inplace=True)
+
     return df

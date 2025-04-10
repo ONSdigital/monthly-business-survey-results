@@ -1,12 +1,7 @@
 import os
-import re
 from importlib import metadata
-from io import BytesIO
-from typing import List
 
 import pandas as pd
-
-from mbs_results.utilities.file_selector import find_files
 
 
 def convert_column_to_datetime(dates):
@@ -22,35 +17,6 @@ def convert_column_to_datetime(dates):
     df : pd.Series
     """
     return pd.to_datetime(dates, format="%Y%m")
-
-
-def read_colon_separated_file(
-    filepath: str, column_names: List[str], period="period"
-) -> pd.DataFrame:
-    """
-    Read data stored as text file, columns separated by colon and any amount of
-    white space, and return the data as a dataframe with an additional column
-    containing the date derived from the six numbers at the end of the filename,
-    preceded by an underscore, eg `_202401`.
-
-    Parameters
-    ----------
-    filepath : str
-        location of data file to read
-    column_names : List[str]
-        list of column names in data file
-
-    Return
-    ------
-    pd.DataFrame
-    """
-    with open(filepath, mode="rb") as file:
-        buffer = BytesIO(file.read())
-        df = pd.read_csv(buffer, sep=r"\s*:\s*", names=column_names, engine="python")
-        date_string = re.findall(r"_(\d{6})", filepath)
-        df[period] = int(date_string[0])
-
-    return df
 
 
 def append_filter_out_questions(
@@ -96,42 +62,6 @@ def get_versioned_filename(prefix, config):
     return filename
 
 
-def read_and_combine_colon_sep_files(column_names: list, config: dict) -> pd.DataFrame:
-    """
-    reads in and combined colon separated files from the specified folder path
-
-    Parameters
-    ----------
-    folder_path : str
-        folder path containing the colon separated files
-    column_names : list
-        list of column names in colon separated file
-    config : dict
-        main pipeline config containing period column name
-
-    Returns
-    -------
-    pd.DataFrame
-        combined colon separated files returned as one dataframe.
-    """
-    sample_files = find_files(
-        file_path=config["folder_path"],
-        file_prefix=config["sample_prefix"],
-        current_period=config["current_period"],
-        revision_window=config["revision_window"],
-        config=config,
-    )
-
-    df = pd.concat(
-        [
-            read_colon_separated_file(f, column_names, period=config["period"])
-            for f in sample_files
-        ],
-        ignore_index=True,
-    )
-    return df
-
-
 def get_snapshot_alternate_path(config):
     """
     Check if snapshot_alternate_path is provided in the config and use this to load the
@@ -160,13 +90,3 @@ def get_snapshot_alternate_path(config):
     if not snapshot_file_path.endswith(os.sep):
         snapshot_file_path += os.sep
     return snapshot_file_path
-
-
-if __name__ == "__main__":
-    # Example usage
-    from mbs_results.utilities.inputs import load_config
-
-    config = load_config(None)
-
-    returned = get_snapshot_alternate_path(config)
-    print(returned)
