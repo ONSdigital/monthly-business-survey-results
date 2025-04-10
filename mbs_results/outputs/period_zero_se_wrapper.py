@@ -68,7 +68,7 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
     back_data : pd.DataFrame
         dataframe consisting only of back data i.e. period zero data
     config : dict
-        main pipeline config dictionary
+        main pipeline config dictionary, currently using SIC
 
     Returns
     -------

@@ -29,7 +29,7 @@ def create_selective_editing_question_output(
          previous period to take the weights for estimation of standardising factor in
          the format yyyymm
     **config: Dict
-          main pipeline configuration. Can be used to input the entire config dictionary
+          main pipeline configuration. Can be used to input the entire config dictionary, used for SIC
 
      Returns
      -------

@@ -149,6 +149,8 @@ def constrain(
         Column name containing question number.
     spp_form_id : str
         Column name containing form id.
+    sic: str
+        Calls in the SIC value from the Main config
 
     Returns
     -------

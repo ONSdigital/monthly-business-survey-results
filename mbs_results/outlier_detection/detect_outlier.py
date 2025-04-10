@@ -14,7 +14,8 @@ def join_l_values(df, l_values_path, classification_values_path, config):
         l_values_path, dtype={"question_no": "int64", "classification": "str"}
     )
 
-    # Merge on classification SIC map (merge on SIC to get classsificaion on df -> )
+    # Merge on classification SIC map (merge on SIC to get classsificaion on df -> ) 
+    #SIC is now called from config
     classification_values = pd.read_csv(classification_values_path, dtype=str)
 
     df = pd.merge(

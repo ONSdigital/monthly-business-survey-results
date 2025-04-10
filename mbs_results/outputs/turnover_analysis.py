@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def create_turnover_output(
-    additional_outputs_df: pd.DataFrame, current_period: int,  **config
+    additional_outputs_df: pd.DataFrame, current_period: int,sic,  **config
 ) -> pd.DataFrame:
     """
     Creating output for turnover analysis tool.
@@ -16,6 +16,8 @@ def create_turnover_output(
         Period of output results in the format YYYYMM
     **config: Dict
           main pipeline configuration. Can be used to input the entire config dictionary
+    sic
+        Using the SIC value from the main config
 
     Returns
     -------
@@ -53,7 +55,7 @@ def create_turnover_output(
 
         turnover_df = turnover_df[
             [
-                config['sic'],
+                sic,
                 "cell_no",
                 "reference",
                 "referencename",
@@ -72,7 +74,7 @@ def create_turnover_output(
 
         turnover_df = turnover_df[
             [
-                config['sic'],
+                sic,
                 "cell_no",
                 "reference",
                 "referencename",

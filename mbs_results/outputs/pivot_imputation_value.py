@@ -67,6 +67,8 @@ def create_imputation_link_output(
     -------
     pd.DataFrame
         Dataframe formatted according to the imputation_link output requirements.
+    sic
+        Using the SIC value from config to be used 
     """
     output_df = (
         additional_outputs_df.pipe(create_imputation_link_column)
