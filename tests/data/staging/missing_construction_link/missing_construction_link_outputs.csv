@@ -1,4 +1,4 @@
-period,questioncode,reference,cell_no,imputation_class_prev_period,construction_link,matched_pair_count,imputation_class
+period,questioncode,reference,cell_no,imputation_class_prev_period,construction_link,flag_construction_matches_count,imputation_class
 202101,49,101,5221,522,0.605,2,522
 202101,49,102,5221,522,0.605,,522
 202101,49,103,5221,522,0.605,2,522
