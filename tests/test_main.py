@@ -24,6 +24,7 @@ test_config = {
     "back_data_qv_path": input_path + "test_qv_009_202112.csv",
     "back_data_cp_path": input_path + "test_cp_009_202112.csv",
     "back_data_finalsel_path": input_path + "test_finalsel009_202112",
+    "sic": "rusic2007",
     "current_period": 202206,
     "revision_window": 6,
 }

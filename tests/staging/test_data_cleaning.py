@@ -109,7 +109,6 @@ def test_create_imputation_class(filepath):
     df_in = expected_output.drop(columns=["expected"])
 
     actual_output = create_imputation_class(df_in, "cell_no", "expected")
-
     assert_frame_equal(actual_output, expected_output)
 
 

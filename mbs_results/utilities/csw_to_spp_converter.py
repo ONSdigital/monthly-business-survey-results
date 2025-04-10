@@ -259,7 +259,7 @@ def load_and_join_finalsel(
             "cell_no",
             "formtype",
             "froempees",
-            "frosic2007",
+            config["sic"],
             "frotover",
         ]
     ]

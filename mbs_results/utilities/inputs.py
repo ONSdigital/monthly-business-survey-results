@@ -13,6 +13,7 @@ from mbs_results.utilities.merge_two_config_files import merge_two_config_files
 
 
 def load_config(config_user_dict=None):
+    """Load the dev and user configs and merges into one dictionary"""
     # Get the directory where mbs_results is installed
     parent_dir = os.path.dirname(mbs_results.__file__)
 
@@ -31,6 +32,11 @@ def load_config(config_user_dict=None):
         logger.info(
             "config dictionary updated with config user dictionary from the testing"
         )
+
+    logger.info("Appending config files with selected sic column name")
+    config["finalsel_keep_cols"].append(config["sic"])
+    config["population_keep_columns"].append(config["sic"])
+
     return config
 
 
