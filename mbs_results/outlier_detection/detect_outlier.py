@@ -18,8 +18,8 @@ def join_l_values(df, l_values_path, classification_values_path, config):
         dtype={"question_no": "int64", "classification": "str"},
     )
 
-    # Merge on classification SIC map (merge on SIC to get classsificaion on df -> ) 
-    #SIC is now called from config
+    # Merge on classification SIC map (merge on SIC to get classsificaion on df -> )
+    # SIC is now called from config
     classification_values = read_csv_wrapper(
         classification_values_path, config["platform"], config["bucket"], dtype=str
     )

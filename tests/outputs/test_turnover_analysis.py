@@ -32,7 +32,8 @@ class TestTurnoverAnalysis:
 
         actual_output = create_turnover_output(
             additional_outputs_df_input_data,
-            202301, sic ='frosic2007', 
+            202301,
+            sic="frosic2007",
         )
 
         assert_frame_equal(actual_output, expected_output)

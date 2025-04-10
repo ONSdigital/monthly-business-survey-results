@@ -6,7 +6,7 @@ from typing import List
 import pandas as pd
 
 from mbs_results.utilities.validation_checks import validate_manual_outlier_df
-from mbs_results.utilities.inputs import load_config
+
 logger = logging.getLogger(__name__)
 
 
@@ -117,7 +117,7 @@ def constrain(
     target: str,
     question_no: str,
     spp_form_id: str,
-    sic:str,
+    sic: str,
 ) -> pd.DataFrame:
     """
     Creates new rows with derived values based on form id and adds a relevant
@@ -273,7 +273,7 @@ def derive_questions(
             "cell_no",
             "converted_frotover",
             "froempment",
-            config['sic'],
+            config["sic"],
             "formtype",
         ],
         verify_integrity=False,
@@ -369,7 +369,7 @@ def calculate_derived_outlier_weights(
     spp_form_id: str,
     outlier_weight: str,
     winsorised_target: str,
-    config:dict,
+    config: dict,
 ) -> pd.DataFrame:
     """
     Function to calculate new outlier weights for derived questions

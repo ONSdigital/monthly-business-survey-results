@@ -141,7 +141,7 @@ def test_constrain_functionality(filepath):
 
 
 def test_calculate_derived_outlier_weights(filepath):
-    config= {'sic':"frosic2007"}
+    config = {"sic": "frosic2007"}
     df = pd.read_csv(
         filepath / "derived-questions-winsor.csv",
         index_col=False,
@@ -178,7 +178,7 @@ def test_calculate_derived_outlier_weights(filepath):
 
 
 def test_calculate_derived_outlier_weights_missing(filepath):
-    config= {'sic':"frosic2007"}
+    config = {"sic": "frosic2007"}
     df = pd.read_csv(
         filepath / "derived-questions-winsor-missing.csv",
         index_col=False,

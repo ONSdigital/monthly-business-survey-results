@@ -1,7 +1,5 @@
 import pandas as pd
 
-from mbs_results.utilities.inputs import load_config
-
 
 def merge_counts(
     input_df: pd.DataFrame,
@@ -51,7 +49,7 @@ def merge_counts(
 
 
 def create_imputation_link_output(
-    additional_outputs_df: pd.DataFrame, sic,**config
+    additional_outputs_df: pd.DataFrame, sic, **config
 ) -> pd.DataFrame:
     """
     A wrapper function that runs the necessary functions for creating the
@@ -68,12 +66,12 @@ def create_imputation_link_output(
     pd.DataFrame
         Dataframe formatted according to the imputation_link output requirements.
     sic
-        Using the SIC value from config to be used 
+        Using the SIC value from config to be used
     """
     output_df = (
         additional_outputs_df.pipe(create_imputation_link_column)
         .pipe(create_count_imps_column)
-        .pipe(format_imputation_link,sic=sic)
+        .pipe(format_imputation_link, sic=sic)
     )
 
     return output_df
@@ -159,7 +157,7 @@ def create_count_imps_column(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def format_imputation_link(df: pd.DataFrame, sic:str) -> pd.DataFrame:
+def format_imputation_link(df: pd.DataFrame, sic: str) -> pd.DataFrame:
     """
     Selects the relevant columns and renames them to match the expected imputation_link
     output format.
@@ -167,7 +165,8 @@ def format_imputation_link(df: pd.DataFrame, sic:str) -> pd.DataFrame:
     Parameters
     ----------
     df : pd.DataFrame
-        Dataframe containing currently selected sic column, cell_no, questioncode, imputation_link, # noqa: E501
+        Dataframe containing currently selected sic column, cell_no,
+        questioncode, imputation_link,
         imputation_flags_adjustedresponse and count_imps.
 
     Returns
@@ -176,7 +175,7 @@ def format_imputation_link(df: pd.DataFrame, sic:str) -> pd.DataFrame:
         Dataframe formatted according to the requirements for the imputation_link
         output.
     """
-    
+
     df = df[
         [
             sic,

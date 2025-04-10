@@ -13,9 +13,7 @@ from mbs_results.utilities.merge_two_config_files import merge_two_config_files
 
 
 def load_config(config_user_dict=None):
-    '''
-    SIC is now pulled from main config
-    '''
+    """Load the dev and user configs and merges into one dictionary"""
     # Get the directory where mbs_results is installed
     parent_dir = os.path.dirname(mbs_results.__file__)
 

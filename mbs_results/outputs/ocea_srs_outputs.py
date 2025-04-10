@@ -1,9 +1,9 @@
 import pandas as pd
 
-from mbs_results.utilities.inputs import load_config
 
-
-def produce_ocea_srs_outputs(additional_outputs_df: pd.DataFrame,config: dict) -> pd.DataFrame:
+def produce_ocea_srs_outputs(
+    additional_outputs_df: pd.DataFrame, config: dict
+) -> pd.DataFrame:
     """Produces outputs for OCEA/SRS, pulling SIC from the config
 
     Parameters
@@ -16,7 +16,7 @@ def produce_ocea_srs_outputs(additional_outputs_df: pd.DataFrame,config: dict) -
       output_df
           MBS output formatted according to SRS/OCEA requirements
     """
-    
+
     output_df = additional_outputs_df[
         [
             "reference",

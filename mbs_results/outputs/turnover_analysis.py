@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def create_turnover_output(
-    additional_outputs_df: pd.DataFrame, current_period: int,sic,  **config
+    additional_outputs_df: pd.DataFrame, current_period: int, sic, **config
 ) -> pd.DataFrame:
     """
     Creating output for turnover analysis tool.
