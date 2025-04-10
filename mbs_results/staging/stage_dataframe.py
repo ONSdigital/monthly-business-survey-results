@@ -1,4 +1,3 @@
-import glob
 import warnings
 
 import pandas as pd
@@ -10,16 +9,17 @@ from mbs_results.staging.create_missing_questions import (
 )
 from mbs_results.staging.data_cleaning import (
     convert_annual_thousands,
+    convert_cell_number,
+    create_imputation_class,
     enforce_datatypes,
     filter_out_questions,
     run_live_or_frozen,
 )
 from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.constrains import constrain
-from mbs_results.utilities.utils import (
-    convert_column_to_datetime,
-    read_colon_separated_file,
-)
+from mbs_results.utilities.file_selector import find_files
+from mbs_results.utilities.inputs import read_colon_separated_file
+from mbs_results.utilities.utils import convert_column_to_datetime
 
 
 def create_form_type_spp_column(
@@ -47,9 +47,7 @@ def create_form_type_spp_column(
     return contributors
 
 
-def read_and_combine_colon_sep_files(
-    folder_path: str, column_names: list, config: dict
-) -> pd.DataFrame:
+def read_and_combine_colon_sep_files(config: dict) -> pd.DataFrame:
     """
     reads in and combined colon separated files from the specified folder path
 
@@ -67,10 +65,24 @@ def read_and_combine_colon_sep_files(
     pd.DataFrame
         combined colon separated files returned as one dataframe.
     """
+    sample_files = find_files(
+        file_path=config["folder_path"],
+        file_prefix=config["sample_prefix"],
+        current_period=config["current_period"],
+        revision_window=config["revision_window"],
+        config=config,
+    )
     df = pd.concat(
         [
-            read_colon_separated_file(f, column_names, period=config["period"])
-            for f in glob.glob(folder_path)
+            read_colon_separated_file(
+                filepath=f,
+                column_names=config["sample_column_names"],
+                keep_columns=config["finalsel_keep_cols"],
+                period=config["period"],
+                import_platform=config["platform"],
+                bucket_name=config["bucket"],
+            )
+            for f in sample_files
         ],
         ignore_index=True,
     )
@@ -117,14 +129,11 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         responses, keep_columns=config["responses_keep_cols"], **config
     )
 
-    finalsel = read_and_combine_colon_sep_files(
-        config["sample_path"], config["sample_column_names"], config
-    )
+    finalsel = read_and_combine_colon_sep_files(config)
 
-    finalsel = finalsel[config["finalsel_keep_cols"]]
-    finalsel = enforce_datatypes(
-        finalsel, keep_columns=config["finalsel_keep_cols"], **config
-    )
+    # keep columns is applied in data reading from source, enforcing dtypes
+    # in all columns of finalsel
+    finalsel = enforce_datatypes(finalsel, keep_columns=list(finalsel), **config)
 
     # Filter contributors files here to temp fix this overlap
 
@@ -166,6 +175,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         save_full_path=config["output_path"]
         + snapshot_name
         + "_filter_out_questions.csv",
+        **config,
     )
 
     df = drop_derived_questions(
@@ -252,7 +262,6 @@ def start_of_period_staging(
         - "finalsel_keep_cols": List of columns to keep in the final selection.
         - "sample_path": Path to the sample files.
         - "sample_column_names": Column names for the sample files.
-        - "period_selected": The period selected for final selection.
         - "idbr_to_spp": Mapping from IDBR to SPP.
         - "form_id_spp": Column name for form ID SPP.
         - "form_id_idbr": Column name for form ID IDBR.
@@ -266,6 +275,15 @@ def start_of_period_staging(
         The staged imputation output DataFrame with missing questions created and
         merged with final selection.
     """
+
+    # Derive period_selected as next month of current period
+    current_period = pd.to_datetime(config["current_period"], format="%Y%m")
+
+    period_selected = current_period + pd.DateOffset(months=1)
+
+    # Saving in the dictionary so it can easilly be accessed
+    config["period_selected"] = int(period_selected.strftime("%Y%m"))
+
     if config["current_period"] in imputation_output["period"].unique():
 
         imputation_output = imputation_output.loc[
@@ -284,14 +302,18 @@ def start_of_period_staging(
             "construction_link",
             "questioncode",
             "imputation_flags_adjustedresponse",
+            "imputation_class",
         ]
-        imputation_output = imputation_output[keep_columns]
-
-        finalsel = read_and_combine_colon_sep_files(
-            config["sample_path"], config["sample_column_names"], config
+        imputation_output = imputation_output[keep_columns].rename(
+            columns={"imputation_class": "imputation_class_prev_period"}
         )
 
-        finalsel = finalsel.loc[finalsel["period"] == config["period_selected"]]
+        finalsel_path = config["sample_path"].replace(
+            "*", f"009_{config['period_selected']}"
+        )
+        finalsel = read_colon_separated_file(
+            finalsel_path, config["sample_column_names"], config["period"]
+        )
 
         finalsel = finalsel[config["finalsel_keep_cols"]]
         finalsel = enforce_datatypes(
@@ -337,8 +359,6 @@ def start_of_period_staging(
             imputation_output_with_missing, config["auxiliary_converted"]
         )
 
-        imputation_output_with_missing.to_csv("pre_constrain.csv")
-
         # Keep only questions present in next period and not current period
         dropped_questions = imputation_output_with_missing[
             ~imputation_output_with_missing.apply(
@@ -350,7 +370,11 @@ def start_of_period_staging(
                 axis=1,
             )
         ]
-        dropped_questions.to_csv(config["output_path"] + "dropped_previous_period.csv")
+        dropped_questions.to_csv(
+            config["output_path"]
+            + "dropped_previous_period_"
+            + f"se_period_{config['period_selected']}.csv"
+        )
 
         # Keep only the rows that match the condition
         imputation_output_with_missing = imputation_output_with_missing[
@@ -386,4 +410,59 @@ def start_of_period_staging(
             columns=f"imputation_flags_{config['target']}", inplace=True
         )
 
+        imputation_output_with_missing = new_questions_construction_link(
+            imputation_output_with_missing, config
+        )
+
     return imputation_output_with_missing
+
+
+def new_questions_construction_link(df, config):
+    """
+    Updates the 'construction_link' based on previous the previous period's imputation
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        The input DataFrame containing the data to be processed.
+    config : dict
+        A dictionary containing configuration parameters. Expected keys include:
+        - "cell_number" : str
+            The column name for cell numbers.
+        - "question_no" : str
+            The column name for question numbers.
+        - "period" : str
+            The column name for the period.
+
+    Returns
+    -------
+    pandas.DataFrame
+        The transformed DataFrame with updated 'construction_link' values.
+    """
+    prev_period_imp_class = "imputation_class_prev_period"
+    current_period_imp_class = "imputation_class"
+    cell_no = config["cell_number"]
+    question_no = config["question_no"]
+
+    df = convert_cell_number(df, cell_no)
+    df = create_imputation_class(df, cell_no, current_period_imp_class)
+
+    df[prev_period_imp_class] = df[prev_period_imp_class].combine_first(
+        df[current_period_imp_class]
+    )
+
+    # Update q49 construction link to be construction_link / matched_pairs
+    df.loc[df[question_no] == 49, "construction_link"] = (
+        df.loc[df[question_no] == 49, "construction_link"]
+        / df.loc[df[question_no] == 49, "flag_construction_matches_count"]
+    )
+
+    df["construction_link"] = df.groupby(
+        [config["period"], question_no, prev_period_imp_class]
+    )["construction_link"].transform(lambda group: group.ffill().bfill())
+
+    # Can drop after sign off, just for testing
+    # df.drop(columns=[config["cell_number"]+"_prev_period", config["cell_number"],
+    # "imputation_class"], inplace=True)
+
+    return df

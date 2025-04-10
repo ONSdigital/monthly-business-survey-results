@@ -11,6 +11,7 @@ def create_selective_editing_question_output(
     additional_outputs_df: pd.DataFrame,
     sic_domain_mapping_path: str,
     period_selected: int,
+    output_path: str,
     **config,
 ) -> pd.DataFrame:
     """
@@ -28,7 +29,7 @@ def create_selective_editing_question_output(
          previous period to take the weights for estimation of standardising factor in
          the format yyyymm
     **config: Dict
-          main pipeline configuration. Can be used to input the entire config dictionary
+          Main pipeline configuration. Used for SIC
 
      Returns
      -------
@@ -53,7 +54,7 @@ def create_selective_editing_question_output(
     df_with_domain = merge_domain(
         input_df=input_data,
         domain_mapping=sic_domain_mapping,
-        sic_input="frosic2007",
+        sic_input=config["sic"],
         sic_mapping="sic_5_digit",
     )
 
@@ -88,7 +89,7 @@ def create_selective_editing_question_output(
         auxiliary_value,
         on=["period", "reference", "imputation_class", "questioncode"],
         how="left",
-    ).drop("imputation_class", axis=1)
+    )
 
     # Survey code is required on this output, 009 is MBS code
     question_output["survey_code"] = "009"
@@ -106,6 +107,24 @@ def create_selective_editing_question_output(
             "adjustedresponse": "predicted_value",
             "questioncode": "question_code",
         }
+    )
+
+    question_output.to_csv(
+        output_path + "se_question_full_output_" + f"se_period_{period_selected}.csv",
+        index=False,
+    )
+    question_output.drop(
+        columns=[
+            "imputation_class",
+            "construction_link",
+            "converted_frotover",
+            "formtype",
+            "design_weight",
+            "outlier_weight",
+            "calibration_factor",
+        ],
+        axis=1,
+        inplace=True,
     )
 
     return question_output

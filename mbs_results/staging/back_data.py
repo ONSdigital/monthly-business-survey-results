@@ -3,17 +3,15 @@ import warnings
 import pandas as pd
 
 from mbs_results.staging.data_cleaning import enforce_datatypes
-from mbs_results.utilities.utils import (
-    convert_column_to_datetime,
-    read_colon_separated_file,
-)
+from mbs_results.utilities.inputs import read_colon_separated_file, read_csv_wrapper
+from mbs_results.utilities.utils import convert_column_to_datetime
 
 
 def is_back_data_date_ok(
     back_data_period: pd.Series,
     first_period: pd.Timestamp,
     current_period: int,
-    revision_period: int,
+    revision_window: int,
 ):
     """
     Applies checks on period 0 (back data period)
@@ -29,7 +27,7 @@ def is_back_data_date_ok(
         First period in staged data.
     current_period : int
         Period of pipeline run.
-    revision_period : int
+    revision_window : int
         Revision length of staged data.
 
     Raises
@@ -52,8 +50,8 @@ def is_back_data_date_ok(
     if len(back_data_period.unique()) != 1:
         raise ValueError("Too many dates in back data, must have only 1")
 
-    if period_0 != current_period - pd.DateOffset(months=revision_period):
-        raise ValueError("Back data period doesn't match the revision period")
+    if period_0 != current_period - pd.DateOffset(months=revision_window):
+        raise ValueError("Back data period doesn't match the revision window")
 
     if first_period != period_0 + pd.DateOffset(months=1):
         raise ValueError(
@@ -83,23 +81,26 @@ def read_back_data(config: dict) -> pd.DataFrame:
         Back data with all column as in source, period is converted to datetime.
     """
 
-    qv_df = pd.read_csv(config["back_data_qv_path"]).drop(
-        columns=["cell_no", "classification"], errors="ignore"
-    )
+    qv_df = read_csv_wrapper(
+        config["back_data_qv_path"], config["platform"], config["bucket"]
+    ).drop(columns=["cell_no", "classification"], errors="ignore")
     qv_df[config["period"]] = convert_column_to_datetime(qv_df[config["period"]])
 
-    cp_df = pd.read_csv(config["back_data_cp_path"]).drop(
-        columns=["cell_no", "classification"], errors="ignore"
-    )
+    cp_df = read_csv_wrapper(
+        config["back_data_cp_path"], config["platform"], config["bucket"]
+    ).drop(columns=["cell_no", "classification"], errors="ignore")
     cp_df[config["period"]] = convert_column_to_datetime(cp_df[config["period"]])
 
     finalsel = read_colon_separated_file(
-        config["back_data_finalsel_path"], config["sample_column_names"]
+        filepath=config["back_data_finalsel_path"],
+        column_names=config["sample_column_names"],
+        keep_columns=config["finalsel_keep_cols"],
+        import_platform=config["platform"],
+        bucket_name=config["bucket"],
     )
-    finalsel = finalsel[config["finalsel_keep_cols"]]
-    finalsel = enforce_datatypes(
-        finalsel, keep_columns=config["finalsel_keep_cols"], **config
-    )
+    # keep columns is applied in data reading from source, enforcing dtypes
+    # in all columns of finalsel
+    finalsel = enforce_datatypes(finalsel, keep_columns=list(finalsel), **config)
 
     join_type = "left"
 
@@ -156,7 +157,7 @@ def append_back_data(staged_data: pd.DataFrame, config: dict) -> pd.DataFrame:
         back_data[config["period"]],
         first_period,
         config["current_period"],
-        config["revision_period"],
+        config["revision_window"],
     )
 
     staged_and_back_data = pd.concat([back_data, staged_data], ignore_index=True)

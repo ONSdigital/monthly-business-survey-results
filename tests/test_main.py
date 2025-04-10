@@ -1,3 +1,7 @@
+import os.path
+
+import pytest
+
 from mbs_results.main import run_mbs_main
 
 input_path = "tests/data/test_main/input/"
@@ -12,17 +16,17 @@ test_config = {
     "l_values_path": input_path
     + "test_classification_question_number_l_value_mapping.csv",
     "manual_constructions_path": input_path + "test_manual_constructions.csv",
+    "manual_outlier_path": "",
     "mbs_file_name": "test_snaphot.json",
     "output_path": "tests/data/test_main/output/",
-    "population_path": input_path + "test_universe009_*",
-    "sample_path": input_path + "test_finalsel009_*",
+    "population_prefix": "test_universe009",
+    "sample_prefix": "test_finalsel009",
     "back_data_qv_path": input_path + "test_qv_009_202112.csv",
     "back_data_cp_path": input_path + "test_cp_009_202112.csv",
     "back_data_finalsel_path": input_path + "test_finalsel009_202112",
-    "period_selected": 202206,
+    "sic": "rusic2007",
     "current_period": 202206,
-    "previous_period": 202205,
-    "revision_period": 6,
+    "revision_window": 6,
 }
 
 
@@ -37,3 +41,22 @@ def test_main():
     config_user_test = test_config
 
     run_mbs_main(config_user_dict=config_user_test)
+
+
+# We want to avoid running it in the workflows
+@pytest.mark.skipif(
+    not (os.path.isfile("config_user.json")),
+    reason="Aplicable only in CDP and data stored in S3",
+)
+def test_main_with_s3():
+    """
+    Triggers a main run when config_user.json exists in the project
+    parent directory (some_path_to/monthly-business-survey-results/).
+    By default the pipeline runs on `s3` platform, this pytest expects
+    `config_user.json` to be filled properly and point to the testing data in
+    s3.
+
+    The testing is mainly useful for developers and reviewers to ensure pipeline
+    integration with s3
+    """
+    run_mbs_main()
