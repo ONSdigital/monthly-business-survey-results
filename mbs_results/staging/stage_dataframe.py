@@ -310,6 +310,7 @@ def start_of_period_staging(
             "questioncode",
             "imputation_flags_adjustedresponse",
             "imputation_class",
+            "flag_construction_matches_count",
         ]
         imputation_output = imputation_output[keep_columns].rename(
             columns={"imputation_class": "imputation_class_prev_period"}
@@ -321,12 +322,9 @@ def start_of_period_staging(
         #     "*", f"009_{config['period_selected']}"
         # )
 
-        finalsel = read_and_combine_colon_sep_files(
-            config["sample_column_names"], config
-        )
-        finalsel = finalsel[config["finalsel_keep_cols"]]
+        finalsel = read_and_combine_colon_sep_files(config)
         finalsel = enforce_datatypes(
-            finalsel, keep_columns=config["finalsel_keep_cols"], **config
+            finalsel, keep_columns=config["finalsel_keep_cols"] + ["period"], **config
         )
 
         idbr_to_spp_mapping = config["idbr_to_spp"]

@@ -89,7 +89,7 @@ def qa_selective_editing_outputs(config: dict):
         else:
             logger.info(f"No nulls or NaNs detected in {dataframe_name} dataframe")
 
-    finalsel = read_and_combine_colon_sep_files(config["sample_column_names"], config)
+    finalsel = read_and_combine_colon_sep_files(config)
     finalsel["formtype"] = finalsel["formtype"].astype(int)
 
     finalsel_unique_reference = set(finalsel["reference"].tolist())

@@ -31,7 +31,7 @@ def load_imputation_output(config: dict) -> pd.DataFrame:
         A DataFrame containing the imputation output data.
     """
     output_path = config["output_path"]
-    imputation_filename = get_versioned_filename("imputation_output", config)
+    imputation_filename = get_versioned_filename("imputation", config)
 
     imputation_output = pd.read_csv(output_path + imputation_filename)
 
