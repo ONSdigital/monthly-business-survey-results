@@ -1,24 +1,21 @@
 {
-    "bucket" : "onscdp-dev-data01-5320d6ca",
+    "bucket": "onscdp-dev-data01-5320d6ca",
     "ssl_file" : "/etc/pki/tls/certs/ca-bundle.crt",
-
     "calibration_group_map_path": "",
     "classification_values_path": "",
     "folder_path": "",
     "l_values_path": "",
     "manual_constructions_path": "",
+    "manual_outlier_path": "",
     "mbs_file_name": "",
     "output_path": "",
-    "population_path": "",
-    "sample_path": "",
+    "population_prefix": "",
+    "sample_prefix": "",
     "back_data_qv_path":"",
     "back_data_cp_path":"",
     "back_data_finalsel_path":"",
     "sic_domain_mapping_path": "",
-    "threshold_filepath":"",
-
-    "period_selected": 202303,
-    "current_period" : 202303,
-    "previous_period" : 202302,
-    "revision_period": 13
+    "threshold_filepath": "",
+    "current_period": 202303,
+    "revision_window": 13
 }

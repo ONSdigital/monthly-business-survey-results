@@ -1,5 +1,6 @@
 {
-    "bucket" : "onscdp-dev-data01-5320d6ca",
+    "bucket": "onscdp-dev-data01-5320d6ca",
+    "ssl_file" : "/etc/pki/tls/certs/ca-bundle.crt",
     "calibration_group_map_path": "",
     "classification_values_path": "",
     "folder_path": "",
