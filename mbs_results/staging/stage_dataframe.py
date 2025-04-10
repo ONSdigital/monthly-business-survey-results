@@ -450,14 +450,15 @@ def new_questions_construction_link(df, config):
         df[current_period_imp_class]
     )
 
+    # Update q49 construction link to be construction_link / matched_pairs
+    df.loc[df[question_no] == 49, "construction_link"] = (
+        df.loc[df[question_no] == 49, "construction_link"]
+        / df.loc[df[question_no] == 49, "flag_construction_matches_count"]
+    )
+
     df["construction_link"] = df.groupby(
         [config["period"], question_no, prev_period_imp_class]
     )["construction_link"].transform(lambda group: group.ffill().bfill())
-
-    df.loc[df[question_no] == 49, "construction_link"] = (
-        df.loc[df[question_no] == 49, "construction_link"]
-        / df.loc[df[question_no] == 49, "matched_pair_count"]
-    )
 
     # Can drop after sign off, just for testing
     # df.drop(columns=[config["cell_number"]+"_prev_period", config["cell_number"],
