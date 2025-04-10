@@ -5,9 +5,8 @@ from typing import List
 
 import pandas as pd
 
-from mbs_results.utilities.inputs import load_config
 from mbs_results.utilities.validation_checks import validate_manual_outlier_df
-
+from mbs_results.utilities.inputs import load_config
 logger = logging.getLogger(__name__)
 
 
@@ -118,6 +117,7 @@ def constrain(
     target: str,
     question_no: str,
     spp_form_id: str,
+    sic:str,
 ) -> pd.DataFrame:
     """
     Creates new rows with derived values based on form id and adds a relevant
@@ -155,7 +155,6 @@ def constrain(
     final_constrained : pd.DataFrame
         Original dataframe with constrains.
     """
-    config = load_config(None)
     derive_map, derive_map_null = create_derive_map(df, spp_form_id)
 
     df[f"pre_derived_{target}"] = df[target]
@@ -171,7 +170,7 @@ def constrain(
             "cell_no",
             "converted_frotover",
             "froempment",
-            config["sic"],
+            sic,
             "formtype",
         ],
         verify_integrity=False,
@@ -231,6 +230,7 @@ def derive_questions(
     target: str,
     question_no: str,
     spp_form_id: str,
+    config: dict,
 ) -> pd.DataFrame:
     """
     Function to calculate new o-weights post winsorisation
@@ -271,7 +271,7 @@ def derive_questions(
             "cell_no",
             "converted_frotover",
             "froempment",
-            "frosic2007",
+            config['sic'],
             "formtype",
         ],
         verify_integrity=False,
@@ -367,6 +367,7 @@ def calculate_derived_outlier_weights(
     spp_form_id: str,
     outlier_weight: str,
     winsorised_target: str,
+    config:dict,
 ) -> pd.DataFrame:
     """
     Function to calculate new outlier weights for derived questions
@@ -418,6 +419,7 @@ def calculate_derived_outlier_weights(
             target,
             question_no,
             spp_form_id,
+            config,
         )
     else:
         # Skipping calculating derived Q's
@@ -430,6 +432,7 @@ def calculate_derived_outlier_weights(
         winsorised_target,
         question_no,
         spp_form_id,
+        config,
     )
 
     post_win_derived = post_win_derived.loc[

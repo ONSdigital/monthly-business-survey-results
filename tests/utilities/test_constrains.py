@@ -109,6 +109,7 @@ def test_constrain_functionality(filepath):
         "target",
         "question_no",
         "spp_form_id",
+        "frosic2007",
     )
 
     # Dropping dummy columns as these are unchanged in function
@@ -140,6 +141,7 @@ def test_constrain_functionality(filepath):
 
 
 def test_calculate_derived_outlier_weights(filepath):
+    config= {'sic':"frosic2007"}
     df = pd.read_csv(
         filepath / "derived-questions-winsor.csv",
         index_col=False,
@@ -162,6 +164,7 @@ def test_calculate_derived_outlier_weights(filepath):
         "spp_form_id",
         "outlier_weight",
         "new_target_variable",
+        config,
     )
 
     sorting_by = ["reference", "period", "question_no", "spp_form_id"]
@@ -175,6 +178,7 @@ def test_calculate_derived_outlier_weights(filepath):
 
 
 def test_calculate_derived_outlier_weights_missing(filepath):
+    config= {'sic':"frosic2007"}
     df = pd.read_csv(
         filepath / "derived-questions-winsor-missing.csv",
         index_col=False,
@@ -206,6 +210,7 @@ def test_calculate_derived_outlier_weights_missing(filepath):
         "spp_form_id",
         "outlier_weight",
         "new_target_variable",
+        config,
     )
 
     sorting_by = ["reference", "period", "question_no", "spp_form_id"]

@@ -24,8 +24,8 @@ def ocea_srs_output(filepath):
 
 class TestProduceOceaSrsOutputs:
     def test_produce_ocea_srs_outputs(self, ocea_srs_input, ocea_srs_output):
-
-        actual_output = produce_ocea_srs_outputs(ocea_srs_input)
+        config = {'sic':'frosic2007'}
+        actual_output = produce_ocea_srs_outputs(ocea_srs_input, config)
 
         expected_output = ocea_srs_output
 

@@ -51,7 +51,7 @@ def merge_counts(
 
 
 def create_imputation_link_output(
-    additional_outputs_df: pd.DataFrame, **config
+    additional_outputs_df: pd.DataFrame, sic,**config
 ) -> pd.DataFrame:
     """
     A wrapper function that runs the necessary functions for creating the
@@ -71,7 +71,7 @@ def create_imputation_link_output(
     output_df = (
         additional_outputs_df.pipe(create_imputation_link_column)
         .pipe(create_count_imps_column)
-        .pipe(format_imputation_link)
+        .pipe(format_imputation_link,sic=sic)
     )
 
     return output_df
@@ -157,7 +157,7 @@ def create_count_imps_column(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def format_imputation_link(df: pd.DataFrame) -> pd.DataFrame:
+def format_imputation_link(df: pd.DataFrame, sic:str) -> pd.DataFrame:
     """
     Selects the relevant columns and renames them to match the expected imputation_link
     output format.
@@ -174,10 +174,10 @@ def format_imputation_link(df: pd.DataFrame) -> pd.DataFrame:
         Dataframe formatted according to the requirements for the imputation_link
         output.
     """
-    config = load_config(None)
+    
     df = df[
         [
-            config["sic"],
+            sic,
             "cell_no",
             "questioncode",
             "imputation_link",
@@ -189,7 +189,7 @@ def format_imputation_link(df: pd.DataFrame) -> pd.DataFrame:
 
     renamed_df = df.rename(
         columns={
-            config["sic"]: "sic",
+            sic: "sic",
             "cell_no": "cell",
             "questioncode": "Question",
             "imputation_flags_adjustedresponse": "link_type",

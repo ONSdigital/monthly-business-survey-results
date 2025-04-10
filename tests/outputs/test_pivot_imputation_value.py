@@ -107,8 +107,8 @@ class TestFormatImputationLink:
         input_df = format_imputation_link_input
 
         expected_output = format_imputation_link_output
-
-        actual_output = format_imputation_link(input_df)
+    
+        actual_output = format_imputation_link(input_df,'frosic2007')
 
         assert_frame_equal(actual_output, expected_output)
 
@@ -122,6 +122,6 @@ class TestFormatCreateImputationLinkOutput:
 
         expected_output = format_imputation_link_output
 
-        actual_output = create_imputation_link_output(input_df)
+        actual_output = create_imputation_link_output(input_df,'frosic2007')
 
         assert_frame_equal(actual_output, expected_output)

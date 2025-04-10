@@ -76,6 +76,7 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
         target=config["target"],
         question_no=config["question_no"],
         spp_form_id=config["form_id_spp"],
+        sic=config["sic"],
     )
 
     post_constrain["imputed_and_derived_flag"] = post_constrain.apply(
