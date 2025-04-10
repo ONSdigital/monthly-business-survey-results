@@ -30,7 +30,7 @@ def get_weighted_adj_val_time_series(
     """
 
     additional_outputs_df = merge_domain(
-        additional_outputs_df, sic_class_mapping, "frosic2007", "sic_5_digit"
+        additional_outputs_df, sic_class_mapping, config["sic"], "sic_5_digit"
     )
 
     # TODO: Find out calculation of weighted adjusted value and derive as necessary

@@ -11,6 +11,7 @@
     "design_weight": "design_weight",
     "status": "statusencoded",
     "form_id_idbr": "formtype",
+    "sic": "rusic2007",
     "group": "calibration_group",
     "calibration_group": "calibration_group",
     "period": "period",
@@ -37,7 +38,10 @@
         "formtype": "str",
         "status": "str",
         "statusencoded": "int",
+        "frosic2003": "str",
+        "rusic2003": "str",
         "frosic2007": "str",
+        "rusic2007": "str",
         "froempment": "int",
         "frotover": "float",
         "cell_no": "int"},
@@ -61,7 +65,6 @@
         "formtype",
         "cell_no",
         "froempment",
-        "frosic2007",
         "frotover",
         "reference"
     ],
@@ -81,7 +84,7 @@
         "selmkr", "inclexcl"
     ],
     "population_keep_columns": [
-        "reference", "region", "frotover", "cell_no", "frosic2007"
+        "reference", "region", "frotover", "cell_no"
     ],
 
     "sample_column_names": [
