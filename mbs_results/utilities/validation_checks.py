@@ -287,8 +287,16 @@ def validate_outlier_detection(df: pd.DataFrame, config: dict):
     
     design_weight = config["design_weight"]
     
-    if ((df[design_weight] == 1) & (df["outlier_weight"] != 1)).any():
-      logger.error("There are instances where the design weight = 1 and outlier_weight != 1.")
+    invalid_rows = df[(df[design_weight] == 1) & (df["outlier_weight"] != 1)]
+    
+    if not invalid_rows.empty:
+        references = invalid_rows["reference"].tolist()
+        
+        # Log the error with the references included
+        logger.error(
+            "There are instances where the design weight = 1 and outlier_weight != 1."
+            f"References: {references}"
+        )
     
     outlier_filename = get_versioned_filename("outlier_output", config)
 

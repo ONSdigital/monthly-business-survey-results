@@ -136,7 +136,6 @@ class TestValidateEstimation:
             validate_estimation(df=test_data, config=self.test_config)
 
 def test_validate_outlier_weight_error(caplog):
-    # Create a temporary directory for the output path
     with tempfile.TemporaryDirectory() as temp_dir:
         test_config = {
             "design_weight": "design_weight",
@@ -155,5 +154,10 @@ def test_validate_outlier_weight_error(caplog):
         with caplog.at_level(logging.ERROR):
             validate_outlier_detection(df=test_data, config=test_config)
 
-        # Assert that the error message is captured in the logs
-        assert "There are instances where the design weight = 1 and outlier_weight != 1." in caplog.text
+        expected_message = (
+            "There are instances where the design weight = 1 and outlier_weight != 1."
+            f"References: {[1]}"
+        )
+
+        # Assert that the expected message is in the captured logs
+        assert expected_message in caplog.text
