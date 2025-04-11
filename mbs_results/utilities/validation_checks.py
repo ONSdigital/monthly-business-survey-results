@@ -284,6 +284,12 @@ def validate_estimation(df: pd.DataFrame, config: dict):
 def validate_outlier_detection(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post outliering")
     output_path = config["output_path"]
+    
+    design_weight = config["design_weight"]
+    
+    if ((df[design_weight] == 1) & (df["outlier_weight"] != 1)).any():
+      logger.error("There are instances where the design weight = 1 and outlier_weight != 1.")
+    
     outlier_filename = get_versioned_filename("outlier_output", config)
 
     # Must be same as save_full_path argument of filter_out_questions() (in staging)
