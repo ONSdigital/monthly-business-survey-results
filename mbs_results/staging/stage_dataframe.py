@@ -1,4 +1,5 @@
 import logging
+import os
 import warnings
 
 import pandas as pd
@@ -24,6 +25,8 @@ from mbs_results.utilities.utils import (
     convert_column_to_datetime,
     get_snapshot_alternate_path,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def create_form_type_spp_column(
@@ -398,6 +401,7 @@ def start_of_period_staging(
             target=config["target"],
             question_no=config["question_no"],
             spp_form_id=config["form_id_spp"],
+            sic=config["sic"],
         )
         imputation_output_with_missing["imputed_and_derived_flag"] = (
             imputation_output_with_missing.apply(
@@ -416,6 +420,8 @@ def start_of_period_staging(
         imputation_output_with_missing = new_questions_construction_link(
             imputation_output_with_missing, config
         )
+
+        check_construction_links(imputation_output_with_missing, config)
 
     return imputation_output_with_missing
 
@@ -455,10 +461,19 @@ def new_questions_construction_link(df, config):
     )
 
     # Update q49 construction link to be construction_link / matched_pairs
-    df.loc[df[question_no] == 49, "construction_link"] = (
-        df.loc[df[question_no] == 49, "construction_link"]
-        / df.loc[df[question_no] == 49, "flag_construction_matches_count"]
+    bool_mask = (df[question_no] == 49) & (df["flag_construction_matches_count"] != 0)
+    df.loc[bool_mask, "construction_link"] = df.loc[
+        bool_mask, "construction_link"
+    ] / df.loc[bool_mask, "flag_construction_matches_count"].fillna(1)
+
+    num_inf_construction_links = (
+        df.loc[df[question_no] == 49, "construction_link"].isin([float("inf")]).sum()
     )
+    if num_inf_construction_links > 0:
+        logging.warning(
+            "Number of times construction link is inf: "
+            + f"{num_inf_construction_links}"
+        )
 
     df["construction_link"] = df.groupby(
         [config["period"], question_no, prev_period_imp_class]
@@ -469,3 +484,29 @@ def new_questions_construction_link(df, config):
     # "imputation_class"], inplace=True)
 
     return df
+
+
+def check_construction_links(df: pd.DataFrame, config: dict):
+
+    logger.info("checking values for construction link for q49")
+    df_large_construction_link = df.loc[
+        (df["construction_link"] > 1)
+        & df[config["question_no"]].astype(int).isin([49]),
+        [config["reference"], "construction_link"],
+    ]
+    logger.info(
+        "number of records with construction link > 1 for q49: "
+        + f"{df_large_construction_link.shape[0]}"
+    )
+    if not df_large_construction_link.empty:
+        output_file = os.path.join(
+            config["output_path"],
+            f"q49_references_con_link_greater_1_{config['current_period']}.csv",
+        )
+        df_large_construction_link.to_csv(
+            output_file,
+            index=False,
+        )
+        logger.info(
+            f"references with construction link > 1 for q49 saved to {output_file}"
+        )
