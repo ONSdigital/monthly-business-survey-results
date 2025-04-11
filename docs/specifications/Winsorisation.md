@@ -10,7 +10,7 @@ Two-sided Winsorisation is out of scope.
 ## 2.0 Terminology
 
 * target variable - The variable of interest that requires data values to be winsorised
-* design weight - a survey weight that is the inverse of a unit's selection probability
+* design weight - a survey weight that is the inverse of a unit's selection probability (sometimes referred to as an a weight)
 * auxiliary variable - The variable used as a predictor for a contributor's target variable under the model
 * L-value - a bias parameter required for winsorisation
 * calibration factor - a sample dependent weight often referred to as a g weight
