@@ -16,5 +16,6 @@
     "sic_domain_mapping_path": "",
     "threshold_filepath": "",
     "current_period": 202303,
-    "revision_window": 13
+    "revision_window": 13,
+    "snapshot_alternate_path_OPTIONAL": null
 }

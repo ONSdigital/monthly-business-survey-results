@@ -1,3 +1,4 @@
+import logging
 import warnings
 
 import pandas as pd
@@ -19,7 +20,10 @@ from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.inputs import read_colon_separated_file
-from mbs_results.utilities.utils import convert_column_to_datetime
+from mbs_results.utilities.utils import (
+    convert_column_to_datetime,
+    get_snapshot_alternate_path,
+)
 
 
 def create_form_type_spp_column(
@@ -111,8 +115,10 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     period = config["period"]
     reference = config["reference"]
 
+    snapshot_file_path = get_snapshot_alternate_path(config)
+
     contributors, responses = get_dfs_from_spp(
-        config["folder_path"] + config["mbs_file_name"],
+        snapshot_file_path + config["mbs_file_name"],
         config["platform"],
         config["bucket"],
     )
@@ -288,7 +294,9 @@ def start_of_period_staging(
         imputation_output = imputation_output.loc[
             imputation_output["period"] == config["current_period"]
         ]
-
+        logging.info(
+            "Setting current_period to the period for SE outputs. Overwriting SEconfig"
+        )
         imputation_output["period"] = convert_column_to_datetime(
             imputation_output["period"]
         ) + pd.DateOffset(months=1)
@@ -302,21 +310,17 @@ def start_of_period_staging(
             "questioncode",
             "imputation_flags_adjustedresponse",
             "imputation_class",
+            "flag_construction_matches_count",
         ]
         imputation_output = imputation_output[keep_columns].rename(
             columns={"imputation_class": "imputation_class_prev_period"}
         )
 
-        finalsel_path = config["sample_path"].replace(
-            "*", f"009_{config['period_selected']}"
-        )
-        finalsel = read_colon_separated_file(
-            finalsel_path, config["sample_column_names"], config["period"]
-        )
+        config["current_period"] = config["selective_editing_period"]
 
-        finalsel = finalsel[config["finalsel_keep_cols"]]
+        finalsel = read_and_combine_colon_sep_files(config)
         finalsel = enforce_datatypes(
-            finalsel, keep_columns=config["finalsel_keep_cols"], **config
+            finalsel, keep_columns=config["finalsel_keep_cols"] + ["period"], **config
         )
 
         idbr_to_spp_mapping = config["idbr_to_spp"]
