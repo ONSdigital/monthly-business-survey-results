@@ -461,10 +461,15 @@ def new_questions_construction_link(df, config):
     )
 
     # Update q49 construction link to be construction_link / matched_pairs
-    bool_mask = (df[question_no] == 49) & (df["flag_construction_matches_count"] != 0)
-    df.loc[bool_mask, "construction_link"] = df.loc[
-        bool_mask, "construction_link"
-    ] / df.loc[bool_mask, "flag_construction_matches_count"].fillna(1)
+    bool_mask = (
+        (df[question_no] == 49)
+        & (df["flag_construction_matches_count"] != 0)
+        & (df["flag_construction_matches_count"].notna())
+    )
+    df.loc[bool_mask, "construction_link"] = (
+        df.loc[bool_mask, "construction_link"]
+        / df.loc[bool_mask, "flag_construction_matches_count"]
+    )
 
     num_inf_construction_links = (
         df.loc[df[question_no] == 49, "construction_link"].isin([float("inf")]).sum()
