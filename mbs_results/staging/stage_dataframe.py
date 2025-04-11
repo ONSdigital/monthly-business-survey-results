@@ -318,10 +318,6 @@ def start_of_period_staging(
 
         config["current_period"] = config["selective_editing_period"]
 
-        # finalsel_path = config["sample_path"].replace(
-        #     "*", f"009_{config['period_selected']}"
-        # )
-
         finalsel = read_and_combine_colon_sep_files(config)
         finalsel = enforce_datatypes(
             finalsel, keep_columns=config["finalsel_keep_cols"] + ["period"], **config
