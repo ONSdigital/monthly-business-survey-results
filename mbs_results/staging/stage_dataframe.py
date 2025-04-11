@@ -492,18 +492,28 @@ def new_questions_construction_link(df, config):
 
 
 def check_construction_links(df: pd.DataFrame, config: dict):
+    """
+    checks construction links for q49. Raises warning and outputs dataframe if any
+    construction links are greater than 1 for q49
 
+    Parameters
+    ----------
+    df : pd.DataFrame
+        main dataframe containing the data to be processed
+    config : dict
+        main config dictionary
+    """
     logger.info("checking values for construction link for q49")
     df_large_construction_link = df.loc[
         (df["construction_link"] > 1)
         & df[config["question_no"]].astype(int).isin([49]),
         [config["reference"], "construction_link"],
     ]
-    logger.info(
-        "number of records with construction link > 1 for q49: "
-        + f"{df_large_construction_link.shape[0]}"
-    )
     if not df_large_construction_link.empty:
+        logger.warning(
+            "number of records with construction link > 1 for q49: "
+            + f"{df_large_construction_link.shape[0]}"
+        )
         output_file = os.path.join(
             config["output_path"],
             f"q49_references_con_link_greater_1_{config['current_period']}.csv",
