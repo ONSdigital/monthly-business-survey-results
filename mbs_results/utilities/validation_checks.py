@@ -1,10 +1,11 @@
 import logging
 import os
 import warnings
-from importlib import metadata
 
+import numpy as np
 import pandas as pd
 
+from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.utils import (
     append_filter_out_questions,
     get_versioned_filename,
@@ -243,8 +244,16 @@ def validate_staging(df: pd.DataFrame, config: dict):
 def validate_imputation(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post imputation")
     output_path = config["output_path"]
+
     imputation_filename = get_versioned_filename("imputation", config)
-    df.to_csv(output_path + imputation_filename, index=False)
+
+    write_csv_wrapper(
+        df=df,
+        save_path=output_path + imputation_filename,
+        import_platform=config["platform"],
+        bucket_name=config["bucket"],
+        index=False,
+    )
 
 
 def validate_estimation(df: pd.DataFrame, config: dict):
@@ -278,7 +287,13 @@ def validate_estimation(df: pd.DataFrame, config: dict):
             f'There are {sampled_nas} NA(s) in the {config["sampled"]} column.'
         )
 
-    df.to_csv(output_path + estimate_filename, index=False)
+    write_csv_wrapper(
+        df,
+        output_path + estimate_filename,
+        config["platform"],
+        config["bucket"],
+        index=False,
+    )
 
 
 def validate_outlier_detection(df: pd.DataFrame, config: dict):
@@ -307,92 +322,61 @@ def validate_outlier_detection(df: pd.DataFrame, config: dict):
     snapshot_name = os.path.splitext(config["mbs_file_name"])[0]
 
     filtered_questions_path = (
-        config["output_path"] + snapshot_name + "filter_out_questions.csv"
+        config["output_path"] + snapshot_name + "_filter_out_questions.csv"
     )
-
     df = append_filter_out_questions(df, filtered_questions_path)
-    df.to_csv(output_path + outlier_filename, index=False)
+    write_csv_wrapper(
+        df,
+        output_path + outlier_filename,
+        config["platform"],
+        config["bucket"],
+        index=False,
+    )
 
 
-def qa_selective_editing_outputs(config: dict):
+def validate_manual_outlier_df(
+    df: pd.DataFrame,
+    reference: str,
+    period: str,
+    question_code: str,
+) -> bool:
     """
-    function to QA check the selective editing outputs
-    Outputs warnings to logging file if any issues are found
-
-    Parameters
-    ----------
-    config : dict
-        main config for pipeline
+    Function to perform a set of validation checks on the ingested
+    manual outlier data that is used to overwrite post-winsorisation
+    derived outliers
     """
 
-    # Loading SE outputs, function to create SE outputs cannot return them, easier to
-    # load them here
+    # Check required columns exist
+    if set([reference, period, question_code, "manual_outlier_weight"]).issubset(
+        df.columns
+    ):
 
-    logger.info("QA checking selective editing outputs")
+        # Force column order:
+        df = df[[reference, period, question_code, "manual_outlier_weight"]]
 
-    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
-    period = config["period_selected"]
-    se_contributor_path = (
-        config["output_path"] + f"secontributors009_{period}_v{file_version_mbs}.csv"
-    )
-    se_question_path = (
-        config["output_path"] + f"sequestions009_{period}_v{file_version_mbs}.csv"
-    )
+        # Check if data types do not match
+        if df.dtypes.to_dict() != {
+            reference: np.int64,
+            period: np.int64,
+            question_code: np.int64,
+            "manual_outlier_weight": np.float64,
+        }:
 
-    contributor_df = pd.read_csv(se_contributor_path).rename(
-        columns={"ruref": "reference"}
-    )
-    question_df = pd.read_csv(se_question_path).rename(columns={"ruref": "reference"})
+            raise Exception("Manual outlier data is not of the correct type")
 
-    # Checking that references match
-    contributor_unique_reference = contributor_df["reference"].unique().tolist()
-    question_unique_reference = question_df["reference"].unique().tolist()
-    unmatched_references = list(
-        set(contributor_unique_reference).symmetric_difference(
-            set(question_unique_reference)
-        )
-    )
+        # Check if reference, period and question code have missing
+        if df[[reference, period, question_code]].isna().all().all():
 
-    if len(unmatched_references) > 0:
-        logger.warning(
-            f"There are {len(unmatched_references)} unmatched references in the"
-            " contributor and question SE outputs"
-            f"unmatched references {unmatched_references}"
-        )
+            raise Exception("Manual outlier weights are not linked to reponse records")
 
-    # Checking for duplicates
-    groupby_cols = {
-        "contributor": ["period", "reference"],
-        "question": ["period", "reference", "question_code"],
-    }
-    dataframe_dict = {"contributor": contributor_df, "question": question_df}
-    for dataframe_name in ["contributor", "question"]:
-        dataframe = dataframe_dict.get(dataframe_name)
-        duplicated = dataframe[
-            dataframe.duplicated(subset=groupby_cols[dataframe_name], keep=False)
-        ]
-        if duplicated.shape[0] > 0:
-            logger.warning(
-                f"""There are {duplicated.shape[0]}
-            duplicated {dataframe_name} in the SE outputs"""
-            )
-            logger.warning(duplicated)
-        else:
-            logger.info(
-                f"no duplicates in {dataframe_name} dataframe columns "
-                f"{groupby_cols[dataframe_name]}"
-            )
+        # Check if all manual_outlier_weight is > 1 or < 0
+        if (df["manual_outlier_weight"].max() > 1.0) or (
+            df["manual_outlier_weight"].min() < 0.0
+        ):
 
-        if dataframe.isnull().sum(axis=0).any():
-            null_columns = dataframe.isnull().sum(axis=0)
-            null_columns = null_columns[null_columns > 0]
-            if not null_columns.empty:
-                logger.warning(
-                    f"Nulls or NaNs detected in se {dataframe_name} "
-                    "dataframe in the following columns:\n"
-                    f"{null_columns}"
-                )
-        else:
-            logger.info(f"No nulls or NaNs detected in {dataframe_name} dataframe")
+            raise Exception("Manual outlier weights are invalid")
 
-    logger.info("QA of SE outputs finished")
+    else:
+        raise Exception("Manual outlier data does not have the correct columns")
+
+    return True

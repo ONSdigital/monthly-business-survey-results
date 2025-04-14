@@ -1,6 +1,7 @@
-period,questioncode,reference,cell_no,imputation_class_prev_period,construction_link
-202101,49,101,5221,522,1.21
-202101,49,102,5221,,
-202101,49,103,5221,522,1.21
-202101,50,104,5221,,
-202101,50,105,5221,522,0.08
+period,questioncode,reference,cell_no,imputation_class_prev_period,construction_link,flag_construction_matches_count
+202101,49,101,5221,522,1.21,2
+202101,49,102,5221,,,
+202101,49,103,5221,522,1.21,2
+202101,50,104,5221,,,
+202101,50,105,5221,522,0.08,2
+202102,49,101,5221,522,1,0

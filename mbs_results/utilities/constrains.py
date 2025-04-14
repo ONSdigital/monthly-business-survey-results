@@ -1,8 +1,13 @@
+import logging
 import operator
 import warnings
 from typing import List
 
 import pandas as pd
+
+from mbs_results.utilities.validation_checks import validate_manual_outlier_df
+
+logger = logging.getLogger(__name__)
 
 
 def replace_values_index_based(
@@ -112,6 +117,7 @@ def constrain(
     target: str,
     question_no: str,
     spp_form_id: str,
+    sic: str,
 ) -> pd.DataFrame:
     """
     Creates new rows with derived values based on form id and adds a relevant
@@ -143,13 +149,14 @@ def constrain(
         Column name containing question number.
     spp_form_id : str
         Column name containing form id.
+    sic: str
+        Calls in the SIC value from the Main config
 
     Returns
     -------
     final_constrained : pd.DataFrame
         Original dataframe with constrains.
     """
-
     derive_map, derive_map_null = create_derive_map(df, spp_form_id)
 
     df[f"pre_derived_{target}"] = df[target]
@@ -165,7 +172,7 @@ def constrain(
             "cell_no",
             "converted_frotover",
             "froempment",
-            "frosic2007",
+            sic,
             "formtype",
         ],
         verify_integrity=False,
@@ -225,6 +232,7 @@ def derive_questions(
     target: str,
     question_no: str,
     spp_form_id: str,
+    config: dict,
 ) -> pd.DataFrame:
     """
     Function to calculate new o-weights post winsorisation
@@ -265,7 +273,7 @@ def derive_questions(
             "cell_no",
             "converted_frotover",
             "froempment",
-            "frosic2007",
+            config["sic"],
             "formtype",
         ],
         verify_integrity=False,
@@ -361,6 +369,7 @@ def calculate_derived_outlier_weights(
     spp_form_id: str,
     outlier_weight: str,
     winsorised_target: str,
+    config: dict,
 ) -> pd.DataFrame:
     """
     Function to calculate new outlier weights for derived questions
@@ -412,6 +421,7 @@ def calculate_derived_outlier_weights(
             target,
             question_no,
             spp_form_id,
+            config,
         )
     else:
         # Skipping calculating derived Q's
@@ -424,6 +434,7 @@ def calculate_derived_outlier_weights(
         winsorised_target,
         question_no,
         spp_form_id,
+        config,
     )
 
     post_win_derived = post_win_derived.loc[
@@ -577,3 +588,94 @@ def update_derived_weight_and_winsorised_value(
     df.drop(columns=["post_win_o_weight", "post_winsorised_value"], inplace=True)
 
     return df
+
+
+def replace_outlier_weights(
+    df: pd.DataFrame,
+    reference: str,
+    period: str,
+    question_code: str,
+    outlier_weight: str,
+    manual_outlier_path: str,
+) -> pd.DataFrame:
+    """
+    Overwrite calculated outlier weights with manual outlier weights
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    reference : str
+        Column name containing reference.
+    period : str
+        Column name containing period.
+    question_code : str
+        Column name containing question code.
+    outlier_weight : str
+        Column name containing outlier weight (refered also as o-weight).
+    manual_outlier_weight : str
+        Column name containing manual outlier weight, ingested from the
+        manual outliers file
+    manual_outlier_path : str
+        String containing file path to manual outliers file.
+
+    Returns
+    -------
+    df : pd.Dataframe
+        Original dataframe with weights updated to equal those supplied
+        in the manual outliers file, if it exists.
+    """
+
+    if not manual_outlier_path:
+        warnings.warn(
+            "No manual outlier file has been specified in the configuration,"
+            " skipping stage"
+        )
+        manual_outlier_df = None
+
+        return df
+
+    else:
+        manual_outlier_df = pd.read_csv(manual_outlier_path)
+
+        validate_manual_outlier_df(manual_outlier_df, reference, period, question_code)
+
+        # Use an outer join to log unmatched manual outlier weights
+        unmatched_df = df.merge(
+            manual_outlier_df,
+            how="outer",
+            on=[reference, period, question_code],
+            indicator=True,
+        )
+
+        unmatched_df = unmatched_df[unmatched_df["_merge"] == "right_only"]
+        unmatched_df = unmatched_df[
+            [reference, period, question_code, "manual_outlier_weight"]
+        ]
+
+        if len(unmatched_df) > 0:
+            logger.warning(
+                f"\nThere are {len(unmatched_df)} unmatched references in the"
+                " ingested manual outlier data"
+                "\nUnmatched references:\n"
+                f"{unmatched_df}"
+            )
+
+        # Use left join to combine manual outlier weights with derived weights
+        df = df.merge(
+            manual_outlier_df,
+            how="left",
+            on=[reference, period, question_code],
+        )
+
+        # Create pre_manual_outlier column that is a copy of outlier_weight
+        df["pre_manual_outlier"] = df[outlier_weight]
+
+        # Overwrite outlier_weight with manual_outlier, if it exists for that record
+        df.loc[~df["manual_outlier_weight"].isna(), outlier_weight] = df[
+            "manual_outlier_weight"
+        ]
+
+        df = df.drop(columns=["manual_outlier_weight"])
+
+        return df

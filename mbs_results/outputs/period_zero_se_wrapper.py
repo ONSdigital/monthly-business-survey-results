@@ -4,6 +4,7 @@ import pandas as pd
 
 from mbs_results.imputation.calculate_imputation_link import calculate_imputation_link
 from mbs_results.imputation.construction_matches import flag_construction_matches
+from mbs_results.imputation.flag_and_count_matched_pairs import count_matches
 from mbs_results.outputs.selective_editing_outputs import create_se_outputs
 from mbs_results.staging.back_data import read_and_process_back_data
 from mbs_results.staging.data_cleaning import (
@@ -68,7 +69,7 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
     back_data : pd.DataFrame
         dataframe consisting only of back data i.e. period zero data
     config : dict
-        main pipeline config dictionary
+        main pipeline config dictionary, currently using SIC
 
     Returns
     -------
@@ -88,22 +89,41 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
     )
 
     # Run apply_imputation_link function to get construction links
-    back_data_cons_matches = flag_construction_matches(back_data, **config)
-
-    # group by question number then apply this function
-    back_data_imputation = back_data_cons_matches.groupby(config["question_no"]).apply(
-        lambda df: calculate_imputation_link(
-            df,
-            match_col="flag_construction_matches",
-            link_col="construction_link",
-            predictive_variable=config["auxiliary_converted"],
-            strata="imputation_class",
-            target=config["target"],
-            period=config["period"],
-        )
+    back_data_cons_matches = (
+        back_data.groupby(config["question_no"])
+        .apply(lambda df: flag_construction_matches(df, **config))
+        .reset_index(drop=True)
     )
 
-    back_data_imputation = back_data_imputation.reset_index(drop=True)
+    back_data_cons_matches = (
+        back_data_cons_matches.groupby(config["question_no"])
+        .apply(
+            lambda df: count_matches(
+                df,
+                flag="flag_construction_matches",
+                period=config["period"],
+                strata="imputation_class",
+            )
+        )
+        .reset_index(drop=True)
+    )
+
+    # group by question number then apply this function
+    back_data_imputation = (
+        back_data_cons_matches.groupby(config["question_no"])
+        .apply(
+            lambda df: calculate_imputation_link(
+                df,
+                match_col="flag_construction_matches",
+                link_col="construction_link",
+                predictive_variable=config["auxiliary_converted"],
+                strata="imputation_class",
+                target=config["target"],
+                period=config["period"],
+            )
+        )
+        .reset_index(drop=True)
+    )
 
     # Changing period back into int. Read_colon_sep_file should be updated to enforce
     # data types as per the config.
@@ -111,7 +131,7 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
     back_data_imputation["period"] = (
         back_data_imputation["period"].dt.strftime("%Y%m").astype("int")
     )
-    back_data_imputation["frosic2007"] = back_data_imputation["frosic2007"].astype(
+    back_data_imputation[config["sic"]] = back_data_imputation[config["sic"]].astype(
         "str"
     )
 
