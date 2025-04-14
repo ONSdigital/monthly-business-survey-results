@@ -1,3 +1,5 @@
+import logging
+import tempfile
 from unittest.mock import patch
 
 import numpy as np
@@ -15,6 +17,7 @@ from mbs_results.utilities.validation_checks import (
     validate_estimation,
     validate_indices,
     validate_manual_outlier_df,
+    validate_outlier_detection,
 )
 
 
@@ -218,6 +221,36 @@ class TestValidateEstimation:
 
         with pytest.raises(ValueError):
             validate_estimation(df=test_data, config=self.test_config)
+
+
+def test_validate_outlier_weight_error(caplog):
+    with tempfile.TemporaryDirectory() as temp_dir:
+        test_config = {
+            "design_weight": "design_weight",
+            "output_path": temp_dir,
+            "mbs_file_name": "test_snapshot.json",
+            "platform": "network",
+            "bucket": "",
+        }
+
+        test_data_dict = {
+            "reference": [1, 2, 3, 4],
+            "design_weight": [1, 1, 0.5, 0.3],
+            "outlier_weight": [0.3, 1, 0.6, 0.8],
+        }
+
+        test_data = pd.DataFrame(data=test_data_dict)
+
+        with caplog.at_level(logging.ERROR):
+            validate_outlier_detection(df=test_data, config=test_config)
+
+        expected_message = (
+            "There are instances where the design weight = 1 and outlier_weight != 1."
+            f"References: {[1]}"
+        )
+
+        # Assert that the expected message is in the captured logs
+        assert expected_message in caplog.text
 
 
 @pytest.fixture
