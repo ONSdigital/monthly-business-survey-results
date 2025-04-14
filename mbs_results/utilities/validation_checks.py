@@ -299,20 +299,20 @@ def validate_estimation(df: pd.DataFrame, config: dict):
 def validate_outlier_detection(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post outliering")
     output_path = config["output_path"]
-    
+
     design_weight = config["design_weight"]
-    
+
     invalid_rows = df[(df[design_weight] == 1) & (df["outlier_weight"] != 1)]
-    
+
     if not invalid_rows.empty:
         references = invalid_rows["reference"].tolist()
-        
+
         # Log the error with the references included
         logger.error(
             "There are instances where the design weight = 1 and outlier_weight != 1."
             f"References: {references}"
         )
-    
+
     outlier_filename = get_versioned_filename("outlier_output", config)
 
     # Must be same as save_full_path argument of filter_out_questions() (in staging)
