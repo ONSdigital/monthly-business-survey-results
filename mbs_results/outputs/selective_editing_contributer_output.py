@@ -62,10 +62,10 @@ def get_selective_editing_contributor_output(
         ~additional_outputs_df["formtype"].isin(forms_ignored)
     ]
     input_data = input_data[
-        [period, reference, "design_weight", "frosic2007", "formtype"]
+        [period, reference, "design_weight", config["sic"], "formtype"]
     ]
 
-    input_data["frosic2007"] = input_data["frosic2007"].astype(str)
+    input_data[config["sic"]] = input_data[config["sic"]].astype(str)
 
     domain_data = pd.read_csv(
         sic_domain_mapping_path, dtype={"sic_5_digit": str, "domain": str}
@@ -80,7 +80,7 @@ def get_selective_editing_contributor_output(
     threshold_mapping.drop_duplicates(inplace=True)
 
     selective_editing_contributor_output = merge_domain(
-        input_data, domain_data, "frosic2007", "sic_5_digit"
+        input_data, domain_data, config["sic"], "sic_5_digit"
     )
 
     selective_editing_contributor_output = pd.merge(
@@ -97,7 +97,7 @@ def get_selective_editing_contributor_output(
 
     selective_editing_contributor_output = selective_editing_contributor_output.rename(
         columns={"reference": "ruref", "domain": "domain_group"}
-    ).drop(columns="frosic2007")
+    ).drop(columns=config["sic"])
 
     # Survey code is requested on this output, 009 is MBS code
     selective_editing_contributor_output["survey_code"] = "009"
