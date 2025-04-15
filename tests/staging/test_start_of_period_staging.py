@@ -31,18 +31,20 @@ def start_of_period_staging_output(filepath):
 input_path = "tests/data/outputs/selective_editing/inputs/"
 
 config = {
-    "period_selected": 202202,
+    "platform": "network",
+    "bucket": "",
+    "folder_path": input_path,
     "current_period": 202201,
+    "revision_window": 1,
     "finalsel_keep_cols": [
         "formtype",
         "cell_no",
         "froempment",
         "frosic2007",
         "frotover",
-        "period",
         "reference",
     ],
-    "sample_path": input_path + "test_finalsel*",
+    "sample_prefix": "test_finalsel",
     "sample_column_names": [
         "reference",
         "checkletter",
@@ -127,6 +129,7 @@ config = {
     },
     "temporarily_remove_cols": [],
     "output_path": "",
+    "sic": "frosic2007",
 }
 
 
@@ -146,6 +149,11 @@ def test_start_of_period_staging(
     expected_output["period"] = (
         expected_output["period"].dt.strftime("%Y%m").astype(int)
     )
+
+    config["selective_editing_period"] = (
+        pd.to_datetime(config["current_period"], format="%Y%m")
+        + pd.DateOffset(months=1)
+    ).strftime("%Y%m")
 
     testing_input = enforce_datatypes(
         imputation_output, keep_columns=imputation_output.columns, **config
