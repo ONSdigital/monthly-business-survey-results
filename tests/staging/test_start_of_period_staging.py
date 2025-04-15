@@ -44,59 +44,6 @@ config = {
         "frotover",
         "reference",
     ],
-    "sample_prefix": "test_finalsel",
-    "sample_column_names": [
-        "reference",
-        "checkletter",
-        "frosic2003",
-        "rusic2003",
-        "frosic2007",
-        "rusic2007",
-        "froempees",
-        "employees",
-        "froempment",
-        "employment",
-        "froFTEempt",
-        "FTEempt",
-        "frotover",
-        "turnover",
-        "entref",
-        "wowentref",
-        "vatref",
-        "payeref",
-        "crn",
-        "live_lu",
-        "live_vat",
-        "live_paye",
-        "legalstatus",
-        "entrepmkr",
-        "region",
-        "birthdate",
-        "entname1",
-        "entname2",
-        "entname3",
-        "runame1",
-        "runame2",
-        "runame3",
-        "ruaddr1",
-        "ruaddr2",
-        "ruaddr3",
-        "ruaddr4",
-        "ruaddr5",
-        "rupostcode",
-        "tradstyle1",
-        "tradstyle2",
-        "tradstyle3",
-        "contact",
-        "telephone",
-        "fax",
-        "seltype",
-        "inclexcl",
-        "cell_no",
-        "formtype",
-        "cso_tel",
-        "currency",
-    ],
     "idbr_to_spp": {
         "106": 12,
     },
@@ -139,8 +86,32 @@ def mock_to_csv():
         yield mock_to_csv
 
 
+@pytest.fixture
+def mock_read_and_combine_colon_sep_files():
+    with patch(
+        "mbs_results.staging.stage_dataframe.read_and_combine_colon_sep_files"
+    ) as mock_read_and_combine_colon_sep_files:
+        mock_read_and_combine_colon_sep_files.return_value = pd.DataFrame(
+            {
+                "reference": [
+                    1,
+                ],
+                "formtype": [106],
+                "cell_no": [999],
+                "frosic2007": [999],
+                "frotover": [999],
+                "froempment": [999],
+                "period": [202202],
+            }
+        )
+        yield mock_read_and_combine_colon_sep_files
+
+
 def test_start_of_period_staging(
-    imputation_output, start_of_period_staging_output, mock_to_csv
+    imputation_output,
+    start_of_period_staging_output,
+    mock_to_csv,
+    mock_read_and_combine_colon_sep_files,
 ):
     expected_output = start_of_period_staging_output
     expected_output = enforce_datatypes(
