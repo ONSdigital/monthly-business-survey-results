@@ -12,8 +12,8 @@ from mbs_results.outputs.selective_editing_question_output import (
     create_selective_editing_question_output,
 )
 from mbs_results.outputs.turnover_analysis import create_turnover_output
-from mbs_results.outputs.weighted_adj_val_time_series import (
-    get_weighted_adj_val_time_series,
+from mbs_results.outputs.growth_rates_output import (
+    get_growth_rates_output,
 )
 from mbs_results.utilities.utils import get_versioned_filename
 
@@ -39,7 +39,13 @@ def get_additional_outputs_df(
     """
 
     additional_outputs_df = estimation_output.merge(
-        outlier_output[["reference", "period", "questioncode", "outlier_weight"]],
+        outlier_output[[
+            "reference", 
+            "period", 
+            "questioncode", 
+            "outlier_weight",
+            "classification"
+        ]],
         how="left",
         on=["reference", "period", "questioncode"],
     )
@@ -69,7 +75,7 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
         config,
         {
             "turnover_output": create_turnover_output,
-            "weighted_adj_val_time_series": get_weighted_adj_val_time_series,
+            "growth_rates_output": get_growth_rates_outputs,
             "produce_ocea_srs_outputs": produce_ocea_srs_outputs,
             "create_imputation_link_output": create_imputation_link_output,
         },
