@@ -76,10 +76,6 @@ def get_additional_outputs(
                     """
         )
 
-    if not config["additional_outputs"]:
-        print("No additional_outputs produced")
-        return None
-
     if config["additional_outputs"] == ["all"]:
 
         functions_to_run = function_mapper.keys()
@@ -99,6 +95,10 @@ def get_additional_outputs(
             for output in functions_to_run
             if not output.startswith("selective_editing_")
         ]
+
+    if not functions_to_run:
+        print("No additional_outputs produced")
+        return None
 
     for function in functions_to_run:
 
