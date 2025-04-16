@@ -24,16 +24,16 @@ def output_df(filepath):
 
 class TestGrowthRatesOutput:
     def test_growth_rates_output(self, input_df, output_df):
-        
+
         config = {
             "question_no": "questioncode",
             "cell_number": "cell_no",
             "period": "period",
-            "target": "adjustedresponse"
+            "target": "adjustedresponse",
         }
-        
+
         expected_output = output_df
-        
+
         actual_output = get_growth_rates_output(input_df, **config)
-        
+
         assert_frame_equal(actual_output, expected_output)

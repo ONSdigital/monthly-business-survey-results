@@ -43,7 +43,8 @@ def get_growth_rates_output(
     input_data.drop(columns=[config["cell_number"]], inplace=True)
 
     input_data.sort_values(
-        ["classification", config["question_no"], "sizeband", config["period"]], inplace=True
+        ["classification", config["question_no"], "sizeband", config["period"]],
+        inplace=True,
     )
 
     growth_rates_output = (
@@ -58,7 +59,13 @@ def get_growth_rates_output(
         .fillna(0)
         .rename_axis(None, axis=1)
     )
-    
-    growth_rates_output.rename(columns={col: pd.to_datetime(col, format = "%Y%m").strftime("%Y%b").upper() for col in growth_rates_output.columns[3:]}, inplace=True)
+
+    growth_rates_output.rename(
+        columns={
+            col: pd.to_datetime(col, format = "%Y%m").strftime("%Y%b").upper()
+            for col in growth_rates_output.columns[3:]
+        },
+        inplace=True,
+    )
 
     return growth_rates_output
