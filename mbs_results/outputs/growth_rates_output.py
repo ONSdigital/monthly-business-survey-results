@@ -62,7 +62,7 @@ def get_growth_rates_output(
 
     growth_rates_output.rename(
         columns={
-            col: pd.to_datetime(col, format = "%Y%m").strftime("%Y%b").upper()
+            col: pd.to_datetime(col, format="%Y%m").strftime("%Y%b").upper()
             for col in growth_rates_output.columns[3:]
         },
         inplace=True,

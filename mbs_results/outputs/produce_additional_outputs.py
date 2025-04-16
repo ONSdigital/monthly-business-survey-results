@@ -38,7 +38,7 @@ def get_additional_outputs_df(
 
     additional_outputs_df = estimation_output.merge(
         outlier_output[
-            ["reference", "period", "questioncode", "outlier_weight","classification"]
+            ["reference", "period", "questioncode", "outlier_weight", "classification"]
         ],
         how="left",
         on=["reference", "period", "questioncode"],
