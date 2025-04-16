@@ -2,7 +2,10 @@ import pandas as pd
 
 
 def get_additional_outputs(
-    config: dict, function_mapper: dict, additional_outputs_df: pd.DataFrame
+    config: dict,
+    function_mapper: dict,
+    additional_outputs_df: pd.DataFrame,
+    selective_editing: bool = False,
 ) -> dict:
     """
     Runs a set of functions as defined in additional_outputs from the config,
@@ -23,6 +26,13 @@ def get_additional_outputs(
 
         Keys are functions names of the outputs which the user will handle.
         Values are the functions in the source code.
+
+    additional_outputs_df : pd.DataFrame
+        A DataFrame containing the data required for the functions in function_mapper.
+
+    selective_editing : bool, optional
+        If True, returns only selective editing outputs. If False, returns
+        non-selective editing outputs. Default is False.
 
     Raises
     ------
@@ -66,16 +76,29 @@ def get_additional_outputs(
                     """
         )
 
-    if not config["additional_outputs"]:
-        print("No additional_outputs produced")
-        return None
-
     if config["additional_outputs"] == ["all"]:
 
         functions_to_run = function_mapper.keys()
 
     else:
         functions_to_run = config["additional_outputs"]
+
+    if selective_editing:
+        functions_to_run = [
+            output
+            for output in functions_to_run
+            if output.startswith("selective_editing_")
+        ]
+    else:
+        functions_to_run = [
+            output
+            for output in functions_to_run
+            if not output.startswith("selective_editing_")
+        ]
+
+    if not functions_to_run:
+        print("No additional_outputs produced")
+        return None
 
     for function in functions_to_run:
 
