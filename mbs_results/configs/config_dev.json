@@ -20,7 +20,6 @@
     "region": "region",
     "sampled": "is_sampled",
     "census": "is_census",
-    "state": "frozen",
     "strata": "cell_no",
     "target": "adjustedresponse",
     "form_id_spp": "form_type_spp",

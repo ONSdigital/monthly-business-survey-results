@@ -4,8 +4,9 @@
     "classification_values_path": "",
     "folder_path": "",
     "l_values_path": "",
-    "manual_constructions_path": "",
-    "manual_outlier_path": "",
+    "manual_constructions_path": null,
+    "filter": null,
+    "manual_outlier_path": null,
     "mbs_file_name": "",
     "output_path": "",
     "population_prefix": "",
@@ -17,5 +18,8 @@
     "threshold_filepath": "",
     "current_period": 202303,
     "revision_window": 13,
-    "snapshot_alternate_path_OPTIONAL": null
+    "snapshot_alternate_path_OPTIONAL": null,
+    "pre_defined_imputation_links_columns":{},
+    "state": "frozen"
+
 }
