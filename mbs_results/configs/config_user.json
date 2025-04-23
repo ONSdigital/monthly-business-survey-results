@@ -19,7 +19,6 @@
     "current_period": 202303,
     "revision_window": 13,
     "snapshot_alternate_path_OPTIONAL": null,
-    "pre_defined_imputation_links_columns":{},
     "state": "frozen"
 
 }
