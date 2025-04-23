@@ -110,17 +110,17 @@ def get_file_choice(paths, config: dict):
     # Get the user's choices from config
     output_paths = {
         output_name.replace("export", "output"): path
-        for output_name, path in config["export_choices"].items()
+        for output_name, path in config["files"].items()
         if "export" in output_name
     }
 
-    root_output = config["outputs_paths"]["outputs_master"]
+    root_output = config["general"]["output_dir"]
 
     # Use dictionary comprehension to create the selection list dict
     selection_dict = {
-        dir[7:]: Path(f"{root_output}/{dir}/{file}").with_suffix(".csv")
+        dir[7:]: Path(f"{root_output}/{file}").with_suffix(".csv")
         for dir, file in output_paths.items()
-        if file != "None"
+        if file != 'None'
     }
 
     # Log the files being exported
@@ -237,13 +237,13 @@ def run_export(export_config_path: str):
         from mbs_results.utilities.singleton_boto import SingletonBoto
 
         boto3_client = SingletonBoto.get_client(config)  # noqa
-        # from src.utils import s3_mods as mods
+        from src.utils import s3_mods as mods
 
     elif platform == "network":
         # If the platform is "network" or "hdfs", there is no need for a client.
         # Adding a client = None for consistency.
         config["client"] = None
-        # from src.utils import local_file_mods as mods
+        from src.utils import local_file_mods as mods
 
     else:
         OutgoingLogger.error(f"The selected platform {platform} is wrong")
@@ -251,16 +251,16 @@ def run_export(export_config_path: str):
 
     OutgoingLogger.info(f"Using the {platform} file system as data source.")
 
-    # # Define paths
-    # paths = config[f"{platform}_paths"]  # Dynamically get paths based on config
-    # output_path = config["outputs_paths"]["outputs_master"]
-    # export_folder = config["export_paths"]["export_folder"]
+    # Define paths
+    paths = config["files"]  # Dynamically get paths based on config
+    output_path = config["general"]["output_dir"]
+    export_folder = config["general"]["export_dir"]
 
-    # # Get list of files to transfer from user
-    # file_select_dict = get_file_choice(paths, config)
+    # Get list of files to transfer from user
+    file_select_dict = get_file_choice(paths, config)
 
-    # # Check that files exist
-    # check_files_exist(list(file_select_dict.values()), config, mods.rd_isfile)
+    # Check that files exist
+    check_files_exist(list(file_select_dict.values()), config, mods.rd_isfile)
 
     # # Creating a manifest object using the Manifest class in manifest_output.py
     # manifest = Manifest(

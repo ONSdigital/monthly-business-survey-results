@@ -9,6 +9,7 @@ import raz_client
 logging.getLogger('botocore').setLevel(logging.WARNING)
 logging.getLogger('urllib3').setLevel(logging.WARNING)
 
+
 class SingletonBoto:
     """Creates a global singleton instance of the boto3 client and a bucket."""
 
