@@ -1,0 +1,21 @@
+{
+    "bucket" : "onscdp-dev-data01-5320d6ca",
+    "calibration_group_map_path": "ons/mbs/testing_dummy_data/mapping_files/test_cell_no_calibration_group_mapping.csv",
+    "classification_values_path": "ons/mbs/testing_dummy_data/mapping_files/test_classification_sic_mapping.csv",
+    "folder_path": "ons/mbs/testing_dummy_data/testing_input/",
+    "l_values_path": "ons/mbs/testing_dummy_data/mapping_files/test_classification_question_number_l_value_mapping.csv",
+    "manual_constructions_path": "ons/mbs/testing_dummy_data/testing_input/test_manual_constructions.csv",
+    "filter": null,
+    "manual_outlier_path": null,
+    "mbs_file_name": "test_snaphot.json",
+    "output_path": "ons/mbs/testing_dummy_data/out/",
+    "population_prefix": "test_universe009",
+    "sample_prefix": "test_finalsel009",
+    "back_data_qv_path": "ons/mbs/testing_dummy_data/testing_input/test_qv_00 9_202112.csv",
+    "back_data_cp_path": "ons/mbs/testing_dummy_data/testing_input/test_cp_009_202112.csv",
+    "back_data_finalsel_path": "ons/mbs/testing_dummy_data/testing_input/test_finalsel009_202112",
+    "current_period": 202206,
+    "revision_window": 6,
+    "snapshot_alternate_path_OPTIONAL": null,
+    "state": "frozen"
+}
