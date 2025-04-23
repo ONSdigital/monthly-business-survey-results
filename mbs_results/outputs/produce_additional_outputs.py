@@ -113,6 +113,7 @@ def produce_selective_editing_outputs(
             "selective_editing_questions": create_selective_editing_question_output,
         },
         additional_outputs_df,
+        selective_editing=True,
     )
 
     # Stop function if no additional_outputs are listed in config.

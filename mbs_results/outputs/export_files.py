@@ -19,10 +19,12 @@ OutgoingLogger = logging.getLogger(__name__)
 
 # Set up default config
 config_default = {
-    "platform": "s3", 
+    "platform": "s3",
     "bucket": "onscdp-dev-data01-5320d6ca",
     "ssl_file": "/etc/pki/tls/certs/ca-bundle.crt",
 }
+
+
 def get_schema_headers(config: dict):
     """
     Extracts the schema headers from the provided configuration.

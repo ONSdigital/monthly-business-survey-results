@@ -1,10 +1,3 @@
-import os
-print(os.getcwd())
-os.chdir("/home/cdsw/monthly-business-survey-results")
-# os.chdir("..")
-from ipdb import set_trace
-# DEBUG - end
-set_trace()
 from mbs_results.estimation.estimate import estimate
 from mbs_results.imputation.impute import impute
 from mbs_results.outlier_detection.detect_outlier import detect_outlier
