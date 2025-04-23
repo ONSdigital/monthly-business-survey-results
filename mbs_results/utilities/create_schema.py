@@ -3,6 +3,8 @@
 Created on Thu Nov 16 10:54:27 2023
 Create schema
 @author: zoring
+
+Read a CSV file, infer data types from data. Save the schema in TOML format.
 """
 import os
 
