@@ -13,13 +13,19 @@ import tomli
 
 import mbs_results.utilities.merge_two_config_files as utils
 
-# from src.outputs.manifest_output import Manifest
+from mbs_results.utilities.manifest_output import Manifest
 # from src.utils.config import config_setup
 
 # Set up logging
 
-logging.basicConfig(level=logging.INFO)
 OutgoingLogger = logging.getLogger(__name__)
+
+# Setting logging levels
+warning_only = [
+    "raz_client_logger", "requests_kerberos.kerberos_", "spnego._gss"
+]
+for module in warning_only:
+    logging.getLogger(module).setLevel(logging.WARNING)
 
 # Set up default config
 config_default = {
@@ -29,7 +35,7 @@ config_default = {
 }
 
 
-def get_schema_headers(config: dict):
+def get_schema_headers(config: dict, file_select_dict: dict):
     """
     Extracts the schema headers from the provided configuration.
 
@@ -44,15 +50,15 @@ def get_schema_headers(config: dict):
         Defaults to config.
 
     Returns:
-        dict: A dictionary where the keys are output names and the values are
+        dict: A dictionary where the keys are export types and the values are
         comma-separated strings of schema headers.
     """
-    schema_paths_only = config["schema_paths"]
+    schemas_dir = config["general"]["schemas_dir"]
+    export_types = list(file_select_dict.keys())
 
     schema_paths = {
-        output_name: path
-        for output_name, path in schema_paths_only.items()
-        if "schema" in output_name
+        type: schemas_dir + type + "_schema.toml"
+        for type in export_types
     }
 
     # Get the headers for each
@@ -60,10 +66,6 @@ def get_schema_headers(config: dict):
     for output_name, path in schema_paths.items():
         with open(path, "rb") as file:
             schema_headers_dict[output_name] = tomli.load(file)
-
-    # schema_headers_dict = {
-    #     output_name: tomli.loads(path) for output_name, path in schema_paths.items()
-    # }
 
     # Stringify the headers (keys of the dict)
     schema_headers_dict.update(
@@ -135,7 +137,7 @@ def check_files_exist(file_list: List, config: dict, isfile: callable):
 
     # Check if the output dirs supplied are string, change to list if so
 
-    platform = config["global"]["platform"]
+    platform = config["general"]["platform"]
 
     if isinstance(file_list, str):
         file_list = [file_list]
@@ -237,13 +239,13 @@ def run_export(export_config_path: str):
         from mbs_results.utilities.singleton_boto import SingletonBoto
 
         boto3_client = SingletonBoto.get_client(config)  # noqa
-        from src.utils import s3_mods as mods
+        from mbs_results.utilities import s3_mods as mods
 
     elif platform == "network":
         # If the platform is "network" or "hdfs", there is no need for a client.
         # Adding a client = None for consistency.
         config["client"] = None
-        from src.utils import local_file_mods as mods
+        from mbs_results.utilities import local_file_mods as mods
 
     else:
         OutgoingLogger.error(f"The selected platform {platform} is wrong")
@@ -262,67 +264,56 @@ def run_export(export_config_path: str):
     # Check that files exist
     check_files_exist(list(file_select_dict.values()), config, mods.rd_isfile)
 
-    # # Creating a manifest object using the Manifest class in manifest_output.py
-    # manifest = Manifest(
-    #     outgoing_directory=output_path,
-    #     export_directory=export_folder,
-    #     pipeline_run_datetime=pipeline_run_datetime,
-    #     dry_run=False,
-    #     delete_file_func=mods.rd_delete_file,
-    #     md5sum_func=mods.rd_md5sum,
-    #     stat_size_func=mods.rd_stat_size,
-    #     isdir_func=mods.rd_isdir,
-    #     isfile_func=mods.rd_isfile,
-    #     config=config,
-    #     read_header_func=mods.rd_read_header,
-    #     string_to_file_func=mods.rd_write_string_to_file,
-    # )
+    # Creating a manifest object using the Manifest class in manifest_output.py
+    manifest = Manifest(
+        outgoing_directory=output_path,
+        export_directory=export_folder,
+        pipeline_run_datetime=pipeline_run_datetime,
+        dry_run=False,
+        delete_file_func=mods.rd_delete_file,
+        md5sum_func=mods.rd_md5sum,
+        stat_size_func=mods.rd_stat_size,
+        isdir_func=mods.rd_isdir,
+        isfile_func=mods.rd_isfile,
+        config=config,
+        read_header_func=mods.rd_read_header,
+        string_to_file_func=mods.rd_write_string_to_file,
+    )
 
-    # schemas_header_dict = get_schema_headers(config)
+    schemas_header_dict = get_schema_headers(config, file_select_dict)
 
-    # # Add the short form output file to the manifest object
-    # for file_name, file_path in file_select_dict.items():
-    #     manifest.add_file(
-    #         file_path,
-    #         column_header=schemas_header_dict[f"{file_name}_schema"],
-    #         validate_col_name_length=True,
-    #         sep=",",
-    #     )
+    # Write the manifest file to the outgoing directory
+    manifest.write_manifest()
 
-    # # Write the manifest file to the outgoing directory
-    # manifest.write_manifest()
+    # Move the manifest file to the outgoing folder
+    manifest_file = mods.rd_search_file(manifest.outgoing_directory, "_manifest.json")
 
-    # # Move the manifest file to the outgoing folder
-    # manifest_file = mods.rd_search_file(manifest.outgoing_directory, "_manifest.json")
+    manifest_path = os.path.join(manifest.outgoing_directory, manifest_file)
 
-    # manifest_path = os.path.join(manifest.outgoing_directory, manifest_file)
+    transfer_files(
+        manifest_path,
+        manifest.export_directory,
+        "move",
+        OutgoingLogger,
+        mods.rd_copy_file,
+        mods.rd_move_file,
+    )
 
-    # transfer_files(
-    #     manifest_path,
-    #     manifest.export_directory,
-    #     "move",
-    #     OutgoingLogger,
-    #     mods.rd_copy_file,
-    #     mods.rd_move_file,
-    # )
+    # Copy or Move files to outgoing folder
+    file_transfer_method = config["export_choices"]["copy_or_move_files"]
 
-    # # Copy or Move files to outgoing folder
-    # file_transfer_method = config["export_choices"]["copy_or_move_files"]
+    for file_path in file_select_dict.values():
+        file_path = os.path.join(file_path)
+        transfer_files(
+            file_path,
+            manifest.export_directory,
+            file_transfer_method,
+            OutgoingLogger,
+            mods.rd_copy_file,
+            mods.rd_move_file,
+        )
 
-    # for file_path in file_select_dict.values():
-    #     file_path = os.path.join(file_path)
-    #     transfer_files(
-    #         file_path,
-    #         manifest.export_directory,
-    #         file_transfer_method,
-    #         OutgoingLogger,
-    #         mods.rd_copy_file,
-    #         mods.rd_move_file,
-    #     )
 
-    # log_exports(list(
-    #     file_select_dict.values()), pipeline_run_datetime, OutgoingLogger
-    # )
 
     OutgoingLogger.info("Exporting files finished.")
 

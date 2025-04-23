@@ -25,17 +25,19 @@ from io import StringIO, TextIOWrapper
 
 from rdsa_utils.cdp.helpers.s3_utils import (
     file_exists,
-    create_folder_on_s3,
+    create_folder,
     delete_file,
     is_s3_directory,
     copy_file,
     move_file,
 )
-from src.utils.singleton_boto import SingletonBoto
+from mbs_results.utilities.singleton_boto import SingletonBoto
 
 # from src.utils.singleton_config import SingletonConfig
 
 # set up logging, boto3 client and s3 bucket
+
+logging.basicConfig(level=logging.INFO)
 s3_logger = logging.getLogger(__name__)
 s3_client = SingletonBoto.get_client()
 s3_bucket = SingletonBoto.get_bucket()
@@ -146,7 +148,7 @@ def rd_mkdir(path: str) -> None:
         None
     """
 
-    _ = create_folder_on_s3(
+    _ = create_folder(
         # client=config["client"],
         s3_client,
         bucket_name=s3_bucket,
