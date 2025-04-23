@@ -16,7 +16,7 @@ test_config = {
     "l_values_path": input_path
     + "test_classification_question_number_l_value_mapping.csv",
     "manual_constructions_path": input_path + "test_manual_constructions.csv",
-    "filter": None,
+    "filter": input_path + "filters.csv",
     "manual_outlier_path": None,
     "mbs_file_name": "test_snaphot.json",
     "output_path": "tests/data/test_main/output/",
