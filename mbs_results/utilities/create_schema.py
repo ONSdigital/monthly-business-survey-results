@@ -10,21 +10,15 @@ import os
 
 import pandas as pd
 
-# Imputation file location and name
-root = "R:/BERD Results System Development 2023/DAP_emulation/"
-input_dir = "2023_surveys/BERD/06_imputation/imputation_qa/"
-
-output_name = "tmi_trim_count_qa"
-year = 2023
-suff = "24-08-30_v733.csv"
-
-# Output folder for all schemas
-out_dir = r"config\output_schemas"
+# Input file location and name
+data_dir = r"D:\data\mbs"
+data_file = "outlier_output_v0.1.5_test_snaphot.csv"
+schema_file = "outlier_output_schema.toml"
 
 # Read the top 10 rows, inferrring the schema from csv
-mypath = os.path.join(root, input_dir, f"{year}_{output_name}_{suff}")
+mypath = os.path.join(data_dir, data_file)
 
-# check the file exists
+# Check the file exists
 if not os.path.exists(mypath):
     raise FileNotFoundError(f"File not found: {mypath}")
 
@@ -45,7 +39,7 @@ for col in schema:
     S = S + s
 
 # Output the schema toml file
-mypath = os.path.join(out_dir, output_name + "_schema.toml")
+mypath = os.path.join(data_dir, schema_file)
 text_file = open(mypath, "w")
 text_file.write(S)
 text_file.close()
