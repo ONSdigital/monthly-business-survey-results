@@ -423,7 +423,77 @@ def start_of_period_staging(
 
         check_construction_links(imputation_output_with_missing, config)
 
+        replace_derived_with_previous_period(
+            imputation_output_with_missing, dropped_questions, config
+        )
+
     return imputation_output_with_missing
+
+
+def replace_derived_with_previous_period(df, dropped_questions, config):
+    # Need to check if derived questions are present in dropped questions
+    dropped_references_q40 = dropped_questions.loc[
+        dropped_questions["questioncode"] == 40, "reference"
+    ].unique()
+    current_references_q40 = df.loc[df["questioncode"] == 40, "reference"].unique()
+    common_references_q40 = list(
+        set(dropped_references_q40) & set(current_references_q40)
+    )
+
+    condition = (df["reference"].isin(common_references_q40)) & (
+        df["questioncode"] == 40
+    )
+    selected_columns = ["reference", "period", "questioncode", "adjustedresponse"]
+    dropped_questions = dropped_questions[selected_columns].rename(
+        columns={"adjustedresponse": "prev_adjustedresponse"}
+    )
+
+    combined_dataframes = pd.merge(
+        df,
+        dropped_questions,
+        on=["reference", "period", "questioncode"],
+        how="left",
+    )
+    print(combined_dataframes.columns)
+    condition = (
+        (
+            combined_dataframes["adjustedresponse"]
+            != combined_dataframes["prev_adjustedresponse"]
+        )
+        & (combined_dataframes["prev_adjustedresponse"].notna())
+        & (
+            (~combined_dataframes["questioncode"].isin([47, 43]))
+            & (combined_dataframes["imputed_and_derived_flag"].notna())
+        )
+    )
+    combined_dataframes.loc[condition, "adjustedresponse"] = combined_dataframes.loc[
+        condition, "prev_adjustedresponse"
+    ]
+    combined_dataframes.loc[condition, "imputed_and_derived_flag"] = (
+        "manual_copy_previous_period_value"
+    )
+    print(
+        combined_dataframes.loc[
+            condition,
+            [
+                "reference",
+                "period",
+                "questioncode",
+                "adjustedresponse",
+                "prev_adjustedresponse",
+                "form_type_spp",
+                "imputed_and_derived_flag",
+            ],
+        ].head()
+    )
+
+    # cleanup and drop undded columns
+
+    # print(df.loc[(condition)],dropped_questions.loc[(condition), "adjustedresponse"],
+    #  different)
+    # print(df[["adjustedresponse","new_adjustedresponse"]],)
+    #  Just join the two dataframes and keep the value that is from dropped dataframe
+    # Need to check how this relates to estimation
 
 
 def new_questions_construction_link(df, config):

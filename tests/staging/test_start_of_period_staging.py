@@ -206,6 +206,7 @@ class TestStartPeriodStaging:
         mock_to_csv,
         mock_read_and_combine_colon_sep_files_changing_formtypes,
     ):
+        # Resetting current period, this is overwritten during start_of_period_staging
         config["current_period"] = 202201
         expected_output = start_of_period_staging_output_changing_formtypes.copy()
         expected_output = enforce_datatypes(
@@ -232,11 +233,6 @@ class TestStartPeriodStaging:
         actual_output = actual_output[expected_output.columns]
         # Reorder columns to match expected output and selecting only the  needed
         # columns in expected output
-        print(
-            expected_output[
-                ["questioncode", "reference", "adjustedresponse", "form_type_spp"]
-            ]
-        )
 
         actual_output = actual_output.sort_values(
             ["reference", "period", "questioncode"], ignore_index=True
@@ -245,12 +241,14 @@ class TestStartPeriodStaging:
         expected_output = expected_output.sort_values(
             ["reference", "period", "questioncode"], ignore_index=True
         )
-        print(
-            actual_output[
-                ["questioncode", "reference", "adjustedresponse", "form_type_spp"]
-            ]
-        )
 
         assert_frame_equal(
             actual_output, expected_output, check_like=True, check_dtype=False
         )
+
+
+# Known issues:
+# Q47 created? shouldnt be present
+# Zero on q40 as this has been derived from q46 and q47
+# If we fix this in start of period staging, what will happen when constrains are
+# applied again in outliering?
