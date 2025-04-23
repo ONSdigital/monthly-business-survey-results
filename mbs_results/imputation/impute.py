@@ -6,6 +6,7 @@ from mbs_results.imputation.ratio_of_means import ratio_of_means
 from mbs_results.staging.data_cleaning import (
     convert_cell_number,
     create_imputation_class,
+    enforce_datatypes,
 )
 from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.inputs import read_csv_wrapper
@@ -54,6 +55,8 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
         filter_df = read_csv_wrapper(
             config["filter"], config["platform"], config["bucket"]
         )
+        filter_df = enforce_datatypes(filter_df, list(filter_df), **config)
+
     else:
         filter_df = None
 
