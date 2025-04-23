@@ -11,10 +11,14 @@ from typing import List
 
 import tomli
 
+import mbs_results.utilities.merge_two_config_files as utils
+
 # from src.outputs.manifest_output import Manifest
 # from src.utils.config import config_setup
 
 # Set up logging
+
+logging.basicConfig(level=logging.INFO)
 OutgoingLogger = logging.getLogger(__name__)
 
 # Set up default config
@@ -221,11 +225,12 @@ def log_exports(
     )
 
 
-def run_export(config: dict):
+def run_export(export_config_path: str):
     """Main function to run the data export pipeline."""
+    config = utils.load_config(export_config_path)
 
     # Check the environment switch
-    platform = config["platform"]
+    platform = config["general"]["platform"]
 
     if platform == "s3":
         # create singletion boto3 client object & pass in bucket string
@@ -244,7 +249,7 @@ def run_export(config: dict):
         OutgoingLogger.error(f"The selected platform {platform} is wrong")
         raise ImportError(f"Cannot import {platform}_mods")
 
-    # OutgoingLogger.info(f"Using the {platform} file system as data source.")
+    OutgoingLogger.info(f"Using the {platform} file system as data source.")
 
     # # Define paths
     # paths = config[f"{platform}_paths"]  # Dynamically get paths based on config
@@ -319,7 +324,7 @@ def run_export(config: dict):
     #     file_select_dict.values()), pipeline_run_datetime, OutgoingLogger
     # )
 
-    # OutgoingLogger.info("Exporting files finished.")
+    OutgoingLogger.info("Exporting files finished.")
 
 
 if __name__ == "__main__":

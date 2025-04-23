@@ -1,10 +1,13 @@
 """
 A class that initialises a single instance of boto3 client.
 """
+import logging
 
 import boto3
 import raz_client
 
+logging.getLogger('botocore').setLevel(logging.WARNING)
+logging.getLogger('urllib3').setLevel(logging.WARNING)
 
 class SingletonBoto:
     """Creates a global singleton instance of the boto3 client and a bucket."""
@@ -22,8 +25,11 @@ class SingletonBoto:
         """
         if cls._instance is None:
             client = boto3.client("s3")
-            raz_client.configure_ranger_raz(client, ssl_file=config["ssl_file"])
-            cls._bucket = config["bucket"]
+            _ = raz_client.configure_ranger_raz(
+                client,
+                ssl_file=config["general"]["ssl_file"]
+            )
+            cls._bucket = config["general"]["bucket"]
             cls._instance = client
         return cls._instance
 
