@@ -11,8 +11,8 @@ from typing import List
 import tomli
 
 import mbs_results.utilities.merge_two_config_files as utils
-
 from mbs_results.utilities.manifest_output import Manifest
+
 # from src.utils.config import config_setup
 
 # Set up logging
@@ -20,9 +20,7 @@ from mbs_results.utilities.manifest_output import Manifest
 OutgoingLogger = logging.getLogger(__name__)
 
 # Setting logging levels
-warning_only = [
-    "raz_client_logger", "requests_kerberos.kerberos_", "spnego._gss"
-]
+warning_only = ["raz_client_logger", "requests_kerberos.kerberos_", "spnego._gss"]
 for module in warning_only:
     logging.getLogger(module).setLevel(logging.WARNING)
 
@@ -55,10 +53,7 @@ def get_schema_headers(config: dict, file_select_dict: dict):
     schemas_dir = config["general"]["schemas_dir"]
     export_types = list(file_select_dict.keys())
 
-    schema_paths = {
-        type: schemas_dir + type + "_schema.toml"
-        for type in export_types
-    }
+    schema_paths = {type: schemas_dir + type + "_schema.toml" for type in export_types}
 
     # Get the headers for each
     schema_headers_dict = {}
@@ -121,7 +116,7 @@ def get_file_choice(paths, config: dict):
     selection_dict = {
         dir[7:]: Path(f"{root_output}/{file}").with_suffix(".csv")
         for dir, file in output_paths.items()
-        if file != 'None'
+        if file != "None"
     }
 
     # Log the files being exported
@@ -319,8 +314,6 @@ def run_export(export_config_path: str):
             mods.rd_copy_file,
             mods.rd_move_file,
         )
-
-
 
     OutgoingLogger.info("Exporting files finished.")
 

@@ -6,17 +6,16 @@ This is so that the corresponding functions in the hdfs_file_mods.py file, which
 are used when running code on hdfs, can be imported with the same name.
 """
 
-import json
-import os
-import pandas as pd
-import logging
-import pathlib
 import hashlib
+import json
+import logging
+import os
+import pathlib
 import shutil
 from typing import Union
 
+import pandas as pd
 import yaml
-
 from src.utils.wrappers import time_logger_wrap
 
 # Set up logger
@@ -212,7 +211,7 @@ def rd_md5sum(path: str):
     The md5sum of the file.
     """
     with open(path, "rb") as f:
-        return hashlib.md5(f.read()).hexdigest()
+        return hashlib.md5(f.read(), usedforsecurity=False).hexdigest()
 
 
 def rd_stat_size(path: str):

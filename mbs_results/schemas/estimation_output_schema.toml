@@ -169,4 +169,3 @@ Deduced_Data_Type = "float64"
 [is_census]
 old_name = "is_census"
 Deduced_Data_Type = "bool"
-

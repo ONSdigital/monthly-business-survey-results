@@ -1,9 +1,8 @@
 import json
+import logging
 import os
 from datetime import datetime
-import logging
-from typing import Dict, Any
-
+from typing import Any, Dict
 
 # set up logging
 ManifestLogger = logging.getLogger(__name__)
@@ -132,7 +131,6 @@ class Manifest:
         column_header_list = column_header.split(sep)
         if file_header_list != column_header_list:
             # Column headers in file do not match expected column headers
-            
 
             # Compare strings `true_header_string` and `column_header`
             # Generate a report of the differences between them.
