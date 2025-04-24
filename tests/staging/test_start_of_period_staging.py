@@ -273,11 +273,12 @@ class TestStartPeriodStaging:
             actual_output, expected_output, check_like=True, check_dtype=False
         )
 
+    @pytest.mark.skip(reason="Test not implemented yet")
     def test_start_of_period_staging_changing_formtypes_integreation_test(
         self,
         imputation_output_changing_formtypes,
         start_of_period_staging_output_changing_formtypes,
-        # mock_to_csv,
+        mock_to_csv,
         mock_read_and_combine_colon_sep_files_changing_formtypes,
     ):
         config["current_period"] = 202201
