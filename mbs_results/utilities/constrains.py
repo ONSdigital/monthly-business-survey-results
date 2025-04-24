@@ -580,10 +580,20 @@ def update_derived_weight_and_winsorised_value(
 
     # fill na with false
     df["post_winsorised"] = df["post_winsorised"].fillna(0).astype("bool")
+    if f"imputation_flags_{target}" in df.columns:
+        se_exceptions = (
+            df[f"imputation_flags_{target}"] != "manual copy previous period value"
+        )
+    else:
+        se_exceptions = True
 
-    df.loc[df["post_winsorised"], outlier_weight] = df["post_win_o_weight"]
+    df.loc[(df["post_winsorised"]) & se_exceptions, outlier_weight] = df[
+        "post_win_o_weight"
+    ]
 
-    df.loc[df["post_winsorised"], "winsorised_value"] = df["post_winsorised_value"]
+    df.loc[(df["post_winsorised"]) & se_exceptions, "winsorised_value"] = df[
+        "post_winsorised_value"
+    ]
 
     df.drop(columns=["post_win_o_weight", "post_winsorised_value"], inplace=True)
 

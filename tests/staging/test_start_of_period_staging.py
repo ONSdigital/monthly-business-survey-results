@@ -5,6 +5,9 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
+from mbs_results.estimation.estimate import estimate
+from mbs_results.outlier_detection.detect_outlier import detect_outlier
+from mbs_results.outputs.produce_additional_outputs import get_additional_outputs_df
 from mbs_results.staging.data_cleaning import enforce_datatypes
 from mbs_results.staging.stage_dataframe import start_of_period_staging
 
@@ -108,6 +111,8 @@ config = {
     "temporarily_remove_cols": [],
     "output_path": "",
     "sic": "frosic2007",
+    "population_prefix": "universe",
+    "sample_prefix": "finalsel",
 }
 
 
@@ -224,7 +229,7 @@ class TestStartPeriodStaging:
         testing_input = enforce_datatypes(
             imputation_output_changing_formtypes,
             keep_columns=imputation_output_changing_formtypes.columns,
-            **config
+            **config,
         )
         testing_input["period"] = (
             testing_input["period"].dt.strftime("%Y%m").astype(int)
@@ -242,12 +247,80 @@ class TestStartPeriodStaging:
             ["reference", "period", "questioncode"], ignore_index=True
         )
 
-        # print(expected_output[["reference","questioncode","construction_link",]])
-        # print(actual_output[["reference","questioncode","construction_link","cell_no","imputation_class"]])
+        print(
+            expected_output[
+                [
+                    "reference",
+                    "questioncode",
+                    "form_type_spp",
+                    "imputed_and_derived_flag",
+                ]
+            ]
+        )
+        print(
+            actual_output[
+                [
+                    "reference",
+                    "questioncode",
+                    "form_type_spp",
+                    "imputed_and_derived_flag",
+                ]
+            ]
+        )
+        print(actual_output[["reference", "questioncode", "adjustedresponse"]])
 
         assert_frame_equal(
             actual_output, expected_output, check_like=True, check_dtype=False
         )
+
+    def test_start_of_period_staging_changing_formtypes_integreation_test(
+        self,
+        imputation_output_changing_formtypes,
+        start_of_period_staging_output_changing_formtypes,
+        # mock_to_csv,
+        mock_read_and_combine_colon_sep_files_changing_formtypes,
+    ):
+        config["current_period"] = 202201
+        expected_output = start_of_period_staging_output_changing_formtypes.copy()
+        expected_output = enforce_datatypes(
+            expected_output, keep_columns=expected_output.columns, **config
+        )
+        expected_output["period"] = (
+            expected_output["period"].dt.strftime("%Y%m").astype(int)
+        )
+
+        config["selective_editing_period"] = (
+            pd.to_datetime(config["current_period"], format="%Y%m")
+            + pd.DateOffset(months=1)
+        ).strftime("%Y%m")
+
+        testing_input = enforce_datatypes(
+            imputation_output_changing_formtypes,
+            keep_columns=imputation_output_changing_formtypes.columns,
+            **config,
+        )
+        testing_input["period"] = (
+            testing_input["period"].dt.strftime("%Y%m").astype(int)
+        )
+        staged_output = start_of_period_staging(testing_input, config)
+
+        staged_output.rename(
+            columns={"imputed_and_derived_flag": "imputation_flags_adjustedresponse"},
+            inplace=True,
+        )
+
+        estimation_output = estimate(staged_output, config)
+
+        outlier_output = detect_outlier(estimation_output, config)
+
+        se_outputs_df = get_additional_outputs_df(estimation_output, outlier_output)
+
+        se_outputs_df.to_csv(
+            config["output_path"]
+            + f"se_outputs_full_df_{config['period_selected']}_test_result.csv",
+            index=False,
+        )
+        assert 1 == 2
 
 
 # Known issues:

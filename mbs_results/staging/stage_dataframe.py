@@ -393,11 +393,6 @@ def start_of_period_staging(
                 axis=1,
             )
         ]
-        print(
-            imputation_output_with_missing[
-                ["reference", "questioncode", "response", "form_type_spp", "frotover"]
-            ]
-        )
 
         imputation_output_with_missing = constrain(
             df=imputation_output_with_missing,
@@ -408,11 +403,7 @@ def start_of_period_staging(
             spp_form_id=config["form_id_spp"],
             sic=config["sic"],
         )
-        print(
-            imputation_output_with_missing[
-                ["reference", "questioncode", "response", "form_type_spp", "frotover"]
-            ]
-        )
+
         imputation_output_with_missing["imputed_and_derived_flag"] = (
             imputation_output_with_missing.apply(
                 lambda row: (
@@ -432,11 +423,6 @@ def start_of_period_staging(
         )
 
         check_construction_links(imputation_output_with_missing, config)
-        print(
-            imputation_output_with_missing[
-                ["reference", "questioncode", "response", "form_type_spp"]
-            ]
-        )
 
         imputation_output_with_missing = replace_derived_with_previous_period(
             imputation_output_with_missing, dropped_questions, config
