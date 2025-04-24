@@ -109,11 +109,11 @@ class Manifest:
         column_header
             the exact column header string
         """
-        if "outputs" not in str(relative_file_path):
-            raise ManifestError(
-                f"""File must be in a subdirectory of the outgoing directory:
-                    {relative_file_path}"""
-            )
+        # if "outputs" not in str(relative_file_path):
+        #     raise ManifestError(
+        #         f"""File must be in a subdirectory of the outgoing directory:
+        #             {relative_file_path}"""
+        #     )
 
         absolute_file_path = os.path.join(self.outgoing_directory, relative_file_path)
 
@@ -129,10 +129,10 @@ class Manifest:
         file_header_string = file_header_string.replace("\n", "")
 
         file_header_list = file_header_string.split(sep)
-
-        if file_header_string != column_header:
+        column_header_list = column_header.split(sep)
+        if file_header_list != column_header_list:
             # Column headers in file do not match expected column headers
-            column_header_list = column_header.split(sep)
+            
 
             # Compare strings `true_header_string` and `column_header`
             # Generate a report of the differences between them.

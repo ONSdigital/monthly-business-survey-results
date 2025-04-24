@@ -82,12 +82,16 @@ Deduced_Data_Type = "float64"
 old_name = "adjustedresponse_man"
 Deduced_Data_Type = "float64"
 
-[f_match_adjustedresponse]
-old_name = "f_match_adjustedresponse"
+[filtered_adjustedresponse]
+old_name = "filtered_adjustedresponse"
+Deduced_Data_Type = "float64"
+
+[f_match_filtered_adjustedresponse]
+old_name = "f_match_filtered_adjustedresponse"
 Deduced_Data_Type = "bool"
 
-[b_match_adjustedresponse]
-old_name = "b_match_adjustedresponse"
+[b_match_filtered_adjustedresponse]
+old_name = "b_match_filtered_adjustedresponse"
 Deduced_Data_Type = "bool"
 
 [f_link_adjustedresponse]
@@ -114,12 +118,12 @@ Deduced_Data_Type = "float64"
 old_name = "default_link_flag_construction_matches"
 Deduced_Data_Type = "bool"
 
-[f_match_adjustedresponse_count]
-old_name = "f_match_adjustedresponse_count"
+[f_match_filtered_adjustedresponse_count]
+old_name = "f_match_filtered_adjustedresponse_count"
 Deduced_Data_Type = "float64"
 
-[b_match_adjustedresponse_count]
-old_name = "b_match_adjustedresponse_count"
+[b_match_filtered_adjustedresponse_count]
+old_name = "b_match_filtered_adjustedresponse_count"
 Deduced_Data_Type = "float64"
 
 [flag_construction_matches_count]
@@ -165,3 +169,4 @@ Deduced_Data_Type = "float64"
 [is_census]
 old_name = "is_census"
 Deduced_Data_Type = "bool"
+

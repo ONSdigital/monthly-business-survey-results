@@ -3,8 +3,7 @@ the output folder to the outgoing folder, along with their manifest file."""
 
 import getpass
 import logging
-
-# import os
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import List
@@ -282,6 +281,14 @@ def run_export(export_config_path: str):
 
     schemas_header_dict = get_schema_headers(config, file_select_dict)
 
+    # Add all output files to the manifest object
+    for file_name, file_path in file_select_dict.items():
+        manifest.add_file(
+            file_path,
+            column_header=schemas_header_dict[f"{file_name}"],
+            validate_col_name_length=True,
+            sep=",",
+        )
     # Write the manifest file to the outgoing directory
     manifest.write_manifest()
 
@@ -300,7 +307,7 @@ def run_export(export_config_path: str):
     )
 
     # Copy or Move files to outgoing folder
-    file_transfer_method = config["export_choices"]["copy_or_move_files"]
+    file_transfer_method = config["options"]["copy_or_move_files"]
 
     for file_path in file_select_dict.values():
         file_path = os.path.join(file_path)

@@ -4,7 +4,7 @@
         "bucket": "onscdp-dev-data01-5320d6ca",
         "ssl_file": "/etc/pki/tls/certs/ca-bundle.crt",
         "output_dir": "/ons/mbs/testing_dummy_data/out/",
-        "export_dir": "/ons/mbs/outgoing_export",
+        "export_dir": "/ons/mbs/outgoing_export/",
         "schemas_dir": "/home/cdsw/monthly-business-survey-results/mbs_results/schemas/"
     },
     "options":{
