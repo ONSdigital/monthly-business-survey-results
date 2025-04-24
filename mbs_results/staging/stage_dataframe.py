@@ -393,6 +393,11 @@ def start_of_period_staging(
                 axis=1,
             )
         ]
+        print(
+            imputation_output_with_missing[
+                ["reference", "questioncode", "response", "form_type_spp", "frotover"]
+            ]
+        )
 
         imputation_output_with_missing = constrain(
             df=imputation_output_with_missing,
@@ -402,6 +407,11 @@ def start_of_period_staging(
             question_no=config["question_no"],
             spp_form_id=config["form_id_spp"],
             sic=config["sic"],
+        )
+        print(
+            imputation_output_with_missing[
+                ["reference", "questioncode", "response", "form_type_spp", "frotover"]
+            ]
         )
         imputation_output_with_missing["imputed_and_derived_flag"] = (
             imputation_output_with_missing.apply(
@@ -422,8 +432,13 @@ def start_of_period_staging(
         )
 
         check_construction_links(imputation_output_with_missing, config)
+        print(
+            imputation_output_with_missing[
+                ["reference", "questioncode", "response", "form_type_spp"]
+            ]
+        )
 
-        replace_derived_with_previous_period(
+        imputation_output_with_missing = replace_derived_with_previous_period(
             imputation_output_with_missing, dropped_questions, config
         )
 
@@ -432,17 +447,7 @@ def start_of_period_staging(
 
 def replace_derived_with_previous_period(df, dropped_questions, config):
     # Need to check if derived questions are present in dropped questions
-    dropped_references_q40 = dropped_questions.loc[
-        dropped_questions["questioncode"] == 40, "reference"
-    ].unique()
-    current_references_q40 = df.loc[df["questioncode"] == 40, "reference"].unique()
-    common_references_q40 = list(
-        set(dropped_references_q40) & set(current_references_q40)
-    )
 
-    condition = (df["reference"].isin(common_references_q40)) & (
-        df["questioncode"] == 40
-    )
     selected_columns = ["reference", "period", "questioncode", "adjustedresponse"]
     dropped_questions = dropped_questions[selected_columns].rename(
         columns={"adjustedresponse": "prev_adjustedresponse"}
@@ -454,7 +459,6 @@ def replace_derived_with_previous_period(df, dropped_questions, config):
         on=["reference", "period", "questioncode"],
         how="left",
     )
-    print(combined_dataframes.columns)
     condition = (
         (
             combined_dataframes["adjustedresponse"]
@@ -470,23 +474,10 @@ def replace_derived_with_previous_period(df, dropped_questions, config):
         condition, "prev_adjustedresponse"
     ]
     combined_dataframes.loc[condition, "imputed_and_derived_flag"] = (
-        "manual_copy_previous_period_value"
+        "manual copy previous period value"
     )
-    print(
-        combined_dataframes.loc[
-            condition,
-            [
-                "reference",
-                "period",
-                "questioncode",
-                "adjustedresponse",
-                "prev_adjustedresponse",
-                "form_type_spp",
-                "imputed_and_derived_flag",
-            ],
-        ].head()
-    )
-
+    combined_dataframes.drop(columns=["prev_adjustedresponse"], inplace=True)
+    return combined_dataframes
     # cleanup and drop undded columns
 
     # print(df.loc[(condition)],dropped_questions.loc[(condition), "adjustedresponse"],

@@ -242,6 +242,9 @@ class TestStartPeriodStaging:
             ["reference", "period", "questioncode"], ignore_index=True
         )
 
+        # print(expected_output[["reference","questioncode","construction_link",]])
+        # print(actual_output[["reference","questioncode","construction_link","cell_no","imputation_class"]])
+
         assert_frame_equal(
             actual_output, expected_output, check_like=True, check_dtype=False
         )
