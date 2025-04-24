@@ -431,46 +431,67 @@ def start_of_period_staging(
     return imputation_output_with_missing
 
 
-def replace_derived_with_previous_period(df, dropped_questions, config):
-    # Need to check if derived questions are present in dropped questions
+def replace_derived_with_previous_period(
+    df: pd.DataFrame, dropped_questions: pd.DataFrame, config: dict
+) -> pd.DataFrame:
+    """
+    replace derived questions values with previous period value for same question.
+    This will only impact references that have changed form types between periods.
 
-    selected_columns = ["reference", "period", "questioncode", "adjustedresponse"]
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        main dataframe containing the data to be processed
+    dropped_questions : pd.DataFrame
+        dataframe contaiting questions not needed in current period and formtype.
+        Note this will also contain derived questions that are needed in current period
+        We only overwrite where current period value does not match previous period
+        value
+    config : dict
+        main pipeline config
+
+    Returns
+    -------
+    pd.DataFrame
+        original dataframe with some derived values updated and replaced with previous
+        periods value. Logger will output references which have been updated
+    """
+    selected_columns = [
+        config["reference"],
+        config["period"],
+        config["question_no"],
+        config["target"],
+    ]
     dropped_questions = dropped_questions[selected_columns].rename(
-        columns={"adjustedresponse": "prev_adjustedresponse"}
+        columns={config["target"]: f"prev_{config['target']}"}
     )
 
     combined_dataframes = pd.merge(
         df,
         dropped_questions,
-        on=["reference", "period", "questioncode"],
+        on=[config["reference"], config["period"], config["question_no"]],
         how="left",
     )
     condition = (
         (
-            combined_dataframes["adjustedresponse"]
-            != combined_dataframes["prev_adjustedresponse"]
+            combined_dataframes[config["target"]]
+            != combined_dataframes[f"prev_{config['target']}"]
         )
-        & (combined_dataframes["prev_adjustedresponse"].notna())
+        & (combined_dataframes[f"prev_{config['target']}"].notna())
         & (
-            (~combined_dataframes["questioncode"].isin([47, 43]))
+            (~combined_dataframes[config["question_no"]].isin([47, 43]))
             & (combined_dataframes["imputed_and_derived_flag"].notna())
         )
     )
-    combined_dataframes.loc[condition, "adjustedresponse"] = combined_dataframes.loc[
-        condition, "prev_adjustedresponse"
+    combined_dataframes.loc[condition, config["target"]] = combined_dataframes.loc[
+        condition, f"prev_{config['target']}"
     ]
     combined_dataframes.loc[condition, "imputed_and_derived_flag"] = (
         "manual copy previous period value"
     )
-    combined_dataframes.drop(columns=["prev_adjustedresponse"], inplace=True)
+    combined_dataframes.drop(columns=[f"prev_{config['target']}"], inplace=True)
     return combined_dataframes
-    # cleanup and drop undded columns
-
-    # print(df.loc[(condition)],dropped_questions.loc[(condition), "adjustedresponse"],
-    #  different)
-    # print(df[["adjustedresponse","new_adjustedresponse"]],)
-    #  Just join the two dataframes and keep the value that is from dropped dataframe
-    # Need to check how this relates to estimation
 
 
 def new_questions_construction_link(df, config):
