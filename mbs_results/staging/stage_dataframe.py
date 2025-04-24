@@ -475,21 +475,28 @@ def replace_derived_with_previous_period(
     )
     condition = (
         (
+            # Only update values where current target different from previous period
+            # target
             combined_dataframes[config["target"]]
             != combined_dataframes[f"prev_{config['target']}"]
         )
+        # Ignore where previous period is nan
         & (combined_dataframes[f"prev_{config['target']}"].notna())
         & (
             (~combined_dataframes[config["question_no"]].isin([47, 43]))
+            # Removing 47 and 43 as these are included from constrains for winsorisation
             & (combined_dataframes["imputed_and_derived_flag"].notna())
         )
     )
+    # Update current period target with previous period target
     combined_dataframes.loc[condition, config["target"]] = combined_dataframes.loc[
         condition, f"prev_{config['target']}"
     ]
+    # Updating imputation flag to be unique to this process
     combined_dataframes.loc[condition, "imputed_and_derived_flag"] = (
         "manual copy previous period value"
     )
+    # cleaning up created column
     combined_dataframes.drop(columns=[f"prev_{config['target']}"], inplace=True)
     return combined_dataframes
 
