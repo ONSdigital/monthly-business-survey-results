@@ -210,7 +210,10 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
 
 
 def drop_derived_questions(
-    df: pd.DataFrame, question_no: str, form_type_spp: str, form_to_derive_map: dict,
+    df: pd.DataFrame,
+    question_no: str,
+    form_type_spp: str,
+    form_to_derive_map: dict,
 ) -> pd.DataFrame:
     """
     drops rows containing derived questions based on spp form type
