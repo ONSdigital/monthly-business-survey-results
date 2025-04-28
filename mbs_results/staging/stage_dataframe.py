@@ -297,9 +297,7 @@ def start_of_period_staging(
         imputation_output = imputation_output.loc[
             imputation_output["period"] == config["current_period"]
         ]
-        logging.info(
-            "Setting current_period to the period for SE outputs. Overwriting SEconfig"
-        )
+
         imputation_output["period"] = convert_column_to_datetime(
             imputation_output["period"]
         ) + pd.DateOffset(months=1)
@@ -319,6 +317,9 @@ def start_of_period_staging(
             columns={"imputation_class": "imputation_class_prev_period"}
         )
 
+        logging.info(
+            "Setting current_period to the period for SE outputs. Overwriting SEconfig"
+        )
         config["current_period"] = config["selective_editing_period"]
 
         finalsel = read_and_combine_colon_sep_files(config)
