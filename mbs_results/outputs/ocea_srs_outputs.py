@@ -1,8 +1,10 @@
 import pandas as pd
 
 
-def produce_ocea_srs_outputs(additional_outputs_df: pd.DataFrame) -> pd.DataFrame:
-    """Produces outputs for OCEA/SRS
+def produce_ocea_srs_outputs(
+    additional_outputs_df: pd.DataFrame, config: dict
+) -> pd.DataFrame:
+    """Produces outputs for OCEA/SRS, pulling SIC from the config
 
     Parameters
       ----------
@@ -19,7 +21,7 @@ def produce_ocea_srs_outputs(additional_outputs_df: pd.DataFrame) -> pd.DataFram
         [
             "reference",
             "period",
-            "frosic2007",
+            config["sic"],
             "response",
             "adjustedresponse",
             "outlier_weight",
@@ -34,7 +36,7 @@ def produce_ocea_srs_outputs(additional_outputs_df: pd.DataFrame) -> pd.DataFram
         {
             "reference": "Ruref",
             "period": "Period",
-            "frosic2007": "SIC",
+            config["sic"]: "SIC",
             "response": "return",
             "adjustedresponse": "adjusted",
             "calibration_factor": "gweight",

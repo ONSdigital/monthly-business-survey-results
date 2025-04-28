@@ -109,7 +109,6 @@ def test_create_imputation_class(filepath):
     df_in = expected_output.drop(columns=["expected"])
 
     actual_output = create_imputation_class(df_in, "cell_no", "expected")
-
     assert_frame_equal(actual_output, expected_output)
 
 
@@ -190,8 +189,10 @@ def test_filter_out_questions(mock_to_csv, filepath):
 
     questions_to_remove = [11, 12, 146]
 
+    network_config = {"platform": "network", "bucket": ""}
+
     actual_output = filter_out_questions(
-        df_in, "question", questions_to_remove, "export.csv"
+        df_in, "question", questions_to_remove, "export.csv", **network_config
     )
 
     # testing if pandas export was called once

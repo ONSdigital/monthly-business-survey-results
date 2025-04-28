@@ -11,6 +11,7 @@
     "design_weight": "design_weight",
     "status": "statusencoded",
     "form_id_idbr": "formtype",
+    "sic": "rusic2007",
     "group": "calibration_group",
     "calibration_group": "calibration_group",
     "period": "period",
@@ -19,7 +20,6 @@
     "region": "region",
     "sampled": "is_sampled",
     "census": "is_census",
-    "state": "frozen",
     "strata": "cell_no",
     "target": "adjustedresponse",
     "form_id_spp": "form_type_spp",
@@ -37,7 +37,10 @@
         "formtype": "str",
         "status": "str",
         "statusencoded": "int",
+        "frosic2003": "str",
+        "rusic2003": "str",
         "frosic2007": "str",
+        "rusic2007": "str",
         "froempment": "int",
         "frotover": "float",
         "cell_no": "int"},
@@ -61,9 +64,7 @@
         "formtype",
         "cell_no",
         "froempment",
-        "frosic2007",
         "frotover",
-        "period",
         "reference"
     ],
 
@@ -82,7 +83,7 @@
         "selmkr", "inclexcl"
     ],
     "population_keep_columns": [
-        "reference", "region", "frotover", "cell_no", "period", "frosic2007"
+        "reference", "region", "frotover", "cell_no"
     ],
 
     "sample_column_names": [
@@ -95,7 +96,7 @@
         "tradstyle2","tradstyle3","contact","telephone","fax","seltype","inclexcl",
         "cell_no","formtype","cso_tel","currency"
     ],
-    "sample_keep_columns": ["reference", "period"],
+    "sample_keep_columns": ["reference"],
 
     "idbr_to_spp": {"201":9,
                     "202":9,

@@ -7,6 +7,7 @@ from mbs_results.utilities.utils import (
 )
 
 
+
 def test_read_colon_separated_file():
     headers = ["int", "str", "float", "period"]
     expected = pd.DataFrame(

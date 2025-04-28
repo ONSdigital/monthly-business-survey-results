@@ -1,7 +1,5 @@
-import re
+import os
 from importlib import metadata
-from io import BytesIO
-from typing import List
 
 import pandas as pd
 
@@ -19,35 +17,6 @@ def convert_column_to_datetime(dates):
     df : pd.Series
     """
     return pd.to_datetime(dates, format="%Y%m")
-
-
-def read_colon_separated_file(
-    filepath: str, column_names: List[str], period="period"
-) -> pd.DataFrame:
-    """
-    Read data stored as text file, columns separated by colon and any amount of
-    white space, and return the data as a dataframe with an additional column
-    containing the date derived from the six numbers at the end of the filename,
-    preceded by an underscore, eg `_202401`.
-
-    Parameters
-    ----------
-    filepath : str
-        location of data file to read
-    column_names : List[str]
-        list of column names in data file
-
-    Return
-    ------
-    pd.DataFrame
-    """
-    with open(filepath, mode="rb") as file:
-        buffer = BytesIO(file.read())
-        df = pd.read_csv(buffer, sep=r"\s*:\s*", names=column_names, engine="python")
-        date_string = re.findall(r"_(\d{6})", filepath)
-        df[period] = int(date_string[0])
-
-    return df
 
 
 def append_filter_out_questions(
@@ -93,6 +62,7 @@ def get_versioned_filename(prefix, config):
     return filename
 
 
+
 def compare_two_dataframes(df1, df2):
     """
     Compare two dataframes and identify the differences between them.
@@ -126,3 +96,33 @@ def compare_two_dataframes(df1, df2):
             changed_columns.append(column)
 
     return diff, changed_columns
+
+def get_snapshot_alternate_path(config):
+    """
+    Check if snapshot_alternate_path is provided in the config and use this to load the
+    snapshot. If snapshot_alternate_path is not provided, snapshot will be loaded from
+    the folder_path.
+    Also checks that folder path ends in a slash, appends one if not included.
+    Does not overwrite the folder_path in the config.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration dictionary containing the snapshot_alternate_path and folder_path
+        keys
+
+    Returns
+    -------
+    str
+        The path to the folder where the snapshot is located. If snapshot_alternate_path
+        is not provided, returns the folder_path.
+    """
+
+    snapshot_file_path = config.get("snapshot_alternate_path_OPTIONAL") or config.get(
+        "folder_path"
+    )
+    snapshot_file_path = os.path.normpath(snapshot_file_path)
+    if not snapshot_file_path.endswith(os.sep):
+        snapshot_file_path += os.sep
+    return snapshot_file_path
+  

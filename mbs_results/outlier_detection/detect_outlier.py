@@ -5,22 +5,28 @@ from mbs_results.utilities.constrains import (
     replace_outlier_weights,
     update_derived_weight_and_winsorised_value,
 )
+from mbs_results.utilities.inputs import read_csv_wrapper
 
 
 def join_l_values(df, l_values_path, classification_values_path, config):
     """Read l values, classifications and drop duplicates and period"""
 
-    l_values = pd.read_csv(
-        l_values_path, dtype={"question_no": "int64", "classification": "str"}
+    l_values = read_csv_wrapper(
+        l_values_path,
+        config["platform"],
+        config["bucket"],
+        dtype={"question_no": "int64", "classification": "str"},
     )
 
     # Merge on classification SIC map (merge on SIC to get classsificaion on df -> )
-    classification_values = pd.read_csv(classification_values_path, dtype=str)
-
+    # SIC is now called from config
+    classification_values = read_csv_wrapper(
+        classification_values_path, config["platform"], config["bucket"], dtype=str
+    )
     df = pd.merge(
         df,
         classification_values,
-        left_on="frosic2007",
+        left_on=config["sic"],
         right_on="sic_5_digit",
         how="left",
     )
@@ -80,7 +86,7 @@ def detect_outlier(df, config):
         config["period"],
         config["question_no"],
         "outlier_weight",
-        config["manual_outlier_path"],
+        config,
     )
 
     return post_win

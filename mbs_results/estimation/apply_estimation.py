@@ -10,6 +10,7 @@ from mbs_results.estimation.create_population_counts import (
 from mbs_results.estimation.pre_processing_estimation import get_estimation_data
 from mbs_results.staging.data_cleaning import is_census
 from mbs_results.utilities.file_selector import find_files
+from mbs_results.utilities.inputs import read_csv_wrapper
 
 # from mbs_results.estimation.validate_estimation import validate_estimation
 
@@ -51,14 +52,13 @@ def apply_estimation(config):
 
     estimation_df_list = []
 
-    calibration_group_map = pd.read_csv(config["calibration_group_map_path"])
+    calibration_group_map = read_csv_wrapper(
+        config["calibration_group_map_path"], config["platform"], config["bucket"]
+    )
 
     for population_file, sample_file in zip(population_files, sample_files):
         estimation_data = get_estimation_data(
-            population_file,
-            sample_file,
-            calibration_group_map=calibration_group_map,
-            **config
+            population_file, sample_file, calibration_group_map, config
         )
 
         census_df = estimation_data[

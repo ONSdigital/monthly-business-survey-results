@@ -5,6 +5,7 @@ from typing import List
 
 import pandas as pd
 
+from mbs_results.utilities.inputs import read_csv_wrapper
 from mbs_results.utilities.validation_checks import validate_manual_outlier_df
 
 logger = logging.getLogger(__name__)
@@ -117,6 +118,7 @@ def constrain(
     target: str,
     question_no: str,
     spp_form_id: str,
+    sic: str,
 ) -> pd.DataFrame:
     """
     Creates new rows with derived values based on form id and adds a relevant
@@ -148,13 +150,14 @@ def constrain(
         Column name containing question number.
     spp_form_id : str
         Column name containing form id.
+    sic: str
+        Calls in the SIC value from the Main config
 
     Returns
     -------
     final_constrained : pd.DataFrame
         Original dataframe with constrains.
     """
-
     derive_map, derive_map_null = create_derive_map(df, spp_form_id)
 
     df[f"pre_derived_{target}"] = df[target]
@@ -170,7 +173,7 @@ def constrain(
             "cell_no",
             "converted_frotover",
             "froempment",
-            "frosic2007",
+            sic,
             "formtype",
         ],
         verify_integrity=False,
@@ -230,6 +233,7 @@ def derive_questions(
     target: str,
     question_no: str,
     spp_form_id: str,
+    config: dict,
 ) -> pd.DataFrame:
     """
     Function to calculate new o-weights post winsorisation
@@ -270,7 +274,7 @@ def derive_questions(
             "cell_no",
             "converted_frotover",
             "froempment",
-            "frosic2007",
+            config["sic"],
             "formtype",
         ],
         verify_integrity=False,
@@ -366,6 +370,7 @@ def calculate_derived_outlier_weights(
     spp_form_id: str,
     outlier_weight: str,
     winsorised_target: str,
+    config: dict,
 ) -> pd.DataFrame:
     """
     Function to calculate new outlier weights for derived questions
@@ -417,6 +422,7 @@ def calculate_derived_outlier_weights(
             target,
             question_no,
             spp_form_id,
+            config,
         )
     else:
         # Skipping calculating derived Q's
@@ -429,6 +435,7 @@ def calculate_derived_outlier_weights(
         winsorised_target,
         question_no,
         spp_form_id,
+        config,
     )
 
     post_win_derived = post_win_derived.loc[
@@ -590,7 +597,7 @@ def replace_outlier_weights(
     period: str,
     question_code: str,
     outlier_weight: str,
-    manual_outlier_path: str,
+    config: dict,
 ) -> pd.DataFrame:
     """
     Overwrite calculated outlier weights with manual outlier weights
@@ -610,8 +617,12 @@ def replace_outlier_weights(
     manual_outlier_weight : str
         Column name containing manual outlier weight, ingested from the
         manual outliers file
-    manual_outlier_path : str
-        String containing file path to manual outliers file.
+    config : dict
+        Dictionary containing the following keys of interest:
+        platform - either "s3" or "network"
+        manual_outlier_path: String containing file path to manual outliers
+                             file.
+        bucket_name - S3 bucket name for file storage. (optional)
 
     Returns
     -------
@@ -619,8 +630,7 @@ def replace_outlier_weights(
         Original dataframe with weights updated to equal those supplied
         in the manual outliers file, if it exists.
     """
-
-    if not manual_outlier_path:
+    if not config["manual_outlier_path"]:
         warnings.warn(
             "No manual outlier file has been specified in the configuration,"
             " skipping stage"
@@ -630,8 +640,9 @@ def replace_outlier_weights(
         return df
 
     else:
-        manual_outlier_df = pd.read_csv(manual_outlier_path)
-
+        manual_outlier_df = read_csv_wrapper(
+            config["manual_outlier_path"], config["platform"], config["bucket"]
+        )
         validate_manual_outlier_df(manual_outlier_df, reference, period, question_code)
 
         # Use an outer join to log unmatched manual outlier weights
