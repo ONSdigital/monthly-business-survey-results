@@ -62,6 +62,41 @@ def get_versioned_filename(prefix, config):
     return filename
 
 
+
+def compare_two_dataframes(df1, df2):
+    """
+    Compare two dataframes and identify the differences between them.
+
+    Parameters:
+    - df1: pd.DataFrame
+        The first dataframe to compare.
+    - df2: pd.DataFrame
+        The second dataframe to compare.
+
+    Returns:
+    - diff: pd.DataFrame
+        A dataframe containing the rows that are different between df1 and df2.
+    - changed_columns: list
+        A list of column names that have differences between df1 and df2.
+    """
+    all_columns = df1.columns.union(df2.columns)
+    df1_aligned = df1.reindex(columns=all_columns)
+    df2_aligned = df2.reindex(columns=all_columns)
+
+    df1_aligned["version"] = "df1"
+    df2_aligned["version"] = "df2"
+
+    diff = pd.concat([df1_aligned, df2_aligned]).drop_duplicates(
+        subset=all_columns, keep=False
+    )
+
+    changed_columns = []
+    for column in all_columns:
+        if not df1_aligned[column].equals(df2_aligned[column]):
+            changed_columns.append(column)
+
+    return diff, changed_columns
+
 def get_snapshot_alternate_path(config):
     """
     Check if snapshot_alternate_path is provided in the config and use this to load the
@@ -90,3 +125,4 @@ def get_snapshot_alternate_path(config):
     if not snapshot_file_path.endswith(os.sep):
         snapshot_file_path += os.sep
     return snapshot_file_path
+  
