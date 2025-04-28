@@ -321,11 +321,9 @@ class TestStartPeriodStaging:
             + f"se_outputs_full_df_{config['period_selected']}_test_result.csv",
             index=False,
         )
-        assert 1 == 2
 
 
 # Known issues:
-# Q47 created? shouldnt be present
 # Zero on q40 as this has been derived from q46 and q47
 # If we fix this in start of period staging, what will happen when constrains are
 # applied again in outliering?
