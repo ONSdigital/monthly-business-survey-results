@@ -190,6 +190,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         df,
         config["question_no"],
         config["form_id_spp"],
+        config["form_to_derived_map"],
     )
 
     warnings.warn("add live or frozen after fixing error marker column in config")
@@ -209,7 +210,10 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
 
 
 def drop_derived_questions(
-    df: pd.DataFrame, question_no: str, form_type_spp: str
+    df: pd.DataFrame,
+    question_no: str,
+    form_type_spp: str,
+    form_to_derive_map: dict,
 ) -> pd.DataFrame:
     """
     drops rows containing derived questions based on spp form type
@@ -222,32 +226,27 @@ def drop_derived_questions(
         column name for question number
     form_type_spp : str
         column name for spp form type
+    form_to_derive_map : str
+        form_to_derive_map from the config
     Returns
     -------
     pd.DataFrame
         _description_
     """
 
-    question_dict = {
-        13: 40,
-        14: 40,
-        15: 46,
-        16: 42,
-    }
-
-    for formid, question_number in question_dict.items():
+    for formid, question_numbers in form_to_derive_map.items():
         filtered_df = df.loc[
-            (df[question_no] == question_number) & (df[form_type_spp] == formid)
+            (df[question_no].isin(question_numbers)) & (df[form_type_spp] == formid)
         ]
         if not filtered_df.empty:
             warnings.warn(
-                f"Derived question dataframe {question_number} for "
+                f"Derived question dataframe {question_numbers} for "
                 + f"formid {formid} was found in the staged dataframe. "
                 + "Dropping"
             )
         df = df.drop(
             df[
-                (df[question_no] == question_number) & (df[form_type_spp] == formid)
+                (df[question_no].isin(question_numbers)) & (df[form_type_spp] == formid)
             ].index
         )
     return df
