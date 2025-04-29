@@ -285,6 +285,7 @@ def start_of_period_staging(
     """
 
     # Derive period_selected as next month of current period
+    input_dataframe = imputation_output.copy()
     current_period = pd.to_datetime(config["current_period"], format="%Y%m")
 
     period_selected = current_period + pd.DateOffset(months=1)
@@ -423,7 +424,37 @@ def start_of_period_staging(
 
         check_construction_links(imputation_output_with_missing, config)
 
+        remove_derived_if_newly_sampled(
+            imputation_output_with_missing, input_dataframe, config
+        )
+
     return imputation_output_with_missing
+
+
+def remove_derived_if_newly_sampled(
+    df: pd.DataFrame, input_dataframe: pd.DataFrame, config: dict
+):
+    # Function to remove derived questions if they are newly sampled business
+    # Currently we fill values with D and 0.0 if derived from questions are nan.
+    # Need to check if a reference is newly sampled i.e. not in the previous period
+    # then replace this with a missing value and remove derived flag
+
+    references_in_prev_period = input_dataframe[config["reference"]].unique()
+    condition = (
+        (df[config["target"]] == 0.0)
+        & (df["imputed_and_derived_flag"] == "d")
+        & ~(df[config["reference"]].isin(references_in_prev_period))
+    )
+    # Pull out all references where this happens
+    num_rows = df.loc[condition].shape[0]
+    logging.info(
+        "number of rows which have been identified "
+        f"as newly sampled derived questions, {num_rows}"
+    )
+    # Set the values to None for the specified columns
+    df.loc[condition, ["imputed_and_derived_flag", config["target"]]] = None
+
+    return df
 
 
 def new_questions_construction_link(df, config):
