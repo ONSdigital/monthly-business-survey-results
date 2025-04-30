@@ -284,6 +284,7 @@ def start_of_period_staging(
     """
 
     # Derive period_selected as next month of current period
+    input_dataframe = imputation_output.copy()
     current_period = pd.to_datetime(config["current_period"], format="%Y%m")
 
     period_selected = current_period + pd.DateOffset(months=1)
@@ -422,7 +423,62 @@ def start_of_period_staging(
 
         check_construction_links(imputation_output_with_missing, config)
 
+        remove_derived_if_newly_sampled(
+            imputation_output_with_missing, input_dataframe, config
+        )
+
     return imputation_output_with_missing
+
+
+def remove_derived_if_newly_sampled(
+    df: pd.DataFrame, previous_period_df: pd.DataFrame, config: dict
+):
+    """
+    Removes derived questions from the DataFrame if they belong to newly sampled
+    business.
+    This function identifies rows where the target value is 0.0, the
+    `imputed_and_derived_flag` is set to "d", and the reference is not present
+    in the previous period's DataFrame. For such rows, it sets the
+    `imputed_and_derived_flag` and the target column to None.
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The current period's DataFrame containing the data to be processed.
+    previous_period_df : pd.DataFrame
+        The DataFrame containing data from the previous period.
+    config : dict
+        A dictionary containing configuration details. It must include:
+        - "reference": The column name used to identify references.
+        - "target": The column name of the target variable.
+    Returns
+    -------
+    pd.DataFrame
+        The modified DataFrame with derived questions removed for newly
+        sampled businesses.
+    Notes
+    -----
+    - A business is considered newly sampled if its reference is not present
+      in the `previous_period_df`.
+    - The function logs the number of rows identified as newly sampled
+      derived questions.
+    """
+
+    references_in_prev_period = previous_period_df[config["reference"]].unique()
+    condition = (
+        (df[config["target"]] == 0.0)
+        & (df["imputed_and_derived_flag"] == "d")
+        & ~(df[config["reference"]].isin(references_in_prev_period))
+    )
+    # Pull out all references where this happens
+    num_rows = df.loc[condition].shape[0]
+    logging.info(
+        "number of rows which have been identified "
+        f"as newly sampled derived questions, {num_rows}"
+    )
+    # Set the values to None for the specified columns
+    df.loc[condition, ["imputed_and_derived_flag", config["target"]]] = None
+
+    return df
 
 
 def new_questions_construction_link(df, config):
