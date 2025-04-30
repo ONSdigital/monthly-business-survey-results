@@ -3,6 +3,7 @@ from pandas.testing import assert_frame_equal
 
 from mbs_results.utilities.inputs import read_colon_separated_file
 
+
 def test_read_colon_separated_file():
     headers = ["int", "str", "float", "period"]
     expected = pd.DataFrame(
