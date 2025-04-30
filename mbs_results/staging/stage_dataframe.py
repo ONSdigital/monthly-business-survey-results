@@ -432,14 +432,39 @@ def start_of_period_staging(
 
 
 def remove_derived_if_newly_sampled(
-    df: pd.DataFrame, input_dataframe: pd.DataFrame, config: dict
+    df: pd.DataFrame, previous_period_df: pd.DataFrame, config: dict
 ):
-    # Function to remove derived questions if they are newly sampled business
-    # Currently we fill values with D and 0.0 if derived from questions are nan.
-    # Need to check if a reference is newly sampled i.e. not in the previous period
-    # then replace this with a missing value and remove derived flag
+    """
+    Removes derived questions from the DataFrame if they belong to newly sampled
+    business.
+    This function identifies rows where the target value is 0.0, the
+    `imputed_and_derived_flag` is set to "d", and the reference is not present
+    in the previous period's DataFrame. For such rows, it sets the
+    `imputed_and_derived_flag` and the target column to None.
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The current period's DataFrame containing the data to be processed.
+    previous_period_df : pd.DataFrame
+        The DataFrame containing data from the previous period.
+    config : dict
+        A dictionary containing configuration details. It must include:
+        - "reference": The column name used to identify references.
+        - "target": The column name of the target variable.
+    Returns
+    -------
+    pd.DataFrame
+        The modified DataFrame with derived questions removed for newly
+        sampled businesses.
+    Notes
+    -----
+    - A business is considered newly sampled if its reference is not present
+      in the `previous_period_df`.
+    - The function logs the number of rows identified as newly sampled
+      derived questions.
+    """
 
-    references_in_prev_period = input_dataframe[config["reference"]].unique()
+    references_in_prev_period = previous_period_df[config["reference"]].unique()
     condition = (
         (df[config["target"]] == 0.0)
         & (df["imputed_and_derived_flag"] == "d")
