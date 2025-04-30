@@ -148,7 +148,7 @@ The HTML report can be accessed at `htmlcov/index.html`.
 9.	Select whether you want to set this as a pre-release or the latest release – generally, we set it as the latest release (but there may be use cases in the future where pre-release could be used).
 10.	Click “Publish Release”.
 
-### To check the status of the release 
+### To check the status of the release
 11.	Log into Jenkins using your Windows Credentials.
 12.	If you have access, you should see the business-survey-statistics project on your Jenkins dashboard. Click on it, and then click into monthly-business-survey-results.
 
