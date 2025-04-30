@@ -62,7 +62,6 @@ def get_versioned_filename(prefix, config):
     return filename
 
 
-
 def compare_two_dataframes(df1, df2):
     """
     Compare two dataframes and identify the differences between them.
@@ -97,6 +96,7 @@ def compare_two_dataframes(df1, df2):
 
     return diff, changed_columns
 
+
 def get_snapshot_alternate_path(config):
     """
     Check if snapshot_alternate_path is provided in the config and use this to load the
@@ -125,4 +125,3 @@ def get_snapshot_alternate_path(config):
     if not snapshot_file_path.endswith(os.sep):
         snapshot_file_path += os.sep
     return snapshot_file_path
-  
