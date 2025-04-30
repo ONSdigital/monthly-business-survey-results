@@ -115,6 +115,47 @@ make coverage_html
 
 The HTML report can be accessed at `htmlcov/index.html`.
 
+## Creating a new release
+### Updating the version number
+
+1.	Create a new branch.
+2.	Update the version in setup.cfg.
+3.	Create a new pull request for your branch, and, once reviewed by somebody, merge it into main.
+
+### Creating a new tag
+4.	From the main branch, you need to use the following git commands to create a new tag:
+
+      `git tag -a v<version_num> -m "v<version_num>"` – for example, `git tag -a v0.1.4 -m “v0.1.4”`
+
+      `git push origin v<version_num>` – for example, `git push origin v0.1.4`
+
+      **Note** – if you make a mistake, you can use the command `git tag -d v<version_num>` to delete the tag.
+
+### Creating the release
+5.	From the repo, click on the Releases heading along the right hand-side.
+
+![creating a new release](images/new_release.png)
+
+6. Click "draft new release" along the top.
+
+![draft new release](images/draft_new_release.png)
+
+7. Under the “Choose a tag” dropdown menu, select the new tag you’ve created.
+
+![draft new release](images/choose_tag.png)
+
+8.	Click “Generate release notes” OR write your own release notes describing what’s changed in this new version.
+9.	Select whether you want to set this as a pre-release or the latest release – generally, we set it as the latest release (but there may be use cases in the future where pre-release could be used).
+10.	Click “Publish Release”.
+
+### To check the status of the release 
+11.	Log into Jenkins using your Windows Credentials.
+12.	If you have access, you should see the business-survey-statistics project on your Jenkins dashboard. Click on it, and then click into monthly-business-survey-results.
+
+(**Note:** the rest of this documentation needs updating with the Jenkins-specific steps)
+
+
+
 ## Documentation
 
 [We write our documentation in MyST Markdown for use in Sphinx][myst]. This is mainly
