@@ -5,6 +5,7 @@ from typing import List
 
 import pandas as pd
 
+from mbs_results.utilities.inputs import read_csv_wrapper
 from mbs_results.utilities.validation_checks import validate_manual_outlier_df
 
 logger = logging.getLogger(__name__)
@@ -606,7 +607,7 @@ def replace_outlier_weights(
     period: str,
     question_code: str,
     outlier_weight: str,
-    manual_outlier_path: str,
+    config: dict,
 ) -> pd.DataFrame:
     """
     Overwrite calculated outlier weights with manual outlier weights
@@ -626,8 +627,12 @@ def replace_outlier_weights(
     manual_outlier_weight : str
         Column name containing manual outlier weight, ingested from the
         manual outliers file
-    manual_outlier_path : str
-        String containing file path to manual outliers file.
+    config : dict
+        Dictionary containing the following keys of interest:
+        platform - either "s3" or "network"
+        manual_outlier_path: String containing file path to manual outliers
+                             file.
+        bucket_name - S3 bucket name for file storage. (optional)
 
     Returns
     -------
@@ -635,8 +640,7 @@ def replace_outlier_weights(
         Original dataframe with weights updated to equal those supplied
         in the manual outliers file, if it exists.
     """
-
-    if not manual_outlier_path:
+    if not config["manual_outlier_path"]:
         warnings.warn(
             "No manual outlier file has been specified in the configuration,"
             " skipping stage"
@@ -646,8 +650,9 @@ def replace_outlier_weights(
         return df
 
     else:
-        manual_outlier_df = pd.read_csv(manual_outlier_path)
-
+        manual_outlier_df = read_csv_wrapper(
+            config["manual_outlier_path"], config["platform"], config["bucket"]
+        )
         validate_manual_outlier_df(manual_outlier_df, reference, period, question_code)
 
         # Use an outer join to log unmatched manual outlier weights

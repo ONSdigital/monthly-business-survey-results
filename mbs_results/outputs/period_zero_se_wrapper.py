@@ -55,6 +55,10 @@ def period_zero_se_wrapper():
     )
     back_data_imputation = imputation_processing(back_data, config)
 
+    back_data_imputation.to_csv(
+        config["output_path"] + "back_data_imputation.csv", index=False
+    )
+
     create_se_outputs(back_data_imputation, config)
 
 

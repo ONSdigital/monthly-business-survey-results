@@ -6,7 +6,7 @@ from mbs_results.imputation.ratio_of_means import ratio_of_means
 from mbs_results.staging.data_cleaning import (
     convert_cell_number,
     create_imputation_class,
-    load_manual_constructions,
+    enforce_datatypes,
 )
 from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.inputs import read_csv_wrapper
@@ -42,16 +42,24 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
 
     # Two options for loading MC:
     warnings.warn("Need to pick one method of loading manual constructions")
-    try:
+
+    if config["manual_constructions_path"]:
         manual_constructions = read_csv_wrapper(
             config["manual_constructions_path"], config["platform"], config["bucket"]
         )
-        if manual_constructions.empty:
-            manual_constructions = None
-        # We could implement above, or the other method of loading mc:
-        load_manual_constructions(df=pre_impute_dataframe, **config)
-    except FileNotFoundError:
+
+    else:
         manual_constructions = None
+
+    if config["filter"]:
+        filter_df = read_csv_wrapper(
+            config["filter"], config["platform"], config["bucket"]
+        )
+        filter_df = enforce_datatypes(filter_df, list(filter_df), **config)
+
+    else:
+        filter_df = None
+
     post_impute = pre_impute_dataframe.groupby(config["question_no"]).apply(
         lambda df: ratio_of_means(
             df=df,
@@ -64,6 +72,7 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
             question_no=config["question_no"],
             strata="imputation_class",
             auxiliary=config["auxiliary_converted"],
+            filters=filter_df,
         )
     )
 

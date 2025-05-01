@@ -190,6 +190,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         df,
         config["question_no"],
         config["form_id_spp"],
+        config["form_to_derived_map"],
     )
 
     warnings.warn("add live or frozen after fixing error marker column in config")
@@ -209,7 +210,10 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
 
 
 def drop_derived_questions(
-    df: pd.DataFrame, question_no: str, form_type_spp: str
+    df: pd.DataFrame,
+    question_no: str,
+    form_type_spp: str,
+    form_to_derive_map: dict,
 ) -> pd.DataFrame:
     """
     drops rows containing derived questions based on spp form type
@@ -222,32 +226,29 @@ def drop_derived_questions(
         column name for question number
     form_type_spp : str
         column name for spp form type
+    form_to_derive_map : str
+        form_to_derive_map from the config
     Returns
     -------
     pd.DataFrame
         _description_
     """
 
-    question_dict = {
-        13: 40,
-        14: 40,
-        15: 46,
-        16: 42,
-    }
-
-    for formid, question_number in question_dict.items():
+    for formid, question_numbers in form_to_derive_map.items():
         filtered_df = df.loc[
-            (df[question_no] == question_number) & (df[form_type_spp] == formid)
+            (df[question_no].isin(question_numbers))
+            & (df[form_type_spp] == int(formid))
         ]
         if not filtered_df.empty:
             warnings.warn(
-                f"Derived question dataframe {question_number} for "
+                f"Derived question dataframe {question_numbers} for "
                 + f"formid {formid} was found in the staged dataframe. "
                 + "Dropping"
             )
         df = df.drop(
             df[
-                (df[question_no] == question_number) & (df[form_type_spp] == formid)
+                (df[question_no].isin(question_numbers))
+                & (df[form_type_spp] == int(formid))
             ].index
         )
     return df
@@ -285,6 +286,7 @@ def start_of_period_staging(
     """
 
     # Derive period_selected as next month of current period
+    input_dataframe = imputation_output.copy()
     current_period = pd.to_datetime(config["current_period"], format="%Y%m")
 
     period_selected = current_period + pd.DateOffset(months=1)
@@ -429,6 +431,10 @@ def start_of_period_staging(
             imputation_output_with_missing, dropped_questions, config
         )
 
+        imputation_output_with_missing = remove_derived_if_newly_sampled(
+            imputation_output_with_missing, input_dataframe, config
+        )
+
     return imputation_output_with_missing
 
 
@@ -500,6 +506,57 @@ def replace_derived_with_previous_period(
     # cleaning up created column
     combined_dataframes.drop(columns=[f"prev_{config['target']}"], inplace=True)
     return combined_dataframes
+
+
+def remove_derived_if_newly_sampled(
+    df: pd.DataFrame, previous_period_df: pd.DataFrame, config: dict
+):
+    """
+    Removes derived questions from the DataFrame if they belong to newly sampled
+    business.
+    This function identifies rows where the target value is 0.0, the
+    `imputed_and_derived_flag` is set to "d", and the reference is not present
+    in the previous period's DataFrame. For such rows, it sets the
+    `imputed_and_derived_flag` and the target column to None.
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The current period's DataFrame containing the data to be processed.
+    previous_period_df : pd.DataFrame
+        The DataFrame containing data from the previous period.
+    config : dict
+        A dictionary containing configuration details. It must include:
+        - "reference": The column name used to identify references.
+        - "target": The column name of the target variable.
+    Returns
+    -------
+    pd.DataFrame
+        The modified DataFrame with derived questions removed for newly
+        sampled businesses.
+    Notes
+    -----
+    - A business is considered newly sampled if its reference is not present
+      in the `previous_period_df`.
+    - The function logs the number of rows identified as newly sampled
+      derived questions.
+    """
+
+    references_in_prev_period = previous_period_df[config["reference"]].unique()
+    condition = (
+        (df[config["target"]] == 0.0)
+        & (df["imputed_and_derived_flag"] == "d")
+        & ~(df[config["reference"]].isin(references_in_prev_period))
+    )
+    # Pull out all references where this happens
+    num_rows = df.loc[condition].shape[0]
+    logging.info(
+        "number of rows which have been identified "
+        f"as newly sampled derived questions, {num_rows}"
+    )
+    # Set the values to None for the specified columns
+    df.loc[condition, ["imputed_and_derived_flag", config["target"]]] = None
+
+    return df
 
 
 def new_questions_construction_link(df, config):

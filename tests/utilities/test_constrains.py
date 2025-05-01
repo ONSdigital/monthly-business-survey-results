@@ -263,13 +263,19 @@ def test_replace_outlier_weights(filepath):
         filepath / "test_replace_outliers_out.csv", index_col=False
     )
 
+    test_config = {
+        "manual_outlier_path": filepath / "manual_outliers.csv",
+        "platform": "network",
+        "bucket": "",
+    }
+
     df_actual = replace_outlier_weights(
         df_in,
         "reference",
         "period",
         "question_no",
         "outlier_weight",
-        filepath / "manual_outliers.csv",
+        test_config,
     )
 
     assert_frame_equal(df_actual, df_expected)
@@ -281,13 +287,15 @@ def test_no_manual_outliers(filepath):
 
     df_in = df.drop(columns=["manual_outlier_weight"])
 
+    test_config = {"manual_outlier_path": "", "platform": "network", "bucket": ""}
+
     df_actual = replace_outlier_weights(
         df_in,
         "reference",
         "period",
         "question_no",
         "outlier_weight",
-        "",
+        test_config,
     )
 
     assert_frame_equal(df_actual, df_in)
@@ -299,14 +307,15 @@ def test_manual_outliers_unmatched_warning(filepath, caplog):
 
     df_in = df.drop(columns=["manual_outlier_weight"])
 
+    test_config = {
+        "manual_outlier_path": filepath / "manual_outliers.csv",
+        "platform": "network",
+        "bucket": "",
+    }
+
     with caplog.at_level(logging.WARN):
         replace_outlier_weights(
-            df_in,
-            "reference",
-            "period",
-            "question_no",
-            "outlier_weight",
-            filepath / "manual_outliers.csv",
+            df_in, "reference", "period", "question_no", "outlier_weight", test_config
         )
 
     assert "There are 1 unmatched references" in caplog.text
