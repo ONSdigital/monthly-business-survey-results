@@ -1,0 +1,10 @@
+questioncode,period,reference,adjustedresponse,response,formtype,cell_no,froempment,frosic2007,frotover,form_type_spp,construction_link,imputed_and_derived_flag
+40,202202,1,8888,,117,999,999,999,,13,,manual copy previous period value
+46,202202,1,,,117,999,999,999,999,13,,
+47,202202,1,,,117,999,999,999,999,13,,
+40,202202,2,9999,,817,888,888,888,888,15,1,
+46,202202,2,6666,,817,888,888,888,,15,,manual copy previous period value
+47,202202,2,0,,817,888,888,888,,15,,
+40,202202,3,8888,,117,577,777,777,,13,,d
+46,202202,3,8888,,117,577,777,777,777,13,1,
+47,202202,3,,,117,577,777,777,777,13,,
