@@ -236,7 +236,8 @@ def drop_derived_questions(
 
     for formid, question_numbers in form_to_derive_map.items():
         filtered_df = df.loc[
-            (df[question_no].isin(question_numbers)) & (df[form_type_spp] == formid)
+            (df[question_no].isin(question_numbers))
+            & (df[form_type_spp] == int(formid))
         ]
         if not filtered_df.empty:
             warnings.warn(
@@ -246,7 +247,8 @@ def drop_derived_questions(
             )
         df = df.drop(
             df[
-                (df[question_no].isin(question_numbers)) & (df[form_type_spp] == formid)
+                (df[question_no].isin(question_numbers))
+                & (df[form_type_spp] == int(formid))
             ].index
         )
     return df
