@@ -555,6 +555,10 @@ def remove_derived_if_newly_sampled(
     )
     # Set the values to None for the specified columns
     df.loc[condition, ["imputed_and_derived_flag", config["target"]]] = None
+    logging.info(
+        f"imputed and derived flag and {config['target']} have been set to null for "
+        f"{num_rows} references"
+    )
 
     return df
 

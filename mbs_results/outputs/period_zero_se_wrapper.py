@@ -52,6 +52,7 @@ def period_zero_se_wrapper():
         back_data,
         config["question_no"],
         config["form_id_spp"],
+        config["form_to_derived_map"],
     )
     back_data_imputation = imputation_processing(back_data, config)
 
