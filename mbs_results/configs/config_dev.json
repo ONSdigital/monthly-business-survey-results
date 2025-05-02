@@ -137,7 +137,8 @@
         "13":"fir"
         },
 
-  "additional_outputs":[],
+  "additional_outputs":["selective_editing_contributors",
+                        "selective_editing_questions"],
 
   "form_to_derived_map": {
         "13": [40],
