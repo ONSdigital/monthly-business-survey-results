@@ -11,7 +11,7 @@
     "design_weight": "design_weight",
     "status": "statusencoded",
     "form_id_idbr": "formtype",
-    "sic": "rusic2007",
+    "sic": "frosic2007",
     "group": "calibration_group",
     "calibration_group": "calibration_group",
     "period": "period",
