@@ -3,16 +3,12 @@ import warnings
 import pandas as pd
 
 from mbs_results.imputation.ratio_of_means import ratio_of_means
-from mbs_results.staging.data_cleaning import (
-    convert_cell_number,
-    create_imputation_class,
-    enforce_datatypes,
-)
 from mbs_results.utilities.constrains import constrain
-from mbs_results.utilities.inputs import read_csv_wrapper
 
 
-def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
+def impute(
+    dataframe: pd.DataFrame, manual_constructions, config: dict, filter_df=None
+) -> pd.DataFrame:
     """
     wrapper function to apply imputation to the given dataframe
 
@@ -32,35 +28,8 @@ def impute(dataframe: pd.DataFrame, config: dict) -> pd.DataFrame:
     warnings.warn("Check what will happen if we try and apply RoM to q146 - Comments")
     # If this is an issue, we could filter to remove 146 and
     # add back after, or escape from Rom if q==146...
-    dataframe["ni_gb_cell_number"] = dataframe[config["cell_number"]]
 
-    dataframe = convert_cell_number(dataframe, config["cell_number"])
-
-    pre_impute_dataframe = create_imputation_class(
-        dataframe, config["cell_number"], "imputation_class"
-    )
-
-    # Two options for loading MC:
-    warnings.warn("Need to pick one method of loading manual constructions")
-
-    if config["manual_constructions_path"]:
-        manual_constructions = read_csv_wrapper(
-            config["manual_constructions_path"], config["platform"], config["bucket"]
-        )
-
-    else:
-        manual_constructions = None
-
-    if config["filter"]:
-        filter_df = read_csv_wrapper(
-            config["filter"], config["platform"], config["bucket"]
-        )
-        filter_df = enforce_datatypes(filter_df, list(filter_df), **config)
-
-    else:
-        filter_df = None
-
-    post_impute = pre_impute_dataframe.groupby(config["question_no"]).apply(
+    post_impute = dataframe.groupby(config["question_no"]).apply(
         lambda df: ratio_of_means(
             df=df,
             manual_constructions=manual_constructions,

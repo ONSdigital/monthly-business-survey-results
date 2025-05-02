@@ -20,11 +20,11 @@ def run_mbs_main(config_user_dict=None):
     config = load_config(config_user_dict)
     validate_config(config)
 
-    staged_data = stage_dataframe(config)
+    staged_data, manual_constructions, filter_df = stage_dataframe(config)
     validate_staging(staged_data, config)
 
     # imputation: RoM wrapper -> Rename wrapper to apply_imputation
-    imputation_output = impute(staged_data, config)
+    (imputation_output,) = impute(staged_data, manual_constructions, config, filter_df)
     validate_imputation(imputation_output, config)
 
     # Estimation Wrapper
