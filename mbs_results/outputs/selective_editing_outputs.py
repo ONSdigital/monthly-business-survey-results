@@ -65,6 +65,7 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
         pd.to_datetime(config_se["current_period"], format="%Y%m")
         + pd.DateOffset(months=1)
     ).strftime("%Y%m")
+    config_se["revision_window"] = 1
 
     imputation_output = start_of_period_staging(imputation_output, config_se)
 
