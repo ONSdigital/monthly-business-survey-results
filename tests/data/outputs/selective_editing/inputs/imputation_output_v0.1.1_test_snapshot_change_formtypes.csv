@@ -1,5 +1,7 @@
 questioncode,period,reference,adjustedresponse,response,formtype,cell_no,froempment,frosic2007,frotover,form_type_spp,imputation_flags_adjustedresponse,cellnumber,status,statusencoded,live_adjustedresponse,imputation_class,backdata_adjustedresponse,backdata_flags_adjustedresponse,adjustedresponse_man,f_match_adjustedresponse,b_match_adjustedresponse,f_link_adjustedresponse,f_match_adjustedresponse_pair_count,default_link_f_match_adjustedresponse,b_link_adjustedresponse,b_match_adjustedresponse_pair_count,default_link_b_match_adjustedresponse,construction_link,flag_construction_matches_count,default_link_flag_construction_matches,pre_derived_adjustedresponse,constrain_marker,pre_constrained_adjustedresponse,imputed_and_derived_flag
-40,202201.0,1,8888,8888,9999,999,999,999,999,106,r,999,Clear,999,8888,99,,,,False,False,1.0,0.0,True,1.0,0.0,True,8.896896896896896,1,False,8888.0,,8888.0,r
-46,202201.0,1,9999,9999,9999,999,999,999,999,106,r,999,Clear,999,9999,99,,,,False,False,1.0,0.0,True,1.0,0.0,True,10.00900900900901,1,False,9999.0,,9999.0,r
-47,202201.0,1,9999,9999,9999,999,999,999,999,106,r,999,Clear,999,9999,99,,,,False,False,1.0,0.0,True,1.0,0.0,True,10.00900900900901,1,False,9999.0,,9999.0,r
-49,202201.0,1,8888,9999,9999,999,999,999,999,106,r,999,Clear,999,9999,99,,,,False,False,1.0,0.0,True,1.0,0.0,True,10.00900900900901,1,False,9999.0,49 > 40,9999.0,r
+40,202201,1,8888,8888,106,999,999,999,999,12,r,999,Clear,999,8888,99,,,,FALSE,FALSE,1,0,TRUE,1,0,TRUE,1,1,TRUE,8888,,,r
+40,202201,2,9999,,117,888,888,888,888,13,,888,Clear,999,9999,88,,,,FALSE,FALSE,1,0,TRUE,1,0,TRUE,1,1,TRUE,9999,,,d
+46,202201,2,6666,6666,117,888,888,888,888,13,r,888,Clear,999,9999,88,,,,FALSE,FALSE,1,0,TRUE,1,0,TRUE,1,1,TRUE,9999,,,r
+47,202201,2,3333,3333,117,888,888,888,888,13,r,888,Clear,999,9999,88,,,,FALSE,FALSE,1,0,TRUE,1,0,TRUE,1,1,TRUE,9999,,,r
+40,202201,3,8888,8888,817,777,777,777,777,15,r,777,Clear,999,9999,77,,,,FALSE,FALSE,1,1,TRUE,1,0,TRUE,1,1,TRUE,9999,,,r
+46,202201,3,8888,,817,777,777,777,777,15,,777,Clear,999,9999,77,,,,FALSE,FALSE,1,2,TRUE,1,0,TRUE,1,1,TRUE,9999,,,d

@@ -109,6 +109,8 @@ def create_selective_editing_question_output(
         }
     )
 
+    question_output.fillna({"auxiliary_value": 0}, inplace=True)
+
     question_output.to_csv(
         output_path + "se_question_full_output_" + f"se_period_{period_selected}.csv",
         index=False,

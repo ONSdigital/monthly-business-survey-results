@@ -236,7 +236,8 @@ def drop_derived_questions(
 
     for formid, question_numbers in form_to_derive_map.items():
         filtered_df = df.loc[
-            (df[question_no].isin(question_numbers)) & (df[form_type_spp] == formid)
+            (df[question_no].isin(question_numbers))
+            & (df[form_type_spp] == int(formid))
         ]
         if not filtered_df.empty:
             warnings.warn(
@@ -246,7 +247,8 @@ def drop_derived_questions(
             )
         df = df.drop(
             df[
-                (df[question_no].isin(question_numbers)) & (df[form_type_spp] == formid)
+                (df[question_no].isin(question_numbers))
+                & (df[form_type_spp] == int(formid))
             ].index
         )
     return df
@@ -284,6 +286,7 @@ def start_of_period_staging(
     """
 
     # Derive period_selected as next month of current period
+    input_dataframe = imputation_output.copy()
     current_period = pd.to_datetime(config["current_period"], format="%Y%m")
 
     period_selected = current_period + pd.DateOffset(months=1)
@@ -296,9 +299,7 @@ def start_of_period_staging(
         imputation_output = imputation_output.loc[
             imputation_output["period"] == config["current_period"]
         ]
-        logging.info(
-            "Setting current_period to the period for SE outputs. Overwriting SEconfig"
-        )
+
         imputation_output["period"] = convert_column_to_datetime(
             imputation_output["period"]
         ) + pd.DateOffset(months=1)
@@ -318,6 +319,9 @@ def start_of_period_staging(
             columns={"imputation_class": "imputation_class_prev_period"}
         )
 
+        logging.info(
+            "Setting current_period to the period for SE outputs. Overwriting SEconfig"
+        )
         config["current_period"] = config["selective_editing_period"]
 
         finalsel = read_and_combine_colon_sep_files(config)
@@ -402,6 +406,7 @@ def start_of_period_staging(
             spp_form_id=config["form_id_spp"],
             sic=config["sic"],
         )
+
         imputation_output_with_missing["imputed_and_derived_flag"] = (
             imputation_output_with_missing.apply(
                 lambda row: (
@@ -422,7 +427,140 @@ def start_of_period_staging(
 
         check_construction_links(imputation_output_with_missing, config)
 
+        imputation_output_with_missing = replace_derived_with_previous_period(
+            imputation_output_with_missing, dropped_questions, config
+        )
+
+        imputation_output_with_missing = remove_derived_if_newly_sampled(
+            imputation_output_with_missing, input_dataframe, config
+        )
+
     return imputation_output_with_missing
+
+
+def replace_derived_with_previous_period(
+    df: pd.DataFrame, dropped_questions: pd.DataFrame, config: dict
+) -> pd.DataFrame:
+    """
+    replace derived questions values with previous period value for same question.
+    This will only impact references that have changed form types between periods.
+
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        main dataframe containing the data to be processed
+    dropped_questions : pd.DataFrame
+        dataframe contaiting questions not needed in current period and formtype.
+        Note this will also contain derived questions that are needed in current period
+        We only overwrite where current period value does not match previous period
+        value
+    config : dict
+        main pipeline config
+
+    Returns
+    -------
+    pd.DataFrame
+        original dataframe with some derived values updated and replaced with previous
+        periods value. Logger will output references which have been updated
+    """
+    selected_columns = [
+        config["reference"],
+        config["period"],
+        config["question_no"],
+        config["target"],
+    ]
+    dropped_questions = dropped_questions[selected_columns].rename(
+        columns={config["target"]: f"prev_{config['target']}"}
+    )
+
+    combined_dataframes = pd.merge(
+        df,
+        dropped_questions,
+        on=[config["reference"], config["period"], config["question_no"]],
+        how="left",
+    )
+    condition = (
+        (
+            # Only update values where current target different from previous period
+            # target
+            combined_dataframes[config["target"]]
+            != combined_dataframes[f"prev_{config['target']}"]
+        )
+        # Ignore where previous period is nan
+        & (combined_dataframes[f"prev_{config['target']}"].notna())
+        & (
+            (~combined_dataframes[config["question_no"]].isin([47, 43]))
+            # Removing 47 and 43 as these are included from constrains for winsorisation
+            & (combined_dataframes["imputed_and_derived_flag"].notna())
+        )
+    )
+    # Update current period target with previous period target
+    combined_dataframes.loc[condition, config["target"]] = combined_dataframes.loc[
+        condition, f"prev_{config['target']}"
+    ]
+    # Updating imputation flag to be unique to this process
+    combined_dataframes.loc[condition, "imputed_and_derived_flag"] = (
+        "manual copy previous period value"
+    )
+    # cleaning up created column
+    combined_dataframes.drop(columns=[f"prev_{config['target']}"], inplace=True)
+    return combined_dataframes
+
+
+def remove_derived_if_newly_sampled(
+    df: pd.DataFrame, previous_period_df: pd.DataFrame, config: dict
+):
+    """
+    Removes derived questions from the DataFrame if they belong to newly sampled
+    business.
+    This function identifies rows where the target value is 0.0, the
+    `imputed_and_derived_flag` is set to "d", and the reference is not present
+    in the previous period's DataFrame. For such rows, it sets the
+    `imputed_and_derived_flag` and the target column to None.
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The current period's DataFrame containing the data to be processed.
+    previous_period_df : pd.DataFrame
+        The DataFrame containing data from the previous period.
+    config : dict
+        A dictionary containing configuration details. It must include:
+        - "reference": The column name used to identify references.
+        - "target": The column name of the target variable.
+    Returns
+    -------
+    pd.DataFrame
+        The modified DataFrame with derived questions removed for newly
+        sampled businesses.
+    Notes
+    -----
+    - A business is considered newly sampled if its reference is not present
+      in the `previous_period_df`.
+    - The function logs the number of rows identified as newly sampled
+      derived questions.
+    """
+
+    references_in_prev_period = previous_period_df[config["reference"]].unique()
+    condition = (
+        (df[config["target"]] == 0.0)
+        & (df["imputed_and_derived_flag"] == "d")
+        & ~(df[config["reference"]].isin(references_in_prev_period))
+    )
+    # Pull out all references where this happens
+    num_rows = df.loc[condition].shape[0]
+    logging.info(
+        "number of rows which have been identified "
+        f"as newly sampled derived questions, {num_rows}"
+    )
+    # Set the values to None for the specified columns
+    df.loc[condition, ["imputed_and_derived_flag", config["target"]]] = None
+    logging.info(
+        f"imputed and derived flag and {config['target']} have been set to null for "
+        f"{num_rows} references"
+    )
+
+    return df
 
 
 def new_questions_construction_link(df, config):

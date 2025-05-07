@@ -65,6 +65,7 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
         pd.to_datetime(config_se["current_period"], format="%Y%m")
         + pd.DateOffset(months=1)
     ).strftime("%Y%m")
+    config_se["revision_window"] = 1
 
     imputation_output = start_of_period_staging(imputation_output, config_se)
 
@@ -81,7 +82,19 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
 
     estimation_output = estimate(imputation_output, config_se)
 
+    estimation_output.to_csv(
+        config_se["output_path"]
+        + f"se_outputs_estimation_output_{config_se['period_selected']}_testing.csv",
+        index=False,
+    )
+
     outlier_output = detect_outlier(estimation_output, config_se)
+
+    outlier_output.to_csv(
+        config_se["output_path"]
+        + f"se_outputs_outlier_output_{config_se['period_selected']}_testing.csv",
+        index=False,
+    )
 
     se_outputs_df = get_additional_outputs_df(estimation_output, outlier_output)
 
