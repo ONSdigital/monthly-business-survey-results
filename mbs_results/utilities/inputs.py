@@ -1,3 +1,4 @@
+import inspect
 import os
 import re
 from typing import List
@@ -7,10 +8,8 @@ import pandas as pd
 import raz_client
 from rdsa_utils.cdp.helpers.s3_utils import load_csv
 
-import mbs_results
 from mbs_results import logger
 from mbs_results.utilities.merge_two_config_files import merge_two_config_files
-import inspect
 
 
 def load_config(config_user_dict=None):
@@ -25,9 +24,8 @@ def load_config(config_user_dict=None):
     # Get config paths relative to the caller directory and check if the files exist
     config_user_path = "config_user.json"
     if not os.path.exists(config_user_path):
-        error_message = f"config_user.json not found at {config_user_path}"
-        logger.error(error_message)
-        raise FileNotFoundError(error_message)
+        warning_message = f"config_user.json not found at {config_user_path}"
+        logger.warning(warning_message)
 
     config_dev_path = os.path.join(caller_dir, "configs", "config_dev.json")
     if not os.path.exists(config_dev_path):

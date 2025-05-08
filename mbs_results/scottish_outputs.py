@@ -1,3 +1,5 @@
+import pandas as pd
+
 loaded_config = {
     "scottish_outputs": [
         "period",
@@ -50,8 +52,6 @@ loaded_config = {
         "error marker.8",
     ]
 }
-
-import pandas as pd
 
 df = pd.read_csv("d:/temp_outputs_new_env/winsorisation_output_0.0.2.csv")
 df = df.columns.to_list()

@@ -26,20 +26,20 @@ def split_func(my_string: str) -> str:
     """
     return my_string.split(sep=("_"))[-1]
 
-def filter_and_calculate_percent_devolved(df,devolved_nation:str):
+
+def filter_and_calculate_percent_devolved(df, devolved_nation: str):
     devolved_nation = devolved_nation.lower()
-    nation_to_code = {'scotland': 'XX', 'wales': 'WW'}
-    try: 
+    nation_to_code = {"scotland": "XX", "wales": "WW"}
+    try:
         region_code = nation_to_code[devolved_nation]
-    except:
-        raise ValueError('devolved nation should be either Scotland or Wales')
-    
+    except KeyError:
+        raise ValueError("devolved nation should be either Scotland or Wales")
+
     df = df.loc[df["region_local"] == region_code]
-    df['percentage_'+devolved_nation] = -1
+    df["percentage_" + devolved_nation] = -1
     # Continue with calculation for percentage ...
 
     return df
-    
 
 
 def devolved_outputs(
@@ -47,16 +47,23 @@ def devolved_outputs(
     question_dictionary: dict,
     devolved_nation: str,
     local_unit_data: pd.DataFrame,
-    devolved_questions: list = [11, 12, 40, 49, 110], # 11, 12 might be 10, 11?
-    agg_function: str = "sum", # potential remove, here for testing
+    devolved_questions: list = [11, 12, 40, 49, 110],  # 11, 12 might be 10, 11?
+    agg_function: str = "sum",  # potential remove, here for testing
 ) -> pd.DataFrame:
     """
     Run to produce devolved outputs (ex GB-NIR)
     Produced a pivot table and converts question numbers into
     """
 
-    df = pd.merge(df, local_unit_data, left_on='reference', right_on='ruref',how='left',suffixes = ['', '_local'])
-    df = filter_and_calculate_percent_devolved(df,devolved_nation)
+    df = pd.merge(
+        df,
+        local_unit_data,
+        left_on="reference",
+        right_on="ruref",
+        how="left",
+        suffixes=["", "_local"],
+    )
+    df = filter_and_calculate_percent_devolved(df, devolved_nation)
 
     devolved_dict = dict(
         (k, question_dictionary[k])
@@ -75,10 +82,10 @@ def devolved_outputs(
     ]
 
     pivot_values = [
-        "adjusted_value", # Original 
-        "new_target_variable", # Imputated / winsorised
-        "response_type", # numeric response type
-        "error_mkr", # single letter (str)
+        "adjusted_value",  # Original
+        "new_target_variable",  # Imputated / winsorised
+        "response_type",  # numeric response type
+        "error_mkr",  # single letter (str)
     ]
 
     # Can use any agg function on numerical values, have to use lambda func for str cols
@@ -155,9 +162,13 @@ if __name__ == "__main__":
     lu_data = read_colon_separated_file(
         data_path / "ludets009_202303" / "ludets009_202303", lu_cols
     )
-    df_pivot = devolved_outputs(df, question_no_plaintext,devolved_nation='Wales',local_unit_data = lu_data)
+    df_pivot = devolved_outputs(
+        df, question_no_plaintext, devolved_nation="Wales", local_unit_data=lu_data
+    )
     print(df_pivot)
-    df_pivot = devolved_outputs(df, question_no_plaintext,devolved_nation='Scotland',local_unit_data = lu_data)
+    df_pivot = devolved_outputs(
+        df, question_no_plaintext, devolved_nation="Scotland", local_unit_data=lu_data
+    )
     print(df_pivot)
 
     # region_local: wales - 25174, scotland - 42020
