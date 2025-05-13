@@ -1,0 +1,171 @@
+[questioncode]
+old_name = "questioncode"
+Deduced_Data_Type = "float64"
+
+[period]
+old_name = "period"
+Deduced_Data_Type = "float64"
+
+[reference]
+old_name = "reference"
+Deduced_Data_Type = "float64"
+
+[adjustedresponse]
+old_name = "adjustedresponse"
+Deduced_Data_Type = "float64"
+
+[response]
+old_name = "response"
+Deduced_Data_Type = "float64"
+
+[rusic2007]
+old_name = "rusic2007"
+Deduced_Data_Type = "int64"
+
+[froempment]
+old_name = "froempment"
+Deduced_Data_Type = "float64"
+
+[frotover]
+old_name = "frotover"
+Deduced_Data_Type = "float64"
+
+[cell_no]
+old_name = "cell_no"
+Deduced_Data_Type = "float64"
+
+[formtype]
+old_name = "formtype"
+Deduced_Data_Type = "int64"
+
+[form_type_spp]
+old_name = "form_type_spp"
+Deduced_Data_Type = "float64"
+
+[imputation_flags_adjustedresponse]
+old_name = "imputation_flags_adjustedresponse"
+Deduced_Data_Type = "object"
+
+[status]
+old_name = "status"
+Deduced_Data_Type = "object"
+
+[statusencoded]
+old_name = "statusencoded"
+Deduced_Data_Type = "float64"
+
+[live_adjustedresponse]
+old_name = "live_adjustedresponse"
+Deduced_Data_Type = "float64"
+
+[converted_frotover]
+old_name = "converted_frotover"
+Deduced_Data_Type = "float64"
+
+[ni_gb_cell_number]
+old_name = "ni_gb_cell_number"
+Deduced_Data_Type = "float64"
+
+[imputation_class]
+old_name = "imputation_class"
+Deduced_Data_Type = "float64"
+
+[backdata_adjustedresponse]
+old_name = "backdata_adjustedresponse"
+Deduced_Data_Type = "float64"
+
+[backdata_flags_adjustedresponse]
+old_name = "backdata_flags_adjustedresponse"
+Deduced_Data_Type = "float64"
+
+[adjustedresponse_man]
+old_name = "adjustedresponse_man"
+Deduced_Data_Type = "float64"
+
+[filtered_adjustedresponse]
+old_name = "filtered_adjustedresponse"
+Deduced_Data_Type = "float64"
+
+[f_match_filtered_adjustedresponse]
+old_name = "f_match_filtered_adjustedresponse"
+Deduced_Data_Type = "bool"
+
+[b_match_filtered_adjustedresponse]
+old_name = "b_match_filtered_adjustedresponse"
+Deduced_Data_Type = "bool"
+
+[f_link_adjustedresponse]
+old_name = "f_link_adjustedresponse"
+Deduced_Data_Type = "float64"
+
+[default_link_f_match_adjustedresponse]
+old_name = "default_link_f_match_adjustedresponse"
+Deduced_Data_Type = "bool"
+
+[b_link_adjustedresponse]
+old_name = "b_link_adjustedresponse"
+Deduced_Data_Type = "float64"
+
+[default_link_b_match_adjustedresponse]
+old_name = "default_link_b_match_adjustedresponse"
+Deduced_Data_Type = "bool"
+
+[construction_link]
+old_name = "construction_link"
+Deduced_Data_Type = "float64"
+
+[default_link_flag_construction_matches]
+old_name = "default_link_flag_construction_matches"
+Deduced_Data_Type = "bool"
+
+[f_match_filtered_adjustedresponse_count]
+old_name = "f_match_filtered_adjustedresponse_count"
+Deduced_Data_Type = "float64"
+
+[b_match_filtered_adjustedresponse_count]
+old_name = "b_match_filtered_adjustedresponse_count"
+Deduced_Data_Type = "float64"
+
+[flag_construction_matches_count]
+old_name = "flag_construction_matches_count"
+Deduced_Data_Type = "float64"
+
+[pre_derived_adjustedresponse]
+old_name = "pre_derived_adjustedresponse"
+Deduced_Data_Type = "float64"
+
+[constrain_marker]
+old_name = "constrain_marker"
+Deduced_Data_Type = "object"
+
+[pre_constrained_adjustedresponse]
+old_name = "pre_constrained_adjustedresponse"
+Deduced_Data_Type = "float64"
+
+[imputed_and_derived_flag]
+old_name = "imputed_and_derived_flag"
+Deduced_Data_Type = "object"
+
+[region]
+old_name = "region"
+Deduced_Data_Type = "object"
+
+[calibration_group]
+old_name = "calibration_group"
+Deduced_Data_Type = "int64"
+
+[is_sampled]
+old_name = "is_sampled"
+Deduced_Data_Type = "bool"
+
+[design_weight]
+old_name = "design_weight"
+Deduced_Data_Type = "float64"
+
+[calibration_factor]
+old_name = "calibration_factor"
+Deduced_Data_Type = "float64"
+
+[is_census]
+old_name = "is_census"
+Deduced_Data_Type = "bool"
