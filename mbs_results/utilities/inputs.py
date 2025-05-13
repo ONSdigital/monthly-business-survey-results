@@ -33,7 +33,7 @@ def load_config(config_user_dict=None):
         logger.error(error_message)
         raise FileNotFoundError(error_message)
 
-    config = merge_two_config_files(config_user_path, config_dev_path)
+    config = merge_two_config_files(config_user_path, config_dev_path, config_user_dict)
     logger.info(
         f"config dictionary created from merging {config_user_path} "
         f"and {config_dev_path}"
