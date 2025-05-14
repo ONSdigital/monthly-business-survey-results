@@ -35,14 +35,14 @@ def merge_two_config_files(
         A dictionary containing the merged configuration.
     """
     if not config_user_dict:
-      try:
-          config_user = load_config(config_user_path)
-          logger.info(f"Loaded user config from {config_user_path}")
-      except Exception as e:
-          logger.error(f"Error loading user config from {config_user_path}: {e}")
-          config_user = {}
+        try:
+            config_user = load_config(config_user_path)
+            logger.info(f"Loaded user config from {config_user_path}")
+        except Exception as e:
+            logger.error(f"Error loading user config from {config_user_path}: {e}")
+            config_user = {}
     else:
-      config_user = config_user_dict
+        config_user = config_user_dict
 
     try:
         config_dev = load_config(config_dev_path)
