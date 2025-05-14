@@ -1,5 +1,3 @@
-import warnings
-
 import pandas as pd
 
 from mbs_results.imputation.ratio_of_means import ratio_of_means
