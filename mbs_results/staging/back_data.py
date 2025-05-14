@@ -2,7 +2,11 @@ import warnings
 
 import pandas as pd
 
-from mbs_results.staging.data_cleaning import enforce_datatypes, create_form_type_spp_column
+from mbs_results import logger
+from mbs_results.staging.data_cleaning import (
+    create_form_type_spp_column,
+    enforce_datatypes,
+)
 from mbs_results.utilities.inputs import read_colon_separated_file, read_csv_wrapper
 from mbs_results.utilities.utils import convert_column_to_datetime
 
@@ -201,11 +205,14 @@ def read_and_process_back_data(config: dict) -> pd.DataFrame:
 
     # TO-DO: Refactor this so construction pipeline doesn't get an unnecessary warning
     if "idbr_to_spp" in config:
-      create_form_type_spp_column(back_data, config)
+        create_form_type_spp_column(back_data, config)
     else:
-      logger.info("""idbr_to_spp column not specified in config, so skipping create_form_type_spp_column. 
-                  You can safely ignore this if this was intentional, i.e. running the construction pipeline.""")
+        logger.info(
+            """idbr_to_spp column not specified in config, so skipping
+            create_form_type_spp_column. You can safely ignore this if
+            this was intentional, i.e. running the construction pipeline."""
+        )
 
     back_data["cellnumber"] = back_data["cell_no"]
-      
+
     return back_data

@@ -12,12 +12,11 @@ from mbs_results.staging.create_missing_questions import (
 from mbs_results.staging.data_cleaning import (
     convert_annual_thousands,
     convert_cell_number,
-    create_imputation_class,
     create_form_type_spp_column,
+    create_imputation_class,
     enforce_datatypes,
     filter_out_questions,
     run_live_or_frozen,
-    
 )
 from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.constrains import constrain
@@ -29,6 +28,7 @@ from mbs_results.utilities.utils import (
 )
 
 logger = logging.getLogger(__name__)
+
 
 def read_and_combine_colon_sep_files(config: dict) -> pd.DataFrame:
     """

@@ -10,9 +10,8 @@ from mbs_results.utilities.validation_checks import (  # validate_manual_constru
     validate_indices,
 )
 
-def create_form_type_spp_column(
-    df: pd.DataFrame, config: dict
-) -> pd.DataFrame:
+
+def create_form_type_spp_column(df: pd.DataFrame, config: dict) -> pd.DataFrame:
     """
     maps IDBR form types to SPP and creates column named "form_type_spp"
 
@@ -29,10 +28,11 @@ def create_form_type_spp_column(
         df dataframe with "form_type_spp" column added
     """
     idbr_to_spp_mapping = config["idbr_to_spp"]
-    df[config["form_id_spp"]] = df[config["form_id_idbr"]].astype(str).map(
-        idbr_to_spp_mapping
+    df[config["form_id_spp"]] = (
+        df[config["form_id_idbr"]].astype(str).map(idbr_to_spp_mapping)
     )
     return df
+
 
 def filter_responses(df, reference, period, last_update):
     """
