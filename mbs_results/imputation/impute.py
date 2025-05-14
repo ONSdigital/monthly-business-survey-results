@@ -25,10 +25,6 @@ def impute(
         post imputation dataframe, values have been derived and constrained following
         imputation
     """
-    warnings.warn("Check what will happen if we try and apply RoM to q146 - Comments")
-    # If this is an issue, we could filter to remove 146 and
-    # add back after, or escape from Rom if q==146...
-
     post_impute = dataframe.groupby(config["question_no"]).apply(
         lambda df: ratio_of_means(
             df=df,
