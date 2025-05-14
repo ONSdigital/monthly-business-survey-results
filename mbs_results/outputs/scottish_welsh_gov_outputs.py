@@ -1,6 +1,6 @@
 from pathlib import Path
-
 import pandas as pd
+from mbs_results.utilities.inputs import read_colon_separated_file
 
 # Missing reporting unit RU and name
 # Should SIC be frozenSIC or SIC)5_digit
@@ -26,20 +26,24 @@ def split_func(my_string: str) -> str:
     """
     return my_string.split(sep=("_"))[-1]
 
-def filter_and_calculate_percent_devolved(df,devolved_nation:str):
+
+def filter_and_calculate_percent_devolved(df: pd.DataFrame, devolved_nation: str):
     devolved_nation = devolved_nation.lower()
     nation_to_code = {'scotland': 'XX', 'wales': 'WW'}
-    try: 
+    try:
         region_code = nation_to_code[devolved_nation]
-    except:
+    except Exception:
         raise ValueError('devolved nation should be either Scotland or Wales')
-    
+    print(f"Filtering for {devolved_nation} with region code {region_code}")
+    print(f"Columns before filtering: {df.columns}")
     df = df.loc[df["region_local"] == region_code]
-    df['percentage_'+devolved_nation] = -1
+    df['percentage_' + devolved_nation] = -1
     # Continue with calculation for percentage ...
-
+    print(f"Calculating percentage for {devolved_nation}")
+    df['percentage_' + devolved_nation] = (
+        df['adjusted_value'] / df['new_target_variable']
+    ) * 100
     return df
-    
 
 
 def devolved_outputs(
@@ -47,15 +51,22 @@ def devolved_outputs(
     question_dictionary: dict,
     devolved_nation: str,
     local_unit_data: pd.DataFrame,
-    devolved_questions: list = [11, 12, 40, 49, 110], # 11, 12 might be 10, 11?
-    agg_function: str = "sum", # potential remove, here for testing
+    devolved_questions: list = [11, 12, 40, 49, 110],  # 11, 12 might be 10, 11?
+    agg_function: str = "sum",  # potential remove, here for testing
 ) -> pd.DataFrame:
     """
     Run to produce devolved outputs (ex GB-NIR)
     Produced a pivot table and converts question numbers into
     """
 
-    df = pd.merge(df, local_unit_data, left_on='reference', right_on='ruref',how='left',suffixes = ['', '_local'])
+    df = pd.merge(
+        df,
+        local_unit_data,
+        left_on='reference',
+        right_on='ruref',
+        how='left',
+        suffixes=['', '_local']
+    )
     df = filter_and_calculate_percent_devolved(df,devolved_nation)
 
     devolved_dict = dict(
@@ -107,7 +118,7 @@ def devolved_outputs(
 
 if __name__ == "__main__":
 
-    data_path = Path(r"D:\temp_outputs_new_env")
+    data_path = Path(r"D:/consultancy/mbs_artifacts/temp_outputs_new_env")
     df = pd.read_csv(data_path / "winsorisation_output_0.0.2.csv")
     # df = df.sample(n = 10000)
 
@@ -124,8 +135,6 @@ if __name__ == "__main__":
     }
 
     devolved_questions = [40, 110, 49, 11, 12]
-
-    from mbs_results.utils import read_colon_separated_file
 
     lu_cols = [
         "ruref",
@@ -155,9 +164,22 @@ if __name__ == "__main__":
     lu_data = read_colon_separated_file(
         data_path / "ludets009_202303" / "ludets009_202303", lu_cols
     )
-    df_pivot = devolved_outputs(df, question_no_plaintext,devolved_nation='Wales',local_unit_data = lu_data)
+    df_pivot = devolved_outputs(
+        df,
+        question_no_plaintext,
+        devolved_nation='Wales',
+        local_unit_data=lu_data
+    )
+    print("================= Pivot table for Wales =============")
     print(df_pivot)
-    df_pivot = devolved_outputs(df, question_no_plaintext,devolved_nation='Scotland',local_unit_data = lu_data)
+
+    df_pivot = devolved_outputs(
+        df,
+        question_no_plaintext,
+        devolved_nation='Scotland',
+        local_unit_data=lu_data
+    )
+    print("================= Pivot table for Scotland =============")
     print(df_pivot)
 
     # region_local: wales - 25174, scotland - 42020
