@@ -13,9 +13,11 @@ from mbs_results.staging.data_cleaning import (
     convert_annual_thousands,
     convert_cell_number,
     create_imputation_class,
+    create_form_type_spp_column,
     enforce_datatypes,
     filter_out_questions,
     run_live_or_frozen,
+    
 )
 from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.constrains import constrain
@@ -27,32 +29,6 @@ from mbs_results.utilities.utils import (
 )
 
 logger = logging.getLogger(__name__)
-
-
-def create_form_type_spp_column(
-    contributors: pd.DataFrame, config: dict
-) -> pd.DataFrame:
-    """
-    maps IDBR form types to SPP and creates column named "form_type_spp"
-
-    Parameters
-    ----------
-    contributors : pd.DataFrame
-        contributors dataframe from JSON snapshot
-    config : dict
-        main pipeline config containing "idbr_to_spp" mapping
-
-    Returns
-    -------
-    pd.DataFrame
-        contributors dataframe with "form_type_spp" column added
-    """
-    idbr_to_spp_mapping = config["idbr_to_spp"]
-    contributors[config["form_id_spp"]] = contributors[config["form_id_idbr"]].map(
-        idbr_to_spp_mapping
-    )
-    return contributors
-
 
 def read_and_combine_colon_sep_files(config: dict) -> pd.DataFrame:
     """
