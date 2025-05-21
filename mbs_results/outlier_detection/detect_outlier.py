@@ -69,16 +69,6 @@ def detect_outlier(df, config):
     # Remove groupby leftovers
     post_win.reset_index(drop=True, inplace=True)
 
-    post_win = update_derived_weight_and_winsorised_value(
-        post_win,
-        config["reference"],
-        config["period"],
-        config["question_no"],
-        config["form_id_spp"],
-        "outlier_weight",
-        config["target"],
-    )
-
     # Replace outlier weights
     post_win = replace_outlier_weights(
         post_win,
@@ -87,6 +77,15 @@ def detect_outlier(df, config):
         config["question_no"],
         "outlier_weight",
         config,
+    )
+    post_win = update_derived_weight_and_winsorised_value(
+        post_win,
+        config["reference"],
+        config["period"],
+        config["question_no"],
+        config["form_id_spp"],
+        "outlier_weight",
+        config["target"],
     )
 
     return post_win
