@@ -4,6 +4,7 @@
     "calibration_group_map_path": "",
     "classification_values_path": "",
     "folder_path": "",
+    "idbr_folder_path": "",
     "l_values_path": "",
     "manual_constructions_path": null,
     "filter": null,
@@ -21,5 +22,4 @@
     "revision_window": 13,
     "snapshot_alternate_path_OPTIONAL": null,
     "state": "frozen"
-
 }

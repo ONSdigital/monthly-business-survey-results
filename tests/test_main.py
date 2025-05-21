@@ -13,6 +13,7 @@ test_config = {
     + "test_cell_no_calibration_group_mapping.csv",
     "classification_values_path": input_path + "test_classification_sic_mapping.csv",
     "folder_path": input_path,
+    "idbr_folder_path": input_path,
     "l_values_path": input_path
     + "test_classification_question_number_l_value_mapping.csv",
     "manual_constructions_path": input_path + "test_manual_constructions.csv",

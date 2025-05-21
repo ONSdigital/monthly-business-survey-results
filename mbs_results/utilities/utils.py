@@ -119,7 +119,7 @@ def get_snapshot_alternate_path(config):
     """
 
     snapshot_file_path = config.get("snapshot_alternate_path_OPTIONAL") or config.get(
-        "folder_path"
+        "idbr_folder_path"
     )
     snapshot_file_path = os.path.normpath(snapshot_file_path)
     if not snapshot_file_path.endswith(os.sep):
