@@ -601,7 +601,7 @@ def update_derived_weight_and_winsorised_value(
     return df
 
 
-def replace_outlier_weights(
+def replace_with_manual_outlier_weights(
     df: pd.DataFrame,
     reference: str,
     period: str,

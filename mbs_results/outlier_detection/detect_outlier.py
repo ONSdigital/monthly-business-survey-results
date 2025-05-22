@@ -2,7 +2,7 @@ import pandas as pd
 
 from mbs_results.outlier_detection.winsorisation import winsorise
 from mbs_results.utilities.constrains import (
-    replace_outlier_weights,
+    replace_with_manual_outlier_weights,
     update_derived_weight_and_winsorised_value,
 )
 from mbs_results.utilities.inputs import read_csv_wrapper
@@ -69,6 +69,15 @@ def detect_outlier(df, config):
     # Remove groupby leftovers
     post_win.reset_index(drop=True, inplace=True)
 
+    # Replace outlier weights
+    post_win = replace_with_manual_outlier_weights(
+        post_win,
+        config["reference"],
+        config["period"],
+        config["question_no"],
+        "outlier_weight",
+        config,
+    )
     post_win = update_derived_weight_and_winsorised_value(
         post_win,
         config["reference"],
@@ -77,16 +86,6 @@ def detect_outlier(df, config):
         config["form_id_spp"],
         "outlier_weight",
         config["target"],
-    )
-
-    # Replace outlier weights
-    post_win = replace_outlier_weights(
-        post_win,
-        config["reference"],
-        config["period"],
-        config["question_no"],
-        "outlier_weight",
-        config,
     )
 
     return post_win
