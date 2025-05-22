@@ -22,6 +22,7 @@ def test_read_colon_separated_file():
 
     assert_frame_equal(actual, expected)
 
+
 def test_compare_two_dataframes():
     df1 = pd.read_csv("tests/data/utilities/utils/compare_two_dataframes_input.csv")
     df2 = df1.copy()
