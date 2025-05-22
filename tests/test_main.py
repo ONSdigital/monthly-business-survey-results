@@ -12,14 +12,13 @@ test_config = {
     "calibration_group_map_path": input_path
     + "test_cell_no_calibration_group_mapping.csv",
     "classification_values_path": input_path + "test_classification_sic_mapping.csv",
-    "folder_path": input_path,
+    "snapshot_file_path": input_path + "test_snaphot.json",
     "idbr_folder_path": input_path,
     "l_values_path": input_path
     + "test_classification_question_number_l_value_mapping.csv",
     "manual_constructions_path": input_path + "test_manual_constructions.csv",
     "filter": input_path + "filters.csv",
     "manual_outlier_path": None,
-    "mbs_file_name": "test_snaphot.json",
     "output_path": "tests/data/test_main/output/",
     "population_prefix": "test_universe009",
     "sample_prefix": "test_finalsel009",

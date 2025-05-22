@@ -49,7 +49,7 @@ def read_and_combine_colon_sep_files(config: dict) -> pd.DataFrame:
         combined colon separated files returned as one dataframe.
     """
     sample_files = find_files(
-        file_path=config["folder_path"],
+        file_path=config["idbr_folder_path"],
         file_prefix=config["sample_prefix"],
         current_period=config["current_period"],
         revision_window=config["revision_window"],
@@ -97,7 +97,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     snapshot_file_path = get_snapshot_alternate_path(config)
 
     contributors, responses = get_dfs_from_spp(
-        snapshot_file_path + config["mbs_file_name"],
+        snapshot_file_path,
         config["platform"],
         config["bucket"],
     )
@@ -150,7 +150,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
 
     df = append_back_data(df, config)
 
-    snapshot_name = config["mbs_file_name"].split(".")[0]
+    snapshot_name = os.path.basename(config["snapshot_file_path"]).split(".")[0]
 
     df = filter_out_questions(
         df=df,

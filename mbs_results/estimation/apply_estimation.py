@@ -36,14 +36,14 @@ def apply_estimation(config):
 
     """
     population_files = find_files(
-        file_path=config["folder_path"],
+        file_path=config["idbr_folder_path"],
         file_prefix=config["population_prefix"],
         current_period=config["current_period"],
         revision_window=config["revision_window"],
         config=config,
     )
     sample_files = find_files(
-        file_path=config["folder_path"],
+        file_path=config["idbr_folder_path"],
         file_prefix=config["sample_prefix"],
         current_period=config["current_period"],
         revision_window=config["revision_window"],

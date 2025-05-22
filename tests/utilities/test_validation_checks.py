@@ -196,7 +196,7 @@ class TestValidateEstimation:
     test_config = {
         "census": "is_census",
         "sampled": "is_sampled",
-        "mbs_file_name": "test_snaphot.json",
+        "snapshot_file_path": "test_snaphot.json",
         "output_path": "tests/data/utilities/validation_checks/outputs/",
     }
 
@@ -228,7 +228,7 @@ def test_validate_outlier_weight_error(caplog):
         test_config = {
             "design_weight": "design_weight",
             "output_path": temp_dir,
-            "mbs_file_name": "test_snapshot.json",
+            "snapshot_file_path": "test_snapshot.json",
             "platform": "network",
             "bucket": "",
         }
@@ -258,7 +258,7 @@ def config():
     return {
         "period_selected": "202301",
         "output_path": "/path/to/output/",
-        "folder_path": "path/to/sample/",
+        "idbr_folder_path": "path/to/sample/",
         "sample_prefix": "sample",
         "sample_path": "/path/to/sample/",
         "sample_column_names": ["reference", "formtype"],
