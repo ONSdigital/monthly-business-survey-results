@@ -22,9 +22,7 @@ from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.inputs import read_colon_separated_file, read_csv_wrapper
-from mbs_results.utilities.utils import (
-    convert_column_to_datetime,
-)
+from mbs_results.utilities.utils import convert_column_to_datetime
 
 logger = logging.getLogger(__name__)
 
