@@ -95,31 +95,3 @@ def compare_two_dataframes(df1, df2):
             changed_columns.append(column)
 
     return diff, changed_columns
-
-
-def get_snapshot_alternate_path(config):
-    """
-    Check if snapshot_alternate_path is provided in the config and use this to load the
-    snapshot. If snapshot_alternate_path is not provided, snapshot will be loaded from
-    the snapshot_file_path.
-    Also checks that folder path ends in a slash, appends one if not included.
-    Does not overwrite the folder_path in the config.
-
-    Parameters
-    ----------
-    config : dict
-        Configuration dictionary containing the snapshot_alternate_path and folder_path
-        keys
-
-    Returns
-    -------
-    str
-        The path to the folder where the snapshot is located. If snapshot_alternate_path
-        is not provided, returns the folder_path.
-    """
-
-    snapshot_file_path = config.get("snapshot_alternate_path_OPTIONAL") or config.get(
-        "snapshot_file_path"
-    )
-    snapshot_file_path = os.path.normpath(snapshot_file_path)
-    return snapshot_file_path

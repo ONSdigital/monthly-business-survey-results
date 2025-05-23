@@ -24,7 +24,6 @@ from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.inputs import read_colon_separated_file, read_csv_wrapper
 from mbs_results.utilities.utils import (
     convert_column_to_datetime,
-    get_snapshot_alternate_path,
 )
 
 logger = logging.getLogger(__name__)
@@ -94,7 +93,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     period = config["period"]
     reference = config["reference"]
 
-    snapshot_file_path = get_snapshot_alternate_path(config)
+    snapshot_file_path = config["snapshot_file_path"]
 
     contributors, responses = get_dfs_from_spp(
         snapshot_file_path,
