@@ -319,7 +319,7 @@ def validate_outlier_detection(df: pd.DataFrame, config: dict):
     # Path must be full path containing directory and file name
     # e.g. folder1/folder2/snapsot_filter_out_questions.csv
 
-    snapshot_name = os.path.splitext(config["mbs_file_name"])[0]
+    snapshot_name = os.path.basename(config["snapshot_file_path"]).split(".")[0]
 
     filtered_questions_path = (
         config["output_path"] + snapshot_name + "_filter_out_questions.csv"

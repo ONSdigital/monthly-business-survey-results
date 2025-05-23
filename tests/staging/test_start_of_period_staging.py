@@ -53,7 +53,7 @@ input_path = "tests/data/outputs/selective_editing/inputs/"
 config = {
     "platform": "network",
     "bucket": "",
-    "folder_path": input_path,
+    "idbr_folder_path": input_path,
     "revision_window": 1,
     "finalsel_keep_cols": [
         "formtype",

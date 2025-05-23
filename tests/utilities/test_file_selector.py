@@ -19,7 +19,7 @@ def mock_config():
         "current_period": 201902,
         "revision_window": 5,
         "platform": "network",
-        "folder_path": "tests/data/file_selector/",
+        "idbr_folder_path": "tests/data/file_selector/",
     }
 
 
@@ -29,7 +29,7 @@ def test_find_files_universe(mock_isfile, mock_config):
     mock_isfile.return_value = True
 
     valid_files = find_files(
-        file_path=mock_config["folder_path"],
+        file_path=mock_config["idbr_folder_path"],
         file_prefix=mock_config["population_prefix"],
         current_period=mock_config["current_period"],
         revision_window=mock_config["revision_window"],
@@ -46,7 +46,7 @@ def test_find_files_finalsel(mock_isfile, mock_config):
     mock_isfile.return_value = True
     print(mock_config["revision_window"])
     valid_files = find_files(
-        file_path=mock_config["folder_path"],
+        file_path=mock_config["idbr_folder_path"],
         file_prefix=mock_config["sample_prefix"],
         current_period=mock_config["current_period"],
         revision_window=mock_config["revision_window"],
@@ -66,7 +66,7 @@ def test_find_files_missing_universe(mock_config):
         FileNotFoundError, match="Missing universe file for periods: 201809"
     ):
         find_files(
-            file_path=mock_config["folder_path"],
+            file_path=mock_config["idbr_folder_path"],
             file_prefix=mock_config["population_prefix"],
             current_period=mock_config["current_period"],
             revision_window=mock_config["revision_window"] + 1,
@@ -81,7 +81,7 @@ def test_find_files_missing_finalsel(mock_config):
         FileNotFoundError, match="Missing finalsel file for periods: 201808, 201809"
     ):
         find_files(
-            file_path=mock_config["folder_path"],
+            file_path=mock_config["idbr_folder_path"],
             file_prefix=mock_config["sample_prefix"],
             current_period=mock_config["current_period"],
             revision_window=mock_config["revision_window"] + 2,
@@ -98,7 +98,7 @@ def test_find_files_duplicate_finalsel(mock_config):
         FileExistsError, match="Duplicate finalsel files found for periods: 201903"
     ):
         find_files(
-            file_path=mock_config["folder_path"],
+            file_path=mock_config["idbr_folder_path"],
             file_prefix=mock_config["sample_prefix"],
             current_period=mock_config["current_period"],
             revision_window=mock_config["revision_window"],
