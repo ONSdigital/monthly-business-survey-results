@@ -148,12 +148,13 @@ The HTML report can be accessed at `htmlcov/index.html`.
 9.	Select whether you want to set this as a pre-release or the latest release – generally, we set it as the latest release (but there may be use cases in the future where pre-release could be used).
 10.	Click “Publish Release”.
 
-### To check the status of the release
+### Jenkins
+
+The Jenkins workflow is set up to scan the GitHub repository once per day. When the repository is scanned the Jenkins server will update to mirror the repository, and if it finds a tag that matches the Jenkins trigger defined in the Jenkins file it will trigger the workflow.
+
 11.	Log into Jenkins using your Windows Credentials.
 12.	If you have access, you should see the business-survey-statistics project on your Jenkins dashboard. Click on it, and then click into monthly-business-survey-results.
-
-(**Note:** the rest of this documentation needs updating with the Jenkins-specific steps)
-
+13. To trigger a scan of the GitHub repository (instead of waiting for the automated scan) click on Scan Repository Now. As long as the above instructions were followed correctly, a new build will be triggered.
 
 
 ## Documentation
