@@ -4,6 +4,9 @@ import pandas as pd
 
 from mbs_results.outputs.get_additional_outputs import get_additional_outputs
 from mbs_results.outputs.growth_rates_output import get_growth_rates_output
+from mbs_results.outputs.imputes_and_constructed_output import (
+    get_imputes_and_constructed_output,
+)
 from mbs_results.outputs.ocea_srs_outputs import produce_ocea_srs_outputs
 from mbs_results.outputs.pivot_imputation_value import create_imputation_link_output
 from mbs_results.outputs.selective_editing_contributer_output import (
@@ -72,6 +75,7 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
             "growth_rates_output": get_growth_rates_output,
             "produce_ocea_srs_outputs": produce_ocea_srs_outputs,
             "create_imputation_link_output": create_imputation_link_output,
+            "imputes_and_constructed_output": get_imputes_and_constructed_output,
         },
         additional_outputs_df,
     )
