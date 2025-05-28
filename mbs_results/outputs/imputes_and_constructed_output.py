@@ -5,7 +5,7 @@ def get_imputes_and_constructed_output(
     additional_outputs_df: pd.DataFrame, **config
 ) -> pd.DataFrame:
     """
-    Creates imputes and constructed output for frozen runs only
+    Creates imputes and constructed output for the current period for frozen runs only.
 
     Parameters
     ----------
@@ -28,9 +28,12 @@ def get_imputes_and_constructed_output(
     if config["state"] != "frozen":
         return
 
+    additional_outputs_df = additional_outputs_df[
+        additional_outputs_df[config["period"]] == config["current_period"]
+    ]
+
     imputes_and_constructed_output = additional_outputs_df[
         [
-            config["period"],
             config["reference"],
             config["question_no"],
             config["target"],
