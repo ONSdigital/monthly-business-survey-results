@@ -1,5 +1,5 @@
 {
-    "platform" : "s3",
+    "platform" : "network",
 
     "back_data_type":"type",
     "imputation_marker_col":"imputation_flags_adjustedresponse",
@@ -136,8 +136,6 @@
         "12":"derived",
         "13":"fir"
         },
-
-  "additional_outputs":[],
 
   "form_to_derived_map": {
         "13": [40],
