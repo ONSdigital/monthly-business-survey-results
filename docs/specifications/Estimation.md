@@ -8,7 +8,7 @@
 
 ## 2.0 Terminology
 
-* Stratified sampling – the process of breaking down a population into subsets called strata and sampling independently within each.
+* stratified sampling – the process of breaking down a population into subsets called strata and sampling independently within each
 * target variable - The variable of interest that requires data values to be estimated
 * design weight - a survey weight that is the inverse of a unit's selection probability
 * calibration factor - a sample dependent weight often referred to as a g weight
@@ -51,7 +51,7 @@ The strengths and limitations of the methods in this specification are as follow
 *	Data to be in correct format (i.e. no symbol characters etc.)
 *	Validation may need to occur before Estimation to avoid errors
 
-## 5.0 Method Inputs and outputs
+## 5.0 Method inputs and outputs
 
 ### Method inputs
 
@@ -71,8 +71,8 @@ The variables required are:
 
 *	period: string
 *	cell: string – the stratum label
-*	Design weight: numeric – the final design weight
-*	Calibration factor
+*	design weight: numeric – the final design weight
+*	calibration factor
 
 ## 6.0 Method
 
@@ -98,13 +98,13 @@ a_i=a_h=\frac{N_h}{n_h}\
 \end{equation}$$
 
 $$\begin{equation}
-\text{sum of weighted auxliary values} = \sum_{i=1}^{n_j} a_i x_i
+\text{sum of weighted auxiliary values} = \sum_{i=1}^{n_j} a_i x_i
 \end{equation}$$
 
 $$\begin{equation}
-\text{sum of universe auxliary values} = \sum_{i=1}^{N_j} x_i
+\text{sum of universe auxiliary values} = \sum_{i=1}^{N_j} x_i
 \end{equation}$$
 
 $$\begin{equation}
-\text{calibration factor} = \frac{\text{sum of universe auxliary values}}{\text{sum of weighted auxliary values}}
+\text{calibration factor} = \frac{\text{sum of universe auxiliary values}}{\text{sum of weighted auxiliary values}}
 \end{equation}$$
