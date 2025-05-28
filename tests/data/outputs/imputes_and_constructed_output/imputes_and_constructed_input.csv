@@ -1,0 +1,5 @@
+period,reference,questioncode,adjustedresponse,imputation_flags_adjustedresponse
+202201,1,201,0,fir
+202201,2,202,10000,bir
+202202,3,203,0,r
+202202,4,204,20000,fimc

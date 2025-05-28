@@ -42,9 +42,7 @@ def get_imputes_and_constructed_output(
     ]
 
     imputes_and_constructed_output = imputes_and_constructed_output[
-        ~imputes_and_constructed_output[
-            "imputation_flags_adjustedresponse"
-        ].str.contains("r", na=False)
+        imputes_and_constructed_output["imputation_flags_adjustedresponse"] != "r"
     ]
 
     imputes_and_constructed_output = imputes_and_constructed_output.rename(
@@ -53,5 +51,7 @@ def get_imputes_and_constructed_output(
             "imputation_flags_adjustedresponse": "imputationmarker",
         }
     )
+
+    imputes_and_constructed_output.reset_index(drop=True, inplace=True)
 
     return imputes_and_constructed_output
