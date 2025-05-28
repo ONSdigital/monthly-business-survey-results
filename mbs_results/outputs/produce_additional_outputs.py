@@ -2,6 +2,7 @@ from importlib import metadata
 
 import pandas as pd
 
+from mbs_results.outputs.csdb_output import create_csdb_output
 from mbs_results.outputs.get_additional_outputs import get_additional_outputs
 from mbs_results.outputs.growth_rates_output import get_growth_rates_output
 from mbs_results.outputs.ocea_srs_outputs import produce_ocea_srs_outputs
@@ -72,6 +73,7 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
             "growth_rates_output": get_growth_rates_output,
             "produce_ocea_srs_outputs": produce_ocea_srs_outputs,
             "create_imputation_link_output": create_imputation_link_output,
+            "create_csdb_output": create_csdb_output
         },
         additional_outputs_df,
     )
