@@ -1,14 +1,10 @@
-from pathlib import Path
-
 import pandas as pd
 
 from mbs_results.utilities.utils import convert_column_to_datetime
 
 
 def create_csdb_output(
-    additional_outputs_df: pd.DataFrame,
-    cdid_data_path: str,
-    **config
+    additional_outputs_df: pd.DataFrame, cdid_data_path: str, **config
 ) -> pd.DataFrame:
     """
     creates outputs for CSDB, only produces monthly aggregations as all higher
@@ -23,7 +19,7 @@ def create_csdb_output(
     Returns
     -------
     pd.DataFrame
-        pivot table aggregating gross values for each month, values are given in pounds (£)
+        pivot table aggregating gross values for each month, values are given in pounds
         thousands. Only returns aggregations of month and not higher periods. Checking
         that output team would be happy with this.
     """
@@ -31,12 +27,14 @@ def create_csdb_output(
     cdid_mapping = pd.read_csv(cdid_data_path)
 
     df_combined = pd.merge(
-        additional_outputs_df, cdid_mapping, on=["questioncode", "classification"], how="left"
+        additional_outputs_df,
+        cdid_mapping,
+        on=["questioncode", "classification"],
+        how="left",
     )
-    df_combined["period"] = (
-        convert_column_to_datetime(df_combined["period"])
-        .dt.strftime("%Y%m")
-    )
+    df_combined["period"] = convert_column_to_datetime(
+        df_combined["period"]
+    ).dt.strftime("%Y%m")
     # Convert grossed_column into pounds thousands before agg
     df_combined["curr_grossed_value"] = (
         df_combined["adjustedresponse"]

@@ -73,7 +73,7 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
             "growth_rates_output": get_growth_rates_output,
             "produce_ocea_srs_outputs": produce_ocea_srs_outputs,
             "create_imputation_link_output": create_imputation_link_output,
-            "create_csdb_output": create_csdb_output
+            "create_csdb_output": create_csdb_output,
         },
         additional_outputs_df,
     )
