@@ -32,8 +32,8 @@ class TestCSDBOutput:
         expected_output = output_df
 
         actual_output = create_csdb_output(
-            additional_outputs_df = input_df,
-            cdid_data_path = Path(filepath / "cdid_mapping.csv"),
+            additional_outputs_df=input_df,
+            cdid_data_path=Path(filepath / "cdid_mapping.csv"),
         )
 
         assert_frame_equal(actual_output, expected_output)
