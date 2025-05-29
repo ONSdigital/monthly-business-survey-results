@@ -43,12 +43,17 @@ def create_csdb_output(
         * df_combined["calibration_factor"]
     ) / 1e3
 
-    df_pivot = pd.pivot_table(
-        df_combined,
-        values="curr_grossed_value",
-        index="cdid",
-        columns="period",
-        aggfunc=sum,
+    df_pivot = (
+        pd.pivot_table(
+            df_combined,
+            values="curr_grossed_value",
+            index="cdid",
+            columns="period",
+            aggfunc="sum",
+        )
+        .reset_index()
+        .fillna(0)
+        .rename_axis(None, axis=1)
     )
 
     return df_pivot
