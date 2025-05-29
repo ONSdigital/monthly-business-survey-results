@@ -17,6 +17,7 @@
     "back_data_finalsel_path":"",
     "sic_domain_mapping_path": "",
     "threshold_filepath": "",
+    "cdid_data_path": "",
     "current_period": 202303,
     "revision_window": 13,
     "state": "frozen"
