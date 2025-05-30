@@ -12,7 +12,7 @@ def join_l_values(df, l_values_path, classification_values_path, config):
     """Read l values, classifications and drop duplicates and period"""
 
     l_value_question_no = config["l_value_question_no"]
-    
+
     l_values = read_csv_wrapper(
         l_values_path,
         config["platform"],
@@ -44,6 +44,7 @@ def join_l_values(df, l_values_path, classification_values_path, config):
     df.drop(columns=l_value_question_no, inplace=True)
 
     return df
+
 
 def detect_outlier(df, config):
     """
