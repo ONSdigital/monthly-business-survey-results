@@ -23,6 +23,7 @@
     "strata": "cell_no",
     "target": "adjustedresponse",
     "form_id_spp": "form_type_spp",
+    "l_value_question_no": "question_no",
 
     "master_column_type_dict" : {
         "reference": "int",
