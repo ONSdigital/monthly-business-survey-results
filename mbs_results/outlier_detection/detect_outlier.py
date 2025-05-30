@@ -41,7 +41,9 @@ def join_l_values(df, l_values_path, classification_values_path, config):
         left_on=[config["question_no"], "classification"],
         right_on=[l_value_question_no, "classification"],
     )
-    df.drop(columns=l_value_question_no, inplace=True)
+
+    if l_value_question_no != config["question_no"]:
+        df.drop(columns=l_value_question_no, inplace=True)
 
     return df
 
