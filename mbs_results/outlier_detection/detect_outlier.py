@@ -11,11 +11,13 @@ from mbs_results.utilities.inputs import read_csv_wrapper
 def join_l_values(df, l_values_path, classification_values_path, config):
     """Read l values, classifications and drop duplicates and period"""
 
+    l_value_question_no = config["l_value_question_no"]
+    
     l_values = read_csv_wrapper(
         l_values_path,
         config["platform"],
         config["bucket"],
-        dtype={"question_no": "int64", "classification": "str"},
+        dtype={"classification": "str"},
     )
 
     # Merge on classification SIC map (merge on SIC to get classsificaion on df -> )
@@ -37,12 +39,11 @@ def join_l_values(df, l_values_path, classification_values_path, config):
         l_values,
         how="left",
         left_on=[config["question_no"], "classification"],
-        right_on=["question_no", "classification"],
+        right_on=[l_value_question_no, "classification"],
     )
-    df.drop(columns=["question_no"], inplace=True)
+    df.drop(columns=l_value_question_no, inplace=True)
 
     return df
-
 
 def detect_outlier(df, config):
     """
