@@ -1,7 +1,8 @@
-import pandas as pd
 import numpy as np
-from mbs_results.utilities.inputs import read_colon_separated_file
+import pandas as pd
+
 from mbs_results import logger
+from mbs_results.utilities.inputs import read_colon_separated_file
 
 # Missing reporting unit RU and name
 # Should SIC be frozenSIC or SIC)5_digit
@@ -29,14 +30,12 @@ def split_func(my_string: str) -> str:
 
 
 def filter_and_calculate_percent_devolved(
-    df: pd.DataFrame,
-    local_unit_data: pd.DataFrame,
-    devolved_nation: str
+    df: pd.DataFrame, local_unit_data: pd.DataFrame, devolved_nation: str
 ) -> pd.DataFrame:
     """Filter by devolved nation and calculate percentage column"""
     print(f"Calculating percentage for {devolved_nation}")
     devolved_nation = devolved_nation.lower()
-    nation_to_code = {'scotland': 'XX', 'wales': 'WW'}
+    nation_to_code = {"scotland": "XX", "wales": "WW"}
     if devolved_nation not in nation_to_code:
         error_msg = (
             f"Invalid devolved nation '{devolved_nation}'. "
@@ -46,60 +45,61 @@ def filter_and_calculate_percent_devolved(
         raise ValueError(error_msg)
     region_code = nation_to_code[devolved_nation]
     logger.info(f"Filtering for {devolved_nation} with region code {region_code}")
-    percent_col = f'percentage_{devolved_nation}'
+    percent_col = f"percentage_{devolved_nation}"
 
     # compute the grossed UK turnover or returns
-    df['gross_turnover_uk'] = (
-        df['adjustedresponse']
-        * df['design_weight']
-        * df['outlier_weight']
-        * df['calibration_factor']
+    df["gross_turnover_uk"] = (
+        df["adjustedresponse"]
+        * df["design_weight"]
+        * df["outlier_weight"]
+        * df["calibration_factor"]
     )
     # Calculate froempment ratio:
     # (sum of froempment in filtered LU data) / (sum of froempment in df)
     # Filter LU data for the devolved nation region
     region_col = "region"
     froempment_col = "froempment"
-    employment_col = 'employment'
+    employment_col = "employment"
 
     # Filter LU data for the devolved nation region and sum employment by reference
-    local_unit_data['reference'] = local_unit_data['ruref']
+    local_unit_data["reference"] = local_unit_data["ruref"]
     regional_employment = (
         local_unit_data[local_unit_data[region_col] == region_code]
-        .groupby('reference')[employment_col]
+        .groupby("reference")[employment_col]
         .sum()
         .reset_index()
-        .rename(columns={employment_col: f'{employment_col}_{devolved_nation}'})
+        .rename(columns={employment_col: f"{employment_col}_{devolved_nation}"})
     )
 
     # Sum total employment by reference from the pipeline data
     total_employment = (
-        df.groupby('reference')[froempment_col]
+        df.groupby("reference")[froempment_col]
         .sum()
         .reset_index()
-        .rename(columns={froempment_col: 'total_employment'})
+        .rename(columns={froempment_col: "total_employment"})
     )
 
     # Merge the two Dataframes and calculate the percentage
     merged_df = pd.merge(
         regional_employment,
         total_employment,
-        on='reference',
-        how='left',
+        on="reference",
+        how="left",
     )
 
     merged_df[percent_col] = (
         (
-            merged_df[f'{employment_col}_{devolved_nation}']
-            / merged_df['total_employment']
-        ) * 100
+            merged_df[f"{employment_col}_{devolved_nation}"]
+            / merged_df["total_employment"]
+        )
+        * 100
     ).round(2)
 
     # Add the percentage column to the original DataFrame
     df = df.merge(
-        merged_df[['reference', f'percentage_{devolved_nation}']],
-        on='reference',
-        how='left'
+        merged_df[["reference", f"percentage_{devolved_nation}"]],
+        on="reference",
+        how="left",
     )
 
     return df
@@ -122,42 +122,70 @@ def get_question_no_plaintext(config: dict) -> dict:
         46: "total_from_invoices",
         47: "donations",
         49: "exports",
-        110: "water"
+        110: "water",
     }
 
 
 def get_lu_cols(config: dict) -> list:
     """Get local unit columns from config or use default."""
     return [
-        "ruref", "entref", "lu ref", "check letter", "sic03", "sic07", "employees",
-        "employment", "fte", "Name1", "Name2", "Name3", "Address1", "Address2",
-        "Address3", "Address4", "Address5", "Postcode", "trading as 1", "trading as 2",
-        "trading as 3", "region"
+        "ruref",
+        "entref",
+        "lu ref",
+        "check letter",
+        "sic03",
+        "sic07",
+        "employees",
+        "employment",
+        "fte",
+        "Name1",
+        "Name2",
+        "Name3",
+        "Address1",
+        "Address2",
+        "Address3",
+        "Address4",
+        "Address5",
+        "Postcode",
+        "trading as 1",
+        "trading as 2",
+        "trading as 3",
+        "region",
     ]
 
 
 def output_column_name_mapping():
-    return {'period': 'period', 'classification': 'SUT', 'cell_no': 'cell',
-            'reference': 'RU', 'entname1': 'name', 'entref': 'enterprise group',
-            'rusic2007': 'SIC', 'formtype': 'form type', 'status': 'status',
-            'percentage_scotland': '%scottish', 'percentage_wales': '%welsh',
-            'froempment': 'frozen employment', 'sizeband': 'band',
-            'imputed_and_derived_flag': 'imputed and derived flag',
-            'statusencoded': 'status encoded', 'start date': 'start date',
-            'end date': 'end date', 'winsorised_value_exports': 'returned to exports',
-            'adjustedresponse_exports': 'adjusted to exports',
-            'imputed_and_derived_flag_exports': 'imputed and derived flag exports',
-            'statusencoded_exports': 'status encoded exports',
-            'winsorised_value_total_turnover': 'returned turnover',
-            'adjustedresponse_total_turnover': 'adjusted turnover',
-            'imputed_and_derived_flag_total_turnover':
-                'imputed and derived flag turnover',
-            'statusencoded_total_turnover': 'status encoded turnover',
-            'winsorised_value_water': 'returned volume water',
-            'adjustedresponse_water': 'adjusted volume water',
-            'imputed_and_derived_flag_water': 'imputed and derived flag volume water',
-            'statusencoded_water': 'status encoded volume water'
-            }
+    return {
+        "period": "period",
+        "classification": "SUT",
+        "cell_no": "cell",
+        "reference": "RU",
+        "entname1": "name",
+        "entref": "enterprise group",
+        "rusic2007": "SIC",
+        "formtype": "form type",
+        "status": "status",
+        "percentage_scotland": "%scottish",
+        "percentage_wales": "%welsh",
+        "froempment": "frozen employment",
+        "sizeband": "band",
+        "imputed_and_derived_flag": "imputed and derived flag",
+        "statusencoded": "status encoded",
+        "start date": "start date",
+        "end date": "end date",
+        "winsorised_value_exports": "returned to exports",
+        "adjustedresponse_exports": "adjusted to exports",
+        "imputed_and_derived_flag_exports": "imputed and derived flag exports",
+        "statusencoded_exports": "status encoded exports",
+        "winsorised_value_total_turnover": "returned turnover",
+        "adjustedresponse_total_turnover": "adjusted turnover",
+        "imputed_and_derived_flag_total_turnover": "imputed and derived flag turnover",
+        "statusencoded_total_turnover": "status encoded turnover",
+        "winsorised_value_water": "returned volume water",
+        "adjustedresponse_water": "adjusted volume water",
+        "imputed_and_derived_flag_water": "imputed and derived flag volume water",
+        "statusencoded_water": "status encoded volume water",
+    }
 
 
 def devolved_outputs(
@@ -177,10 +205,10 @@ def devolved_outputs(
     df = pd.merge(
         df,
         local_unit_data,
-        left_on='reference',
-        right_on='ruref',
-        how='left',
-        suffixes=['', '_local']
+        left_on="reference",
+        right_on="ruref",
+        how="left",
+        suffixes=["", "_local"],
     )
     df = filter_and_calculate_percent_devolved(df, local_unit_data, devolved_nation)
 
@@ -230,12 +258,21 @@ def devolved_outputs(
     df_pivot.reset_index(inplace=True)
 
     # adding extra columns from df
-    percent_devolved_nation_col = f'percentage_{devolved_nation.lower()}'
+    percent_devolved_nation_col = f"percentage_{devolved_nation.lower()}"
 
     extra_columns = [
-        "period", "classification", "cell_no", "reference", "entname1", 'entref',
-        "rusic2007", "formtype", "status", percent_devolved_nation_col, "froempment",
-        'sizeband'
+        "period",
+        "classification",
+        "cell_no",
+        "reference",
+        "entname1",
+        "entref",
+        "rusic2007",
+        "formtype",
+        "status",
+        percent_devolved_nation_col,
+        "froempment",
+        "sizeband",
     ]
     extra_columns_existing = [col for col in extra_columns if col in df.columns]
     df_extra = df[extra_columns_existing].drop_duplicates(
@@ -243,7 +280,12 @@ def devolved_outputs(
     )
 
     merge_keys = [
-        "period", "cell_no", "reference", "rusic2007", "formtype", "froempment"
+        "period",
+        "cell_no",
+        "reference",
+        "rusic2007",
+        "formtype",
+        "froempment",
     ]
     df_pivot = pd.merge(
         df_pivot,
@@ -258,15 +300,13 @@ def devolved_outputs(
         and f"{percent_devolved_nation_col}_y" in df_pivot.columns
     ):
         # Prefer the _x column, or combine as needed
-        df_pivot[percent_devolved_nation_col] = (
-            df_pivot[f"{percent_devolved_nation_col}_x"].combine_first(
-                df_pivot[f"{percent_devolved_nation_col}_y"]
-            )
-        )
+        df_pivot[percent_devolved_nation_col] = df_pivot[
+            f"{percent_devolved_nation_col}_x"
+        ].combine_first(df_pivot[f"{percent_devolved_nation_col}_y"])
         df_pivot = df_pivot.drop(
             columns=[
                 f"{percent_devolved_nation_col}_x",
-                f"{percent_devolved_nation_col}_y"
+                f"{percent_devolved_nation_col}_y",
             ]
         )
     elif f"{percent_devolved_nation_col}_x" in df_pivot.columns:
@@ -364,7 +404,7 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
             devolved_nation=nation,
             local_unit_data=lu_data,
             devolved_questions=devolved_questions,
-            agg_function="sum"
+            agg_function="sum",
         )
 
         output_file = config["output_path"] + f"{nation.lower()}_pivot.csv"

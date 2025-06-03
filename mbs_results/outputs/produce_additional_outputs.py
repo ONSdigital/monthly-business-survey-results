@@ -5,6 +5,7 @@ import pandas as pd
 from mbs_results.outputs.get_additional_outputs import get_additional_outputs
 from mbs_results.outputs.ocea_srs_outputs import produce_ocea_srs_outputs
 from mbs_results.outputs.pivot_imputation_value import create_imputation_link_output
+from mbs_results.outputs.scottish_welsh_gov_outputs import generate_devolved_outputs
 from mbs_results.outputs.selective_editing_contributer_output import (
     get_selective_editing_contributor_output,
 )
@@ -16,7 +17,6 @@ from mbs_results.outputs.weighted_adj_val_time_series import (
     get_weighted_adj_val_time_series,
 )
 from mbs_results.utilities.utils import get_versioned_filename
-from mbs_results.outputs.scottish_welsh_gov_outputs import generate_devolved_outputs
 
 
 def get_additional_outputs_df(

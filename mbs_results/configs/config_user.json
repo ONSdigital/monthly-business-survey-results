@@ -21,7 +21,7 @@
     "revision_window": 15,
     "snapshot_alternate_path_OPTIONAL": null,
     "state": "frozen",
-    
+
     "devolved_nations": ["Scotland", "Wales"],
     "additional_outputs":["generate_devolved_outputs"]
 }
