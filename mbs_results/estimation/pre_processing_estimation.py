@@ -8,6 +8,7 @@ def get_estimation_data(
     population_file: str,
     sample_file: str,
     calibration_group_map: pd.DataFrame,
+    convert_NI_GB_cells: bool,
     config: dict,
 ):
     """Get the input data required to run estimation.
@@ -20,6 +21,9 @@ def get_estimation_data(
         File path to the folder containing the sample data.
     calibration_group_map: pd.DataFrame
         Dataframe containing map between cell number and calibration group.
+    convert_NI_GB_cells: bool
+        If True, will convert NI and GB cells to UK (convert_cell_number
+        will be activated)
     config : dict
         Dictionary containing the following keys of interest:
         platform - either "s3" or "network"
@@ -61,22 +65,24 @@ def get_estimation_data(
     estimation_data = derive_estimation_variables(
         population_df,
         sample_df,
-        calibration_group_map,
         config["period"],
         config["reference"],
+        convert_NI_GB_cells,
         config["cell_number"],
+        calibration_group_map,
     )
 
     return estimation_data
 
 
 def derive_estimation_variables(
-    population_frame,
-    sample,
-    calibration_group_map,
-    period,
-    reference,
-    cell_number,
+    population_frame: pd.DataFrame,
+    sample: pd.DataFrame,
+    period: str,
+    reference: str,
+    convert_NI_GB_cells: bool,
+    cell_number: str,
+    calibration_group_map: pd.DataFrame = None,
     **config
 ):
     """
@@ -88,14 +94,17 @@ def derive_estimation_variables(
         dataframe containing population frame
     sample: pd.DataFrame
         dataframe containing sample data
-    calibration_group_map: pd.DataFrame
-        dataframe containing map between cell number and calibration group
     period: Str
         the name of the period column
+    convert_NI_GB_cells: bool
+        If True, will convert NI and GB cells to UK (convert_cell_number
+        will be activated)
     cell_number: Str
         the name of the cell number column
     reference: Str
         the name of the reference column
+    calibration_group_map: pd.DataFrame
+        dataframe containing map between cell number and calibration group
     **config: Dict
         main pipeline configuration. Can be used to input the entire config dictionary
 
@@ -105,12 +114,13 @@ def derive_estimation_variables(
         population frame containing sampled column
 
     """
+    if convert_NI_GB_cells:
+        population_frame = convert_cell_number(population_frame, cell_number)
 
-    population_frame = convert_cell_number(population_frame, cell_number)
-
-    population_frame = population_frame.merge(
-        calibration_group_map, on=[cell_number], how="left"
-    )
+    if calibration_group_map is not None:
+        population_frame = population_frame.merge(
+            calibration_group_map, on=[cell_number], how="left"
+        )
 
     sample = sample.copy()[[reference, period]]
     sample["is_sampled"] = True

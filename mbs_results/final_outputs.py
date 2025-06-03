@@ -7,7 +7,7 @@ from mbs_results.utilities.validation_checks import validate_config
 
 
 def run_final_outputs():
-    config = load_config("./mbs_results/config.json")
+    config = load_config()
     validate_config(config)
 
     imputation_output = load_imputation_output(config)

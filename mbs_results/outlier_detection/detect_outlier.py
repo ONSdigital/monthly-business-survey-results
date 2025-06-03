@@ -2,7 +2,7 @@ import pandas as pd
 
 from mbs_results.outlier_detection.winsorisation import winsorise
 from mbs_results.utilities.constrains import (
-    replace_outlier_weights,
+    replace_with_manual_outlier_weights,
     update_derived_weight_and_winsorised_value,
 )
 from mbs_results.utilities.inputs import read_csv_wrapper
@@ -11,11 +11,13 @@ from mbs_results.utilities.inputs import read_csv_wrapper
 def join_l_values(df, l_values_path, classification_values_path, config):
     """Read l values, classifications and drop duplicates and period"""
 
+    l_value_question_no = config["l_value_question_no"]
+
     l_values = read_csv_wrapper(
         l_values_path,
         config["platform"],
         config["bucket"],
-        dtype={"question_no": "int64", "classification": "str"},
+        dtype={"classification": "str"},
     )
 
     # Merge on classification SIC map (merge on SIC to get classsificaion on df -> )
@@ -37,9 +39,11 @@ def join_l_values(df, l_values_path, classification_values_path, config):
         l_values,
         how="left",
         left_on=[config["question_no"], "classification"],
-        right_on=["question_no", "classification"],
+        right_on=[l_value_question_no, "classification"],
     )
-    df.drop(columns=["question_no"], inplace=True)
+
+    if l_value_question_no != config["question_no"]:
+        df.drop(columns=l_value_question_no, inplace=True)
 
     return df
 
@@ -69,6 +73,15 @@ def detect_outlier(df, config):
     # Remove groupby leftovers
     post_win.reset_index(drop=True, inplace=True)
 
+    # Replace outlier weights
+    post_win = replace_with_manual_outlier_weights(
+        post_win,
+        config["reference"],
+        config["period"],
+        config["question_no"],
+        "outlier_weight",
+        config,
+    )
     post_win = update_derived_weight_and_winsorised_value(
         post_win,
         config["reference"],
@@ -77,16 +90,6 @@ def detect_outlier(df, config):
         config["form_id_spp"],
         "outlier_weight",
         config["target"],
-    )
-
-    # Replace outlier weights
-    post_win = replace_outlier_weights(
-        post_win,
-        config["reference"],
-        config["period"],
-        config["question_no"],
-        "outlier_weight",
-        config,
     )
 
     return post_win

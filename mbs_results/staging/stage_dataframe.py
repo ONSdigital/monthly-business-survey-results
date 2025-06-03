@@ -12,6 +12,7 @@ from mbs_results.staging.create_missing_questions import (
 from mbs_results.staging.data_cleaning import (
     convert_annual_thousands,
     convert_cell_number,
+    create_form_type_spp_column,
     create_imputation_class,
     enforce_datatypes,
     filter_out_questions,
@@ -20,38 +21,10 @@ from mbs_results.staging.data_cleaning import (
 from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.file_selector import find_files
-from mbs_results.utilities.inputs import read_colon_separated_file
-from mbs_results.utilities.utils import (
-    convert_column_to_datetime,
-    get_snapshot_alternate_path,
-)
+from mbs_results.utilities.inputs import read_colon_separated_file, read_csv_wrapper
+from mbs_results.utilities.utils import convert_column_to_datetime
 
 logger = logging.getLogger(__name__)
-
-
-def create_form_type_spp_column(
-    contributors: pd.DataFrame, config: dict
-) -> pd.DataFrame:
-    """
-    maps IDBR form types to SPP and creates column named "form_type_spp"
-
-    Parameters
-    ----------
-    contributors : pd.DataFrame
-        contributors dataframe from JSON snapshot
-    config : dict
-        main pipeline config containing "idbr_to_spp" mapping
-
-    Returns
-    -------
-    pd.DataFrame
-        contributors dataframe with "form_type_spp" column added
-    """
-    idbr_to_spp_mapping = config["idbr_to_spp"]
-    contributors[config["form_id_spp"]] = contributors[config["form_id_idbr"]].map(
-        idbr_to_spp_mapping
-    )
-    return contributors
 
 
 def read_and_combine_colon_sep_files(config: dict) -> pd.DataFrame:
@@ -73,7 +46,7 @@ def read_and_combine_colon_sep_files(config: dict) -> pd.DataFrame:
         combined colon separated files returned as one dataframe.
     """
     sample_files = find_files(
-        file_path=config["folder_path"],
+        file_path=config["idbr_folder_path"],
         file_prefix=config["sample_prefix"],
         current_period=config["current_period"],
         revision_window=config["revision_window"],
@@ -118,10 +91,10 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     period = config["period"]
     reference = config["reference"]
 
-    snapshot_file_path = get_snapshot_alternate_path(config)
+    snapshot_file_path = config["snapshot_file_path"]
 
     contributors, responses = get_dfs_from_spp(
-        snapshot_file_path + config["mbs_file_name"],
+        snapshot_file_path,
         config["platform"],
         config["bucket"],
     )
@@ -174,7 +147,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
 
     df = append_back_data(df, config)
 
-    snapshot_name = config["mbs_file_name"].split(".")[0]
+    snapshot_name = os.path.basename(config["snapshot_file_path"]).split(".")[0]
 
     df = filter_out_questions(
         df=df,
@@ -205,8 +178,36 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     df[config["auxiliary_converted"]] = df[config["auxiliary"]].copy()
     df = convert_annual_thousands(df, config["auxiliary_converted"])
 
+    df["ni_gb_cell_number"] = df[config["cell_number"]]
+
+    df = convert_cell_number(df, config["cell_number"])
+
+    pre_impute_df = create_imputation_class(
+        df, config["cell_number"], "imputation_class"
+    )
+
+    # Two options for loading MC:
+    warnings.warn("Need to pick one method of loading manual constructions")
+
+    if config["manual_constructions_path"]:
+        manual_constructions = read_csv_wrapper(
+            config["manual_constructions_path"], config["platform"], config["bucket"]
+        )
+
+    else:
+        manual_constructions = None
+
+    if config["filter"]:
+        filter_df = read_csv_wrapper(
+            config["filter"], config["platform"], config["bucket"]
+        )
+        filter_df = enforce_datatypes(filter_df, list(filter_df), **config)
+
+    else:
+        filter_df = None
+
     print("Staging Completed")
-    return df
+    return pre_impute_df, manual_constructions, filter_df
 
 
 def drop_derived_questions(

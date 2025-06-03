@@ -1,3 +1,4 @@
+import inspect
 import os
 import re
 from typing import List
@@ -7,21 +8,32 @@ import pandas as pd
 import raz_client
 from rdsa_utils.cdp.helpers.s3_utils import load_csv
 
-import mbs_results
 from mbs_results import logger
 from mbs_results.utilities.merge_two_config_files import merge_two_config_files
 
 
 def load_config(config_user_dict=None):
     """Load the dev and user configs and merges into one dictionary"""
-    # Get the directory where mbs_results is installed
-    parent_dir = os.path.dirname(mbs_results.__file__)
+    # Get the directory of the script that called this function
+    # This is necessary to find the path of the config files relative to this script
+    caller_frame = inspect.stack()[1]
+    caller_file = caller_frame.filename
+    caller_dir = os.path.dirname(os.path.abspath(caller_file))
+    logger.info(f"load_config caller directory: {caller_dir}")
 
-    # Get config paths
+    # Get config paths relative to the caller directory and check if the files exist
     config_user_path = "config_user.json"
-    config_dev_path = os.path.join(parent_dir, "configs", "config_dev.json")
+    if not os.path.exists(config_user_path):
+        warning_message = f"config_user.json not found at {config_user_path}"
+        logger.warning(warning_message)
 
-    config = merge_two_config_files(config_user_path, config_dev_path)
+    config_dev_path = os.path.join(caller_dir, "configs", "config_dev.json")
+    if not os.path.exists(config_dev_path):
+        error_message = f"config_dev.json not found at {config_dev_path}"
+        logger.error(error_message)
+        raise FileNotFoundError(error_message)
+
+    config = merge_two_config_files(config_user_path, config_dev_path, config_user_dict)
     logger.info(
         f"config dictionary created from merging {config_user_path} "
         f"and {config_dev_path}"

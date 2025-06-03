@@ -22,17 +22,15 @@ def run_mbs_main(config_user_dict=None):
     config = load_config(config_user_dict)
     validate_config(config)
 
-    staged_data, manual_constructions, filter_df = stage_dataframe(config)
+    staged_data = stage_dataframe(config)
     validate_staging(staged_data, config)
 
     # imputation: RoM wrapper -> Rename wrapper to apply_imputation
-    imputation_output = impute(staged_data, manual_constructions, config, filter_df)
+    imputation_output = impute(staged_data, config)
     validate_imputation(imputation_output, config)
 
     # Estimation Wrapper
-    estimation_output = estimate(
-        df=imputation_output, method="combined", convert_NI_GB_cells=True, config=config
-    )
+    estimation_output = estimate(imputation_output, config)
     validate_estimation(estimation_output, config)
 
     # Outlier Wrapper

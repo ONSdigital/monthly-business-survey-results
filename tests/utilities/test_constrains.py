@@ -8,8 +8,8 @@ from pandas.testing import assert_frame_equal
 from mbs_results.utilities.constrains import (
     calculate_derived_outlier_weights,
     constrain,
-    replace_outlier_weights,
     replace_values_index_based,
+    replace_with_manual_outlier_weights,
     sum_sub_df,
     update_derived_weight_and_winsorised_value,
 )
@@ -269,7 +269,7 @@ def test_replace_outlier_weights(filepath):
         "bucket": "",
     }
 
-    df_actual = replace_outlier_weights(
+    df_actual = replace_with_manual_outlier_weights(
         df_in,
         "reference",
         "period",
@@ -289,7 +289,7 @@ def test_no_manual_outliers(filepath):
 
     test_config = {"manual_outlier_path": "", "platform": "network", "bucket": ""}
 
-    df_actual = replace_outlier_weights(
+    df_actual = replace_with_manual_outlier_weights(
         df_in,
         "reference",
         "period",
@@ -314,7 +314,7 @@ def test_manual_outliers_unmatched_warning(filepath, caplog):
     }
 
     with caplog.at_level(logging.WARN):
-        replace_outlier_weights(
+        replace_with_manual_outlier_weights(
             df_in, "reference", "period", "question_no", "outlier_weight", test_config
         )
 

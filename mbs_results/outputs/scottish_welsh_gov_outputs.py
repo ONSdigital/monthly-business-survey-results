@@ -29,6 +29,7 @@ def split_func(my_string: str) -> str:
     return my_string.split(sep=("_"))[-1]
 
 
+
 def filter_and_calculate_percent_devolved(
     df: pd.DataFrame, local_unit_data: pd.DataFrame, devolved_nation: str
 ) -> pd.DataFrame:
@@ -187,6 +188,21 @@ def output_column_name_mapping():
         "statusencoded_water": "status encoded volume water",
     }
 
+def filter_and_calculate_percent_devolved(df, devolved_nation: str):
+    devolved_nation = devolved_nation.lower()
+    nation_to_code = {"scotland": "XX", "wales": "WW"}
+    try:
+        region_code = nation_to_code[devolved_nation]
+    except KeyError:
+        raise ValueError("devolved nation should be either Scotland or Wales")
+
+    df = df.loc[df["region_local"] == region_code]
+    df["percentage_" + devolved_nation] = -1
+    # Continue with calculation for percentage ...
+
+    return df
+
+
 
 def devolved_outputs(
     df: pd.DataFrame,
@@ -210,7 +226,11 @@ def devolved_outputs(
         how="left",
         suffixes=["", "_local"],
     )
+
     df = filter_and_calculate_percent_devolved(df, local_unit_data, devolved_nation)
+
+    df = filter_and_calculate_percent_devolved(df, devolved_nation)
+
 
     devolved_dict = dict(
         (k, question_dictionary[k])
@@ -229,10 +249,17 @@ def devolved_outputs(
     ]
 
     pivot_values = [
+
         "adjustedresponse",  # Original
         "winsorised_value",  # Imputated/winsorised (= adjustedresponse*outlier_weight)
         "imputed_and_derived_flag",  # [response_type -> imputed_and_derived_flag]
         "statusencoded",  # single letter (str) [error_mkr -> statusencoded]
+
+        "adjusted_value",  # Original
+        "new_target_variable",  # Imputated / winsorised
+        "response_type",  # numeric response type
+        "error_mkr",  # single letter (str)
+
     ]
 
     # Can use any agg function on numerical values, have to use lambda func for str cols
@@ -385,6 +412,7 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
     lu_cols = get_lu_cols(config)
     lu_data = read_colon_separated_file(lu_path, lu_cols)
 
+
     question_no_plaintext = get_question_no_plaintext(config)
     devolved_questions = get_devolved_questions()
     nations = config.get("devolved_nations", ["Scotland", "Wales"])
@@ -416,3 +444,19 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
         )
         outputs[nation] = df_pivot
     return outputs
+
+    lu_data = read_colon_separated_file(
+        data_path / "ludets009_202303" / "ludets009_202303", lu_cols
+    )
+    df_pivot = devolved_outputs(
+        df, question_no_plaintext, devolved_nation="Wales", local_unit_data=lu_data
+    )
+    print(df_pivot)
+    df_pivot = devolved_outputs(
+        df, question_no_plaintext, devolved_nation="Scotland", local_unit_data=lu_data
+    )
+    print(df_pivot)
+
+    # region_local: wales - 25174, scotland - 42020
+    # region (finalsel): wales - 16173, scotland - 30397
+

@@ -5,13 +5,12 @@
 | bucket | The path to the bucket. | string | Any filepath. |
 | calibration_group_map_path | The filepath to the calibration group mapping file. | string | Any filepath. |
 | classification_values_path | The filepath to the file containing SIC classification values. | string | Any filepath. |
-| folder_path | The path to the folder containing input data. | string | Any filepath. |
+| snapshot_file_path | The full filepath to the snapshot data | string | Any filepath. |
+| idbr_folder_path | The path to the folder containing the IDBR data. | string | Any filepath. |
 | l_values_path | The filepath to the file containing l values. | string | Any filepath. |
 | manual_constructions_path | The filepath to the file containing manual constructions data. | string | Any filepath. |
-| mbs_file_name | The filepath to the input data. | string | Any filepath. |
 | output_path | The filepath where outputs should be saved to. | string | Any filepath. |
 | population_path | The filepath to the file containing population frame data. | string | Any filepath. |
-| sample_path | The filepath for the file containing sample data. | string | Any filepath. |
 | back_data_qv_path | The filepath for the file containing QV backdata. | string | Any filepath. |
 | back_data_cp_path | The filepath for the file containing CP backdata. | string | Any filepath. |
 | back_data_finalsel_path | The filepath for the file containing final selection backdata. | string | Any filepath. |

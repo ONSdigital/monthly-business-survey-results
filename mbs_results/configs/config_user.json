@@ -1,13 +1,14 @@
 {
-    "bucket": "",
+    "bucket": "onscdp-dev-data01-5320d6ca",
+    "ssl_file" : "/etc/pki/tls/certs/ca-bundle.crt",
     "calibration_group_map_path": "",
     "classification_values_path": "",
-    "folder_path": "",
+    "snapshot_file_path": "",
+    "idbr_folder_path": "",
     "l_values_path": "",
     "manual_constructions_path": null,
     "filter": null,
     "manual_outlier_path": null,
-    "mbs_file_name": "",
     "output_path": "",
     "population_prefix": "",
     "sample_prefix": "",
@@ -18,10 +19,15 @@
     "threshold_filepath": "",
     "lu_path": "",
     "current_period": 202303,
+
     "revision_window": 15,
     "snapshot_alternate_path_OPTIONAL": null,
     "state": "frozen",
 
     "devolved_nations": ["Scotland", "Wales"],
     "additional_outputs":["generate_devolved_outputs"]
+
+    "revision_window": 13,
+    "state": "frozen"
+
 }
