@@ -30,7 +30,9 @@ def run_mbs_main(config_user_dict=None):
     validate_imputation(imputation_output, config)
 
     # Estimation Wrapper
-    estimation_output = estimate(imputation_output, config)
+    estimation_output = estimate(
+        df=imputation_output, method="combined", convert_NI_GB_cells=True, config=config
+    )
     validate_estimation(estimation_output, config)
 
     # Outlier Wrapper

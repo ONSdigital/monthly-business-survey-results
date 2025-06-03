@@ -47,14 +47,14 @@ class TestPreProcessingEstimation:
         sample = population_frame.loc[:1, ["reference", "period"]]
 
         calibration_group_map = expected[["cell_no", "calibration_group"]]
-
         actual = derive_estimation_variables(
-            population_frame,
-            sample,
-            calibration_group_map,
-            "period",
-            "reference",
-            "cell_no",
+            population_frame=population_frame,
+            sample=sample,
+            period="period",
+            reference="reference",
+            convert_NI_GB_cells=True,
+            cell_number="cell_no",
+            calibration_group_map=calibration_group_map,
         )
 
         assert_frame_equal(expected, actual, check_dtype=False, check_like=True)

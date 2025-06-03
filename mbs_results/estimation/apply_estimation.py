@@ -15,13 +15,21 @@ from mbs_results.utilities.inputs import read_csv_wrapper
 # from mbs_results.estimation.validate_estimation import validate_estimation
 
 
-def apply_estimation(config):
+def apply_estimation(method: str, convert_NI_GB_cells: bool, config: dict):
     """
     Read population frame and sample, merge key variables onto df then derive
     and validate estimation weights.
 
     Parameters
     ----------
+    method : str
+        Method to be applied, accepted values are `separate` and `combined`
+        For separate, calibration factor is calculated at strata variable
+        For combined ratio,calibration factor is calculated at calibration
+        group, calibration group mapping must be supplied via a csv file.
+    convert_NI_GB_cells: bool
+        If True, will convert NI and GB cells to UK (convert_cell_number
+        will be activated)
     config : dict
         main config file for pipeline
 
@@ -52,13 +60,38 @@ def apply_estimation(config):
 
     estimation_df_list = []
 
-    calibration_group_map = read_csv_wrapper(
-        config["calibration_group_map_path"], config["platform"], config["bucket"]
-    )
+    if method not in ["separate", "combined"]:
+        raise ValueError(
+            """{} is not an accepted state status,
+              use either separate or combined""".format(
+                method
+            )
+        )
+
+    if method == "combined":
+
+        # Combined methods requires a group variable (aka calibration_group)
+        # this is mapped to the main dataframe now and is used to calculate
+        # calibration factor
+
+        calibration_group_map = read_csv_wrapper(
+            config["calibration_group_map_path"], config["platform"], config["bucket"]
+        )
+
+    if method == "separate":
+        # No mapping required and group is same as strata, so strata is used
+        # to calculate the calibration factor
+
+        calibration_group_map = None
+        config["group"] = config["strata"]
 
     for population_file, sample_file in zip(population_files, sample_files):
         estimation_data = get_estimation_data(
-            population_file, sample_file, calibration_group_map, config
+            population_file,
+            sample_file,
+            calibration_group_map,
+            convert_NI_GB_cells,
+            config,
         )
 
         census_df = estimation_data[
