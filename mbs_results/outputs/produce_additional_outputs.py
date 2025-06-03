@@ -40,7 +40,16 @@ def get_additional_outputs_df(
     """
 
     additional_outputs_df = estimation_output.merge(
-        outlier_output[["reference", "period", "questioncode", "outlier_weight"]],
+        outlier_output[
+            [
+                "reference",
+                "period",
+                "questioncode",
+                "outlier_weight",
+                "classification",
+                "winsorised_value",
+            ]
+        ],
         how="left",
         on=["reference", "period", "questioncode"],
     )
@@ -85,11 +94,6 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
     for output in additional_outputs:
         filename = get_versioned_filename(output, config)
         output_value = additional_outputs[output]
-        print(f"output: {output}")
-        print(f"type(output): {type(output)}")
-        print(f"output_value: {output_value}")
-        print(f"type(output_value): {type(output_value)}")
-        print(f"filename: {filename}")
         if isinstance(output_value, dict):
             # if the output is a dictionary (e.g. fron generate_devolved_outputs),
             # we need to save each DataFrame in the dictionary

@@ -16,6 +16,7 @@
     "back_data_finalsel_path":"",
     "sic_domain_mapping_path": "",
     "threshold_filepath": "",
+    "lu_path": "",
     "current_period": 202303,
     "revision_window": 15,
     "snapshot_alternate_path_OPTIONAL": null,

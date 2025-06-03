@@ -1,5 +1,5 @@
-from pathlib import Path
 import pandas as pd
+import numpy as np
 from mbs_results.utilities.inputs import read_colon_separated_file
 from mbs_results import logger
 
@@ -29,9 +29,12 @@ def split_func(my_string: str) -> str:
 
 
 def filter_and_calculate_percent_devolved(
-    df: pd.DataFrame, devolved_nation: str
+    df: pd.DataFrame,
+    local_unit_data: pd.DataFrame,
+    devolved_nation: str
 ) -> pd.DataFrame:
     """Filter by devolved nation and calculate percentage column"""
+    print(f"Calculating percentage for {devolved_nation}")
     devolved_nation = devolved_nation.lower()
     nation_to_code = {'scotland': 'XX', 'wales': 'WW'}
     if devolved_nation not in nation_to_code:
@@ -42,16 +45,63 @@ def filter_and_calculate_percent_devolved(
         logger.error(error_msg)
         raise ValueError(error_msg)
     region_code = nation_to_code[devolved_nation]
-    
     logger.info(f"Filtering for {devolved_nation} with region code {region_code}")
-    logger.info(f"Columns before filtering: {df.columns}")
-    #df = df.loc[df["region_local"] == region_code].copy()
-    #logger.info(f"Columns after filtering: {df.columns}")
     percent_col = f'percentage_{devolved_nation}'
-    df['percentage_' + devolved_nation] = -1
-    # Continue with calculation for percentage ...
-    print(f"Calculating percentage for {devolved_nation}")
-    df[percent_col] = (df['adjustedresponse'] / df['new_target_variable']) * 100
+
+    # compute the grossed UK turnover or returns
+    df['gross_turnover_uk'] = (
+        df['adjustedresponse']
+        * df['design_weight']
+        * df['outlier_weight']
+        * df['calibration_factor']
+    )
+    # Calculate froempment ratio:
+    # (sum of froempment in filtered LU data) / (sum of froempment in df)
+    # Filter LU data for the devolved nation region
+    region_col = "region"
+    froempment_col = "froempment"
+    employment_col = 'employment'
+
+    # Filter LU data for the devolved nation region and sum employment by reference
+    local_unit_data['reference'] = local_unit_data['ruref']
+    regional_employment = (
+        local_unit_data[local_unit_data[region_col] == region_code]
+        .groupby('reference')[employment_col]
+        .sum()
+        .reset_index()
+        .rename(columns={employment_col: f'{employment_col}_{devolved_nation}'})
+    )
+
+    # Sum total employment by reference from the pipeline data
+    total_employment = (
+        df.groupby('reference')[froempment_col]
+        .sum()
+        .reset_index()
+        .rename(columns={froempment_col: 'total_employment'})
+    )
+
+    # Merge the two Dataframes and calculate the percentage
+    merged_df = pd.merge(
+        regional_employment,
+        total_employment,
+        on='reference',
+        how='left',
+    )
+
+    merged_df[percent_col] = (
+        (
+            merged_df[f'{employment_col}_{devolved_nation}']
+            / merged_df['total_employment']
+        ) * 100
+    ).round(2)
+
+    # Add the percentage column to the original DataFrame
+    df = df.merge(
+        merged_df[['reference', f'percentage_{devolved_nation}']],
+        on='reference',
+        how='left'
+    )
+
     return df
 
 
@@ -69,10 +119,10 @@ def get_question_no_plaintext(config: dict) -> dict:
         40: "total_turnover",
         42: "commission_or_fees",
         43: "sales_on_own_account",
-        46: "total_from_invoices"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  ,
+        46: "total_from_invoices",
         47: "donations",
         49: "exports",
-        110: "water",
+        110: "water"
     }
 
 
@@ -84,6 +134,30 @@ def get_lu_cols(config: dict) -> list:
         "Address3", "Address4", "Address5", "Postcode", "trading as 1", "trading as 2",
         "trading as 3", "region"
     ]
+
+
+def output_column_name_mapping():
+    return {'period': 'period', 'classification': 'SUT', 'cell_no': 'cell',
+            'reference': 'RU', 'entname1': 'name', 'entref': 'enterprise group',
+            'rusic2007': 'SIC', 'formtype': 'form type', 'status': 'status',
+            'percentage_scotland': '%scottish', 'percentage_wales': '%welsh',
+            'froempment': 'frozen employment', 'sizeband': 'band',
+            'imputed_and_derived_flag': 'imputed and derived flag',
+            'statusencoded': 'status encoded', 'start date': 'start date',
+            'end date': 'end date', 'winsorised_value_exports': 'returned to exports',
+            'adjustedresponse_exports': 'adjusted to exports',
+            'imputed_and_derived_flag_exports': 'imputed and derived flag exports',
+            'statusencoded_exports': 'status encoded exports',
+            'winsorised_value_total_turnover': 'returned turnover',
+            'adjustedresponse_total_turnover': 'adjusted turnover',
+            'imputed_and_derived_flag_total_turnover':
+                'imputed and derived flag turnover',
+            'statusencoded_total_turnover': 'status encoded turnover',
+            'winsorised_value_water': 'returned volume water',
+            'adjustedresponse_water': 'adjusted volume water',
+            'imputed_and_derived_flag_water': 'imputed and derived flag volume water',
+            'statusencoded_water': 'status encoded volume water'
+            }
 
 
 def devolved_outputs(
@@ -108,37 +182,37 @@ def devolved_outputs(
         how='left',
         suffixes=['', '_local']
     )
-    df = filter_and_calculate_percent_devolved(df, devolved_nation)
+    df = filter_and_calculate_percent_devolved(df, local_unit_data, devolved_nation)
 
     devolved_dict = dict(
         (k, question_dictionary[k])
         for k in devolved_questions
         if k in question_dictionary
     )
-    df["text_question"] = df["question_no"].map(devolved_dict)
+    df["text_question"] = df["questioncode"].map(devolved_dict)
 
     pivot_index = [
         "period",
         "reference",
         "cell_no",
-        "frosic2007",
-        "form_type",
-        "froempees",
+        "rusic2007",
+        "formtype",
+        "froempment",
     ]
 
     pivot_values = [
-        "adjusted_value", # Original 
-        "new_target_variable", # Imputated / winsorised
-        "response_type", # numeric response type
-        "error_mkr", # single letter (str)
+        "adjustedresponse",  # Original
+        "winsorised_value",  # Imputated/winsorised (= adjustedresponse*outlier_weight)
+        "imputed_and_derived_flag",  # [response_type -> imputed_and_derived_flag]
+        "statusencoded",  # single letter (str) [error_mkr -> statusencoded]
     ]
 
     # Can use any agg function on numerical values, have to use lambda func for str cols
     pivot_agg_functions = [
         agg_function,
         agg_function,
-        agg_function,
-        lambda x: " ".join(x),
+        lambda x: "".join(str(v) for v in x if pd.notnull(v)),
+        lambda x: "".join(str(int(v)) for v in x if pd.notnull(v)),
     ]
 
     dict_agg_funcs = dict(zip(pivot_values, pivot_agg_functions))
@@ -153,6 +227,67 @@ def devolved_outputs(
 
     df_pivot.columns = ["_".join(col).strip() for col in df_pivot.columns.values]
     df_pivot = df_pivot[sorted(df_pivot.columns, key=split_func)]
+    df_pivot.reset_index(inplace=True)
+
+    # adding extra columns from df
+    percent_devolved_nation_col = f'percentage_{devolved_nation.lower()}'
+
+    extra_columns = [
+        "period", "classification", "cell_no", "reference", "entname1", 'entref',
+        "rusic2007", "formtype", "status", percent_devolved_nation_col, "froempment",
+        'sizeband'
+    ]
+    extra_columns_existing = [col for col in extra_columns if col in df.columns]
+    df_extra = df[extra_columns_existing].drop_duplicates(
+        subset=["period", "reference"]
+    )
+
+    merge_keys = [
+        "period", "cell_no", "reference", "rusic2007", "formtype", "froempment"
+    ]
+    df_pivot = pd.merge(
+        df_pivot,
+        df_extra,
+        on=merge_keys,
+        how="left",
+    )
+
+    # After merge, if both _x and _y exist, keep only one and rename it
+    if (
+        f"{percent_devolved_nation_col}_x" in df_pivot.columns
+        and f"{percent_devolved_nation_col}_y" in df_pivot.columns
+    ):
+        # Prefer the _x column, or combine as needed
+        df_pivot[percent_devolved_nation_col] = (
+            df_pivot[f"{percent_devolved_nation_col}_x"].combine_first(
+                df_pivot[f"{percent_devolved_nation_col}_y"]
+            )
+        )
+        df_pivot = df_pivot.drop(
+            columns=[
+                f"{percent_devolved_nation_col}_x",
+                f"{percent_devolved_nation_col}_y"
+            ]
+        )
+    elif f"{percent_devolved_nation_col}_x" in df_pivot.columns:
+        df_pivot = df_pivot.rename(
+            columns={f"{percent_devolved_nation_col}_x": percent_devolved_nation_col}
+        )
+    elif f"{percent_devolved_nation_col}_y" in df_pivot.columns:
+        df_pivot = df_pivot.rename(
+            columns={f"{percent_devolved_nation_col}_y": percent_devolved_nation_col}
+        )
+
+    # Now reorder columns as before, but only include columns that exist
+    existing_desired_order = [col for col in extra_columns if col in df_pivot.columns]
+    df_pivot = df_pivot[
+        existing_desired_order
+        + [col for col in df_pivot.columns if col not in existing_desired_order]
+    ]
+
+    # map the column names used in the pipeline to column names in the business template
+    column_name_mapping = output_column_name_mapping()
+    df_pivot = df_pivot.rename(columns=column_name_mapping)
 
     return df_pivot
 
@@ -160,38 +295,25 @@ def devolved_outputs(
 def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dict:
     """
     Main function to generate devolved outputs for nations specified in config.
-    
+
     Parameters
     ----------
     config : dict
         Configuration dictionary containing paths and settings.
-        
+
     Returns
     -------
     dict
         Dictionary containing devolved outputs for each nation.
-    
-    Raises
-    ------
-    ValueError
-        If the devolved nation is not recognised.
-        
-    KeyError
-        If the specified columns are not found in the DataFrame.
-        
-    TypeError
-        If the input DataFrame is not a pandas DataFrame.
-        
-    
-    
+
     Notes
     -----
     This function reads the input data, processes it to generate devolved outputs,
     and saves the results to CSV files. The function is designed to be flexible and
     can be easily adapted to handle different configurations and data formats.
     The devolved outputs are generated for the specified nations (e.g., Scotland,
-    Wales) based on the provided configuration. 
-    
+    Wales) based on the provided configuration.
+
     Example usage:
     >>> config = {
     ...     "devolved_nations": ["Scotland", "Wales"],
@@ -210,7 +332,7 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
     ...         49: "exports",
     ...         110: "water",
     ...     },
-    
+
     ...     "devolved_questions": [11, 12, 40, 49, 110],
     ... }
     >>> outputs = generate_devolved_outputs(config)
@@ -218,30 +340,21 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
         print(f"================= Pivot table for {nation} =============")
         print(df_pivot)
     """
-
-    # The paths could be added to the config
-    data_path = Path(r"D:/consultancy/mbs_artifacts/temp_outputs_new_env")
-    winsorisation_file = data_path / "winsorisation_output_0.0.2.csv"
-    lu_file = data_path / "ludets009_202303" / "ludets009_202303"
-
-    if additional_outputs_df is not None:
-        df = additional_outputs_df.copy()
-        print(f"\nUsing additional outputs DataFrame with shape: {df.shape}")
-        print(f"Columns in additional outputs DataFrame: {df.columns}")
-        print(f"df[['period', 'adjustedresponse', 'response']]:\n{df[['period', 'adjustedresponse', 'response']].head(10)}")
-        
-        df_winzor = pd.read_csv(winsorisation_file)
-        print(f"\nUsing winsorisation DataFrame with shape: {df_winzor.shape}")
-        print(f"Columns in winsorisation DataFrame: {df_winzor.columns}")
-        print(f"df_winzor[['period', 'adjusted_value']]:\n{df_winzor[['period', 'adjusted_value', 'new_target_variable']].head(10)}")
-    else:
-        df = pd.read_csv(winsorisation_file)
+    lu_path = config.get("lu_path")
+    df = additional_outputs_df.copy()
     lu_cols = get_lu_cols(config)
-    lu_data = read_colon_separated_file(lu_file, lu_cols)
+    lu_data = read_colon_separated_file(lu_path, lu_cols)
 
     question_no_plaintext = get_question_no_plaintext(config)
     devolved_questions = get_devolved_questions()
     nations = config.get("devolved_nations", ["Scotland", "Wales"])
+
+    # Derive the band number from the cell_no column
+    df["sizeband"] = np.where(
+        df[config["cell_number"]].isna(),
+        df[config["cell_number"]],
+        df[config["cell_number"]].astype(str).str[-1],
+    ).astype(int)
 
     outputs = {}
     for nation in nations:
@@ -253,16 +366,8 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
             devolved_questions=devolved_questions,
             agg_function="sum"
         )
-        
-        # TO DO: 
-        #     1: rename the columns to match the business required column names
-        #           df_pivot.rename(columns=rename_dict, inplace=True)
-        #     2: Rearrange the columns to match the business required column order: column_order
-        #           df_pivot = df_pivot[column_order]
-        #     3: Add the RU and name columns to the pivot table
-        #           df_pivot = pd.merge(df_pivot, lu_data, left_on='reference', right_on='ruref', how='left')
-        
-        output_file = data_path / f"{nation.lower()}_pivot.csv"
+
+        output_file = config["output_path"] + f"{nation.lower()}_pivot.csv"
         df_pivot.to_csv(
             output_file,
             index=False,
@@ -271,24 +376,3 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
         )
         outputs[nation] = df_pivot
     return outputs
-
-
-if __name__ == "__main__":
-    # region_local: wales - 25174, scotland - 42020
-    # region (finalsel): wales - 16173, scotland - 30397
-    
-    column_names = {
-        "period": "period",
-        "sut": "SUT",
-        "cell_no": "cell",
-        "reference": "RU",
-        "entname1": "name",
-        "enterprice_group": "enterprice group",
-        "frosic2007": "SIC",
-        "form_type": "form type",  
-    }
-
-    outputs = generate_devolved_outputs(additional_outputs_df=None, config={},)
-    for nation, df_pivot in outputs.items():
-        print(f"================= Pivot table for {nation} =============")
-        print(df_pivot)

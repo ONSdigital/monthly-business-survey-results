@@ -75,7 +75,6 @@ def get_finalsel_columns():
     ]
 
 
-
 def analyse_winsorisation_output(winsorisation_filepath: str,
                                  scottish_outputs_columns: list):
     """

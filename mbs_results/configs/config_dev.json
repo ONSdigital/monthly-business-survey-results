@@ -65,7 +65,8 @@
         "cell_no",
         "froempment",
         "frotover",
-        "reference"
+        "reference",
+        "entname1"
     ],
 
     "temporarily_remove_cols": [],
