@@ -23,7 +23,7 @@ def apply_estimation(method: str, convert_NI_GB_cells: bool, config: dict):
     Parameters
     ----------
     method : str
-        Method to be applied, accepted values are `seperate` and `combined`
+        Method to be applied, accepted values are `separate` and `combined`
         For separate, calibration factor is calculated at strata variable
         For combined ratio,calibration factor is calculated at calibration
         group, calibration group mapping must be supplied via a csv file.
@@ -60,10 +60,10 @@ def apply_estimation(method: str, convert_NI_GB_cells: bool, config: dict):
 
     estimation_df_list = []
 
-    if method not in ["seperated", "combined"]:
+    if method not in ["separate", "combined"]:
         raise ValueError(
             """{} is not an accepted state status,
-              use either seperated or combined""".format(
+              use either separate or combined""".format(
                 method
             )
         )
@@ -78,7 +78,7 @@ def apply_estimation(method: str, convert_NI_GB_cells: bool, config: dict):
             config["calibration_group_map_path"], config["platform"], config["bucket"]
         )
 
-    if method == "seperated":
+    if method == "separate":
         # No mapping required and group is same as strata, so strata is used
         # to calculate the calibration factor
 

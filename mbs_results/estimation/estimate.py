@@ -16,7 +16,7 @@ def estimate(
     df : pd.DataFrame
         post imputation dataframe
     method : str
-        Method to be applied, accepted values are `seperate` and `combined`
+        Method to be applied, accepted values are `separate` and `combined`
         For separate, calibration factor is calculated at strata variable
         For combined ratio,calibration factor is calculated at calibration
         group, calibration group mapping must be supplied via a csv file.
