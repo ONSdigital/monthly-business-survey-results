@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 from mbs_results.utilities.inputs import read_colon_separated_file
 
 
@@ -9,10 +8,6 @@ def get_scottish_outputs_columns():
     Returns the list of column names for Scottish outputs.
     """
     return [
-
-loaded_config = {
-    "scottish_outputs": [
-
         "period",
         "SUT",
         "cell",
@@ -62,7 +57,6 @@ loaded_config = {
         "response type.8",
         "error marker.8",
     ]
-
 
 
 def get_finalsel_columns():
@@ -184,11 +178,6 @@ def get_finalsel(finalsel_columns: list):
     finalsel_data = read_colon_separated_file(finalsel_filepath, finalsel_columns)
 
     return finalsel_data
-
-df = pd.read_csv("d:/temp_outputs_new_env/winsorisation_output_0.0.2.csv")
-df = df.columns.to_list()
-print(df)
-
 
 
 def scottish_outputs(df: pd.DataFrame, scotish_columns: list, sup_data: pd.DataFrame):
