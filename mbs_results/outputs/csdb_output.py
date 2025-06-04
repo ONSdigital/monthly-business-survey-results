@@ -35,6 +35,7 @@ def create_csdb_output(
     df_combined["period"] = convert_column_to_datetime(
         df_combined["period"]
     ).dt.strftime("%Y%m")
+    df_combined["cdid"] = df_combined["cdid"].strip()
     # Convert grossed_column into pounds thousands before agg
     df_combined["curr_grossed_value"] = (
         df_combined["adjustedresponse"]
