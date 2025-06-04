@@ -11,7 +11,7 @@
     "design_weight": "design_weight",
     "status": "statusencoded",
     "form_id_idbr": "formtype",
-    "sic": "frosic2007",
+    "sic": "rusic2007",
     "group": "calibration_group",
     "calibration_group": "calibration_group",
     "period": "period",
@@ -142,7 +142,8 @@
 
 
   "additional_outputs":["selective_editing_contributors",
-                        "selective_editing_questions"],
+                        "selective_editing_questions",
+                        "generate_devolved_outputs"],
 
 
   "form_to_derived_map": {
