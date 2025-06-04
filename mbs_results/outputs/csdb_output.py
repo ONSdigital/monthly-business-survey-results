@@ -20,8 +20,7 @@ def create_csdb_output(
     -------
     pd.DataFrame
         pivot table aggregating gross values for each month, values are given in pounds
-        thousands. Only returns aggregations of month and not higher periods. Checking
-        that output team would be happy with this.
+        thousands. Only returns aggregations of month and not higher periods.
     """
 
     cdid_mapping = pd.read_csv(cdid_data_path)
