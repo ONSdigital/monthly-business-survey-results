@@ -1,5 +1,5 @@
 {
-    "platform" : "s3",
+    "platform" : "network",
 
     "back_data_type":"type",
     "imputation_marker_col":"imputation_flags_adjustedresponse",
@@ -11,7 +11,7 @@
     "design_weight": "design_weight",
     "status": "statusencoded",
     "form_id_idbr": "formtype",
-    "sic": "frosic2007",
+    "sic": "rusic2007",
     "group": "calibration_group",
     "calibration_group": "calibration_group",
     "period": "period",
@@ -66,7 +66,8 @@
         "cell_no",
         "froempment",
         "frotover",
-        "reference"
+        "reference",
+        "entname1"
     ],
 
     "temporarily_remove_cols": [],
@@ -138,8 +139,12 @@
         "13":"fir"
         },
 
+
+
   "additional_outputs":["selective_editing_contributors",
-                        "selective_editing_questions"],
+                        "selective_editing_questions",
+                        "generate_devolved_outputs"],
+
 
   "form_to_derived_map": {
         "13": [40],
