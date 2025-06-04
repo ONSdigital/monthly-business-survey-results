@@ -36,7 +36,7 @@ def create_csdb_output(
     ).dt.strftime("%Y%m")
     df_combined["cdid"] = df_combined.replace()["cdid"].apply(
         lambda x: x.strip() if isinstance(x, str) else x
-        )
+    )
     # Convert grossed_column into pounds thousands before agg
     df_combined["curr_grossed_value"] = (
         df_combined["adjustedresponse"]
