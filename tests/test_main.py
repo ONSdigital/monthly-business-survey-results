@@ -31,7 +31,7 @@ test_config = {
     "revision_window": 6,
     "snapshot_alternate_path_OPTIONAL": None,
     "state": "frozen",
-    "devolved_nations": ["Scotland", "Wales"]
+    "devolved_nations": ["Scotland", "Wales"],
 }
 
 

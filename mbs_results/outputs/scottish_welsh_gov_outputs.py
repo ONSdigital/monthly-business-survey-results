@@ -133,30 +133,33 @@ def get_question_no_plaintext(config: dict) -> dict:
 
 def get_lu_cols(config: dict) -> list:
     """Get local unit columns from config or use default."""
-    return config.get("local_unit_columns", [
-        "ruref",
-        "entref",
-        "lu ref",
-        "check letter",
-        "sic03",
-        "sic07",
-        "employees",
-        "employment",
-        "fte",
-        "Name1",
-        "Name2",
-        "Name3",
-        "Address1",
-        "Address2",
-        "Address3",
-        "Address4",
-        "Address5",
-        "Postcode",
-        "trading as 1",
-        "trading as 2",
-        "trading as 3",
-        "region",
-    ])
+    return config.get(
+        "local_unit_columns",
+        [
+            "ruref",
+            "entref",
+            "lu ref",
+            "check letter",
+            "sic03",
+            "sic07",
+            "employees",
+            "employment",
+            "fte",
+            "Name1",
+            "Name2",
+            "Name3",
+            "Address1",
+            "Address2",
+            "Address3",
+            "Address4",
+            "Address5",
+            "Postcode",
+            "trading as 1",
+            "trading as 2",
+            "trading as 3",
+            "region",
+        ],
+    )
 
 
 def output_column_name_mapping():
@@ -302,7 +305,7 @@ def devolved_outputs(
         df_extra,
         on=merge_keys,
         how="left",
-        suffixes=('', '_extra'),
+        suffixes=("", "_extra"),
     )
 
     # Drop the percentage column with the '_extra' suffix if it exists

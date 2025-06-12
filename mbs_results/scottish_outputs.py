@@ -63,7 +63,7 @@ def get_finalsel_columns(config):
     """
     Returns the list of column names for finalsel data.
     """
-    return config.get('sample_column_names')
+    return config.get("sample_column_names")
 
 
 def analyse_winsorisation_output(

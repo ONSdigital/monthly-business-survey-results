@@ -2,6 +2,7 @@ from importlib import metadata
 
 import pandas as pd
 
+from mbs_results import logger
 from mbs_results.outputs.get_additional_outputs import get_additional_outputs
 from mbs_results.outputs.growth_rates_output import get_growth_rates_output
 from mbs_results.outputs.ocea_srs_outputs import produce_ocea_srs_outputs
@@ -15,7 +16,6 @@ from mbs_results.outputs.selective_editing_question_output import (
 )
 from mbs_results.outputs.turnover_analysis import create_turnover_output
 from mbs_results.utilities.utils import get_versioned_filename
-from mbs_results import logger
 
 
 def get_additional_outputs_df(
