@@ -24,6 +24,9 @@ def create_csdb_output(
     """
 
     cdid_mapping = pd.read_csv(cdid_data_path)
+    
+    for col in ["questioncode", "classification"]:
+        if additional_outputs_df[col].dtype != 'int64' : additional_outputs_df[col] = additional_outputs_df[col].astype('int64')
 
     df_combined = pd.merge(
         additional_outputs_df,
@@ -34,9 +37,6 @@ def create_csdb_output(
     df_combined["period"] = convert_column_to_datetime(
         df_combined["period"]
     ).dt.strftime("%Y%m")
-    df_combined["cdid"] = df_combined.replace()["cdid"].apply(
-        lambda x: x.strip() if isinstance(x, str) else x
-    )
     # Convert grossed_column into pounds thousands before agg
     df_combined["curr_grossed_value"] = (
         df_combined["adjustedresponse"]
