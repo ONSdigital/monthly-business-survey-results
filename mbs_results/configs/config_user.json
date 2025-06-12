@@ -18,9 +18,9 @@
     "sic_domain_mapping_path": "",
     "threshold_filepath": "",
     "lu_path": "",
+    "cdid_data_path": "",
     "current_period": 202303,
     "revision_window": 15,
-    "snapshot_alternate_path_OPTIONAL": null,
     "state": "frozen",
     "devolved_nations": ["Scotland", "Wales"],
 }
