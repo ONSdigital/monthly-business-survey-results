@@ -11,7 +11,7 @@
     "design_weight": "design_weight",
     "status": "statusencoded",
     "form_id_idbr": "formtype",
-    "sic": "rusic2007",
+    "sic": "frosic2007",
     "group": "calibration_group",
     "calibration_group": "calibration_group",
     "period": "period",
@@ -151,5 +151,25 @@
         "14": [40],
         "15": [46],
         "16": [42]
-    }
+    },
+
+    "devolved_questions": [11, 12, 40, 49, 110],
+
+    "question_no_plaintext": {
+        "11": "start_date",
+        "12": "end_date",
+        "40": "total_turnover",
+        "42": "commission_or_fees",
+        "43": "sales_on_own_account",
+        "46": "total_from_invoices",
+        "47": "donations",
+        "49": "exports",
+        "110": "water"
+    },
+
+    "local_unit_columns": ["ruref", "entref", "lu ref", "check letter", "sic03", "sic07",
+    "employees", "employment", "fte", "Name1", "Name2", "Name3", "Address1", "Address2",
+    "Address3", "Address4", "Address5", "Postcode", "trading as 1", "trading as 2", 
+    "trading as 3", "region"
+    ]
 }

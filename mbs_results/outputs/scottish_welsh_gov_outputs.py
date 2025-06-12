@@ -33,7 +33,7 @@ def filter_and_calculate_percent_devolved(
     df: pd.DataFrame, local_unit_data: pd.DataFrame, devolved_nation: str
 ) -> pd.DataFrame:
     """Filter by devolved nation and calculate percentage column"""
-    print(f"Calculating percentage for {devolved_nation}")
+    logger.info(f"Calculating percentage for {devolved_nation}")
     devolved_nation = devolved_nation.lower()
     nation_to_code = {"scotland": "XX", "wales": "WW"}
     if devolved_nation not in nation_to_code:
@@ -105,14 +105,19 @@ def filter_and_calculate_percent_devolved(
     return df
 
 
-def get_devolved_questions() -> list:
-    """Get devolved questions from config or use default."""
-    return [11, 12, 40, 49, 110]
+def get_devolved_questions(config: dict) -> list:
+    """Get devolved questions from config or use default. Integer values expected."""
+    return config.get("devolved_questions", [11, 12, 40, 49, 110])
 
 
 def get_question_no_plaintext(config: dict) -> dict:
-    """Get question number to plaintext mapping from config or use default."""
-
+    """
+    Get question number to plaintext mapping from config or use default.
+    Ensures all keys are integers, even if loaded as strings from JSON.
+    """
+    mapping = config.get("question_no_plaintext")
+    if mapping is not None:
+        return {int(k): v for k, v in mapping.items()}
     return {
         11: "start_date",
         12: "end_date",
@@ -128,7 +133,7 @@ def get_question_no_plaintext(config: dict) -> dict:
 
 def get_lu_cols(config: dict) -> list:
     """Get local unit columns from config or use default."""
-    return [
+    return config.get("local_unit_columns", [
         "ruref",
         "entref",
         "lu ref",
@@ -151,10 +156,14 @@ def get_lu_cols(config: dict) -> list:
         "trading as 2",
         "trading as 3",
         "region",
-    ]
+    ])
 
 
 def output_column_name_mapping():
+    """
+    Mapping to convert column names used in the pipeline to column names in the
+    business template.
+    """
     return {
         "period": "period",
         "classification": "SUT",
@@ -162,7 +171,7 @@ def output_column_name_mapping():
         "reference": "RU",
         "entname1": "name",
         "entref": "enterprise group",
-        "rusic2007": "SIC",
+        "frosic2007": "SIC",
         "formtype": "form type",
         "status": "status",
         "percentage_scotland": "%scottish",
@@ -223,7 +232,7 @@ def devolved_outputs(
         "period",
         "reference",
         "cell_no",
-        "rusic2007",
+        "frosic2007",
         "formtype",
         "froempment",
     ]
@@ -268,7 +277,7 @@ def devolved_outputs(
         "reference",
         "entname1",
         "entref",
-        "rusic2007",
+        "frosic2007",
         "formtype",
         "status",
         percent_devolved_nation_col,
@@ -284,7 +293,7 @@ def devolved_outputs(
         "period",
         "cell_no",
         "reference",
-        "rusic2007",
+        "frosic2007",
         "formtype",
         "froempment",
     ]
@@ -293,31 +302,13 @@ def devolved_outputs(
         df_extra,
         on=merge_keys,
         how="left",
+        suffixes=('', '_extra'),
     )
 
-    # After merge, if both _x and _y exist, keep only one and rename it
-    if (
-        f"{percent_devolved_nation_col}_x" in df_pivot.columns
-        and f"{percent_devolved_nation_col}_y" in df_pivot.columns
-    ):
-        # Prefer the _x column, or combine as needed
-        df_pivot[percent_devolved_nation_col] = df_pivot[
-            f"{percent_devolved_nation_col}_x"
-        ].combine_first(df_pivot[f"{percent_devolved_nation_col}_y"])
-        df_pivot = df_pivot.drop(
-            columns=[
-                f"{percent_devolved_nation_col}_x",
-                f"{percent_devolved_nation_col}_y",
-            ]
-        )
-    elif f"{percent_devolved_nation_col}_x" in df_pivot.columns:
-        df_pivot = df_pivot.rename(
-            columns={f"{percent_devolved_nation_col}_x": percent_devolved_nation_col}
-        )
-    elif f"{percent_devolved_nation_col}_y" in df_pivot.columns:
-        df_pivot = df_pivot.rename(
-            columns={f"{percent_devolved_nation_col}_y": percent_devolved_nation_col}
-        )
+    # Drop the percentage column with the '_extra' suffix if it exists
+    extra_col = f"{percent_devolved_nation_col}_extra"
+    if extra_col in df_pivot.columns:
+        df_pivot = df_pivot.drop(columns=[extra_col])
 
     # Now reorder columns as before, but only include columns that exist
     existing_desired_order = [col for col in extra_columns if col in df_pivot.columns]
@@ -358,7 +349,7 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
     Example usage:
     >>> config = {
     ...     "devolved_nations": ["Scotland", "Wales"],
-    ...     "data_path": "path/to/data",
+    ...     "output_path": "path/to/data",
     ...     "winsorisation_file": "winsorisation_output.csv",
     ...     "lu_file": "ludets009_202303",
     ...     "lu_cols": ["ruref", "entref", "region"],
@@ -381,13 +372,19 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
         print(f"================= Pivot table for {nation} =============")
         print(df_pivot)
     """
-    lu_path = config.get("lu_path")
+
+    logger.info(f"Generating devolved outputs for {config['devolved_nations']}")
+
     df = additional_outputs_df.copy()
+
+    # local unit data
     lu_cols = get_lu_cols(config)
+    lu_path = config.get("lu_path")
     lu_data = read_colon_separated_file(lu_path, lu_cols)
 
     question_no_plaintext = get_question_no_plaintext(config)
-    devolved_questions = get_devolved_questions()
+    devolved_questions = get_devolved_questions(config)
+
     nations = config.get("devolved_nations", ["Scotland", "Wales"])
 
     # Derive the band number from the cell_no column
@@ -408,12 +405,5 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
             agg_function="sum",
         )
 
-        output_file = config["output_path"] + f"{nation.lower()}_pivot.csv"
-        df_pivot.to_csv(
-            output_file,
-            index=False,
-            sep=",",
-            quoting=1,
-        )
         outputs[nation] = df_pivot
     return outputs

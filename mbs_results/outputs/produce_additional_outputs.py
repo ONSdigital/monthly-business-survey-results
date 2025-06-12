@@ -15,6 +15,7 @@ from mbs_results.outputs.selective_editing_question_output import (
 )
 from mbs_results.outputs.turnover_analysis import create_turnover_output
 from mbs_results.utilities.utils import get_versioned_filename
+from mbs_results import logger
 
 
 def get_additional_outputs_df(
@@ -93,16 +94,16 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
         filename = get_versioned_filename(output, config)
         output_value = additional_outputs[output]
         if isinstance(output_value, dict):
-            # if the output is a dictionary (e.g. fron generate_devolved_outputs),
+            # if the output is a dictionary (e.g. from generate_devolved_outputs),
             # we need to save each DataFrame in the dictionary
             for nation, df in output_value.items():
                 nation_filename = f"{config['output_path']}{nation.lower()}_{filename}"
                 df.to_csv(nation_filename, index=False)
-                print(nation_filename + " saved")
+                logger.info(nation_filename + " saved")
         else:
             # if the output is a DataFrame, save it directly
             output_value.to_csv(config["output_path"] + filename, index=False)
-            print(config["output_path"] + filename + " saved")
+            logger.info(config["output_path"] + filename + " saved")
 
 
 def produce_selective_editing_outputs(
@@ -146,4 +147,4 @@ def produce_selective_editing_outputs(
         period = additional_outputs[output]["period"].unique()[0]
         filename = f"se{file}009_{period}_v{file_version_mbs}.csv"
         additional_outputs[output].to_csv(config["output_path"] + filename, index=False)
-        print(config["output_path"] + filename + " saved")
+        logger.info(config["output_path"] + filename + " saved")

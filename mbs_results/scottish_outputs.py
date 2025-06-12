@@ -59,62 +59,11 @@ def get_scottish_outputs_columns():
     ]
 
 
-def get_finalsel_columns():
+def get_finalsel_columns(config):
     """
     Returns the list of column names for finalsel data.
     """
-    return [
-        "ruref",
-        "checkletter",
-        "frosic2003",
-        "rusic2003",
-        "frosic2007",
-        "rusic2007",
-        "froempees",
-        "employees",
-        "froempment",
-        "employment",
-        "froFTEempt",
-        "FTEempt",
-        "frotover",
-        "turnover",
-        "entref",
-        "wowentref",
-        "vatref",
-        "payeref",
-        "crn",
-        "live_lu",
-        "live_vat",
-        "live_paye",
-        "legalstatus",
-        "entrepmkr",
-        "region",
-        "birthdate",
-        "entname1",
-        "entname2",
-        "entname3",
-        "runame1",
-        "runame2",
-        "runame3",
-        "ruaddr1",
-        "ruaddr2",
-        "ruaddr3",
-        "ruaddr4",
-        "ruaddr5",
-        "rupostcode",
-        "tradstyle1",
-        "tradstyle2",
-        "tradstyle3",
-        "contact",
-        "telephone",
-        "fax",
-        "seltype",
-        "inclexcl",
-        "cell_no",
-        "formtype",
-        "cso_tel",
-        "currency",
-    ]
+    return config.get('sample_column_names')
 
 
 def analyse_winsorisation_output(
@@ -155,12 +104,14 @@ def analyse_winsorisation_output(
 
 
 # Get finalsel dataframe
-def get_finalsel(finalsel_columns: list):
+def get_finalsel(config: dict, finalsel_columns: list):
     """
     Reads the finalsel data file and returns a DataFrame with the specified columns.
 
     Parameters
     ----------
+    config : dict
+        Configuration dictionary containing the path to the finalsel data file.
     finalsel_columns : list
         List of column names to include in the finalsel DataFrame.
 
@@ -170,10 +121,7 @@ def get_finalsel(finalsel_columns: list):
         A DataFrame containing the finalsel data with the specified columns.
 
     """
-    finalsel_filepath = (
-        "C:/Users/njobud/Office for National Statistics/Legacy Uplift - MBS/"
-        "mbs_anonymised_jan_2025_20250128T111044/finalsel009_202112"
-    )
+    finalsel_filepath = config.get("back_data_finalsel_path")
 
     finalsel_data = read_colon_separated_file(finalsel_filepath, finalsel_columns)
 
@@ -196,36 +144,3 @@ def scottish_outputs(df: pd.DataFrame, scotish_columns: list, sup_data: pd.DataF
         _description_
     """
     return df[scotish_columns]
-
-
-if __name__ == "__main__":
-
-    scottish_outputs_columns = get_scottish_outputs_columns()
-    print(f"\nscottish_outputs_column_name\n{scottish_outputs_columns}")
-    print("=============================")
-
-    winsorisation_filepath = (
-        "d:/consultancy/mbs_artifacts/temp_outputs_new_env/"
-        "winsorisation_output_0.0.2.csv"
-    )
-    df, column_name, difference_column_name, missing_columns = (
-        analyse_winsorisation_output(winsorisation_filepath, scottish_outputs_columns)
-    )
-    print(f"\nwinsorisation_output_column_name\n{column_name}")
-
-    print("\nDifference between column_name and scottish_outputs_columns:")
-    print(difference_column_name)
-    print(
-        "\nElements in loaded_config['scottish_outputs'] that are not in column_name:"
-    )
-    print(missing_columns)
-    print("=============================")
-
-    finalsel_columns = get_finalsel_columns()
-    finalsel_data = get_finalsel(finalsel_columns)
-    print(f"\n\nfinalsel_data\n{finalsel_data}")
-    print("=============================")
-
-    df_scottish_outputs = scottish_outputs(df, scottish_outputs_columns, None)
-
-    outputs_dir = "D:/consultancy/monthly-business-survey-results/testing_copying/"

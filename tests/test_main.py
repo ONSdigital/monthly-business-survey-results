@@ -26,11 +26,12 @@ test_config = {
     "back_data_cp_path": input_path + "test_cp_009_202112.csv",
     "back_data_finalsel_path": input_path + "test_finalsel009_202112",
     "lu_path": input_path + "ludets009_202303",
-    "sic": "rusic2007",
+    "sic": "frosic2007",
     "current_period": 202206,
     "revision_window": 6,
     "snapshot_alternate_path_OPTIONAL": None,
     "state": "frozen",
+    "devolved_nations": ["Scotland", "Wales"]
 }
 
 
