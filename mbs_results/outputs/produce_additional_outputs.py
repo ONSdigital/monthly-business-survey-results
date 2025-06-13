@@ -2,11 +2,13 @@ from importlib import metadata
 
 import pandas as pd
 
+from mbs_results import logger
 from mbs_results.outputs.csdb_output import create_csdb_output
 from mbs_results.outputs.get_additional_outputs import get_additional_outputs
 from mbs_results.outputs.growth_rates_output import get_growth_rates_output
 from mbs_results.outputs.ocea_srs_outputs import produce_ocea_srs_outputs
 from mbs_results.outputs.pivot_imputation_value import create_imputation_link_output
+from mbs_results.outputs.scottish_welsh_gov_outputs import generate_devolved_outputs
 from mbs_results.outputs.selective_editing_contributer_output import (
     get_selective_editing_contributor_output,
 )
@@ -39,7 +41,14 @@ def get_additional_outputs_df(
 
     additional_outputs_df = estimation_output.merge(
         outlier_output[
-            ["reference", "period", "questioncode", "outlier_weight", "classification"]
+            [
+                "reference",
+                "period",
+                "questioncode",
+                "outlier_weight",
+                "classification",
+                "winsorised_value",
+            ]
         ],
         how="left",
         on=["reference", "period", "questioncode"],
@@ -74,6 +83,7 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
             "produce_ocea_srs_outputs": produce_ocea_srs_outputs,
             "create_imputation_link_output": create_imputation_link_output,
             "create_csdb_output": create_csdb_output,
+            "generate_devolved_outputs": generate_devolved_outputs,
         },
         additional_outputs_df,
     )
@@ -84,8 +94,18 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
 
     for output in additional_outputs:
         filename = get_versioned_filename(output, config)
-        additional_outputs[output].to_csv(config["output_path"] + filename, index=False)
-        print(config["output_path"] + filename + " saved")
+        output_value = additional_outputs[output]
+        if isinstance(output_value, dict):
+            # if the output is a dictionary (e.g. from generate_devolved_outputs),
+            # we need to save each DataFrame in the dictionary
+            for nation, df in output_value.items():
+                nation_filename = f"{config['output_path']}{nation.lower()}_{filename}"
+                df.to_csv(nation_filename, index=False)
+                logger.info(nation_filename + " saved")
+        else:
+            # if the output is a DataFrame, save it directly
+            output_value.to_csv(config["output_path"] + filename, index=False)
+            logger.info(config["output_path"] + filename + " saved")
 
 
 def produce_selective_editing_outputs(
@@ -129,4 +149,4 @@ def produce_selective_editing_outputs(
         period = additional_outputs[output]["period"].unique()[0]
         filename = f"se{file}009_{period}_v{file_version_mbs}.csv"
         additional_outputs[output].to_csv(config["output_path"] + filename, index=False)
-        print(config["output_path"] + filename + " saved")
+        logger.info(config["output_path"] + filename + " saved")
