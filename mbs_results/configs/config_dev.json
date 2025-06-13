@@ -1,5 +1,5 @@
 {
-    "platform" : "network",
+    "platform" : "s3",
 
     "back_data_type":"type",
     "imputation_marker_col":"imputation_flags_adjustedresponse",
