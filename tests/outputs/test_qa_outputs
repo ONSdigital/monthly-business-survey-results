@@ -1,0 +1,60 @@
+from pathlib import Path
+
+import pandas as pd
+import pytest
+from pandas.testing import assert_frame_equal
+
+from mbs_results.outputs.qa_output import produce_qa_output
+
+@pytest.fixture(scope="class")
+def filepath():
+    return Path("tests/data/outputs/qa_output")
+
+
+@pytest.fixture(scope="class")
+def input_df(filepath):
+    return pd.read_csv(filepath / "qa_output_input.csv", index_col=False)
+
+
+@pytest.fixture(scope="class")
+def output_df(filepath):
+    return pd.read_csv(filepath / "qa_output_output.csv", index_col=False)
+
+@pytest.fixture(scope="class")
+def test_config():
+    return {
+        "reference": "int",
+        "period": "date",
+        "response": "str",
+        "questioncode": "int",
+        "adjustedresponse": "float",
+        "frozensic": "str",
+        "frozenemployees": "int",
+        "frozenturnover": "float",
+        "cellnumber": "int",
+        "formtype": "str",
+        "status": "str",
+        "statusencoded": "int",
+        "frosic2003": "str",
+        "rusic2003": "str",
+        "frosic2007": "str",
+        "rusic2007": "str",
+        "froempment": "int",
+        "frotover": "float",
+        "cell_no": "int"}
+
+class TestProduceQaOutput:
+    def test_qa_output(
+        self,
+        test_config,
+        input_df,
+        output_df,
+    ):
+        expected_output = output_df
+
+        actual_output = produce_qa_output(
+            config = test_config,
+            post_win_df=input_df,
+        )
+
+        assert_frame_equal(actual_output, expected_output)
