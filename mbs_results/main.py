@@ -15,6 +15,8 @@ from mbs_results.utilities.validation_checks import (
     validate_staging,
 )
 
+from mbs_results.outputs.qa_output import produce_qa_output
+
 # DEBUG - BEGIN
 
 
@@ -38,6 +40,9 @@ def run_mbs_main(config_user_dict=None):
     # Outlier Wrapper
     outlier_output = detect_outlier(estimation_output, config)
     validate_outlier_detection(outlier_output, config)
+
+    # QA output
+    qa_output = produce_qa_output(config, outlier_output)
 
     additional_outputs_df = get_additional_outputs_df(estimation_output, outlier_output)
     produce_additional_outputs(config, additional_outputs_df)

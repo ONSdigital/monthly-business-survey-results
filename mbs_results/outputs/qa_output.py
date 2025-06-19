@@ -49,8 +49,8 @@ def produce_qa_output(config: dict, post_win_df: pd.DataFrame) -> pd.DataFrame:
     for col in requested_columns:
         cols_from_config.append(config.get(col, col))
 
-    post_win_df['total weight (A*G*O)'] = post_win_df['design_weight'] * post_win_df['calibration_factor'] * post_win_df['outlier_weight']
+    post_win_df['total weight (A*G*O)'] = post_win_df[config['design_weight']] * post_win_df[config['calibration_factor']] * post_win_df['outlier_weight']
     
-    post_win_df['weighted adjusted value'] = post_win_df['adjusted_value'] * post_win_df['total_weight_(A*G*O)']
+    post_win_df['weighted adjusted value'] = post_win_df[config["target"]] * post_win_df['total weight (A*G*O)']
 
     return post_win_df[cols_from_config]

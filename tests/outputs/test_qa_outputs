@@ -23,25 +23,27 @@ def output_df(filepath):
 @pytest.fixture(scope="class")
 def test_config():
     return {
-        "reference": "int",
-        "period": "date",
-        "response": "str",
-        "questioncode": "int",
-        "adjustedresponse": "float",
-        "frozensic": "str",
-        "frozenemployees": "int",
-        "frozenturnover": "float",
-        "cellnumber": "int",
-        "formtype": "str",
-        "status": "str",
-        "statusencoded": "int",
-        "frosic2003": "str",
-        "rusic2003": "str",
-        "frosic2007": "str",
-        "rusic2007": "str",
-        "froempment": "int",
-        "frotover": "float",
-        "cell_no": "int"}
+    "auxiliary": "frotover",
+    "auxiliary_converted": "converted_frotover",
+    "calibration_factor": "calibration_factor",
+    "cell_number": "cell_no",
+    "design_weight": "design_weight",
+    "status": "statusencoded",
+    "form_id_idbr": "formtype",
+    "sic": "frosic2007",
+    "group": "calibration_group",
+    "calibration_group": "calibration_group",
+    "period": "period",
+    "question_no": "questioncode",
+    "reference": "reference",
+    "region": "region",
+    "sampled": "is_sampled",
+    "census": "is_census",
+    "strata": "cell_no",
+    "target": "adjustedresponse",
+    "form_id_spp": "form_type_spp",
+    "l_value_question_no": "question_no"
+    }
 
 class TestProduceQaOutput:
     def test_qa_output(
