@@ -11,32 +11,35 @@ def produce_qa_output(config: dict, post_win_df: pd.DataFrame) -> pd.DataFrame:
     post_win_df : pd.DataFrame
         Dataframe containing the required columns, following the outlier_detection module.
         """
+    
+    target = config["target"]
+    
     requested_columns = [
         'reference',
         'period',
         'sic',
         'classification',
-        'cell_no',
-        'frotover',
+        'cell_number',
+        'auxiliary',
         'froempment', 
-        'form_type', 
+        'form_id_spp', 
         'response_type', 
         'question_no',
-        'adjusted_value',
+        'target',
         'error_mkr', 
         'design_weight',
         'calibration_factor', 
         'outlier_weight',
         'total weight (A*G*O)',
         'weighted adjusted value', 
-        'imputation_flags_adjusted_value',
+        f'imputation_flags_{target}',
         'imputation_class',
-        'f_link_adjusted_value', 
-        'f_match_adjusted_value_pair_count',
-        'default_link_f_match_adjusted_value',
-        'b_link_adjusted_value',
-        'b_match_adjusted_value_pair_count',
-        'default_link_b_match_adjusted_value',
+        f'f_link_{target}', 
+        f'f_match_{target}_pair_count',
+        f'default_link_f_match_{target}',
+        f'b_link_{target}',
+        f'b_match_{target}_pair_count',
+        f'default_link_b_match_{target}',
         'construction_link', 
         'flag_construction_matches_pair_count',
         'default_link_flag_construction_matches',
@@ -52,5 +55,8 @@ def produce_qa_output(config: dict, post_win_df: pd.DataFrame) -> pd.DataFrame:
     post_win_df['total weight (A*G*O)'] = post_win_df[config['design_weight']] * post_win_df[config['calibration_factor']] * post_win_df['outlier_weight']
     
     post_win_df['weighted adjusted value'] = post_win_df[config["target"]] * post_win_df['total weight (A*G*O)']
+
+    missing_columns = [col for col in cols_from_config if col not in post_win_df.columns]
+    print("Missing columns:", missing_columns)
 
     return post_win_df[cols_from_config]
