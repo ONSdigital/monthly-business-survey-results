@@ -76,21 +76,14 @@ class TestProduceQaOutput:
     ):
         # changing input/output to match names when filters are applied
         test_config["filter"] = "filter.csv"
-        input_df.rename(
-            columns={
-                "b_match_adjustedresponse_count": "b_match_filtered_adjustedresponse_count",
-                "f_match_adjustedresponse_count": "f_match_filtered_adjustedresponse_count",
-            },
-            inplace=True,
-        )
 
-        output_df.rename(
-            columns={
-                "b_match_adjustedresponse_count": "b_match_filtered_adjustedresponse_count",
-                "f_match_adjustedresponse_count": "f_match_filtered_adjustedresponse_count",
-            },
-            inplace=True,
-        )
+        rename_columns = {
+            "b_match_adjustedresponse_count": "b_match_filtered_adjustedresponse_count",
+            "f_match_adjustedresponse_count": "f_match_filtered_adjustedresponse_count",
+        }
+
+        input_df.rename(columns=rename_columns, inplace=True)
+        output_df.rename(columns=rename_columns, inplace=True)
 
         expected_output = output_df
 
