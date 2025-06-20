@@ -8,6 +8,7 @@ from pandas.testing import assert_frame_equal, assert_series_equal
 from mbs_results.staging.data_cleaning import (
     clean_and_merge,
     convert_cell_number,
+    convert_nil_values,
     create_imputation_class,
     enforce_datatypes,
     filter_out_questions,
@@ -206,3 +207,40 @@ def test_filter_out_questions_save_full_path_errror():
 
     with pytest.raises(ValueError):
         filter_out_questions("dummy", "dummy", "dummy", "export.txt")
+
+
+def test_convert_nil_values(filepath):
+
+    nil_values = [
+        "Combined child (NIL2)",
+        "Out of scope (NIL3)",
+        "Ceased trading (NIL4)",
+        "Dormant (NIL5)",
+        "Part year return (NIL8)",
+        "No UK activity (NIL9)",
+    ]
+
+    df_in = pd.read_csv(filepath / "test_convert_nil_values_input.csv")
+    expected_output = pd.read_csv(filepath / "test_convert_nil_values_output.csv")
+
+    actual_output = convert_nil_values(df_in, "status", "value", nil_values)
+
+    assert_frame_equal(actual_output, expected_output)
+
+
+def test_convert_nil_values_warning(filepath):
+    """Test if warning is working"""
+
+    nil_values = [
+        "Combined child (NIL2)",
+        "Out of scope (NIL3)",
+        "Ceased trading (NIL4)",
+        "Dormant (NIL5)",
+        "Part year return (NIL8)",
+        "No UK activity (NIL9)",
+    ]
+
+    df_in_warning = pd.read_csv(filepath / "test_convert_nil_values_input_warning.csv")
+
+    with pytest.warns():
+        convert_nil_values(df_in_warning, "status", "value", nil_values)

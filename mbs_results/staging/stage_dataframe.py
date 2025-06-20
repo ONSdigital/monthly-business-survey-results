@@ -12,6 +12,7 @@ from mbs_results.staging.create_missing_questions import (
 from mbs_results.staging.data_cleaning import (
     convert_annual_thousands,
     convert_cell_number,
+    convert_nil_values,
     create_form_type_spp_column,
     create_imputation_class,
     enforce_datatypes,
@@ -205,6 +206,10 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
 
     else:
         filter_df = None
+
+    pre_impute_df = convert_nil_values(
+        pre_impute_df, config["nil_status_col"], config["target"], config["nil_values"]
+    )
 
     print("Staging Completed")
     return pre_impute_df, manual_constructions, filter_df

@@ -24,6 +24,7 @@
     "target": "adjustedresponse",
     "form_id_spp": "form_type_spp",
     "l_value_question_no": "question_no",
+    "nil_status_col": "status",
 
     "master_column_type_dict" : {
         "reference": "int",
@@ -171,5 +172,8 @@
     "employees", "employment", "fte", "Name1", "Name2", "Name3", "Address1", "Address2",
     "Address3", "Address4", "Address5", "Postcode", "trading as 1", "trading as 2",
     "trading as 3", "region"
-    ]
+    ],
+    "nil_values" : ["Combined child (NIL2)", "Out of scope (NIL3)", "Ceased trading (NIL4)" ,"Dormant (NIL5)",
+    "Part year return (NIL8)",
+    "No UK activity (NIL9)"]
 }

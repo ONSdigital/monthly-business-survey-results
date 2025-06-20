@@ -1,3 +1,4 @@
+import logging
 import warnings
 from typing import List
 
@@ -9,6 +10,8 @@ from mbs_results.utilities.utils import convert_column_to_datetime
 from mbs_results.utilities.validation_checks import (  # validate_manual_constructions,
     validate_indices,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def create_form_type_spp_column(df: pd.DataFrame, config: dict) -> pd.DataFrame:
@@ -532,3 +535,67 @@ def filter_out_questions(
     keep_questions_df.reset_index(drop=True, inplace=True)
 
     return keep_questions_df
+
+
+def convert_nil_values(
+    df: pd.DataFrame,
+    status_col: str,
+    target_col: str,
+    nil_values: List[str],
+    convert_to: float = 0,
+) -> pd.DataFrame:
+    """
+    Converts values in target_col to 0 (optional) when status_col has value
+    defined in nil_values
+
+    Logs status and nil_values and raises warning if tries to convert a non 0
+    or non na value.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    status_col : str
+        Column with status variable to search for any nil values.
+    target_col : str
+        Value to convert.
+    nil_values : List(str)
+        List of values which are identified as nil.
+    convert_to : float, optional
+        Value to convert if nil values exist. The default is 0.
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Original dataframe with 0 for nil contributers as defined in nil_values.
+    """
+
+    df = df.copy()
+
+    unique_status = df[status_col].unique()
+
+    nil_values_mask = df[status_col].isin(nil_values)
+
+    warning_mask = nil_values_mask & (
+        ~df[target_col].isna() & df[target_col] != convert_to
+    )
+
+    logging.info(
+        f"""{status_col} has these values {unique_status}, from them these
+{nil_values} have been configured as nil values thus will be converted to
+ {convert_to}"""
+    )
+
+    # expected values are 0 or na for nil, raising warning if otherwise
+
+    if any(warning_mask):  # any true value
+
+        warnings.warn(
+            f"""\nThere are nil contributors with a non zero value in the
+snapshot, these will be converted to {convert_to}, these values {nil_values} have been
+configured as nil value in {status_col} column."""
+        )
+
+    df.loc[nil_values_mask, target_col] = convert_to
+
+    return df
