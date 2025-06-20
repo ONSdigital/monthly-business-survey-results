@@ -5,6 +5,7 @@ from mbs_results.outputs.produce_additional_outputs import (
     get_additional_outputs_df,
     produce_additional_outputs,
 )
+from mbs_results.outputs.qa_output import produce_qa_output
 from mbs_results.staging.stage_dataframe import stage_dataframe
 from mbs_results.utilities.inputs import load_config
 from mbs_results.utilities.validation_checks import (
@@ -14,8 +15,6 @@ from mbs_results.utilities.validation_checks import (
     validate_outlier_detection,
     validate_staging,
 )
-
-from mbs_results.outputs.qa_output import produce_qa_output
 
 # DEBUG - BEGIN
 

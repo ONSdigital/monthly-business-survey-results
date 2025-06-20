@@ -10,11 +10,9 @@ from mbs_results.outputs.qa_output import produce_qa_output
 def filepath():
     return Path("tests/data/outputs/qa_output")
 
-
 @pytest.fixture(scope="class")
 def input_df(filepath):
     return pd.read_csv(filepath / "qa_output_input.csv", index_col=False)
-
 
 @pytest.fixture(scope="class")
 def output_df(filepath):
@@ -42,11 +40,12 @@ def test_config():
     "strata": "cell_no",
     "target": "adjustedresponse",
     "form_id_spp": "form_type_spp",
-    "l_value_question_no": "question_no"
+    "l_value_question_no": "question_no",
+    "filter": None,
     }
 
 class TestProduceQaOutput:
-    def test_qa_output(
+    def test_qa_output_no_filter(
         self,
         test_config,
         input_df,
@@ -59,4 +58,30 @@ class TestProduceQaOutput:
             post_win_df=input_df,
         )
 
-        assert_frame_equal(actual_output, expected_output)
+        assert_frame_equal(actual_output.sort_index(axis=1), expected_output.sort_index(axis=1))
+
+    def test_qa_output_filter(
+        self,
+        test_config,
+        input_df,
+        output_df,
+    ):
+        #changing input/output to match names when filters are applied
+        test_config["filter"] = "filter.csv"
+        input_df.rename(columns={'b_match_adjustedresponse_count': 'b_match_filtered_adjustedresponse_count',
+                         'f_match_adjustedresponse_count': 'f_match_filtered_adjustedresponse_count'},
+                         inplace = True)
+        
+        output_df.rename(columns={'b_match_adjustedresponse_count': 'b_match_filtered_adjustedresponse_count',
+                         'f_match_adjustedresponse_count': 'f_match_filtered_adjustedresponse_count'}, 
+                         inplace = True)
+
+        expected_output = output_df
+
+        actual_output = produce_qa_output(
+            config = test_config,
+            post_win_df=input_df,
+        )
+
+        assert_frame_equal(actual_output.sort_index(axis=1), expected_output.sort_index(axis=1))
+
