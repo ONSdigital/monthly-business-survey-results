@@ -2,14 +2,16 @@ import pandas as pd
 
 
 def produce_qa_output(config: dict, post_win_df: pd.DataFrame) -> pd.DataFrame:
-    """Produces an output with required columns, and with total weight and weighted adjusted value calculated.
+    """Produces an output with required columns, and with total weight and
+    weighted adjusted value calculated.
 
      Parameters
     ----------
     config : dict
         The config as a dictionary.
     post_win_df : pd.DataFrame
-        Dataframe containing the required columns, following the outlier_detection module.
+        Dataframe containing the required columns, following the
+        outlier_detection module.
     """
 
     target = config["target"]
@@ -69,12 +71,5 @@ def produce_qa_output(config: dict, post_win_df: pd.DataFrame) -> pd.DataFrame:
     post_win_df["weighted adjusted value"] = (
         post_win_df[config["target"]] * post_win_df["total weight (A*G*O)"]
     )
-
-    missing_columns = [
-        col for col in cols_from_config if col not in post_win_df.columns
-    ]
-
-    for i in range(0, len(missing_columns), 3):
-        print("Missing columns:", missing_columns[i : i + 3])
 
     return post_win_df[cols_from_config]

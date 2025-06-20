@@ -8,6 +8,8 @@ from mbs_results.outputs.produce_additional_outputs import (
 from mbs_results.outputs.qa_output import produce_qa_output
 from mbs_results.staging.stage_dataframe import stage_dataframe
 from mbs_results.utilities.inputs import load_config
+from mbs_results.utilities.outputs import write_csv_wrapper
+from mbs_results.utilities.utils import get_versioned_filename
 from mbs_results.utilities.validation_checks import (
     validate_config,
     validate_estimation,
@@ -42,6 +44,13 @@ def run_mbs_main(config_user_dict=None):
 
     # QA output
     qa_output = produce_qa_output(config, outlier_output)
+    write_csv_wrapper(
+        qa_output,
+        config["output_path"] + get_versioned_filename("qa_output", config),
+        config["platform"],
+        config["bucket"],
+        index=False,
+    )
 
     additional_outputs_df = get_additional_outputs_df(estimation_output, outlier_output)
     produce_additional_outputs(config, additional_outputs_df)
