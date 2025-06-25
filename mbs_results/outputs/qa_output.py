@@ -3,7 +3,7 @@ import pandas as pd
 
 def produce_qa_output(
     additional_outputs_df: pd.DataFrame,
-    **config: dict,
+    **config,
 ) -> pd.DataFrame:
     """Produces an output with required columns, and with total weight and
     weighted adjusted value calculated.
