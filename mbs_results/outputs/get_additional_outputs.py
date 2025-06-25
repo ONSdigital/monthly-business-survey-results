@@ -62,9 +62,6 @@ def get_additional_outputs(
     >> get_additional_outputs(config, function_mapper)
 
     """
-
-    print("RUNNING CONSTRUCTION GET ADDITIONAL OUTPUTS")
-
     additional_outputs = dict()
     for config_list_name in ["additional_outputs", "mandatory_outputs"]:
         if not isinstance(config[config_list_name], list):
