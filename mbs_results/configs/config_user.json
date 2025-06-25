@@ -23,4 +23,5 @@
     "revision_window": 15,
     "state": "frozen",
     "devolved_nations": ["Scotland", "Wales"],
+    "additional_outputs":["generate_devolved_outputs"]
 }

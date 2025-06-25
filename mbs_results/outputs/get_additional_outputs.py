@@ -63,25 +63,31 @@ def get_additional_outputs(
 
     """
 
+    print("RUNNING CONSTRUCTION GET ADDITIONAL OUTPUTS")
+
     additional_outputs = dict()
-
-    if not isinstance(config["additional_outputs"], list):
-
-        raise ValueError(
-            """
-            In config file additional_outputs must be a list, please use:\n
-            ["all"] to get all outputs\n
-            [] to get no outputs\n
-            or a list with the outputs, e.g. ["output_1","output_2"]
-                    """
-        )
+    for config_list_name in ["additional_outputs", "mandatory_outputs"]:
+        if not isinstance(config[config_list_name], list):
+            raise TypeError(
+                f"""
+                In config file {config_list_name} must be a list, please use: \n
+                ["all"] to get all outputs\n
+                [] to get only mandatory outputs (defined in dev config) (\n
+                or a list with the outputs, e.g. ["output_1", "output_2"]
+                """  # noqa: E272
+            )
 
     if config["additional_outputs"] == ["all"]:
-
+        # Dont have to worry about mandatory outputs here, all functions from mapper
+        # will run. mandatory and optional outputs should be defined in the mapper
         functions_to_run = function_mapper.keys()
 
     else:
-        functions_to_run = config["additional_outputs"]
+        # If "all" is not specified, use the provided list combining with
+        # mandatory outputs
+        functions_to_run = sorted(
+            list(set(config["additional_outputs"]) | set(config["mandatory_outputs"]))
+        )
 
     if selective_editing:
         functions_to_run = [
@@ -104,9 +110,15 @@ def get_additional_outputs(
 
         if function in function_mapper:
 
-            additional_outputs[function] = function_mapper[function](
+            result = function_mapper[function](
                 additional_outputs_df=additional_outputs_df, **config
             )
+            # Function can return either a tuple of df, name or just a dataframe
+            if isinstance(result, tuple):
+                df, name = result
+            else:
+                df, name = result, None
+            additional_outputs[function] = (df, name)
 
         else:
             raise ValueError(

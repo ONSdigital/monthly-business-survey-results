@@ -60,7 +60,7 @@ class TestProduceQaOutput:
 
         actual_output = produce_qa_output(
             config=test_config,
-            post_win_df=input_df,
+            additional_outputs_df=input_df,
         )
 
         assert_frame_equal(
@@ -89,7 +89,7 @@ class TestProduceQaOutput:
 
         actual_output = produce_qa_output(
             config=test_config,
-            post_win_df=input_df,
+            additional_outputs_df=input_df,
         )
 
         assert_frame_equal(

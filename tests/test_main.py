@@ -32,6 +32,7 @@ test_config = {
     "snapshot_alternate_path_OPTIONAL": None,
     "state": "frozen",
     "devolved_nations": ["Scotland", "Wales"],
+    "additional_outputs": ["produce_qa_output"],
 }
 
 
