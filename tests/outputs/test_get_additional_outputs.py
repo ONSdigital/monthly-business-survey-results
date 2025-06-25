@@ -36,11 +36,19 @@ def se_function_mapper():
 @pytest.mark.parametrize(
     "inp, expected, selective_editing",
     [
-        ({"additional_outputs": ["all"]}, "1\n2\n", False),
-        ({"additional_outputs": ["test1"]}, "1\n", False),
-        ({"additional_outputs": ["test2"]}, "2\n", False),
-        ({"additional_outputs": []}, "No additional_outputs produced\n", False),
-        ({"additional_outputs": ["all"]}, "No additional_outputs produced\n", True),
+        ({"additional_outputs": ["all"], "mandatory_outputs": []}, "1\n2\n", False),
+        ({"additional_outputs": ["test1"], "mandatory_outputs": []}, "1\n", False),
+        ({"additional_outputs": ["test2"], "mandatory_outputs": []}, "2\n", False),
+        (
+            {"additional_outputs": [], "mandatory_outputs": []},
+            "No additional_outputs produced\n",
+            False,
+        ),
+        (
+            {"additional_outputs": ["all"], "mandatory_outputs": []},
+            "No additional_outputs produced\n",
+            True,
+        ),
         (
             {
                 "additional_outputs": [
@@ -48,7 +56,8 @@ def se_function_mapper():
                     "test2",
                     "selective_editing_test1",
                     "selective_editing_test2",
-                ]
+                ],
+                "mandatory_outputs": [],
             },
             "1\n2\n",
             False,
@@ -65,11 +74,33 @@ def test_output(capsys, function_mapper, inp, expected, selective_editing):
 @pytest.mark.parametrize(
     "inp, expected, selective_editing",
     [
-        ({"additional_outputs": ["all"]}, "1\n2\n", True),
-        ({"additional_outputs": ["selective_editing_test1"]}, "1\n", True),
-        ({"additional_outputs": ["selective_editing_test2"]}, "2\n", True),
-        ({"additional_outputs": []}, "No additional_outputs produced\n", True),
-        ({"additional_outputs": ["all"]}, "No additional_outputs produced\n", False),
+        ({"additional_outputs": ["all"], "mandatory_outputs": []}, "1\n2\n", True),
+        (
+            {
+                "additional_outputs": ["selective_editing_test1"],
+                "mandatory_outputs": [],
+            },
+            "1\n",
+            True,
+        ),
+        (
+            {
+                "additional_outputs": ["selective_editing_test2"],
+                "mandatory_outputs": [],
+            },
+            "2\n",
+            True,
+        ),
+        (
+            {"additional_outputs": [], "mandatory_outputs": []},
+            "No additional_outputs produced\n",
+            True,
+        ),
+        (
+            {"additional_outputs": ["all"], "mandatory_outputs": []},
+            "No additional_outputs produced\n",
+            False,
+        ),
         (
             {
                 "additional_outputs": [
@@ -77,7 +108,8 @@ def test_output(capsys, function_mapper, inp, expected, selective_editing):
                     "test2",
                     "selective_editing_test1",
                     "selective_editing_test2",
-                ]
+                ],
+                "mandatory_outputs": [],
             },
             "1\n2\n",
             True,
@@ -95,12 +127,19 @@ def test_raise_errors(function_mapper):
     """Test if error is raised when user doesn't pass a list or passes a
     function which does not link to a function"""
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         get_additional_outputs(
-            {"additional_outputs": "not_a_list"}, function_mapper, pd.DataFrame()
+            {
+                "additional_outputs": "not_a_list",
+                "mandatory_outputs": "also_not_a_list",
+            },
+            function_mapper,
+            pd.DataFrame(),
         )
 
     with pytest.raises(ValueError):
         get_additional_outputs(
-            {"additional_outputs": ["test3"]}, function_mapper, pd.DataFrame()
+            {"additional_outputs": ["test3"], "mandatory_outputs": []},
+            function_mapper,
+            pd.DataFrame(),
         )
