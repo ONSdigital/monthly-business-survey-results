@@ -577,7 +577,7 @@ def convert_nil_values(
     nil_values_mask = df[status_col].isin(nil_values)
 
     warning_mask = nil_values_mask & (
-        ~df[target_col].isna() & df[target_col] != convert_to
+        df[target_col].notna() & df[target_col] != convert_to
     )
 
     logging.info(
