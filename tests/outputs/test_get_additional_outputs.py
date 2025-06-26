@@ -36,23 +36,23 @@ def se_function_mapper():
 @pytest.mark.parametrize(
     "inp, expected, selective_editing",
     [
-        # testing additional outputs and no mandatory outputs
-        ({"additional_outputs": ["all"], "mandatory_outputs": []}, "1\n2\n", False),
-        ({"additional_outputs": ["test1"], "mandatory_outputs": []}, "1\n", False),
-        ({"additional_outputs": ["test2"], "mandatory_outputs": []}, "2\n", False),
+        # testing optional outputs and no mandatory outputs
+        ({"optional_outputs": ["all"], "mandatory_outputs": []}, "1\n2\n", False),
+        ({"optional_outputs": ["test1"], "mandatory_outputs": []}, "1\n", False),
+        ({"optional_outputs": ["test2"], "mandatory_outputs": []}, "2\n", False),
         (
-            {"additional_outputs": [], "mandatory_outputs": []},
+            {"optional_outputs": [], "mandatory_outputs": []},
             "No additional_outputs produced\n",
             False,
         ),
         (
-            {"additional_outputs": ["all"], "mandatory_outputs": []},
+            {"optional_outputs": ["all"], "mandatory_outputs": []},
             "No additional_outputs produced\n",
             True,
         ),
         (
             {
-                "additional_outputs": [
+                "optional_outputs": [
                     "test1",
                     "test2",
                     "selective_editing_test1",
@@ -63,27 +63,27 @@ def se_function_mapper():
             "1\n2\n",
             False,
         ),
-        # testing mandatory outputs and no additional outputs
+        # testing mandatory outputs and no optional outputs
         (
-            {"additional_outputs": [], "mandatory_outputs": ["test1", "test2"]},
+            {"optional_outputs": [], "mandatory_outputs": ["test1", "test2"]},
             "1\n2\n",
             False,
         ),
-        ({"additional_outputs": [], "mandatory_outputs": ["test1"]}, "1\n", False),
-        ({"additional_outputs": [], "mandatory_outputs": ["test2"]}, "2\n", False),
-        # testing a mix of both mandatory and additional outputs
+        ({"optional_outputs": [], "mandatory_outputs": ["test1"]}, "1\n", False),
+        ({"optional_outputs": [], "mandatory_outputs": ["test2"]}, "2\n", False),
+        # testing a mix of both mandatory and optional outputs
         (
-            {"additional_outputs": ["test1"], "mandatory_outputs": ["test2"]},
-            "1\n2\n",
-            False,
-        ),
-        (
-            {"additional_outputs": ["test2"], "mandatory_outputs": ["test1"]},
+            {"optional_outputs": ["test1"], "mandatory_outputs": ["test2"]},
             "1\n2\n",
             False,
         ),
         (
-            {"additional_outputs": ["all"], "mandatory_outputs": ["test2"]},
+            {"optional_outputs": ["test2"], "mandatory_outputs": ["test1"]},
+            "1\n2\n",
+            False,
+        ),
+        (
+            {"optional_outputs": ["all"], "mandatory_outputs": ["test2"]},
             "1\n2\n",
             False,
         ),
@@ -99,11 +99,11 @@ def test_output(capsys, function_mapper, inp, expected, selective_editing):
 @pytest.mark.parametrize(
     "inp, expected, selective_editing",
     [
-        # Testing additional outputs and empty mandatory outputs
-        ({"additional_outputs": ["all"], "mandatory_outputs": []}, "1\n2\n", True),
+        # Testing optional outputs and empty mandatory outputs
+        ({"optional_outputs": ["all"], "mandatory_outputs": []}, "1\n2\n", True),
         (
             {
-                "additional_outputs": ["selective_editing_test1"],
+                "optional_outputs": ["selective_editing_test1"],
                 "mandatory_outputs": [],
             },
             "1\n",
@@ -111,25 +111,25 @@ def test_output(capsys, function_mapper, inp, expected, selective_editing):
         ),
         (
             {
-                "additional_outputs": ["selective_editing_test2"],
+                "optional_outputs": ["selective_editing_test2"],
                 "mandatory_outputs": [],
             },
             "2\n",
             True,
         ),
         (
-            {"additional_outputs": [], "mandatory_outputs": []},
+            {"optional_outputs": [], "mandatory_outputs": []},
             "No additional_outputs produced\n",
             True,
         ),
         (
-            {"additional_outputs": ["all"], "mandatory_outputs": []},
+            {"optional_outputs": ["all"], "mandatory_outputs": []},
             "No additional_outputs produced\n",
             False,
         ),
         (
             {
-                "additional_outputs": [
+                "optional_outputs": [
                     "test1",
                     "test2",
                     "selective_editing_test1",
@@ -140,10 +140,10 @@ def test_output(capsys, function_mapper, inp, expected, selective_editing):
             "1\n2\n",
             True,
         ),
-        # Testing mandatory outputs and empty additional outputs
+        # Testing mandatory outputs and empty optional outputs
         (
             {
-                "additional_outputs": [],
+                "optional_outputs": [],
                 "mandatory_outputs": ["selective_editing_test1"],
             },
             "1\n",
@@ -151,7 +151,7 @@ def test_output(capsys, function_mapper, inp, expected, selective_editing):
         ),
         (
             {
-                "additional_outputs": [],
+                "optional_outputs": [],
                 "mandatory_outputs": ["selective_editing_test2"],
             },
             "2\n",
@@ -159,7 +159,7 @@ def test_output(capsys, function_mapper, inp, expected, selective_editing):
         ),
         (
             {
-                "additional_outputs": [],
+                "optional_outputs": [],
                 "mandatory_outputs": [
                     "selective_editing_test1",
                     "selective_editing_test2",
@@ -168,10 +168,10 @@ def test_output(capsys, function_mapper, inp, expected, selective_editing):
             "1\n2\n",
             True,
         ),
-        # Testing a mix of both mandatory and additional outputs
+        # Testing a mix of both mandatory and optional outputs
         (
             {
-                "additional_outputs": ["selective_editing_test1"],
+                "optional_outputs": ["selective_editing_test1"],
                 "mandatory_outputs": ["selective_editing_test2"],
             },
             "1\n2\n",
@@ -179,7 +179,7 @@ def test_output(capsys, function_mapper, inp, expected, selective_editing):
         ),
         (
             {
-                "additional_outputs": ["selective_editing_test2"],
+                "optional_outputs": ["selective_editing_test2"],
                 "mandatory_outputs": ["selective_editing_test1"],
             },
             "1\n2\n",
@@ -187,7 +187,7 @@ def test_output(capsys, function_mapper, inp, expected, selective_editing):
         ),
         (
             {
-                "additional_outputs": ["all"],
+                "optional_outputs": ["all"],
                 "mandatory_outputs": ["selective_editing_test1"],
             },
             "1\n2\n",
@@ -209,7 +209,7 @@ def test_raise_errors(function_mapper):
     with pytest.raises(TypeError):
         get_additional_outputs(
             {
-                "additional_outputs": "not_a_list",
+                "optional_outputs": "not_a_list",
                 "mandatory_outputs": "also_not_a_list",
             },
             function_mapper,
@@ -218,7 +218,7 @@ def test_raise_errors(function_mapper):
 
     with pytest.raises(ValueError):
         get_additional_outputs(
-            {"additional_outputs": ["test3"], "mandatory_outputs": []},
+            {"optional_outputs": ["test3"], "mandatory_outputs": []},
             function_mapper,
             pd.DataFrame(),
         )

@@ -49,13 +49,13 @@ def get_additional_outputs(
     Examples
     --------
     >> example_function = print("Hello world")
-    >> config = {"additional_outputs" : ["output_name"]}
+    >> config = {"optional_outputs" : ["output_name"]}
     >> function_mapper = {"output_name" : example_function}
     >> get_additional_outputs(config, function_mapper)
     >>
     >>
     >> example_function = function(argA, argB)
-    >> config = {"additional_outputs" : ["example_output"],
+    >> config = {"optional_outputs" : ["example_output"],
     >>           "argA": "valueA",
     >>           "argB": "valueB"}
     >> function_mapper = {"example_output" : example_function}
@@ -63,7 +63,7 @@ def get_additional_outputs(
 
     """
     additional_outputs = dict()
-    for config_list_name in ["additional_outputs", "mandatory_outputs"]:
+    for config_list_name in ["optional_outputs", "mandatory_outputs"]:
         if not isinstance(config[config_list_name], list):
             raise TypeError(
                 f"""
@@ -74,7 +74,7 @@ def get_additional_outputs(
                 """  # noqa: E272
             )
 
-    if config["additional_outputs"] == ["all"]:
+    if config["optional_outputs"] == ["all"]:
         # Dont have to worry about mandatory outputs here, all functions from mapper
         # will run. mandatory and optional outputs should be defined in the mapper
         functions_to_run = function_mapper.keys()
@@ -83,7 +83,7 @@ def get_additional_outputs(
         # If "all" is not specified, use the provided list combining with
         # mandatory outputs
         functions_to_run = sorted(
-            list(set(config["additional_outputs"]) | set(config["mandatory_outputs"]))
+            list(set(config["optional_outputs"]) | set(config["mandatory_outputs"]))
         )
 
     if selective_editing:
