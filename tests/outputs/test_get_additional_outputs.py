@@ -36,20 +36,54 @@ def se_function_mapper():
 @pytest.mark.parametrize(
     "inp, expected, selective_editing",
     [
-        ({"additional_outputs": ["all"]}, "1\n2\n", False),
-        ({"additional_outputs": ["test1"]}, "1\n", False),
-        ({"additional_outputs": ["test2"]}, "2\n", False),
-        ({"additional_outputs": []}, "No additional_outputs produced\n", False),
-        ({"additional_outputs": ["all"]}, "No additional_outputs produced\n", True),
+        # testing optional outputs and no mandatory outputs
+        ({"optional_outputs": ["all"], "mandatory_outputs": []}, "1\n2\n", False),
+        ({"optional_outputs": ["test1"], "mandatory_outputs": []}, "1\n", False),
+        ({"optional_outputs": ["test2"], "mandatory_outputs": []}, "2\n", False),
+        (
+            {"optional_outputs": [], "mandatory_outputs": []},
+            "No additional_outputs produced\n",
+            False,
+        ),
+        (
+            {"optional_outputs": ["all"], "mandatory_outputs": []},
+            "No additional_outputs produced\n",
+            True,
+        ),
         (
             {
-                "additional_outputs": [
+                "optional_outputs": [
                     "test1",
                     "test2",
                     "selective_editing_test1",
                     "selective_editing_test2",
-                ]
+                ],
+                "mandatory_outputs": [],
             },
+            "1\n2\n",
+            False,
+        ),
+        # testing mandatory outputs and no optional outputs
+        (
+            {"optional_outputs": [], "mandatory_outputs": ["test1", "test2"]},
+            "1\n2\n",
+            False,
+        ),
+        ({"optional_outputs": [], "mandatory_outputs": ["test1"]}, "1\n", False),
+        ({"optional_outputs": [], "mandatory_outputs": ["test2"]}, "2\n", False),
+        # testing a mix of both mandatory and optional outputs
+        (
+            {"optional_outputs": ["test1"], "mandatory_outputs": ["test2"]},
+            "1\n2\n",
+            False,
+        ),
+        (
+            {"optional_outputs": ["test2"], "mandatory_outputs": ["test1"]},
+            "1\n2\n",
+            False,
+        ),
+        (
+            {"optional_outputs": ["all"], "mandatory_outputs": ["test2"]},
             "1\n2\n",
             False,
         ),
@@ -65,19 +99,96 @@ def test_output(capsys, function_mapper, inp, expected, selective_editing):
 @pytest.mark.parametrize(
     "inp, expected, selective_editing",
     [
-        ({"additional_outputs": ["all"]}, "1\n2\n", True),
-        ({"additional_outputs": ["selective_editing_test1"]}, "1\n", True),
-        ({"additional_outputs": ["selective_editing_test2"]}, "2\n", True),
-        ({"additional_outputs": []}, "No additional_outputs produced\n", True),
-        ({"additional_outputs": ["all"]}, "No additional_outputs produced\n", False),
+        # Testing optional outputs and empty mandatory outputs
+        ({"optional_outputs": ["all"], "mandatory_outputs": []}, "1\n2\n", True),
         (
             {
-                "additional_outputs": [
+                "optional_outputs": ["selective_editing_test1"],
+                "mandatory_outputs": [],
+            },
+            "1\n",
+            True,
+        ),
+        (
+            {
+                "optional_outputs": ["selective_editing_test2"],
+                "mandatory_outputs": [],
+            },
+            "2\n",
+            True,
+        ),
+        (
+            {"optional_outputs": [], "mandatory_outputs": []},
+            "No additional_outputs produced\n",
+            True,
+        ),
+        (
+            {"optional_outputs": ["all"], "mandatory_outputs": []},
+            "No additional_outputs produced\n",
+            False,
+        ),
+        (
+            {
+                "optional_outputs": [
                     "test1",
                     "test2",
                     "selective_editing_test1",
                     "selective_editing_test2",
-                ]
+                ],
+                "mandatory_outputs": [],
+            },
+            "1\n2\n",
+            True,
+        ),
+        # Testing mandatory outputs and empty optional outputs
+        (
+            {
+                "optional_outputs": [],
+                "mandatory_outputs": ["selective_editing_test1"],
+            },
+            "1\n",
+            True,
+        ),
+        (
+            {
+                "optional_outputs": [],
+                "mandatory_outputs": ["selective_editing_test2"],
+            },
+            "2\n",
+            True,
+        ),
+        (
+            {
+                "optional_outputs": [],
+                "mandatory_outputs": [
+                    "selective_editing_test1",
+                    "selective_editing_test2",
+                ],
+            },
+            "1\n2\n",
+            True,
+        ),
+        # Testing a mix of both mandatory and optional outputs
+        (
+            {
+                "optional_outputs": ["selective_editing_test1"],
+                "mandatory_outputs": ["selective_editing_test2"],
+            },
+            "1\n2\n",
+            True,
+        ),
+        (
+            {
+                "optional_outputs": ["selective_editing_test2"],
+                "mandatory_outputs": ["selective_editing_test1"],
+            },
+            "1\n2\n",
+            True,
+        ),
+        (
+            {
+                "optional_outputs": ["all"],
+                "mandatory_outputs": ["selective_editing_test1"],
             },
             "1\n2\n",
             True,
@@ -95,12 +206,19 @@ def test_raise_errors(function_mapper):
     """Test if error is raised when user doesn't pass a list or passes a
     function which does not link to a function"""
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         get_additional_outputs(
-            {"additional_outputs": "not_a_list"}, function_mapper, pd.DataFrame()
+            {
+                "optional_outputs": "not_a_list",
+                "mandatory_outputs": "also_not_a_list",
+            },
+            function_mapper,
+            pd.DataFrame(),
         )
 
     with pytest.raises(ValueError):
         get_additional_outputs(
-            {"additional_outputs": ["test3"]}, function_mapper, pd.DataFrame()
+            {"optional_outputs": ["test3"], "mandatory_outputs": []},
+            function_mapper,
+            pd.DataFrame(),
         )

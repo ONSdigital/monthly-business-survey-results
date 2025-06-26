@@ -1,7 +1,10 @@
 import pandas as pd
 
 
-def produce_qa_output(config: dict, post_win_df: pd.DataFrame) -> pd.DataFrame:
+def produce_qa_output(
+    additional_outputs_df: pd.DataFrame,
+    **config,
+) -> pd.DataFrame:
     """Produces an output with required columns, and with total weight and
     weighted adjusted value calculated.
 
@@ -62,14 +65,15 @@ def produce_qa_output(config: dict, post_win_df: pd.DataFrame) -> pd.DataFrame:
     for col in requested_columns:
         cols_from_config.append(config.get(col, col))
 
-    post_win_df["total weight (A*G*O)"] = (
-        post_win_df[config["design_weight"]]
-        * post_win_df[config["calibration_factor"]]
-        * post_win_df["outlier_weight"]
+    additional_outputs_df["total weight (A*G*O)"] = (
+        additional_outputs_df[config["design_weight"]]
+        * additional_outputs_df[config["calibration_factor"]]
+        * additional_outputs_df["outlier_weight"]
     )
 
-    post_win_df["weighted adjusted value"] = (
-        post_win_df[config["target"]] * post_win_df["total weight (A*G*O)"]
+    additional_outputs_df["weighted adjusted value"] = (
+        additional_outputs_df[config["target"]]
+        * additional_outputs_df["total weight (A*G*O)"]
     )
 
-    return post_win_df[cols_from_config]
+    return additional_outputs_df[cols_from_config]

@@ -46,6 +46,7 @@ def test_config():
         "form_id_spp": "form_type_spp",
         "l_value_question_no": "question_no",
         "filter": None,
+        "mandatory_outputs": ["produce_qa_output"],
     }
 
 
@@ -59,8 +60,8 @@ class TestProduceQaOutput:
         expected_output = output_df
 
         actual_output = produce_qa_output(
-            config=test_config,
-            post_win_df=input_df,
+            additional_outputs_df=input_df,
+            **test_config,
         )
 
         assert_frame_equal(
@@ -88,8 +89,8 @@ class TestProduceQaOutput:
         expected_output = output_df
 
         actual_output = produce_qa_output(
-            config=test_config,
-            post_win_df=input_df,
+            additional_outputs_df=input_df,
+            **test_config,
         )
 
         assert_frame_equal(

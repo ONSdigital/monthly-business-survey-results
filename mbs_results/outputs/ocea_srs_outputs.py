@@ -2,7 +2,7 @@ import pandas as pd
 
 
 def produce_ocea_srs_outputs(
-    additional_outputs_df: pd.DataFrame, config: dict
+    additional_outputs_df: pd.DataFrame, **config: dict
 ) -> pd.DataFrame:
     """Produces outputs for OCEA/SRS, pulling SIC from the config
 
