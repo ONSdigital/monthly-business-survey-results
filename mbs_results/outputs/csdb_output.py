@@ -23,7 +23,9 @@ def create_csdb_output(
         thousands. Only returns aggregations of month and not higher periods.
     """
 
-    cdid_mapping = pd.read_csv(cdid_data_path)
+    cdid_mapping = pd.read_csv(
+        cdid_data_path, dtype={"questioncode": int, "classification": str}
+    )
 
     df_combined = pd.merge(
         additional_outputs_df,
