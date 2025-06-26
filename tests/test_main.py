@@ -32,7 +32,8 @@ test_config = {
     "snapshot_alternate_path_OPTIONAL": None,
     "state": "frozen",
     "devolved_nations": ["Scotland", "Wales"],
-    "additional_outputs": ["produce_qa_output"],
+    "additional_outputs": ["all"],
+    "cdid_data_path": "tests/data/outputs/csdb_output/cdid_mapping.csv",
 }
 
 
