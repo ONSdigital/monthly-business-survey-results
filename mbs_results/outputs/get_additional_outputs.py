@@ -71,7 +71,7 @@ def get_additional_outputs(
                 ["all"] to get all outputs\n
                 [] to get only mandatory outputs (defined in dev config) (\n
                 or a list with the outputs, e.g. ["output_1", "output_2"]
-                """  # noqa: E272
+                """
             )
 
     if config["optional_outputs"] == ["all"]:
