@@ -207,7 +207,7 @@ def devolved_outputs(
     question_dictionary: dict,
     devolved_nation: str,
     local_unit_data: pd.DataFrame,
-    devolved_questions: list = [11, 12, 40, 49, 110],  # 11, 12 might be 10, 11?
+    devolved_questions: list = [11, 12, 40, 49, 110],
     agg_function: str = "sum",  # potential remove, here for testing
 ) -> pd.DataFrame:
     """
@@ -260,6 +260,23 @@ def devolved_outputs(
 
     dict_agg_funcs = dict(zip(pivot_values, pivot_agg_functions))
 
+    start_end_dates = df[df['questioncode'].isin([11, 12])][
+        ['reference', 'period', 'questioncode', 'adjustedresponse']
+    ]
+    
+    start_end_pivot = (
+        start_end_dates.pivot_table(
+            index=['reference', 'period'],
+            columns='questioncode',
+            values='adjustedresponse',
+            aggfunc='first'
+        )
+        .rename(columns={11: 'start_date', 12:'end_date'})
+        .reset_index()
+    )
+    
+    df = df[~df["questioncode"].isin([11, 12])]
+
     df_pivot = pd.pivot_table(
         df,
         values=pivot_values,
@@ -272,12 +289,12 @@ def devolved_outputs(
     df_pivot = df_pivot[sorted(df_pivot.columns, key=split_func)]
     df_pivot.reset_index(inplace=True)
     
-    #Fill missing values of 'Name1' where imputed flag == d before merging
+    # #Fill missing values of 'Name1' where imputed flag == d before merging
     ru_name_mapping = local_unit_data.groupby("ruref")["Name1"].first()
     mask_missing_name = (df["entname1"].isna() & df["reference"].isin(ru_name_mapping.index))
     df.loc[mask_missing_name, "entname1"] = df.loc[mask_missing_name, "reference"].map(ru_name_mapping)
 
-    # adding extra columns from df
+    # # adding extra columns from df
     percent_devolved_nation_col = f"percentage_{devolved_nation.lower()}"
 
     extra_columns = [
@@ -313,6 +330,13 @@ def devolved_outputs(
         on=merge_keys,
         how="left",
         suffixes=("", "_extra"),
+    )
+    
+    df_pivot = pd.merge(
+        df_pivot,
+        start_end_pivot,
+        on=["reference", "period"],
+        how="left"
     )
 
     # Drop the percentage column with the '_extra' suffix if it exists
