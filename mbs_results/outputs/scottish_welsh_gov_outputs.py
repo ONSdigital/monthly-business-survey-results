@@ -72,12 +72,14 @@ def filter_and_calculate_percent_devolved(
     )
 
     # Sum total employment by reference from the pipeline data
-    total_employment = (
-        df.groupby("reference")[froempment_col]
-        .sum()
-        .reset_index()
-        .rename(columns={froempment_col: "total_employment"})
-    )
+    total_employment = df[['reference', 'froempment']].drop_duplicates().reset_index(drop=True).rename(columns={froempment_col: "total_employment"})
+    
+    #(
+    #     df.groupby("reference")[froempment_col]
+    #     .sum()
+    #     .reset_index()
+    #     .rename(columns={froempment_col: "total_employment"})
+    # )
 
     # Merge the two Dataframes and calculate the percentage
     merged_df = pd.merge(
@@ -95,7 +97,7 @@ def filter_and_calculate_percent_devolved(
         * 100
     ).round(2)
     
-    merged_df[percent_col] = merged_df[percent_col].clip(upper=100)
+    # merged_df[percent_col] = merged_df[percent_col].clip(upper=100)
 
     # Add the percentage column to the original DataFrame
     df = df.merge(
@@ -185,8 +187,8 @@ def output_column_name_mapping():
         "sizeband": "band",
         "imputed_and_derived_flag": "imputed and derived flag",
         "statusencoded": "status encoded",
-        "start date": "start date",
-        "end date": "end date",
+        "start_date": "start date",
+        "end_date": "end date",
         "winsorised_value_exports": "returned to exports",
         "adjustedresponse_exports": "adjusted to exports",
         "imputed_and_derived_flag_exports": "imputed and derived flag exports",
@@ -348,7 +350,7 @@ def devolved_outputs(
     existing_desired_order = [col for col in extra_columns if col in df_pivot.columns]
     df_pivot = df_pivot[
         existing_desired_order
-        + [col for col in df_pivot.columns if col not in existing_desired_order]
+        + [col for col in df_pivot.columns if col not in existing_desired_order] 
     ]
 
     # map the column names used in the pipeline to column names in the business template
