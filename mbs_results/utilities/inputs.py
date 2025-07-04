@@ -155,7 +155,7 @@ def read_json_wrapper(
     filepath: str,
     import_platform: str = "network",
     bucket_name: str = None,
-    **kwargs,        
+    **kwargs,
 ) -> pd.DataFrame:
     """
     Load a JSON file from an S3 bucket or from a network path into a Pandas
@@ -198,7 +198,7 @@ def read_json_wrapper(
     if import_platform == "network":
         df = pd.read_json(filepath, **kwargs)
         return df
-    
+
     raise Exception("platform must either be 's3' or 'network'")
 
 
