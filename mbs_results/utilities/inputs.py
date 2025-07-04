@@ -6,7 +6,7 @@ from typing import List
 import boto3
 import pandas as pd
 import raz_client
-from rdsa_utils.cdp.helpers.s3_utils import load_csv
+from rdsa_utils.cdp.helpers.s3_utils import load_csv, load_json
 
 from mbs_results import logger
 from mbs_results.utilities.merge_two_config_files import merge_two_config_files
@@ -148,6 +148,57 @@ def read_csv_wrapper(
         df = pd.read_csv(filepath, **kwargs)
         return df
 
+    raise Exception("platform must either be 's3' or 'network'")
+
+
+def read_json_wrapper(
+    filepath: str,
+    import_platform: str = "network",
+    bucket_name: str = None,
+    **kwargs,        
+) -> pd.DataFrame:
+    """
+    Load a JSON file from an S3 bucket or from a network path into a Pandas
+    DataFrame.
+
+    Parameters
+    ----------
+    filepath
+        The key (full path and filename) of the JSON file in the S3 bucket or
+        in the network.
+    import_platform : str
+        Platform to import from. Must be either 's3' or 'network'
+    bucket_name : str, optional
+        The name of the S3 bucket,needed when `import_platform` is set to
+         `s3`. The default is None.
+    kwargs
+        Additional keyword arguments to pass to the `pd.read_json` method.
+
+    Returns
+    -------
+    pd.DataFrame
+        Pandas DataFrame containing the data from the JSON file.
+
+    Raises
+    ------
+    Exception
+        If import_platform is not either be 's3' or 'network'.
+    """
+    if import_platform == "s3":
+        client = boto3.client("s3")
+        raz_client.configure_ranger_raz(
+            client, ssl_file="/etc/pki/tls/certs/ca-bundle.crt"
+        )
+        df = load_json(
+            client=client, bucket_name=bucket_name, filepath=filepath, **kwargs
+        )
+
+        return df
+
+    if import_platform == "network":
+        df = pd.read_json(filepath, **kwargs)
+        return df
+    
     raise Exception("platform must either be 's3' or 'network'")
 
 
