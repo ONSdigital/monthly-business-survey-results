@@ -55,7 +55,7 @@ def filter_and_calculate_percent_devolved(
         * df["calibration_factor"]
     )
     # Calculate froempment ratio:
-    # (sum of froempment in filtered LU data) / (sum of froempment in df)
+    # (sum of froempment in filtered LU data) / (froempment in df)
     # Filter LU data for the devolved nation region
     region_col = "region"
     froempment_col = "froempment"
@@ -65,27 +65,25 @@ def filter_and_calculate_percent_devolved(
     local_unit_data["reference"] = local_unit_data["ruref"]
     regional_employment = (
         local_unit_data[local_unit_data[region_col] == region_code]
-        .groupby("reference")[employment_col]
+        .groupby(["reference", "period"])[employment_col]
         .sum()
         .reset_index()
         .rename(columns={employment_col: f"{employment_col}_{devolved_nation}"})
     )
 
     # Sum total employment by reference from the pipeline data
-    total_employment = df[['reference', 'froempment']].drop_duplicates().reset_index(drop=True).rename(columns={froempment_col: "total_employment"})
-    
-    #(
-    #     df.groupby("reference")[froempment_col]
-    #     .sum()
-    #     .reset_index()
-    #     .rename(columns={froempment_col: "total_employment"})
-    # )
+    total_employment = (
+        df[['reference', 'period', 'froempment']]
+        .drop_duplicates()
+        .reset_index(drop=True)
+        .rename(columns={froempment_col: "total_employment"})
+    )
 
     # Merge the two Dataframes and calculate the percentage
     merged_df = pd.merge(
         regional_employment,
         total_employment,
-        on="reference",
+        on=["reference", "period"],
         how="left",
     )
 
@@ -101,8 +99,8 @@ def filter_and_calculate_percent_devolved(
 
     # Add the percentage column to the original DataFrame
     df = df.merge(
-        merged_df[["reference", f"percentage_{devolved_nation}"]],
-        on="reference",
+        merged_df[["reference", "period", f"percentage_{devolved_nation}"]],
+        on=["reference", "period"],
         how="left",
     )
 
