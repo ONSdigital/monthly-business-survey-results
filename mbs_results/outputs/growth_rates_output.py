@@ -23,14 +23,13 @@ def get_growth_rates_output(
         Dataframe containing classification, question number, and cell number, pivoted
         wider on period with adjusted values.
     """
-    
+
     additional_outputs_df["weighted_target"] = (
         additional_outputs_df["adjustedresponse"]
         * additional_outputs_df["design_weight"]
         * additional_outputs_df["outlier_weight"]
         * additional_outputs_df["calibration_factor"]
-        )
-
+    )
 
     input_data = additional_outputs_df[
         [
