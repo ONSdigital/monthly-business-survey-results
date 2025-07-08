@@ -1,9 +1,0 @@
-{
-    "period": [202112, 202112],
-    "reference": [1, 1],
-    "question_no": [40, -999],
-    "returned_value": [999, -999],
-    "adjusted_value": [999, -999],
-    "instance": [999, -999],
-    "type": [1, 2]
-}
