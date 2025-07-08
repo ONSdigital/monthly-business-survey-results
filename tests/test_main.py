@@ -9,6 +9,7 @@ input_path = "tests/data/test_main/input/"
 test_config = {
     "platform": "network",
     "bucket": "",
+    "back_data_format": "json",
     "calibration_group_map_path": input_path
     + "test_cell_no_calibration_group_mapping.csv",
     "classification_values_path": input_path + "test_classification_sic_mapping.csv",
@@ -22,8 +23,9 @@ test_config = {
     "output_path": "tests/data/test_main/output/",
     "population_prefix": "test_universe009",
     "sample_prefix": "test_finalsel009",
-    "back_data_qv_path": input_path + "test_json_qv.json",
-    "back_data_cp_path": input_path + "test_json_cp.json",
+    "back_data_qv_path": input_path + "test_qv_009_202112.csv",
+    "back_data_cp_path": input_path + "test_cp_009_202112.csv",
+    "back_data_qv_cp_json_path": input_path + "test_json_backdata.json",
     "back_data_finalsel_path": input_path + "test_finalsel009_202112",
     "lu_path": input_path + "ludets009_202303",
     "sic": "frosic2007",
