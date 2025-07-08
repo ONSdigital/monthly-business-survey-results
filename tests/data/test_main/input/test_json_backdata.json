@@ -1,0 +1,35 @@
+{
+    "snapshot_id": "test_back_data",
+    "contributors": [
+        {
+            "period": 202112,
+            "reference": 1,
+            "form_type": "T111G",
+            "sic92": 45310,
+            "error_mkr": "O",
+            "response_type": 1
+        }
+    ],
+    "responses": [
+        {
+            "period": 202112,
+            "reference": 1,
+            "question_no": 40,
+            "returned_value": 999,
+            "adjusted_value": 999,
+            "instance": 999,
+            "type": 1,
+            "imputationmarker": "r" 
+        },
+        {
+            "period": 202112,
+            "reference": 1,
+            "question_no": -999,
+            "returned_value": -999,
+            "adjusted_value": -999,
+            "instance": -999,
+            "type": 1,
+            "imputationmarker": "c"
+        }
+    ]
+}
