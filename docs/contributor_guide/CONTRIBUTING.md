@@ -123,7 +123,7 @@ The HTML report can be accessed at `htmlcov/index.html`.
 3.	Create a new pull request for your branch, and, once reviewed by somebody, merge it into main.
 
 ### Creating a new tag
-4.	From the main branch, you need to use the following git commands to create a new tag:
+4.	Navigate to the main branch and pull the latest changes, then use the following git commands to create a new tag:
 
       `git tag -a v<version_num> -m "v<version_num>"` – for example, `git tag -a v0.1.4 -m “v0.1.4”`
 
