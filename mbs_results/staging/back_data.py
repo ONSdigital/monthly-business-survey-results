@@ -7,6 +7,7 @@ from mbs_results.staging.data_cleaning import (
     create_form_type_spp_column,
     enforce_datatypes,
 )
+from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.inputs import read_colon_separated_file, read_csv_wrapper
 from mbs_results.utilities.utils import convert_column_to_datetime
 
@@ -85,14 +86,24 @@ def read_back_data(config: dict) -> pd.DataFrame:
         Back data with all column as in source, period is converted to datetime.
     """
 
-    qv_df = read_csv_wrapper(
-        config["back_data_qv_path"], config["platform"], config["bucket"]
-    ).drop(columns=["cell_no", "classification"], errors="ignore")
-    qv_df[config["period"]] = convert_column_to_datetime(qv_df[config["period"]])
+    if config["back_data_format"] == "json":
+        cp_df, qv_df = get_dfs_from_spp(
+            config["back_data_qv_cp_json_path"], config["platform"], config["bucket"]
+        )
 
-    cp_df = read_csv_wrapper(
-        config["back_data_cp_path"], config["platform"], config["bucket"]
-    ).drop(columns=["cell_no", "classification"], errors="ignore")
+    elif config["back_data_format"] == "csv":
+        qv_df = read_csv_wrapper(
+            config["back_data_qv_path"], config["platform"], config["bucket"]
+        ).drop(columns=["cell_no", "classification"], errors="ignore")
+
+        cp_df = read_csv_wrapper(
+            config["back_data_cp_path"], config["platform"], config["bucket"]
+        ).drop(columns=["cell_no", "classification"], errors="ignore")
+
+    else:
+        raise Exception("back_data_format must be either 'csv' or 'json'")
+
+    qv_df[config["period"]] = convert_column_to_datetime(qv_df[config["period"]])
     cp_df[config["period"]] = convert_column_to_datetime(cp_df[config["period"]])
 
     finalsel = read_colon_separated_file(

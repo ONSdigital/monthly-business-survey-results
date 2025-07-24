@@ -5,11 +5,10 @@
 | bucket | The path to the bucket. | string | Any filepath. |
 | calibration_group_map_path | The filepath to the calibration group mapping file. | string | Any filepath. |
 | classification_values_path | The filepath to the file containing SIC classification values. | string | Any filepath. |
-| folder_path | The filepath for the folder containing input data (note: the snapshot data folder should be specified in the `idbr_folder_path` key. | string | Any filepath. |
-| idbr_folder_path | The path to the folder containing the snapshot. | string | Any filepath. |
+| snapshot_file_path | The full filepath to the snapshot data | string | Any filepath. |
+| idbr_folder_path | The path to the folder containing the IDBR data. | string | Any filepath. |
 | l_values_path | The filepath to the file containing l values. | string | Any filepath. |
 | manual_constructions_path | The filepath to the file containing manual constructions data. | string | Any filepath. |
-| mbs_file_name | The filepath to the snapshot file. | string | Any filepath. |
 | output_path | The filepath where outputs should be saved to. | string | Any filepath. |
 | population_path | The filepath to the file containing population frame data. | string | Any filepath. |
 | back_data_qv_path | The filepath for the file containing QV backdata. | string | Any filepath. |
@@ -19,6 +18,7 @@
 | threshold_filepath | The filepath for the data containing thresholds for selective editing. | string | Any filepath. |
 | current_period | The most recent period to include in the outputs (same as above). | int | Any int in the form `yyyymm`. |
 | revision_window | The number of months to use as a revision window. | int | Any int in the form `mm` or `m` (does not need to be zero-padded). |
+| optional_outputs | A list of optional outputs to produce after the pipeline has run. | `[]` | list | Any of the outputs listed in `mbs_results/outputs/produce_additional_outputs.py` within the `produce_additional_outputs` function which can be produced. |
 
 
 ## Guidance for use
@@ -52,7 +52,7 @@ As an end user, you will only need to change the user config (named `config_user
 | master_column_type_dict | Defines the expected data types for various columns. | `{"reference": "int", "period": "date", "response": "str", "questioncode": "int", "adjustedresponse": "float", "frozensic": "str", "frozenemployees": "int", "frozenturnover": "float", "cellnumber": "int", "formtype": "str", "status": "str", "statusencoded": "int", "frosic2007": "str", "froempment": "int", "frotover": "float", "cell_no": "int"}` | dict | Any dictionary in the format `{"column_name": "data_type"}` where column name is a valid column and data_type is one of `"bool"`, `"int"`, `"str"` or `"float"`. Both key and value should be enclosed in quotation marks. |
 | contributors_keep_cols | Columns to keep for contributors. | `["period", "reference", "status", "statusencoded"]` | list | A list of valid column names. |
 | responses_keep_cols | Columns to keep for responses. | `["adjustedresponse", "period", "questioncode", "reference", "response"]` | list | A list of valid column names. |
-| finalsel_keep_cols | Columns to keep for final selection. | `["formtype", "cell_no", "froempment", "frosic2007", "frotover", "period", "reference"]` | list | A list of valid column names. |
+| finalsel_keep_cols | Columns to keep for final selection. | `["formtype", "cell_no", "froempment", "frosic2007", "frotover", "period", "reference", "entname1"]` | list | A list of valid column names. |
 | temporarily_remove_cols | Columns to temporarily remove. | [] | list | A list of valid column names. |
 | non_sampled_strata | Non-sampled strata values. | `["5141", "5142", "5143", "5371", "5372", "5373", "5661", "5662", "5663"]` | list | A list of cell numbers/strata. |
 | population_column_names | Column names in the population frame. | `["reference", "checkletter", "inqcode", "entref", "wowentref", "frosic2003", "rusic2003", "frosic2007", "rusic2007", "froempees", "employees", "froempment", "employment", "froFTEempt", "FTEempt", "frotover", "turnover", "entrepmkr", "legalstatus", "inqstop", "entzonemkr", "region", "live_lu", "live_vat", "live_paye", "immfoc", "ultfoc", "cell_no", "selmkr", "inclexcl" ]` | list | A list of valid column names in the population frame dataset. |
@@ -63,7 +63,7 @@ As an end user, you will only need to change the user config (named `config_user
 | idbr_to_spp | Mapping between IDBR and SPP. | `{"201": 9, "202": 9, "203": 10, "204": 10, "205": 11, "216": 11, "106": 12, "111": 12, "117": 13, "167": 13, "123": 14, "173": 14, "817": 15, "867": 15, "823": 16, "873": 16}` | dict | A dictionary in the format `{"IDBR_value": SPP_value}` where IDBR value is a string and SPP value is an int. |
 | csw_to_spp_columns | Mapping of CSW to SPP columns. | `{"returned_value":"response", "adjusted_value":"adjustedresponse", "question_no":"questioncode"}` | dict | A dictionary in the format `{"CSW_col_name": "SPP_col_name"}`. |
 | type_to_imputation_marker | A dictionary mapper mapping type to imputation marker. | `{"0": "r", "1": "r", "2": "derived", "3": "fir", "4": "bir", "5": "c", "6": "mc", "10": "r", "11": "r", "12": "derived", "13": "fir" }` | dict | A dictionary in the format `{"type":"imputation_marker"}` where imputation marker is a value found in the imputation_marker_col. |
-| additional_outputs | A list of additional outputs to produce after the pipeline has run. | [] | list | Any of the additional outputs listed in `mbs_results/outputs/produce_additional_outputs.py` within the `produce_additional_outputs` function. See below for information on how to generate additional outputs. Currently: `"selective_editing_contributor"`, `"selective_editing_question"`, `"turnover_output"`, `"weighted_adj_val_time_series"`, `"produce_ocea_srs_outputs"`, `"create_imputation_link_output"` or `["all"]` to produce all additional outputs. |
+| mandatory_outputs | A list of mandatory outputs to produce after the pipeline has run. | `["produce_qa_output", "selective_editing_contributors",               "selective_editing_questions"]` | list | Any of the outputs listed in `mbs_results/outputs/produce_additional_outputs.py` within the `produce_additional_outputs` function which must be produced. |
 | form_to_derived_map | A dictionary mapper mapping form type to question number for derived questions | `{"13": [40],"14": [40],"15": [46],"16": [42]}` | dict | A dictionary in the format `{"formtype":["question_no"]}` where each key-value pair represents the form type and question number for each derived question in the data. Note that question number is a list, even if there's only one. |
 ## Usage
 

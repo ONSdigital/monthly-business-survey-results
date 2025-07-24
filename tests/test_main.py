@@ -9,28 +9,33 @@ input_path = "tests/data/test_main/input/"
 test_config = {
     "platform": "network",
     "bucket": "",
+    "back_data_format": "json",
     "calibration_group_map_path": input_path
     + "test_cell_no_calibration_group_mapping.csv",
     "classification_values_path": input_path + "test_classification_sic_mapping.csv",
-    "folder_path": input_path,
+    "snapshot_file_path": input_path + "test_snaphot.json",
     "idbr_folder_path": input_path,
     "l_values_path": input_path
     + "test_classification_question_number_l_value_mapping.csv",
     "manual_constructions_path": input_path + "test_manual_constructions.csv",
     "filter": input_path + "filters.csv",
     "manual_outlier_path": None,
-    "mbs_file_name": "test_snaphot.json",
     "output_path": "tests/data/test_main/output/",
     "population_prefix": "test_universe009",
     "sample_prefix": "test_finalsel009",
     "back_data_qv_path": input_path + "test_qv_009_202112.csv",
     "back_data_cp_path": input_path + "test_cp_009_202112.csv",
+    "back_data_qv_cp_json_path": input_path + "test_json_backdata.json",
     "back_data_finalsel_path": input_path + "test_finalsel009_202112",
-    "sic": "rusic2007",
+    "lu_path": input_path + "ludets009_202303",
+    "sic": "frosic2007",
     "current_period": 202206,
     "revision_window": 6,
     "snapshot_alternate_path_OPTIONAL": None,
     "state": "frozen",
+    "devolved_nations": ["Scotland", "Wales"],
+    "optional_outputs": ["all"],
+    "cdid_data_path": "tests/data/outputs/csdb_output/cdid_mapping.csv",
 }
 
 

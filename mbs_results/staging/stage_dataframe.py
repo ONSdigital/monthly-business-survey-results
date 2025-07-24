@@ -12,6 +12,7 @@ from mbs_results.staging.create_missing_questions import (
 from mbs_results.staging.data_cleaning import (
     convert_annual_thousands,
     convert_cell_number,
+    convert_nil_values,
     create_form_type_spp_column,
     create_imputation_class,
     enforce_datatypes,
@@ -22,10 +23,7 @@ from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.inputs import read_colon_separated_file, read_csv_wrapper
-from mbs_results.utilities.utils import (
-    convert_column_to_datetime,
-    get_snapshot_alternate_path,
-)
+from mbs_results.utilities.utils import convert_column_to_datetime
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +47,7 @@ def read_and_combine_colon_sep_files(config: dict) -> pd.DataFrame:
         combined colon separated files returned as one dataframe.
     """
     sample_files = find_files(
-        file_path=config["folder_path"],
+        file_path=config["idbr_folder_path"],
         file_prefix=config["sample_prefix"],
         current_period=config["current_period"],
         revision_window=config["revision_window"],
@@ -94,10 +92,10 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     period = config["period"]
     reference = config["reference"]
 
-    snapshot_file_path = get_snapshot_alternate_path(config)
+    snapshot_file_path = config["snapshot_file_path"]
 
     contributors, responses = get_dfs_from_spp(
-        snapshot_file_path + config["mbs_file_name"],
+        snapshot_file_path,
         config["platform"],
         config["bucket"],
     )
@@ -150,7 +148,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
 
     df = append_back_data(df, config)
 
-    snapshot_name = config["mbs_file_name"].split(".")[0]
+    snapshot_name = os.path.basename(config["snapshot_file_path"]).split(".")[0]
 
     df = filter_out_questions(
         df=df,
@@ -208,6 +206,10 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
 
     else:
         filter_df = None
+
+    pre_impute_df = convert_nil_values(
+        pre_impute_df, config["nil_status_col"], config["target"], config["nil_values"]
+    )
 
     print("Staging Completed")
     return pre_impute_df, manual_constructions, filter_df

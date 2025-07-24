@@ -12,7 +12,7 @@ Methods can be generalised and have a different naming convention to their speci
 |Target variable | Variable to be imputed |
 |Imputation | A method for estimating a response when a response to a question is missing (a.k.a. non-response) |
 |Imputation class | A grouping of similar units where information can be drawn from to inform imputation. This is likely to be similar to strata but they serve a different purpose so they are different |
-|Imputation link | A ratio of the sum of responses in one period to the sum of responses in the next period, where only references that responded in both periods are included in the sums | 
+|Imputation link | A ratio of the sum of responses in one period to the sum of responses in the next period, where only references that responded in both periods are included in the sums |
 |Period | Date variable within a dataset |
 |Auxiliary variable | A variable that is used to inform an estimate or model, e.g. a predictor for a reference's target variable, or as supplimentary information for estimation weights |
 | SIC | Standard Industrial Classification is the classification system used for UK business |

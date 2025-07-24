@@ -213,11 +213,31 @@ def read_colon_separated_file(
         usecols=usecols,
     )
 
+    # Esure the filepath is a string
+    if not isinstance(filepath, str):
+        if isinstance(filepath, os.PathLike):
+            filepath = str(filepath)
+        else:
+            error_msg = (
+                "The filepath must be a string or os.PathLike object. "
+                f"Got {type(filepath)} instead."
+            )
+            logger.error(error_msg)
+            raise TypeError(error_msg)
+
     date_string = re.findall(r"_(\d{6})", filepath)
 
     # Get pattern from end, to avoid issues when path has dates
     # e.g. path_190812/file_202301 should return 202301
 
-    df[period] = int(date_string[-1])
+    if date_string:
+        df[period] = int(date_string[-1])
+    else:
+        error_msg = (
+            "The filepath does not contain a date string in the format "
+            f"'_YYYYMM'. Please check the {filepath}."
+        )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
 
     return df
