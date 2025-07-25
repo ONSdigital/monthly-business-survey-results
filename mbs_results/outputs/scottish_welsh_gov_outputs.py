@@ -107,6 +107,7 @@ def filter_and_calculate_percent_devolved(
 
     # Filter LU data for the devolved nation region and sum employment by reference
     local_unit_data["reference"] = local_unit_data["ruref"]
+    # local_unit_data["reference"] = local_unit_data["reference"].astype("int64")
     regional_employment = (
         local_unit_data[local_unit_data[region_col] == region_code]
         .groupby(["reference", "period"])[employment_col]
@@ -117,11 +118,25 @@ def filter_and_calculate_percent_devolved(
 
     # Sum total employment by reference from the pipeline data
     total_employment = (
+<<<<<<< HEAD
         df[["reference", "period", "froempment"]]
+=======
+        df[["reference", "froempment"]]
+>>>>>>> 68655ab (fixed pre-commit formatting issues)
         .drop_duplicates()
         .reset_index(drop=True)
         .rename(columns={froempment_col: "total_employment"})
     )
+<<<<<<< HEAD
+=======
+
+    # (
+    #     df.groupby("reference")[froempment_col]
+    #     .sum()
+    #     .reset_index()
+    #     .rename(columns={froempment_col: "total_employment"})
+    # )
+>>>>>>> 68655ab (fixed pre-commit formatting issues)
 
     # Merge the two Dataframes and calculate the percentage
     merged_df = pd.merge(
@@ -139,7 +154,11 @@ def filter_and_calculate_percent_devolved(
         * 100
     ).round(2)
 
+<<<<<<< HEAD
     merged_df[percent_col] = merged_df[percent_col].clip(upper=100)
+=======
+    # merged_df[percent_col] = merged_df[percent_col].clip(upper=100)
+>>>>>>> 68655ab (fixed pre-commit formatting issues)
 
     # Add the percentage column to the original DataFrame
     df = df.merge(
@@ -228,6 +247,7 @@ def devolved_outputs(
     Produced a pivot table and converts question numbers into plaintext
     for devolved questions
     """
+    local_unit_data["ruref"] = local_unit_data["ruref"].astype("int64")
 
     df = pd.merge(
         df,
@@ -301,6 +321,18 @@ def devolved_outputs(
     df_pivot.columns = ["_".join(col).strip() for col in df_pivot.columns.values]
     df_pivot = df_pivot[sorted(df_pivot.columns, key=split_func)]
     df_pivot.reset_index(inplace=True)
+<<<<<<< HEAD
+=======
+
+    # #Fill missing values of 'Name1' where imputed flag == d before merging
+    ru_name_mapping = local_unit_data.groupby("ruref")["Name1"].first()
+    mask_missing_name = df["entname1"].isna() & df["reference"].isin(
+        ru_name_mapping.index
+    )
+    df.loc[mask_missing_name, "entname1"] = df.loc[mask_missing_name, "reference"].map(
+        ru_name_mapping
+    )
+>>>>>>> 68655ab (fixed pre-commit formatting issues)
 
     # Fill missing values of 'Name1' where imputed flag == d before merging
     ru_name_mapping = local_unit_data.groupby("ruref")["Name1"].first()
