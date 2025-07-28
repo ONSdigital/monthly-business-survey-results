@@ -150,7 +150,7 @@ def convert_cp_to_contributors(df: pd.DataFrame) -> pd.DataFrame:
 
     df["combined_error_marker"] = df.apply(
         lambda x: (
-            x["error_mkr"] if x["response_type"] <= 2 else str(x["response_type"])
+            x["error_mkr"] if x["response_type"] == 2 else str(x["response_type"])
         ),
         axis=1,
     )
@@ -163,7 +163,7 @@ def convert_cp_to_contributors(df: pd.DataFrame) -> pd.DataFrame:
         "W": ("Check needed", "201"),
         # We haven't seen codes 200-900 in MBS data before
         # but we're leaving them in the mapping in case they are needed
-        "200": ("Form sent out", "100"),
+        "1": ("Form sent out", "100"),
         "300": ("Clear - overridden", "211"),
         "500": ("Check needed", "201"),
         "600": ("Clear", "210"),
