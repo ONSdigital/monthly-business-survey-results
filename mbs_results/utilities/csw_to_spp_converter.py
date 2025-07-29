@@ -156,8 +156,8 @@ def convert_cp_to_contributors(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     error_marker_map = {
-        "C": ("Clear - overridden", "211"),
-        "O": ("Clear", "210"),
+        "C": ("Clear", "211"),
+        "O": ("Clear - overridden", "210"),
         "E": ("Check needed", "201"),
         "W": ("Check needed", "201"),
         "1": ("Form sent out", "100"),
