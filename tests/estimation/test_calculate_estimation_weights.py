@@ -11,13 +11,13 @@ from mbs_results.estimation.calculate_estimation_weights import (
 
 
 @pytest.fixture(scope="class")
-def filepath():
+def data_dir():
     return Path("tests") / "data" / "estimation" / "calculate_estimation_weights"
 
 
 class TestEstimation:
-    def test_calculate_design_weights(self, filepath):
-        expected_output = pd.read_csv(filepath / "design_weights.csv")
+    def test_calculate_design_weights(self, data_dir):
+        expected_output = pd.read_csv(data_dir / "design_weights.csv")
 
         input_data = expected_output.drop(columns=["design_weight"])
         actual_output = calculate_design_weight(
@@ -36,8 +36,8 @@ class TestEstimation:
             ("calibration_factor_combined.csv", "calibration_group"),
         ],
     )
-    def test_calculate_calibration_factor(self, filepath, csv, group):
-        expected_output = pd.read_csv(filepath / csv)
+    def test_calculate_calibration_factor(self, data_dir, csv, group):
+        expected_output = pd.read_csv(data_dir / csv)
 
         input_data = expected_output.drop(columns=["calibration_factor"])
         actual_output = calculate_calibration_factor(
