@@ -13,37 +13,37 @@ from mbs_results.staging.stage_dataframe import start_of_period_staging
 
 
 @pytest.fixture(scope="class")
-def filepath():
+def data_dir():
     return Path("tests/data/outputs/selective_editing")
 
 
 @pytest.fixture(scope="class")
-def imputation_output(filepath):
+def imputation_output(data_dir):
     return pd.read_csv(
-        filepath / "inputs/imputation_output_v0.1.1_test_snapshot.csv",
+        data_dir / "inputs/imputation_output_v0.1.1_test_snapshot.csv",
         index_col=False,
         dtype={"reference": int, "questioncode": int},
     )
 
 
 @pytest.fixture(scope="class")
-def imputation_output_changing_formtypes(filepath):
+def imputation_output_changing_formtypes(data_dir):
     return pd.read_csv(
-        filepath / "inputs/imputation_output_v0.1.1_test_snapshot_change_formtypes.csv",
+        data_dir / "inputs/imputation_output_v0.1.1_test_snapshot_change_formtypes.csv",
         index_col=False,
         dtype={"reference": int, "questioncode": int},
     )
 
 
 @pytest.fixture(scope="class")
-def start_of_period_staging_output(filepath):
-    return pd.read_csv(filepath / "start_of_period_staging_output.csv", index_col=False)
+def start_of_period_staging_output(data_dir):
+    return pd.read_csv(data_dir / "start_of_period_staging_output.csv", index_col=False)
 
 
 @pytest.fixture(scope="class")
-def start_of_period_staging_output_changing_formtypes(filepath):
+def start_of_period_staging_output_changing_formtypes(data_dir):
     return pd.read_csv(
-        filepath / "start_of_period_staging_output_changing_formtypes.csv",
+        data_dir / "start_of_period_staging_output_changing_formtypes.csv",
         index_col=False,
     )
 
@@ -162,11 +162,6 @@ def mock_read_and_combine_colon_sep_files_changing_formtypes():
         yield mock_read_and_combine_colon_sep_files
 
 
-# @pytest.mark.usefixtures(
-#     "mock_to_csv",
-#     "mock_read_and_combine_colon_sep_files",
-#     "start_of_period_staging_output"
-# )
 class TestStartPeriodStaging:
     def test_start_of_period_staging(
         self,
@@ -246,28 +241,6 @@ class TestStartPeriodStaging:
         expected_output = expected_output.sort_values(
             ["reference", "period", "questioncode"], ignore_index=True
         )
-
-        print(
-            expected_output[
-                [
-                    "reference",
-                    "questioncode",
-                    "form_type_spp",
-                    "imputed_and_derived_flag",
-                ]
-            ]
-        )
-        print(
-            actual_output[
-                [
-                    "reference",
-                    "questioncode",
-                    "form_type_spp",
-                    "imputed_and_derived_flag",
-                ]
-            ]
-        )
-        print(actual_output[["reference", "questioncode", "adjustedresponse"]])
 
         assert_frame_equal(
             actual_output, expected_output, check_like=True, check_dtype=False

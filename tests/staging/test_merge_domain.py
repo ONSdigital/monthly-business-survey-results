@@ -8,18 +8,18 @@ from mbs_results.staging.merge_domain import merge_domain
 
 
 @pytest.fixture(scope="class")
-def filepath():
+def data_dir():
     return Path("tests/data/staging/merge_domain")
 
 
 @pytest.fixture(scope="class")
-def merged_domain_test_data(filepath):
-    return pd.read_csv(filepath / "merge_domain.csv", index_col=False)
+def merged_domain_test_data(data_dir):
+    return pd.read_csv(data_dir / "merge_domain.csv", index_col=False)
 
 
 @pytest.fixture(scope="class")
-def domain_mapping_test_data(filepath):
-    return pd.read_csv(filepath / "domain_mapping.csv", index_col=False)
+def domain_mapping_test_data(data_dir):
+    return pd.read_csv(data_dir / "domain_mapping.csv", index_col=False)
 
 
 class TestMergeDomain:

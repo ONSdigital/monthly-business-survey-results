@@ -18,7 +18,7 @@ from mbs_results.staging.data_cleaning import (
 
 
 @pytest.fixture(scope="class")
-def filepath():
+def data_dir():
     return Path("tests/data/staging/data_cleaning")
 
 
@@ -33,8 +33,8 @@ def correct_types(df):
     return df_expected_out
 
 
-def test_enforce_datatypes(filepath):
-    df = pd.read_csv(filepath / "imputation_flag_data.csv")
+def test_enforce_datatypes(data_dir):
+    df = pd.read_csv(data_dir / "imputation_flag_data.csv")
     df_subset = df[["period", "strata", "reference", "target_variable"]]
     expected_output = correct_types(df_subset)
     df_subset = df_subset.set_index(["reference", "period"])
@@ -103,9 +103,9 @@ def test_clean_and_merge():
     assert_frame_equal(actual_output, expected_output)
 
 
-def test_create_imputation_class(filepath):
+def test_create_imputation_class(data_dir):
 
-    expected_output = pd.read_csv(filepath / "test_create_imputation_class.csv")
+    expected_output = pd.read_csv(data_dir / "test_create_imputation_class.csv")
 
     df_in = expected_output.drop(columns=["expected"])
 
@@ -113,9 +113,9 @@ def test_create_imputation_class(filepath):
     assert_frame_equal(actual_output, expected_output)
 
 
-def test_convert_cell_number(filepath):
+def test_convert_cell_number(data_dir):
 
-    df = pd.read_csv(filepath / "test_convert_cell_number.csv")
+    df = pd.read_csv(data_dir / "test_convert_cell_number.csv")
 
     df_in = df.drop(columns=["expected"])
 
@@ -128,12 +128,12 @@ def test_convert_cell_number(filepath):
     assert_frame_equal(actual_output, expected_output)
 
 
-def test_run_live_or_frozen(filepath):
+def test_run_live_or_frozen(data_dir):
 
-    df_in = pd.read_csv(filepath / "test_run_live_or_frozen_input.csv")
+    df_in = pd.read_csv(data_dir / "test_run_live_or_frozen_input.csv")
 
     expected_frozen_output = pd.read_csv(
-        filepath / "test_run_live_or_frozen_frozen_output.csv"
+        data_dir / "test_run_live_or_frozen_frozen_output.csv"
     )
 
     expected_live_output = df_in.copy()
@@ -146,17 +146,17 @@ def test_run_live_or_frozen(filepath):
     assert_frame_equal(live_ouput, expected_live_output)
 
 
-def test_run_live_or_frozen_exception(filepath):
+def test_run_live_or_frozen_exception(data_dir):
 
-    df = pd.read_csv(filepath / "test_run_live_or_frozen_input.csv")
+    df = pd.read_csv(data_dir / "test_run_live_or_frozen_input.csv")
 
     with pytest.raises(ValueError):
         run_live_or_frozen(df, "target", "error", "love")
 
 
-def test_is_census(filepath):
+def test_is_census(data_dir):
 
-    df = pd.read_csv(filepath / "test_is_cencus.csv")
+    df = pd.read_csv(data_dir / "test_is_cencus.csv")
 
     extra_cal_groups = [
         5043,
@@ -182,65 +182,63 @@ def test_is_census(filepath):
     assert_series_equal(actual_output, expected_output)
 
 
-@patch("pandas.DataFrame.to_csv")  # mock pandas export csv function
-def test_filter_out_questions(mock_to_csv, filepath):
+class TestFilterOutQuestions:
+    @patch("pandas.DataFrame.to_csv")  # mock pandas export csv function
+    def test_filter_out_questions(self, mock_to_csv, data_dir):
 
-    df_in = pd.read_csv(filepath / "test_filter_out_questions.csv")
-    expected_output = pd.read_csv(filepath / "test_filter_out_questions_expected.csv")
+        df_in = pd.read_csv(data_dir / "test_filter_out_questions.csv")
+        expected_output = pd.read_csv(
+            data_dir / "test_filter_out_questions_expected.csv"
+        )
 
-    questions_to_remove = [11, 12, 146]
+        questions_to_remove = [11, 12, 146]
 
-    network_config = {"platform": "network", "bucket": ""}
+        network_config = {"platform": "network", "bucket": ""}
 
-    actual_output = filter_out_questions(
-        df_in, "question", questions_to_remove, "export.csv", **network_config
-    )
+        actual_output = filter_out_questions(
+            df_in, "question", questions_to_remove, "export.csv", **network_config
+        )
 
-    # testing if pandas export was called once
-    mock_to_csv.assert_called_once_with("export.csv", index=False, date_format="%Y%m")
+        # testing if pandas export was called once
+        mock_to_csv.assert_called_once_with(
+            "export.csv", index=False, date_format="%Y%m"
+        )
 
-    assert_frame_equal(actual_output, expected_output)
+        assert_frame_equal(actual_output, expected_output)
 
+    def test_filter_out_questions_save_full_path_errror(self):
+        """Check if ValueError raised when path is not csv"""
 
-def test_filter_out_questions_save_full_path_errror():
-    """Check if ValueError raised when path is not csv"""
-
-    with pytest.raises(ValueError):
-        filter_out_questions("dummy", "dummy", "dummy", "export.txt")
-
-
-def test_convert_nil_values(filepath):
-
-    nil_values = [
-        "Combined child (NIL2)",
-        "Out of scope (NIL3)",
-        "Ceased trading (NIL4)",
-        "Dormant (NIL5)",
-        "Part year return (NIL8)",
-        "No UK activity (NIL9)",
-    ]
-
-    df_in = pd.read_csv(filepath / "test_convert_nil_values_input.csv")
-    expected_output = pd.read_csv(filepath / "test_convert_nil_values_output.csv")
-
-    actual_output = convert_nil_values(df_in, "status", "value", nil_values)
-
-    assert_frame_equal(actual_output, expected_output)
+        with pytest.raises(ValueError):
+            filter_out_questions("dummy", "dummy", "dummy", "export.txt")
 
 
-def test_convert_nil_values_warning(filepath):
-    """Test if warning is working"""
+class TestNilValues:
+    @pytest.fixture(scope="class")
+    def nil_values(self):
+        return [
+            "Combined child (NIL2)",
+            "Out of scope (NIL3)",
+            "Ceased trading (NIL4)",
+            "Dormant (NIL5)",
+            "Part year return (NIL8)",
+            "No UK activity (NIL9)",
+        ]
 
-    nil_values = [
-        "Combined child (NIL2)",
-        "Out of scope (NIL3)",
-        "Ceased trading (NIL4)",
-        "Dormant (NIL5)",
-        "Part year return (NIL8)",
-        "No UK activity (NIL9)",
-    ]
+    def test_convert_nil_values(self, data_dir, nil_values):
+        df_in = pd.read_csv(data_dir / "test_convert_nil_values_input.csv")
+        expected_output = pd.read_csv(data_dir / "test_convert_nil_values_output.csv")
 
-    df_in_warning = pd.read_csv(filepath / "test_convert_nil_values_input_warning.csv")
+        actual_output = convert_nil_values(df_in, "status", "value", nil_values)
 
-    with pytest.warns():
-        convert_nil_values(df_in_warning, "status", "value", nil_values)
+        assert_frame_equal(actual_output, expected_output)
+
+    def test_convert_nil_values_warning(self, data_dir, nil_values):
+        """Test if warning is working"""
+
+        df_in_warning = pd.read_csv(
+            data_dir / "test_convert_nil_values_input_warning.csv"
+        )
+
+        with pytest.warns():
+            convert_nil_values(df_in_warning, "status", "value", nil_values)

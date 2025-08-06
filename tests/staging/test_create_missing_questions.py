@@ -8,28 +8,28 @@ from mbs_results.staging.create_missing_questions import create_missing_question
 
 
 @pytest.fixture(scope="class")
-def filepath():
+def data_dir():
     return Path("tests/data/staging/create_missing_questions")
 
 
 @pytest.fixture(scope="class")
-def create_missing_questions_input_con(filepath):
+def create_missing_questions_input_con(data_dir):
     return pd.read_csv(
-        filepath / "create_missing_questions_contributors.csv", index_col=False
+        data_dir / "create_missing_questions_contributors.csv", index_col=False
     )
 
 
 @pytest.fixture(scope="class")
-def create_missing_questions_input_res(filepath):
+def create_missing_questions_input_res(data_dir):
     return pd.read_csv(
-        filepath / "create_missing_questions_responses.csv", index_col=False
+        data_dir / "create_missing_questions_responses.csv", index_col=False
     )
 
 
 @pytest.fixture(scope="class")
-def create_missing_questions_output(filepath):
+def create_missing_questions_output(data_dir):
     return pd.read_csv(
-        filepath / "create_missing_questions_output.csv", index_col=False
+        data_dir / "create_missing_questions_output.csv", index_col=False
     )
 
 
