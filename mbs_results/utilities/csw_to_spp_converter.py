@@ -150,26 +150,17 @@ def convert_cp_to_contributors(df: pd.DataFrame) -> pd.DataFrame:
 
     df["combined_error_marker"] = df.apply(
         lambda x: (
-            x["error_mkr"] if x["response_type"] <= 2 else str(x["response_type"])
+            x["error_mkr"] if x["response_type"] == 2 else str(x["response_type"])
         ),
         axis=1,
     )
 
     error_marker_map = {
-        # Error marker mapping for cases when response <= 2
         "C": ("Clear - overridden", "211"),
         "O": ("Clear", "210"),
         "E": ("Check needed", "201"),
         "W": ("Check needed", "201"),
-        # We haven't seen codes 200-900 in MBS data before
-        # but we're leaving them in the mapping in case they are needed
-        "200": ("Form sent out", "100"),
-        "300": ("Clear - overridden", "211"),
-        "500": ("Check needed", "201"),
-        "600": ("Clear", "210"),
-        "700": ("Clear - overridden", "211"),
-        "800": ("Clear - overridden", "211"),
-        "900": ("Clear - overridden", "211"),
+        "1": ("Form sent out", "100"),
         "5": ("Combined child (NIL2)", "302"),
         "6": ("Out of scope (NIL3)", "303"),
         "7": ("Ceased trading (NIL4)", "304"),

@@ -14,6 +14,7 @@
     "sample_prefix": "",
     "back_data_qv_path":"",
     "back_data_cp_path":"",
+    "back_data_qv_cp_json_path":"",
     "back_data_finalsel_path":"",
     "sic_domain_mapping_path": "",
     "threshold_filepath": "",
