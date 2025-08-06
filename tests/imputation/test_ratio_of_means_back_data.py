@@ -4,7 +4,11 @@ from pandas.testing import assert_frame_equal
 
 from mbs_results.imputation.ratio_of_means import ratio_of_means
 
-scenario_path_prefix = "tests/data/imputation/back_data_testing/"
+
+@pytest.fixture(scope="class")
+def data_dir(imputation_data_dir):
+    return imputation_data_dir / "back_data_testing"
+
 
 scenarios = [
     "BIR_C_FIC",
@@ -24,12 +28,10 @@ pytestmark = pytest.mark.parametrize("base_file_name", scenarios)
 
 
 class TestRatioOfMeans:
-    def test_ratio_of_means_back_data(self, base_file_name):
+    def test_ratio_of_means_back_data(self, data_dir, base_file_name):
 
-        input_data = pd.read_csv(scenario_path_prefix + base_file_name + "_input.csv")
-        expected_output = pd.read_csv(
-            scenario_path_prefix + base_file_name + "_output.csv"
-        )
+        input_data = pd.read_csv(data_dir / (base_file_name + "_input.csv"))
+        expected_output = pd.read_csv(data_dir / (base_file_name + "_output.csv"))
 
         # Can't use load_format helper, test cases have date instead of period
 
