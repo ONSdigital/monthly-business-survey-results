@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -8,8 +6,8 @@ from mbs_results.staging.merge_domain import merge_domain
 
 
 @pytest.fixture(scope="class")
-def data_dir():
-    return Path("tests/data/staging/merge_domain")
+def data_dir(staging_data_dir):
+    return staging_data_dir / "merge_domain"
 
 
 @pytest.fixture(scope="class")

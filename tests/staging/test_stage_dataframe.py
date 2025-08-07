@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -8,8 +6,8 @@ from mbs_results.staging.stage_dataframe import drop_derived_questions
 
 
 @pytest.fixture(scope="class")
-def data_dir():
-    return Path("tests/data/staging/stage_dataframe")
+def data_dir(staging_data_dir):
+    return staging_data_dir / "stage_dataframe"
 
 
 def test_drop_derived_questions(data_dir):

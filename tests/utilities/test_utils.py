@@ -32,8 +32,8 @@ def test_compare_two_dataframes():
     df2.loc[0:4, "imputation_flags_adjustedresponse"] = ["mc", "mc", "mc", "mc", "mc"]
 
     # Creating the diff based on modified rows
-    df1_diff = df1.loc[0:4]
-    df2_diff = df2.loc[0:4]
+    df1_diff = df1.copy().loc[0:4]
+    df2_diff = df2.copy().loc[0:4]
 
     df1_diff["version"] = "df1"
     df2_diff["version"] = "df2"

@@ -1,4 +1,3 @@
-from pathlib import Path
 from unittest.mock import patch
 
 import pandas as pd
@@ -18,8 +17,8 @@ from mbs_results.staging.data_cleaning import (
 
 
 @pytest.fixture(scope="class")
-def data_dir():
-    return Path("tests/data/staging/data_cleaning")
+def data_dir(staging_data_dir):
+    return staging_data_dir / "data_cleaning"
 
 
 def correct_types(df):

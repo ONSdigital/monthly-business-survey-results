@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 from unittest.mock import patch
 
 import pandas as pd
@@ -11,8 +10,8 @@ from mbs_results.utilities.utils import convert_column_to_datetime
 
 
 @pytest.fixture(scope="class")
-def data_dir():
-    return Path("tests/data/staging/back_data")
+def data_dir(staging_data_dir):
+    return staging_data_dir / "back_data"
 
 
 testdata = [
