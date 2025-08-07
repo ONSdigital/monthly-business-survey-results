@@ -19,7 +19,7 @@ def derive_estimation_variables_data(data_dir):
 
 class TestPreProcessingEstimation:
     def test_derive_estimation_variables(self, derive_estimation_variables_data):
-        expected = derive_estimation_variables_data[
+        expected = derive_estimation_variables_data.copy()[
             [
                 "period",
                 "reference",
