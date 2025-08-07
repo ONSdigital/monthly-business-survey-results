@@ -20,37 +20,39 @@ def input_dataframe():
     )
 
 
+@pytest.fixture(scope="class")
+def expected_output_dataframe():
+    return pd.DataFrame(
+        {
+            "period": [1, 1, 1],
+            "strata": ["A", "B", "C"],
+            "population_turnover_sum": [3, 7, 5],
+            "population_count": [2, 2, 1],
+            "sample_turnover_sum": [1, 3, 5],
+            "sample_count": [1, 1, 1],
+        }
+    )
+
+
 class TestTurnoverPopulationCounts:
-    def test_calculate_turnover_sum_count(self, input_dataframe):
+    def test_calculate_turnover_sum_count(
+        self, input_dataframe, expected_output_dataframe
+    ):
         # producing output
         output = calculate_turnover_sum_count(
             input_dataframe, "period", "strata", "population"
         )
 
-        # creating expected output
-        expected_output = pd.DataFrame(
-            {
-                "period": [1, 1, 1],
-                "strata": ["A", "B", "C"],
-                "population_turnover_sum": [3, 7, 5],
-                "population_count": [2, 2, 1],
-            }
+        # creating expected output by dropping unnecessary columns
+        expected_output = expected_output_dataframe.copy().drop(
+            columns=["sample_turnover_sum", "sample_count"]
         )
         pd.testing.assert_frame_equal(output, expected_output)
 
-    def test_create_population_count_output(self, input_dataframe):
+    def test_create_population_count_output(
+        self, input_dataframe, expected_output_dataframe
+    ):
         # producing output
         output = create_population_count_output(input_dataframe, "period", "strata")
 
-        # creating expected output
-        expected_output = pd.DataFrame(
-            {
-                "period": [1, 1, 1],
-                "strata": ["A", "B", "C"],
-                "population_turnover_sum": [3, 7, 5],
-                "population_count": [2, 2, 1],
-                "sample_turnover_sum": [1, 3, 5],
-                "sample_count": [1, 1, 1],
-            }
-        )
-        pd.testing.assert_frame_equal(output, expected_output)
+        pd.testing.assert_frame_equal(output, expected_output_dataframe)

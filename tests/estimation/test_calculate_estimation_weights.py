@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -11,8 +9,8 @@ from mbs_results.estimation.calculate_estimation_weights import (
 
 
 @pytest.fixture(scope="class")
-def data_dir():
-    return Path("tests") / "data" / "estimation" / "calculate_estimation_weights"
+def data_dir(estimation_data_dir):
+    return estimation_data_dir / "calculate_estimation_weights"
 
 
 class TestEstimation:

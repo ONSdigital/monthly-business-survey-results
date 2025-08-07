@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 from pandas.testing import assert_frame_equal
 
@@ -8,13 +6,12 @@ from tests.helper_functions import load_and_format
 
 
 @pytest.fixture(scope="class")
-def data_dir():
-    return Path("tests/data/estimation/pre_processing_estimation")
-
-
-@pytest.fixture(scope="class")
-def derive_estimation_variables_data(data_dir):
-    return load_and_format(data_dir / "derive_estimation_variables.csv")
+def derive_estimation_variables_data(estimation_data_dir):
+    return load_and_format(
+        estimation_data_dir
+        / "pre_processing_estimation"
+        / "derive_estimation_variables.csv"
+    )
 
 
 class TestPreProcessingEstimation:
