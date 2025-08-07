@@ -223,6 +223,7 @@ def devolved_outputs(
     local_unit_data: pd.DataFrame,
     devolved_questions: list = [11, 12, 40, 49, 110],
     agg_function: str = "sum",  # potential remove, here for testing
+    config: dict = None,
 ) -> pd.DataFrame:
     """
     Run to produce devolved outputs (excluding GB-NIR)
@@ -378,7 +379,7 @@ def devolved_outputs(
 
     # Reorder columns to match original output
     original_column_order = [
-        "period",
+        config["period"],
         "classification",
         "cell_no",
         "reference",
@@ -491,6 +492,7 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
             local_unit_data=lu_data,
             devolved_questions=devolved_questions,
             agg_function="sum",
+            config=config,
         )
 
         outputs[nation] = df_pivot
