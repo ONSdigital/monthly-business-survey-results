@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -14,8 +12,8 @@ from mbs_results.outputs.pivot_imputation_value import (
 
 
 @pytest.fixture(scope="class")
-def filepath():
-    return Path("tests/data/outputs/pivot_imputation_value")
+def filepath(outputs_data_dir):
+    return outputs_data_dir / "pivot_imputation_value"
 
 
 @pytest.fixture(scope="class")
