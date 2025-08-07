@@ -198,12 +198,16 @@ class TestValidateEstimation:
         "sampled": "is_sampled",
         "snapshot_file_path": "test_snaphot.json",
         "output_path": "tests/data/utilities/validation_checks/outputs/",
+        "group": "group",
+        "strata": "strata",
     }
 
     def test_validate_estimation_null_census(self):
         test_data_dict = {
             "is_sampled": [True, False, False, True, False],
             "is_census": [False, True, True, np.nan, False],
+            "group": ["A", "B", "C", "D", "E"],
+            "strata": ["A", "B", "C", "D", "E"],
         }
 
         test_data = pd.DataFrame(data=test_data_dict)
@@ -215,6 +219,8 @@ class TestValidateEstimation:
         test_data_dict = {
             "is_sampled": [True, False, False, np.nan, False],
             "is_census": [False, True, True, False, False],
+            "group": ["A", "B", "C", "D", "E"],
+            "strata": ["A", "B", "C", "D", "E"],
         }
 
         test_data = pd.DataFrame(data=test_data_dict)

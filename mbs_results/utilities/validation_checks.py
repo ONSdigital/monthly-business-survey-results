@@ -8,6 +8,11 @@ import pandas as pd
 from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.utils import (
     append_filter_out_questions,
+    check_above_one,
+    check_duplicates,
+    check_non_negative,
+    check_unique_per_cell_period,
+    check_weights_exist,
     get_versioned_filename,
 )
 
@@ -267,7 +272,6 @@ def validate_estimation(df: pd.DataFrame, config: dict):
     config: Dict
         The config dictionary.
 
-
     Raises
     ------
     ValueError
@@ -287,6 +291,21 @@ def validate_estimation(df: pd.DataFrame, config: dict):
             f'There are {sampled_nas} NA(s) in the {config["sampled"]} column.'
         )
 
+    weight_columns = ["weight", "g_weight"]
+
+    unique_checks = [config["design_weight"], config["calibration_factor"]]
+
+    non_negative_checks = {config["calibration_factor"], config["auxiliary"]}
+
+    if config["group"] != config["strata"]:
+        validate_combined_ratio_estimation(
+            population_frame=df,
+            weight_columns=weight_columns,
+            unique_checks=unique_checks,
+            non_negative_checks=non_negative_checks,
+            design_weight=config["design_weight"],
+        )
+
     write_csv_wrapper(
         df,
         output_path + estimate_filename,
@@ -294,6 +313,56 @@ def validate_estimation(df: pd.DataFrame, config: dict):
         config["bucket"],
         index=False,
     )
+
+
+def validate_combined_ratio_estimation(
+    population_frame: pd.DataFrame,
+    weight_columns: list[str],
+    unique_checks: list[str],
+    non_negative_checks: dict[str, str],
+    design_weight: str,
+) -> None:
+    """
+    Run all validation checks on combined ratio estimation.
+
+    This function performs the following checks:
+
+    1. Checks for duplicate rows based on 'period', 'reference', and 'question'.
+    2. Verifies that weight columns exist and contain no missing values.
+    3. Ensures unique design weights and calibration factors per cell/period.
+    4. Checks that 'auxilary' and 'calibration_factor' contain non-negative values.
+    5. Checks that 'design_weight' is above one.
+
+    Parameters
+    ----------
+    population_frame : pandas.DataFrame
+        A data frame with estimation weights.
+    weight_columns : list of str
+        A list of weight columns to check for missing values.
+    unique_checks : list of str
+        A list of columns to check for unique values per cell/period.
+    non_negative_checks : dict of str to str
+        A dictionary of columns to check for non-negative values
+    design_weight : str
+        The name of the design weight column.
+
+    Raises
+    ------
+    `ValueError`
+    """
+    check_duplicates(population_frame, ["period", "reference", "question"])
+
+    check_weights_exist(population_frame, weight_columns)
+
+    for column in unique_checks:
+        check_unique_per_cell_period(population_frame, "cell", "period", column)
+
+    for column in non_negative_checks:
+        check_non_negative(population_frame, column)
+
+    check_above_one(population_frame, design_weight)
+
+    # check_population_sample(population_frame, census, 'sample_column')
 
 
 def validate_outlier_detection(df: pd.DataFrame, config: dict):

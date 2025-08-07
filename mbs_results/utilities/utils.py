@@ -1,6 +1,7 @@
 import os
 from importlib import metadata
 
+import numpy as np
 import pandas as pd
 
 
@@ -95,3 +96,76 @@ def compare_two_dataframes(df1, df2):
             changed_columns.append(column)
 
     return diff, changed_columns
+
+
+def check_duplicates(df, columns):
+    """Check for duplicate rows based on specified columns."""
+    if df.duplicated(subset=columns).any():
+        raise ValueError(f"Duplicate rows found based on columns: {columns}")
+
+
+def check_missing_values(df, column):
+    """Check for missing values in a specific column."""
+    if column not in df.columns:
+        raise ValueError(f"Missing required column: {column}")
+    if df[column].isnull().any():
+        raise ValueError(f"Column {column} contains missing values.")
+
+
+def check_input_types(df, expected_types):
+    """Check types of input variables."""
+    for column, expected_type in expected_types.items():
+        if column not in df.columns:
+            raise ValueError(f"Missing required column: {column}")
+        if not np.issubdtype(df[column].dtype, expected_type):
+            raise TypeError(f"Column {column} is not of type {expected_type}")
+
+
+def check_population_sample(df, population_column, sample_column):
+    """Check if population = sample, then a and g should be 1."""
+    if (df[population_column] == df[sample_column]).all():
+        if not (df["a"] == 1).all():
+            raise ValueError("If population = sample, all refs must have a = 1")
+        if not (df["g"] == 1).all():
+            raise ValueError("If population = sample, all refs must have g = 1")
+
+
+def check_weights_exist(df, weight_columns):
+    """Check dataset contains a weight and g weight for all rows."""
+    for column in weight_columns:
+        if column not in df.columns:
+            raise ValueError(f"Missing required weight column: {column}")
+        if df[column].isnull().any():
+            raise ValueError(f"Missing weights in column: {column}")
+
+
+def check_unique_per_cell_period(
+    df, cell_column, period_column, weight_column, calibration_factor
+):
+    """Check that for each cell/period there is only one unique design weight."""
+    if not all(
+        col in df.columns
+        for col in [cell_column, period_column, weight_column, calibration_factor]
+    ):
+        raise ValueError("Missing required columns for uniqueness check.")
+    for col in [weight_column, calibration_factor]:
+        if df.groupby([cell_column, period_column])[col].nunique().max() > 1:
+            raise ValueError(
+                f"Multiple unique values found for {col} in each cell/period"
+            )
+
+
+def check_non_negative(df, column):
+    """Check that all values in a column are non-negative."""
+    if column not in df.columns:
+        raise ValueError(f"Missing required column: {column}")
+    if (df[column] < 0).any():
+        raise ValueError(f"Column {column} contains negative values.")
+
+
+def check_above_one(df, column):
+    """Check that all values in a column are non-negative."""
+    if column not in df.columns:
+        raise ValueError(f"Missing required column: {column}")
+    if (df[column] < 1).any():
+        raise ValueError(f"Column {column} contains values not greater than 1.")
