@@ -5,7 +5,7 @@ from mbs_results.utilities.inputs import read_colon_separated_file
 from mbs_results.utilities.utils import compare_two_dataframes
 
 
-def test_read_colon_separated_file():
+def test_read_colon_separated_file(utilities_data_dir):
     headers = ["int", "str", "float", "period"]
     expected = pd.DataFrame(
         {
@@ -17,14 +17,14 @@ def test_read_colon_separated_file():
     )
 
     actual = read_colon_separated_file(
-        "tests/data/utilities/read_colon_separated_file/colon_sep_202401", headers
+        utilities_data_dir / "read_colon_separated_file/colon_sep_202401", headers
     )
 
     assert_frame_equal(actual, expected)
 
 
-def test_compare_two_dataframes():
-    df1 = pd.read_csv("tests/data/utilities/utils/compare_two_dataframes_input.csv")
+def test_compare_two_dataframes(utilities_data_dir):
+    df1 = pd.read_csv(utilities_data_dir / "utils" / "compare_two_dataframes_input.csv")
     df2 = df1.copy()
 
     # Modifying some rows in df2
