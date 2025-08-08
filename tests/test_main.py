@@ -46,10 +46,8 @@ def test_main():
     config_user_test as a parameter to run_mbs_main. The config
     dictionary will be updated in the mbs_results/utilites/inputs.py.
     """
-    # Create config dictionary
-    config_user_test = test_config
 
-    run_mbs_main(config_user_dict=config_user_test)
+    run_mbs_main(config_user_dict=test_config)
 
 
 # We want to avoid running it in the workflows
