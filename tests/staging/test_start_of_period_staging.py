@@ -117,12 +117,6 @@ config = {
 
 
 @pytest.fixture(scope="class")
-def mock_to_csv():
-    with patch("pandas.DataFrame.to_csv") as mock_to_csv:
-        yield mock_to_csv
-
-
-@pytest.fixture(scope="class")
 def mock_read_and_combine_colon_sep_files():
     with patch(
         "mbs_results.staging.stage_dataframe.read_and_combine_colon_sep_files"
@@ -162,12 +156,13 @@ def mock_read_and_combine_colon_sep_files_changing_formtypes():
         yield mock_read_and_combine_colon_sep_files
 
 
+@patch("pandas.DataFrame.to_csv")  # mock pandas export csv function
 class TestStartPeriodStaging:
     def test_start_of_period_staging(
         self,
+        mock_to_csv,
         imputation_output,
         start_of_period_staging_output,
-        mock_to_csv,
         mock_read_and_combine_colon_sep_files,
     ):
         config["current_period"] = 202201
@@ -195,15 +190,19 @@ class TestStartPeriodStaging:
         # Reorder columns to match expected output and selecting only the  needed
         # columns in expected output
 
+        # mock_to_csv.assert_called_once_with(
+        #     "export.csv", index=False, date_format="%Y%m"
+        # )
+
         assert_frame_equal(
             actual_output, expected_output, check_like=True, check_dtype=False
         )
 
     def test_start_of_period_staging_changing_formtypes(
         self,
+        mock_to_csv,
         imputation_output_changing_formtypes,
         start_of_period_staging_output_changing_formtypes,
-        mock_to_csv,
         mock_read_and_combine_colon_sep_files_changing_formtypes,
     ):
         # Resetting current period, this is overwritten during start_of_period_staging
@@ -249,9 +248,9 @@ class TestStartPeriodStaging:
     @pytest.mark.skip(reason="Test not implemented yet")
     def test_start_of_period_staging_changing_formtypes_integreation_test(
         self,
+        mock_to_csv,
         imputation_output_changing_formtypes,
         start_of_period_staging_output_changing_formtypes,
-        mock_to_csv,
         mock_read_and_combine_colon_sep_files_changing_formtypes,
     ):
         config["current_period"] = 202201
