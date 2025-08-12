@@ -130,29 +130,15 @@ def check_population_sample(df, population_column, sample_column):
             raise ValueError("If population = sample, all refs must have g = 1")
 
 
-def check_weights_exist(df, weight_columns):
-    """Check dataset contains a weight and g weight for all rows."""
-    for column in weight_columns:
-        if column not in df.columns:
-            raise ValueError(f"Missing required weight column: {column}")
-        if df[column].isnull().any():
-            raise ValueError(f"Missing weights in column: {column}")
-
-
-def check_unique_per_cell_period(
-    df, cell_column, period_column, weight_column, calibration_factor
-):
+def check_unique_per_cell_period(df, cell_column, period_column, column):
     """Check that for each cell/period there is only one unique design weight."""
-    if not all(
-        col in df.columns
-        for col in [cell_column, period_column, weight_column, calibration_factor]
-    ):
-        raise ValueError("Missing required columns for uniqueness check.")
-    for col in [weight_column, calibration_factor]:
-        if df.groupby([cell_column, period_column])[col].nunique().max() > 1:
-            raise ValueError(
-                f"Multiple unique values found for {col} in each cell/period"
-            )
+    for col in [cell_column, period_column, column]:
+        if col not in df.columns:
+            raise ValueError(f"Missing required weight column: {col}")
+    if df.groupby([cell_column, period_column])[column].nunique().max() > 1:
+        raise ValueError(
+            f"Multiple unique values found for {column} in each cell/period"
+        )
 
 
 def check_non_negative(df, column):
