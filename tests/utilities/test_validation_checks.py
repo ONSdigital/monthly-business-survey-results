@@ -16,6 +16,7 @@ from mbs_results.utilities.validation_checks import (
     validate_config_repeated_datatypes,
     validate_estimation,
     validate_indices,
+    validate_manual_constructions,
     validate_manual_outlier_df,
     validate_outlier_detection,
 )
@@ -340,3 +341,47 @@ def test_qa_selective_editing_outputs(
         "finalsel and SE outputs with water formtypes"
     )
     mock_logger.info.assert_any_call("QA of SE outputs finished")
+
+
+def test_validate_manual_constructions_no_error():
+    """Test when a unique observation (period,reference,question code) does
+    not exist in both responses and manual constructions"""
+
+    responses_data = {"period": [1], "reference": [1], "qcode": [1], "value": [5]}
+    responses_in = pd.DataFrame(data=responses_data)
+
+    manual_constructions_data = {
+        "period": [1],
+        "reference": [2],
+        "qcode": [1],
+        "value": [50],
+    }
+    responses_in = pd.DataFrame(data=responses_data)
+
+    manual_constructions_in = pd.DataFrame(data=manual_constructions_data)
+
+    validate_manual_constructions(
+        responses_in, manual_constructions_in, ["period", "reference", "qcode"]
+    )
+
+
+def test_validate_manual_constructions_raises_error():
+    "Test if error is raised"
+
+    responses_data = {"period": [1], "reference": [1], "qcode": [1], "value": [5]}
+    responses_in = pd.DataFrame(data=responses_data)
+
+    manual_constructions_data = {
+        "period": [1],
+        "reference": [1],
+        "qcode": [1],
+        "value": [50],
+    }
+    responses_in = pd.DataFrame(data=responses_data)
+
+    manual_constructions_in = pd.DataFrame(data=manual_constructions_data)
+
+    with pytest.raises(ValueError):
+        validate_manual_constructions(
+            responses_in, manual_constructions_in, ["period", "reference", "qcode"]
+        )
