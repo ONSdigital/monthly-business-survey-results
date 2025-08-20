@@ -24,6 +24,7 @@ from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.inputs import read_colon_separated_file, read_csv_wrapper
 from mbs_results.utilities.utils import convert_column_to_datetime
+from mbs_results.utilities.validation_checks import validate_manual_constructions
 
 logger = logging.getLogger(__name__)
 
@@ -193,6 +194,16 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     if config["manual_constructions_path"]:
         manual_constructions = read_csv_wrapper(
             config["manual_constructions_path"], config["platform"], config["bucket"]
+        )
+
+        manual_constructions = enforce_datatypes(
+            manual_constructions, keep_columns=list(manual_constructions), **config
+        )
+
+        validate_manual_constructions(
+            responses,
+            manual_constructions,
+            [config["period"], config["reference"], config["question_no"]],
         )
 
     else:

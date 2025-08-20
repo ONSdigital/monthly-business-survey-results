@@ -206,34 +206,46 @@ def validate_config_repeated_datatypes(
         )
 
 
-def validate_manual_constructions(df, manual_constructions):
+def validate_manual_constructions(
+    responses: pd.DataFrame, manual_constructions: pd.DataFrame, merge_on_cols: list
+):
     """
-    Checks that manual construction identifiers match those in the main dataset
+    Check to ensure there isn't a return (and therefore not in the responses
+    table in the spnashot) and MC for same reference-period-question combination.
 
     Parameters
     ----------
-    df: pd.DataFrame
-        the main dataframe after preprocessing
+    responses: pd.DataFrame
+        the responses dataframe
     manual_constructions: pd.DataFrame
         the manual constructions input read in as a dataframe
+    merge_on_cols : list
+        list of column to check for common observations in input dataframes.
 
     Raises
     ------
     ValueError
         ValueError if any combinations of period and reference appear in the manual
-        constructions input but not in the main dataframe
+        constructions input and  in the responses dataframe.
     """
 
-    incorrect_ids = set(manual_constructions.index) - set(df.index)
+    inner_joined = pd.merge(
+        left=responses,
+        right=manual_constructions,
+        how="inner",
+        on=merge_on_cols,
+        suffixes=("_from_responses", "_from_manual_constructions"),
+    )
 
-    if len(incorrect_ids) > 1:
-        string_ids = " ".join(
-            [f"\nreference: {str(i[0])}, period: {str(i[1])}" for i in incorrect_ids]
-        )
+    if not inner_joined.empty:
+
+        inner_joined.to_csv("valueError_validate_manual_constructions.csv", index=False)
 
         raise ValueError(
-            f"""There are reference and period combinations in the manual constructions
-      with no match: {string_ids}"""
+            """There are cases where a value exists in responses
+and in manual constructions, this is not possible, saving the results to
+the current working directory in a dataframe called
+`valueError_validate_manual_constructions.csv`"""
         )
 
 
