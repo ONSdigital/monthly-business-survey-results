@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 
@@ -8,13 +6,10 @@ from tests.helper_functions import does_not_raise
 
 
 @pytest.fixture()
-def filepath():
-    return Path("tests/data/estimation/validate_estimation")
-
-
-@pytest.fixture()
-def validate_estimation_data(filepath):
-    return pd.read_csv(filepath / "validate_estimation.csv")
+def validate_estimation_data(estimation_data_dir):
+    return pd.read_csv(
+        estimation_data_dir / "validate_estimation" / "validate_estimation.csv"
+    )
 
 
 @pytest.mark.parametrize(

@@ -4,7 +4,7 @@ from pandas.testing import assert_frame_equal
 from mbs_results.utilities.inputs import read_colon_separated_file
 
 
-def test_read_colon_separated_file():
+def test_read_colon_separated_file(utilities_data_dir):
     headers = ["int", "str", "float", "period"]
     expected = pd.DataFrame(
         {
@@ -16,7 +16,7 @@ def test_read_colon_separated_file():
     )
 
     actual = read_colon_separated_file(
-        "tests/data/utilities/read_colon_separated_file/colon_sep_202401", headers
+        utilities_data_dir / "read_colon_separated_file/colon_sep_202401", headers
     )
 
     assert_frame_equal(actual, expected)

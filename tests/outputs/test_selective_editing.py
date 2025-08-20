@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -12,8 +10,8 @@ from mbs_results.outputs.selective_editing import (
 
 
 @pytest.fixture(scope="class")
-def filepath():
-    return Path("tests/data/outputs/selective_editing")
+def filepath(outputs_data_dir):
+    return outputs_data_dir / "selective_editing"
 
 
 @pytest.fixture(scope="class")

@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -8,13 +6,9 @@ from mbs_results.outlier_detection.winsorisation import winsorise
 
 
 @pytest.fixture(scope="class")
-def expected_output():
+def expected_output(outlier_data_dir):
     return pd.read_csv(
-        Path("tests")
-        / "data"
-        / "outlier_detection"
-        / "test_winsorisation"
-        / "winsorised_weight_data_output.csv",
+        outlier_data_dir / "test_winsorisation" / "winsorised_weight_data_output.csv",
         low_memory=False,
         usecols=lambda c: not c.startswith("Unnamed:"),
     )

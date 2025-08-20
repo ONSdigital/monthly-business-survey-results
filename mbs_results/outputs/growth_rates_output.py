@@ -31,7 +31,7 @@ def get_growth_rates_output(
         * additional_outputs_df["calibration_factor"]
     )
 
-    input_data = additional_outputs_df[
+    input_data = additional_outputs_df.copy()[
         [
             "classification",
             config["question_no"],

@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -8,18 +6,17 @@ from mbs_results.outputs.qa_output import produce_qa_output
 
 
 @pytest.fixture(scope="class")
-def filepath():
-    return Path("tests/data/outputs/qa_output")
+def input_df(outputs_data_dir):
+    return pd.read_csv(
+        outputs_data_dir / "qa_output" / "qa_output_input.csv", index_col=False
+    )
 
 
 @pytest.fixture(scope="class")
-def input_df(filepath):
-    return pd.read_csv(filepath / "qa_output_input.csv", index_col=False)
-
-
-@pytest.fixture(scope="class")
-def output_df(filepath):
-    return pd.read_csv(filepath / "qa_output_output.csv", index_col=False)
+def output_df(outputs_data_dir):
+    return pd.read_csv(
+        outputs_data_dir / "qa_output" / "qa_output_output.csv", index_col=False
+    )
 
 
 @pytest.fixture(scope="class")

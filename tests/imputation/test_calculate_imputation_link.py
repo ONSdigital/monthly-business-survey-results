@@ -6,16 +6,16 @@ from tests.helper_functions import load_and_format
 
 
 @pytest.fixture(scope="class")
-def forward_backward_test_data():
+def forward_backward_test_data(imputation_data_dir):
     return load_and_format(
-        "tests/data/imputation/calculate_imputation_link/forward_backward.csv"
+        imputation_data_dir / "calculate_imputation_link/forward_backward.csv"
     )
 
 
 @pytest.fixture(scope="class")
-def construction_test_data():
+def construction_test_data(imputation_data_dir):
     return load_and_format(
-        "tests/data/imputation/calculate_imputation_link/construction.csv"
+        imputation_data_dir / "calculate_imputation_link/construction.csv"
     )
 
 
