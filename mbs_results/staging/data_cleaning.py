@@ -377,24 +377,29 @@ def run_live_or_frozen(
     return df
 
 
-def convert_annual_thousands(df: pd.DataFrame, col: str) -> pd.DataFrame:
+def convert_annual_thousands(
+    df: pd.DataFrame, auxiliary_converted: str, auxiliary: str
+) -> pd.DataFrame:
     """Convert values from annual £000s to monthly £.
 
     Parameters
     ----------
     df : pd.DataFrame
         Original dataframe.
-    col : str
-        Col name of df.
+    auxiliary_converted : str
+        The column name for the auxiliary_converted column created as part of this
+        function.
+    auxiliary : str
+        The column name for the auxiliary variable which should already exist in df.
 
     Returns
     -------
     df : pd.DataFrame
-        Original dataframe.
+        Original dataframe with an additional column for the converted auxiliary.
 
     """
 
-    df[col] = df[col] * 1000 / 12
+    df[auxiliary_converted] = df[auxiliary] * 1000 / 12
 
     return df
 
