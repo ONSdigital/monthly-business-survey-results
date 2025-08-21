@@ -399,7 +399,7 @@ def convert_annual_thousands(
 
     """
 
-    df[auxiliary_converted] = df[auxiliary] * 1000 / 12
+    df.loc[:, auxiliary_converted] = df[auxiliary] * 1000 / 12
 
     return df
 
