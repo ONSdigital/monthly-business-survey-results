@@ -177,8 +177,9 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         error_values=[201],
     )
 
-    df[config["auxiliary_converted"]] = df[config["auxiliary"]].copy()
-    df = convert_annual_thousands(df, config["auxiliary_converted"])
+    df = convert_annual_thousands(
+        df, config["auxiliary_converted"], config["auxiliary"]
+    )
 
     df["ni_gb_cell_number"] = df[config["cell_number"]]
 
@@ -382,7 +383,9 @@ def start_of_period_staging(
             imputation_output_with_missing[config["auxiliary"]].copy()
         )
         imputation_output_with_missing = convert_annual_thousands(
-            imputation_output_with_missing, config["auxiliary_converted"]
+            imputation_output_with_missing,
+            config["auxiliary_converted"],
+            config["auxiliary"],
         )
 
         # Keep only questions present in next period and not current period
