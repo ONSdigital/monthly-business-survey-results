@@ -90,6 +90,30 @@ def read_back_data(config: dict) -> pd.DataFrame:
         cp_df, qv_df = get_dfs_from_spp(
             config["back_data_qv_cp_json_path"], config["platform"], config["bucket"]
         )
+        cp_df = cp_df.drop(
+            columns=[
+                "cell_no",
+                "classification",
+                "createdby",
+                "createddate",
+                "lastupdatedby",
+                "lastupdateddate",
+            ],
+            errors="ignore",
+        )
+        qv_df = qv_df.drop(
+            columns=[
+                "cell_no",
+                "classification",
+                "createdby",
+                "createddate",
+                "lastupdatedby",
+                "lastupdateddate",
+                "survey",
+                "formtype",
+            ],
+            errors="ignore",
+        )
 
     elif config["back_data_format"] == "csv":
         qv_df = read_csv_wrapper(
