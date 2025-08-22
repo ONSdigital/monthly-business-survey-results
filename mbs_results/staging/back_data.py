@@ -107,14 +107,13 @@ def read_back_data(config: dict) -> pd.DataFrame:
     cp_df[config["period"]] = convert_column_to_datetime(cp_df[config["period"]])
 
     # enforce all data types here
-    cp_df = cp_df[config["contributors_keep_cols"]]
+
     cp_df = enforce_datatypes(
         cp_df,
         keep_columns=config["contributors_keep_cols"],
         **config,
     )
 
-    qv_df = qv_df[config["responses_keep_cols"]]
     qv_df = enforce_datatypes(
         qv_df, keep_columns=config["responses_keep_cols"], **config
     )
