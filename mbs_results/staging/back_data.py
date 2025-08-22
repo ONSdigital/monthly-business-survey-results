@@ -106,6 +106,19 @@ def read_back_data(config: dict) -> pd.DataFrame:
     qv_df[config["period"]] = convert_column_to_datetime(qv_df[config["period"]])
     cp_df[config["period"]] = convert_column_to_datetime(cp_df[config["period"]])
 
+    # enforce all data types here
+    cp_df = cp_df[config["contributors_keep_cols"]]
+    cp_df = enforce_datatypes(
+        cp_df,
+        keep_columns=config["contributors_keep_cols"],
+        **config,
+    )
+
+    qv_df = qv_df[config["responses_keep_cols"]]
+    qv_df = enforce_datatypes(
+        qv_df, keep_columns=config["responses_keep_cols"], **config
+    )
+
     finalsel = read_colon_separated_file(
         filepath=config["back_data_finalsel_path"],
         column_names=config["sample_column_names"],
@@ -201,7 +214,12 @@ def read_and_process_back_data(config: dict) -> pd.DataFrame:
 
     back_data = read_back_data(config)
 
-    back_data = back_data.rename(columns=config["csw_to_spp_columns"], errors="raise")
+    if config["back_data_format"] == "csv":
+        # renaming columns to spp standard names
+        # this is only needed for csv back data
+        back_data = back_data.rename(
+            columns=config["csw_to_spp_columns"], errors="raise"
+        )
 
     # Json file can't store keys as int, thus stored them as str
     # This is why we need to convert them to str here since from csv source
