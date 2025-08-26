@@ -255,12 +255,18 @@ def read_and_process_back_data(config: dict) -> pd.DataFrame:
     # This is why we need to convert them to str here since from csv source
     # they are loaded as int
     # Filled as -999 because int cannot store nulls, and -999 isnt a used type
-
-    back_data.insert(
-        0,
-        config["imputation_marker_col"],
-        back_data[type_col].fillna(-999).astype(int).astype(str).map(map_type),
-    )
+    if config["back_data_format"] == "csv":
+        back_data.insert(
+            0,
+            config["imputation_marker_col"],
+            back_data[type_col].fillna(-999).astype(int).astype(str).map(map_type),
+        )
+    elif config["back_data_format"] == "json":
+        back_data.insert(
+            0,
+            config["imputation_marker_col"],
+            back_data["imputationmarker"],
+        )
 
     # TO-DO: Refactor this so construction pipeline doesn't get an unnecessary warning
     if "idbr_to_spp" in config:
