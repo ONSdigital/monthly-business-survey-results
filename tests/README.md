@@ -13,7 +13,7 @@ Key and commonly used mocked / patched functions have been included as well. If 
 - User warnings and warnings from importlib have been suppressed when running the unit tests (these will still appear when running the main pipeline!)
 - Warnings suppressed can be updated in `pyproject.toml`
 
-## Suppresed warnings
+## Suppressed warnings
 
 There are two warning messages suppressed when running the unit tests, these are:
  - `UserWarning`- This covers all warnings we have coded into the pipeline, tests will still fail if they expect to see a user warning, they will just not be printed to the output console.
