@@ -132,6 +132,13 @@ def read_back_data(config: dict) -> pd.DataFrame:
 
     # enforce all data types here
 
+    if "yes" in qv_df[config["target"]] or "no" in qv_df[config["target"]]:
+        qv_df[config["target"]] = (
+            qv_df[config["target"]]
+            .map({"yes": 1, "no": 0})
+            .fillna(qv_df[config["target"]])
+        )
+
     cp_df = enforce_datatypes(
         cp_df,
         keep_columns=config["contributors_keep_cols"],
