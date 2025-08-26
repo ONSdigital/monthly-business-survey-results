@@ -1,6 +1,7 @@
 import os
 from importlib import metadata
 
+import numpy as np
 import pandas as pd
 
 
@@ -95,3 +96,62 @@ def compare_two_dataframes(df1, df2):
             changed_columns.append(column)
 
     return diff, changed_columns
+
+
+def check_duplicates(df, columns):
+    """Check for duplicate rows based on specified columns."""
+    if df.duplicated(subset=columns).any():
+        raise ValueError(f"Duplicate rows found based on columns: {columns}")
+
+
+def check_missing_values(df, column):
+    """Check for missing values in a specific column."""
+    if column not in df.columns:
+        raise ValueError(f"Missing required column: {column}")
+    if df[column].isnull().any():
+        raise ValueError(f"Column {column} contains missing values.")
+
+
+def check_input_types(df, expected_types):
+    """Check types of input variables."""
+    for column, expected_type in expected_types.items():
+        if column not in df.columns:
+            raise ValueError(f"Missing required column: {column}")
+        if not np.issubdtype(df[column].dtype, expected_type):
+            raise TypeError(f"Column {column} is not of type {expected_type}")
+
+
+def check_population_sample(df, population_column, sample_column):
+    """Check if population = sample, then a and g should be 1."""
+    if (df[population_column] == df[sample_column]).all():
+        if not (df["a"] == 1).all():
+            raise ValueError("If population = sample, all refs must have a = 1")
+        if not (df["g"] == 1).all():
+            raise ValueError("If population = sample, all refs must have g = 1")
+
+
+def check_unique_per_cell_period(df, cell_column, period_column, column):
+    """Check that for each cell/period there is only one unique design weight."""
+    for col in [cell_column, period_column, column]:
+        if col not in df.columns:
+            raise ValueError(f"Missing required weight column: {col}")
+    if df.groupby([cell_column, period_column])[column].nunique().max() > 1:
+        raise ValueError(
+            f"Multiple unique values found for {column} in each cell/period"
+        )
+
+
+def check_non_negative(df, column):
+    """Check that all values in a column are non-negative."""
+    if column not in df.columns:
+        raise ValueError(f"Missing required column: {column}")
+    if (df[column] < 0).any():
+        raise ValueError(f"Column {column} contains negative values.")
+
+
+def check_above_one(df, column):
+    """Check that all values in a column are non-negative."""
+    if column not in df.columns:
+        raise ValueError(f"Missing required column: {column}")
+    if (df[column] < 1).any():
+        raise ValueError(f"Column {column} contains values not greater than 1.")

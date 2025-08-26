@@ -1,8 +1,19 @@
+import numpy as np
 import pandas as pd
+import pytest
 from pandas.testing import assert_frame_equal
 
 from mbs_results.utilities.inputs import read_colon_separated_file
-from mbs_results.utilities.utils import compare_two_dataframes
+from mbs_results.utilities.utils import (
+    check_above_one,
+    check_duplicates,
+    check_input_types,
+    check_missing_values,
+    check_non_negative,
+    check_population_sample,
+    check_unique_per_cell_period,
+    compare_two_dataframes,
+)
 
 
 def test_read_colon_separated_file():
@@ -46,3 +57,104 @@ def test_compare_two_dataframes():
     assert_frame_equal(expected_diff, actual_diff)
 
     assert expected_column_diff == actual_column_diff
+
+
+def test_check_duplicates_raises_value_error():
+
+    df = pd.DataFrame({"col1": [1, 2, 2], "col2": [3, 4, 4]})
+    columns = ["col1", "col2"]
+
+    with pytest.raises(ValueError, match="Duplicate rows found based on columns:"):
+        check_duplicates(df, columns)
+
+
+def test_check_missing_values_raises_value_error():
+
+    df = pd.DataFrame({"col1": [1, 2, 3]})
+    column = "col2"
+
+    with pytest.raises(ValueError, match="Missing required column: col2"):
+        check_missing_values(df, column)
+
+    df = pd.DataFrame({"col1": [1, None, 3]})
+    column = "col1"
+
+    with pytest.raises(ValueError, match="Column col1 contains missing values."):
+        check_missing_values(df, column)
+
+
+def test_check_input_types_raises_value_error():
+    df = pd.DataFrame({"col1": [1, 2, 3], "col2": ["a", "b", "c"]})
+    expected_types = {"col1": np.integer, "col2": np.float64}
+
+    with pytest.raises(ValueError, match="Missing required column: col3"):
+        check_input_types(df, {"col3": np.float64})
+
+    with pytest.raises(
+        TypeError, match="Column col2 is not of type <class 'numpy.float64'>"
+    ):
+        check_input_types(df, expected_types)
+
+
+def test_check_population_sample_raises_value_error():
+
+    df = pd.DataFrame(
+        {
+            "population": [1, 2, 3],
+            "sample": [1, 2, 3],
+            "a": [1, 0, 1],
+            "g": [1, 1, 0],
+        }
+    )
+
+    with pytest.raises(
+        ValueError, match="If population = sample, all refs must have a = 1"
+    ):
+        check_population_sample(df, "population", "sample")
+
+    df["a"] = [1, 1, 1]
+    with pytest.raises(
+        ValueError, match="If population = sample, all refs must have g = 1"
+    ):
+        check_population_sample(df, "population", "sample")
+
+
+def test_check_unique_per_cell_period_raises_value_error():
+
+    df = pd.DataFrame({"cell": [1, 2], "period": [2023, 2023]})
+
+    with pytest.raises(ValueError, match="Missing required weight column: weight"):
+        check_unique_per_cell_period(df, "cell", "period", "weight")
+
+    df = pd.DataFrame(
+        {
+            "cell": [1, 1, 2],
+            "period": [2023, 2023, 2023],
+            "weight": [1.0, 2.0, 3.0],
+        }
+    )
+
+    with pytest.raises(
+        ValueError, match="Multiple unique values found for weight in each cell/period"
+    ):
+        check_unique_per_cell_period(df, "cell", "period", "weight")
+
+
+def test_check_non_negative_raises_value_error():
+
+    df = pd.DataFrame({"col1": [1, -2, 3]})
+    column = "col1"
+
+    with pytest.raises(ValueError, match="Column col1 contains negative values."):
+        check_non_negative(df, column)
+
+
+def test_check_above_one_raises_value_error():
+
+    df = pd.DataFrame({"col1": [0.5, 1.0, 1.5]})
+    column = "col1"
+
+    with pytest.raises(
+        ValueError, match="Column col1 contains values not greater than 1."
+    ):
+        check_above_one(df, column)
