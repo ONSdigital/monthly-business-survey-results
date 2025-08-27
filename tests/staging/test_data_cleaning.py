@@ -128,35 +128,35 @@ def test_convert_cell_number(data_dir):
     assert_frame_equal(actual_output, expected_output)
 
 
-def test_run_live_or_frozen(data_dir):
+class TestRunLiveOrFrozen:
+    def test_run_live_or_frozen(self, data_dir):
 
-    df_in = pd.read_csv(data_dir / "test_run_live_or_frozen_input.csv")
+        df_in = pd.read_csv(data_dir / "test_run_live_or_frozen_input.csv")
 
-    expected_frozen_output = pd.read_csv(
-        data_dir / "test_run_live_or_frozen_frozen_output.csv"
-    )
+        expected_frozen_output = pd.read_csv(
+            data_dir / "test_run_live_or_frozen_frozen_output.csv"
+        )
 
-    expected_live_output = df_in.copy()
+        expected_live_output = df_in.copy()
 
-    live_ouput = run_live_or_frozen(df_in, "target", "status", "live")
+        live_ouput = run_live_or_frozen(df_in, "target", "status", "live")
 
-    frozen_output = run_live_or_frozen(df_in, "target", "status", "frozen")
+        frozen_output = run_live_or_frozen(df_in, "target", "status", "frozen")
 
-    assert_frame_equal(frozen_output, expected_frozen_output)
-    assert_frame_equal(live_ouput, expected_live_output)
+        assert_frame_equal(frozen_output, expected_frozen_output)
+        assert_frame_equal(live_ouput, expected_live_output)
 
+    def test_run_live_or_frozen_exception(self, data_dir):
 
-def test_run_live_or_frozen_exception(data_dir):
+        df = pd.read_csv(data_dir / "test_run_live_or_frozen_input.csv")
 
-    df = pd.read_csv(data_dir / "test_run_live_or_frozen_input.csv")
-
-    with pytest.raises(ValueError):
-        run_live_or_frozen(df, "target", "error", "love")
+        with pytest.raises(ValueError):
+            run_live_or_frozen(df, "target", "error", "love")
 
 
 def test_is_census(data_dir):
 
-    df = pd.read_csv(data_dir / "test_is_cencus.csv")
+    df = pd.read_csv(data_dir / "test_is_census.csv")
 
     extra_cal_groups = [
         5043,
@@ -244,10 +244,10 @@ class TestNilValues:
             convert_nil_values(df_in_warning, "status", "value", nil_values)
 
 
-def test_convert_annual_thousands(filepath):
+def test_convert_annual_thousands(data_dir):
 
-    df_in = pd.read_csv(filepath / "test_convert_annual_thousands_input.csv")
-    expected_output = pd.read_csv(filepath / "test_convert_annual_thousands_output.csv")
+    df_in = pd.read_csv(data_dir / "test_convert_annual_thousands_input.csv")
+    expected_output = pd.read_csv(data_dir / "test_convert_annual_thousands_output.csv")
 
     actual_output = convert_annual_thousands(df_in, "converted_frotover", "frotover")
 
