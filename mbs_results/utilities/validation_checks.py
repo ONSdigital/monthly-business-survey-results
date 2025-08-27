@@ -8,6 +8,10 @@ import pandas as pd
 from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.utils import (
     append_filter_out_questions,
+    check_above_one,
+    check_duplicates,
+    check_non_negative,
+    check_unique_per_cell_period,
     get_versioned_filename,
 )
 
@@ -206,34 +210,46 @@ def validate_config_repeated_datatypes(
         )
 
 
-def validate_manual_constructions(df, manual_constructions):
+def validate_manual_constructions(
+    responses: pd.DataFrame, manual_constructions: pd.DataFrame, merge_on_cols: list
+):
     """
-    Checks that manual construction identifiers match those in the main dataset
+    Check to ensure there isn't a return (and therefore not in the responses
+    table in the spnashot) and MC for same reference-period-question combination.
 
     Parameters
     ----------
-    df: pd.DataFrame
-        the main dataframe after preprocessing
+    responses: pd.DataFrame
+        the responses dataframe
     manual_constructions: pd.DataFrame
         the manual constructions input read in as a dataframe
+    merge_on_cols : list
+        list of column to check for common observations in input dataframes.
 
     Raises
     ------
     ValueError
         ValueError if any combinations of period and reference appear in the manual
-        constructions input but not in the main dataframe
+        constructions input and  in the responses dataframe.
     """
 
-    incorrect_ids = set(manual_constructions.index) - set(df.index)
+    inner_joined = pd.merge(
+        left=responses,
+        right=manual_constructions,
+        how="inner",
+        on=merge_on_cols,
+        suffixes=("_from_responses", "_from_manual_constructions"),
+    )
 
-    if len(incorrect_ids) > 1:
-        string_ids = " ".join(
-            [f"\nreference: {str(i[0])}, period: {str(i[1])}" for i in incorrect_ids]
-        )
+    if not inner_joined.empty:
+
+        inner_joined.to_csv("valueError_validate_manual_constructions.csv", index=False)
 
         raise ValueError(
-            f"""There are reference and period combinations in the manual constructions
-      with no match: {string_ids}"""
+            """There are cases where a value exists in responses
+and in manual constructions, this is not possible, saving the results to
+the current working directory in a dataframe called
+`valueError_validate_manual_constructions.csv`"""
         )
 
 
@@ -267,7 +283,6 @@ def validate_estimation(df: pd.DataFrame, config: dict):
     config: Dict
         The config dictionary.
 
-
     Raises
     ------
     ValueError
@@ -287,6 +302,12 @@ def validate_estimation(df: pd.DataFrame, config: dict):
             f'There are {sampled_nas} NA(s) in the {config["sampled"]} column.'
         )
 
+    if config["group"] != config["strata"]:
+        validate_combined_ratio_estimation(
+            population_frame=df,
+            config=config,
+        )
+
     write_csv_wrapper(
         df,
         output_path + estimate_filename,
@@ -294,6 +315,53 @@ def validate_estimation(df: pd.DataFrame, config: dict):
         config["bucket"],
         index=False,
     )
+
+
+def validate_combined_ratio_estimation(
+    population_frame: pd.DataFrame,
+    config: dict,
+) -> None:
+    """
+    Run all validation checks on combined ratio estimation.
+
+    This function performs the following checks:
+
+    1. Checks for duplicate rows based on 'period', 'reference', and 'question'.
+    2. Verifies that weight columns exist and contain no missing values.
+    3. Ensures unique design weights and calibration factors per cell/period.
+    4. Checks that 'auxilary' and 'calibration_factor' contain non-negative values.
+    5. Checks that 'design_weight' is above one.
+
+    Parameters
+    ----------
+    population_frame : pandas.DataFrame
+        A data frame with estimation weights.
+    weight_columns : list of str
+        A list of weight columns to check for missing values.
+    unique_checks : list of str
+        A list of columns to check for unique values per cell/period.
+    non_negative_checks : dict of str to str
+        A list of columns to check for non-negative values
+    design_weight : str
+        The name of the design weight column.
+
+    Raises
+    ------
+    `ValueError`
+    """
+    check_duplicates(
+        population_frame, [config["period"], config["reference"], config["question_no"]]
+    )
+
+    for column in [config["design_weight"], config["calibration_factor"]]:
+        check_unique_per_cell_period(
+            population_frame, config["cell_number"], config["period"], column
+        )
+
+    for column in [config["calibration_factor"], config["auxiliary"]]:
+        check_non_negative(population_frame, column)
+
+    check_above_one(population_frame, config["design_weight"])
 
 
 def validate_outlier_detection(df: pd.DataFrame, config: dict):

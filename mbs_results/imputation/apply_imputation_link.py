@@ -193,5 +193,7 @@ def merge_imputation_type(df, imputation_spec, marker, target):
     imputation_marker = imputation_spec["marker"]
     imputation_column = imputation_spec["intermediate_column"]
 
-    df.loc[df[marker] == imputation_marker, target] = df[imputation_column]
+    df.loc[(df[marker] == imputation_marker) & (~df["is_backdata"]), target] = df[
+        imputation_column
+    ]
     return df

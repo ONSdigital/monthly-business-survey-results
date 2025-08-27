@@ -85,7 +85,9 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
 
     # Convert Aux to £'s monthly
     back_data[config["auxiliary_converted"]] = back_data[config["auxiliary"]].copy()
-    back_data = convert_annual_thousands(back_data, config["auxiliary_converted"])
+    back_data = convert_annual_thousands(
+        back_data, config["auxiliary_converted"], config["auxiliary"]
+    )
 
     # Convert cell number to not include NI
     back_data = convert_cell_number(back_data, config["cell_number"])

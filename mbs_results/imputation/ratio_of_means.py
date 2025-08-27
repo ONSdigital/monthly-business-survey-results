@@ -514,7 +514,6 @@ def ratio_of_means(
             construction_link="construction_link",
             imputation_types=imputation_types,
         )
-        .pipe(reapply_backdata, target=target)
     )
 
     # TODO: Reset index needed because of sorting, perhaps reset index

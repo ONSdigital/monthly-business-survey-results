@@ -6,6 +6,7 @@ from pandas.testing import assert_frame_equal, assert_series_equal
 
 from mbs_results.staging.data_cleaning import (
     clean_and_merge,
+    convert_annual_thousands,
     convert_cell_number,
     convert_nil_values,
     create_imputation_class,
@@ -241,3 +242,13 @@ class TestNilValues:
 
         with pytest.warns():
             convert_nil_values(df_in_warning, "status", "value", nil_values)
+
+
+def test_convert_annual_thousands(filepath):
+
+    df_in = pd.read_csv(filepath / "test_convert_annual_thousands_input.csv")
+    expected_output = pd.read_csv(filepath / "test_convert_annual_thousands_output.csv")
+
+    actual_output = convert_annual_thousands(df_in, "converted_frotover", "frotover")
+
+    assert_frame_equal(actual_output, expected_output)
