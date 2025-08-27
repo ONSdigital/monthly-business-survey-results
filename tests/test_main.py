@@ -9,7 +9,7 @@ input_path = "tests/data/test_main/input/"
 test_config = {
     "platform": "network",
     "bucket": "",
-    "back_data_format": "json",
+    "back_data_format": "csv",
     "calibration_group_map_path": input_path
     + "test_cell_no_calibration_group_mapping.csv",
     "classification_values_path": input_path + "test_classification_sic_mapping.csv",
@@ -69,3 +69,10 @@ def test_main_with_s3():
     integration with s3
     """
     run_mbs_main()
+
+
+def test_main_json():
+    config_user_test = test_config
+    config_user_test["back_data_format"] = "json"
+
+    run_mbs_main(config_user_dict=config_user_test)

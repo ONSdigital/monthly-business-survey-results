@@ -7,16 +7,18 @@
             "form_type": "T111G",
             "sic92": 45310,
             "error_mkr": "O",
-            "response_type": 1
+            "response_type": 1,
+            "status": "test",
+            "statusencoded": 1
         }
     ],
     "responses": [
         {
             "period": 202112,
             "reference": 1,
-            "question_no": 40,
-            "returned_value": 999,
-            "adjusted_value": 999,
+            "questioncode": 40,
+            "response": 999,
+            "adjustedresponse": 999,
             "instance": 999,
             "type": 1,
             "imputationmarker": "r"
@@ -24,9 +26,9 @@
         {
             "period": 202112,
             "reference": 1,
-            "question_no": -999,
-            "returned_value": -999,
-            "adjusted_value": -999,
+            "questioncode": -999,
+            "response": -999,
+            "adjustedresponse": -999,
             "instance": -999,
             "type": 1,
             "imputationmarker": "c"

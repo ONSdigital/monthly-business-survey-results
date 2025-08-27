@@ -90,6 +90,50 @@ def read_back_data(config: dict) -> pd.DataFrame:
         cp_df, qv_df = get_dfs_from_spp(
             config["back_data_qv_cp_json_path"], config["platform"], config["bucket"]
         )
+        cp_df = cp_df.drop(
+            columns=[
+                "cell_no",
+                "classification",
+                "createdby",
+                "createddate",
+                "lastupdatedby",
+                "lastupdateddate",
+            ],
+            errors="ignore",
+        )
+        qv_df = qv_df.drop(
+            columns=[
+                "cell_no",
+                "classification",
+                "createdby",
+                "createddate",
+                "lastupdatedby",
+                "lastupdateddate",
+                "survey",
+                "formtype",
+            ],
+            errors="ignore",
+        )
+        if (
+            "Yes" in qv_df[config["target"]].unique()
+            or "No" in qv_df[config["target"]].unique()
+        ):
+            # Converting yes to 1, no to 0 and empty string to None
+            qv_df[config["target"]] = (
+                qv_df[config["target"]]
+                .map({"Yes": 1, "No": 0})
+                .fillna(qv_df[config["target"]])
+            )
+            qv_df.loc[qv_df[config["target"]] == "", config["target"]] = None
+        cp_df = enforce_datatypes(
+            cp_df,
+            keep_columns=config["contributors_keep_cols"],
+            **config,
+        )
+
+        qv_df = enforce_datatypes(
+            qv_df, keep_columns=config["responses_keep_cols"], **config
+        )
 
     elif config["back_data_format"] == "csv":
         qv_df = read_csv_wrapper(
@@ -105,6 +149,8 @@ def read_back_data(config: dict) -> pd.DataFrame:
 
     qv_df[config["period"]] = convert_column_to_datetime(qv_df[config["period"]])
     cp_df[config["period"]] = convert_column_to_datetime(cp_df[config["period"]])
+
+    # enforce all data types here
 
     finalsel = read_colon_separated_file(
         filepath=config["back_data_finalsel_path"],
@@ -201,18 +247,29 @@ def read_and_process_back_data(config: dict) -> pd.DataFrame:
 
     back_data = read_back_data(config)
 
-    back_data = back_data.rename(columns=config["csw_to_spp_columns"], errors="raise")
+    if config["back_data_format"] == "csv":
+        # renaming columns to spp standard names
+        # this is only needed for csv back data
+        back_data = back_data.rename(
+            columns=config["csw_to_spp_columns"], errors="raise"
+        )
 
     # Json file can't store keys as int, thus stored them as str
     # This is why we need to convert them to str here since from csv source
     # they are loaded as int
     # Filled as -999 because int cannot store nulls, and -999 isnt a used type
-
-    back_data.insert(
-        0,
-        config["imputation_marker_col"],
-        back_data[type_col].fillna(-999).astype(int).astype(str).map(map_type),
-    )
+    if config["back_data_format"] == "csv":
+        back_data.insert(
+            0,
+            config["imputation_marker_col"],
+            back_data[type_col].fillna(-999).astype(int).astype(str).map(map_type),
+        )
+    elif config["back_data_format"] == "json":
+        back_data.insert(
+            0,
+            config["imputation_marker_col"],
+            back_data["imputationmarker"],
+        )
 
     # TO-DO: Refactor this so construction pipeline doesn't get an unnecessary warning
     if "idbr_to_spp" in config:
