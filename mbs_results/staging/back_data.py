@@ -118,12 +118,13 @@ def read_back_data(config: dict) -> pd.DataFrame:
             "Yes" in qv_df[config["target"]].unique()
             or "No" in qv_df[config["target"]].unique()
         ):
-            # Converting yes to 1, no and empty string to 0
+            # Converting yes to 1, no to 0 and empty string to None
             qv_df[config["target"]] = (
                 qv_df[config["target"]]
-                .map({"Yes": 1, "No": 0, "": 0})
+                .map({"Yes": 1, "No": 0})
                 .fillna(qv_df[config["target"]])
             )
+            qv_df.loc[qv_df[config["target"]] == "", config["target"]] = None
         cp_df = enforce_datatypes(
             cp_df,
             keep_columns=config["contributors_keep_cols"],
