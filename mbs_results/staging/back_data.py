@@ -114,12 +114,25 @@ def read_back_data(config: dict) -> pd.DataFrame:
             ],
             errors="ignore",
         )
-        if "yes" in qv_df[config["target"]] or "no" in qv_df[config["target"]]:
+        if (
+            "Yes" in qv_df[config["target"]].unique()
+            or "No" in qv_df[config["target"]].unique()
+        ):
+            # Converting yes to 1, no and empty string to 0
             qv_df[config["target"]] = (
                 qv_df[config["target"]]
-                .map({"yes": 1, "no": 0})
+                .map({"Yes": 1, "No": 0, "": 0})
                 .fillna(qv_df[config["target"]])
             )
+        cp_df = enforce_datatypes(
+            cp_df,
+            keep_columns=config["contributors_keep_cols"],
+            **config,
+        )
+
+        qv_df = enforce_datatypes(
+            qv_df, keep_columns=config["responses_keep_cols"], **config
+        )
 
     elif config["back_data_format"] == "csv":
         qv_df = read_csv_wrapper(
@@ -137,16 +150,6 @@ def read_back_data(config: dict) -> pd.DataFrame:
     cp_df[config["period"]] = convert_column_to_datetime(cp_df[config["period"]])
 
     # enforce all data types here
-
-    cp_df = enforce_datatypes(
-        cp_df,
-        keep_columns=config["contributors_keep_cols"],
-        **config,
-    )
-
-    qv_df = enforce_datatypes(
-        qv_df, keep_columns=config["responses_keep_cols"], **config
-    )
 
     finalsel = read_colon_separated_file(
         filepath=config["back_data_finalsel_path"],
