@@ -149,9 +149,27 @@ def produce_selective_editing_outputs(
 
     file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
 
-    for output in additional_outputs:
-        file = output.split("_")[-1]
-        period = additional_outputs[output]["period"].unique()[0]
-        filename = f"se{file}009_{period}_v{file_version_mbs}.csv"
-        additional_outputs[output].to_csv(config["output_path"] + filename, index=False)
-        logger.info(config["output_path"] + filename + " saved")
+    # Stop function if no additional_outputs are listed in config.
+    if additional_outputs is None:
+        return
+
+    for output, (df, name) in additional_outputs.items():
+        if name:
+            filename = name
+            print("if name")
+        else:
+            file = output.split("_")[-1]
+            period = df["period"].unique()[0]
+            filename = f"se{file}009_{period}_v{file_version_mbs}.csv"
+        # output_value = additional_outputs[output]
+        if isinstance(df, dict):
+            # if the output is a dictionary (e.g. from generate_devolved_outputs),
+            # we need to save each DataFrame in the dictionary
+            for nation, df in df.items():
+                nation_filename = f"{config['output_path']}{nation.lower()}_{filename}"
+                df.to_csv(nation_filename, index=False)
+                logger.info(nation_filename + " saved")
+        else:
+            # if the output is a DataFrame, save it directly
+            df.to_csv(config["output_path"] + filename, index=False)
+            logger.info(config["output_path"] + filename + " saved")

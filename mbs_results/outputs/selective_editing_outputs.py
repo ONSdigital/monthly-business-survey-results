@@ -80,7 +80,12 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
         index=False,
     )
 
-    estimation_output = estimate(imputation_output, config_se)
+    estimation_output = estimate(
+        df=imputation_output,
+        method="combined",
+        convert_NI_GB_cells=True,
+        config=config_se,
+    )
 
     estimation_output.to_csv(
         config_se["output_path"]
