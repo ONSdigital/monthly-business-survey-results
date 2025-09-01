@@ -14,7 +14,7 @@ from mbs_results.staging.data_cleaning import (
 )
 from mbs_results.staging.stage_dataframe import drop_derived_questions
 from mbs_results.utilities.inputs import load_config
-
+import warnings
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     filename="period_zero_se_wrapper.txt",
@@ -24,7 +24,7 @@ logging.basicConfig(
 )
 
 
-def period_zero_se_wrapper():
+def period_zero_se_wrapper(config_user_dict=None):
     """
     wrapper for selective editing outputs when using period zero data supplied from csw
     function does some minor imputation processing to update cell_number and imputation
@@ -38,7 +38,7 @@ def period_zero_se_wrapper():
     # Double check which periods frotover and cell number should be used
     # for construction links.
 
-    config = load_config(None)
+    config = load_config(config_user_dict)
 
     # Read in back data
     back_data = read_and_process_back_data(config)

@@ -1,4 +1,7 @@
 from pathlib import Path
+from unittest.mock import patch
+from mbs_results.period_zero_se_wrapper import period_zero_se_wrapper
+from mbs_results.final_outputs import run_final_outputs
 
 import pandas as pd
 import pytest
@@ -123,3 +126,28 @@ class TestSelectiveEditing:
         )
 
         assert_frame_equal(actual_output, expected_output)
+
+
+
+
+@pytest.fixture(scope="class")
+def mock_load_imputation_output():
+    path = "tests/data/test_se_wrappers/output/imputation_test_snapshot.csv"
+    with patch(
+        "mbs_results.final_outputs.load_imputation_output",
+        return_value=pd.read_csv(path)
+    ) as mock_load:
+        yield pd.read_csv(path)
+
+
+class TestSelectiveEditingWrappers:
+    def test_period_zero_se_wrapper(self, mock_user_config):
+        period_zero_se_wrapper(config_user_dict=mock_user_config)
+
+    def test_run_final_outputs(self, mock_user_config, mock_load_imputation_output):
+        mock_user_config["current_period"] = 202201
+
+        # Access the mock to ensure it's used and avoid the "not accessed" error
+        assert mock_load_imputation_output is not None
+
+        run_final_outputs(mock_user_config)

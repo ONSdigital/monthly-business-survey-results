@@ -890,3 +890,7 @@ debug_script*
 
 # Ignore logs
 logs/
+
+# Ignore selective editing testing outputs
+tests/data/test_se_wrappers/output/*
+selective_editing_review_doc/*
