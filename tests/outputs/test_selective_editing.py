@@ -1,17 +1,17 @@
 from pathlib import Path
 from unittest.mock import patch
-from mbs_results.period_zero_se_wrapper import period_zero_se_wrapper
-from mbs_results.final_outputs import run_final_outputs
 
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
+from mbs_results.final_outputs import run_final_outputs
 from mbs_results.outputs.selective_editing import (
     calculate_auxiliary_value,
     calculate_predicted_value,
     create_standardising_factor,
 )
+from mbs_results.period_zero_se_wrapper import period_zero_se_wrapper
 
 
 @pytest.fixture(scope="class")
@@ -128,26 +128,69 @@ class TestSelectiveEditing:
         assert_frame_equal(actual_output, expected_output)
 
 
+input_path = "tests/data/test_main/input/"
+
+
+@pytest.fixture(scope="class")
+def mock_user_config():
+    return {
+        "platform": "network",
+        "bucket": "",
+        "back_data_format": "csv",
+        "calibration_group_map_path": input_path
+        + "test_cell_no_calibration_group_mapping.csv",
+        "classification_values_path": input_path
+        + "test_classification_sic_mapping.csv",
+        "snapshot_file_path": "test_snapshot.json",
+        "idbr_folder_path": input_path,
+        "l_values_path": input_path
+        + "test_classification_question_number_l_value_mapping.csv",
+        "output_path": "tests/data/test_se_wrappers/output/",
+        "manual_outlier_path": None,
+        "population_prefix": "test_universe009",
+        "sample_prefix": "test_finalsel009",
+        "back_data_qv_path": input_path + "test_qv_009_202112.csv",
+        "back_data_cp_path": input_path + "test_cp_009_202112.csv",
+        "back_data_qv_cp_json_path": input_path + "test_json_backdata.json",
+        "back_data_finalsel_path": input_path + "test_finalsel009_202112",
+        "lu_path": input_path + "ludets009_202303",
+        "cdid_data_path": "",
+        "revision_window": 1,
+        "state": "frozen",
+        "devolved_nations": ["Scotland", "Wales"],
+        "optional_outputs": [],
+        "idbr_to_spp": {"9999": 999},
+        "sic_domain_mapping_path": input_path + "test_sic_domain_mapping.csv",
+        "threshold_filepath": input_path + "test_form_domain_threshold_mapping.csv",
+    }
 
 
 @pytest.fixture(scope="class")
 def mock_load_imputation_output():
-    path = "tests/data/test_se_wrappers/output/imputation_test_snapshot.csv"
+    path = "tests/data/test_se_wrappers/inputs/imputation_test_snapshot.csv"
     with patch(
         "mbs_results.final_outputs.load_imputation_output",
-        return_value=pd.read_csv(path)
-    ) as mock_load:
+        return_value=pd.read_csv(path),
+    ):
         yield pd.read_csv(path)
 
 
+@pytest.fixture(scope="class")
+def mock_create_mapper():
+    mapper_dict = {999: [40]}
+    with patch(
+        "mbs_results.staging.stage_dataframe.create_mapper", return_value=mapper_dict
+    ):
+        yield mapper_dict
+
+
 class TestSelectiveEditingWrappers:
-    def test_period_zero_se_wrapper(self, mock_user_config):
+    def test_period_zero_se_wrapper(self, mock_user_config, mock_create_mapper):
+        mock_user_config["current_period"] = 202112
         period_zero_se_wrapper(config_user_dict=mock_user_config)
 
-    def test_run_final_outputs(self, mock_user_config, mock_load_imputation_output):
+    def test_run_final_outputs(
+        self, mock_user_config, mock_load_imputation_output, mock_create_mapper
+    ):
         mock_user_config["current_period"] = 202201
-
-        # Access the mock to ensure it's used and avoid the "not accessed" error
-        assert mock_load_imputation_output is not None
-
         run_final_outputs(mock_user_config)

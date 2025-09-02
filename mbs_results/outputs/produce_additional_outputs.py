@@ -159,7 +159,7 @@ def produce_selective_editing_outputs(
             print("if name")
         else:
             file = output.split("_")[-1]
-            period = df["period"].unique()[0]
+            period = df["period"].unique()[0].astype(int)
             filename = f"se{file}009_{period}_v{file_version_mbs}.csv"
         # output_value = additional_outputs[output]
         if isinstance(df, dict):
