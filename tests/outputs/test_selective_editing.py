@@ -184,6 +184,16 @@ def mock_create_mapper():
         yield mapper_dict
 
 
+@pytest.fixture(scope="function", autouse=True)
+def clear_outputs_folder():
+    output_folder = Path("tests/data/test_se_wrappers/output/")
+    yield
+    if output_folder.exists():
+        for item in output_folder.iterdir():
+            if item.suffix == ".csv":
+                item.unlink()
+
+
 class TestSelectiveEditingWrappers:
     def test_period_zero_se_wrapper(self, mock_user_config, mock_create_mapper):
         mock_user_config["current_period"] = 202112
