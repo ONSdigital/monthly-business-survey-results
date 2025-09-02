@@ -28,8 +28,8 @@ def merge_domain(
         dataframe with SIC and domain columns merged.
 
     """
-
-    merged_df = input_df.merge(
+    # figure out why this is needed after changes to additional output df func
+    merged_df = input_df.drop(columns=[sic_mapping], errors="ignore").merge(
         domain_mapping, how="left", left_on=sic_input, right_on=sic_mapping
     )
 

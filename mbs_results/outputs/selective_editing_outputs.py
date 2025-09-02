@@ -101,7 +101,9 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
         index=False,
     )
 
-    se_outputs_df = get_additional_outputs_df(estimation_output, outlier_output)
+    se_outputs_df = get_additional_outputs_df(
+        estimation_output, outlier_output, config_se
+    )
 
     se_outputs_df.to_csv(
         config_se["output_path"]
