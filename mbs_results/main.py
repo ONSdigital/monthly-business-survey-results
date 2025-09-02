@@ -37,7 +37,9 @@ def run_mbs_main(config_user_dict=None):
     outlier_output = detect_outlier(estimation_output, config)
     validate_outlier_detection(outlier_output, config)
 
-    additional_outputs_df = get_additional_outputs_df(estimation_output, outlier_output)
+    additional_outputs_df = get_additional_outputs_df(
+        estimation_output, outlier_output, config
+    )
     produce_additional_outputs(config, additional_outputs_df)
 
 
