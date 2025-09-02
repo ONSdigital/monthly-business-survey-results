@@ -14,7 +14,7 @@ from mbs_results.staging.data_cleaning import (
 )
 from mbs_results.staging.stage_dataframe import drop_derived_questions
 from mbs_results.utilities.inputs import load_config
-import warnings
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     filename="period_zero_se_wrapper.txt",
