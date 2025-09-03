@@ -29,6 +29,8 @@ def merge_domain(
 
     """
     # figure out why this is needed after changes to additional output df func
+    # Looks like sic_5_digit is also in input_df, so we get _x _y. Invesitgate in
+    # ASAP-895
     merged_df = input_df.drop(columns=[sic_mapping], errors="ignore").merge(
         domain_mapping, how="left", left_on=sic_input, right_on=sic_mapping
     )
