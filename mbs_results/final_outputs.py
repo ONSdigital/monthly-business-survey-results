@@ -6,8 +6,8 @@ from mbs_results.utilities.inputs import load_config
 from mbs_results.utilities.validation_checks import validate_config
 
 
-def run_final_outputs():
-    config = load_config()
+def run_final_outputs(config_user_dict=None):
+    config = load_config(config_user_dict)
     validate_config(config)
 
     imputation_output = load_imputation_output(config)
