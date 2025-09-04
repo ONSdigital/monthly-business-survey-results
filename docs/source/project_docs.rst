@@ -5,4 +5,4 @@ Project Documentation
     :maxdepth: 2
     :glob:
 
-    project_docs_md/*
+    project_docs_md/**/*

@@ -16,4 +16,3 @@ MBS Documentation
 
    api
    project_docs
-
