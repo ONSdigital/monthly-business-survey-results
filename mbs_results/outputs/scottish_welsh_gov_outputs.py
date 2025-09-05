@@ -1,9 +1,12 @@
+import os
+
 import numpy as np
 import pandas as pd
 
 from mbs_results import logger
 from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.inputs import read_colon_separated_file
+from mbs_results.utilities.utils import append_filter_out_questions
 
 # Missing reporting unit RU and name
 # Should SIC be frozenSIC or SIC)5_digit
@@ -466,6 +469,13 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
     logger.info(f"Generating devolved outputs for {config['devolved_nations']}")
 
     df = additional_outputs_df.copy()
+
+    snapshot_name = os.path.basename(config["snapshot_file_path"]).split(".")[0]
+
+    filtered_questions_path = (
+        config["output_path"] + snapshot_name + "_filter_out_questions.csv"
+    )
+    df = append_filter_out_questions(df, filtered_questions_path)
 
     # local unit data
     lu_data = read_and_combine_ludets_files(config)

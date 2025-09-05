@@ -1,4 +1,3 @@
-import os
 from importlib import metadata
 
 import pandas as pd
@@ -18,10 +17,7 @@ from mbs_results.outputs.selective_editing_question_output import (
     create_selective_editing_question_output,
 )
 from mbs_results.outputs.turnover_analysis import create_turnover_output
-from mbs_results.utilities.utils import (
-    append_filter_out_questions,
-    get_versioned_filename,
-)
+from mbs_results.utilities.utils import get_versioned_filename
 
 
 def get_additional_outputs_df(
@@ -33,8 +29,6 @@ def get_additional_outputs_df(
 
     Parameters
     ----------
-    estimation_output : pd.DataFrame
-        Dataframe output from the estimation stage of the pipeline
     outlier_output : pd.DataFrame
         Dataframe output from the outliering stage of the pipeline
 
@@ -43,15 +37,6 @@ def get_additional_outputs_df(
     pd.DataFrame
 
     """
-
-    snapshot_name = os.path.basename(config["snapshot_file_path"]).split(".")[0]
-
-    filtered_questions_path = (
-        config["output_path"] + snapshot_name + "_filter_out_questions.csv"
-    )
-    outlier_output = append_filter_out_questions(
-        outlier_output, filtered_questions_path
-    )
 
     additional_outputs_df = outlier_output
 
