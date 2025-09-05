@@ -40,6 +40,12 @@ def get_additional_outputs_df(
 
     additional_outputs_df = outlier_output
 
+    # converting cell_number to int
+    # needed for outputs that use cell_number for sizebands
+    additional_outputs_df[config["cell_number"]] = additional_outputs_df[
+        config["cell_number"]
+    ].astype(int)
+
     return additional_outputs_df
 
 
