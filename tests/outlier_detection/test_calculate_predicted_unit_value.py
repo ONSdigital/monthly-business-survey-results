@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -10,11 +8,9 @@ from mbs_results.outlier_detection.calculate_predicted_unit_value import (
 
 
 @pytest.fixture(scope="class")
-def predicted_unit_value_test_data():
+def predicted_unit_value_test_data(outlier_data_dir):
     return pd.read_csv(
-        Path("tests")
-        / "data"
-        / "outlier_detection"
+        outlier_data_dir
         / "calculate_predicted_unit_value"
         / "predicted_unit_value_data.csv",
         low_memory=False,
@@ -23,11 +19,9 @@ def predicted_unit_value_test_data():
 
 
 @pytest.fixture(scope="class")
-def predicted_unit_value_test_output():
+def predicted_unit_value_test_output(outlier_data_dir):
     return pd.read_csv(
-        Path("tests")
-        / "data"
-        / "outlier_detection"
+        outlier_data_dir
         / "calculate_predicted_unit_value"
         / "predicted_unit_value_output.csv",
         low_memory=False,
