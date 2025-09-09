@@ -1,4 +1,3 @@
-import os
 from importlib import metadata
 
 import pandas as pd
@@ -19,10 +18,7 @@ from mbs_results.outputs.selective_editing_question_output import (
 )
 from mbs_results.outputs.turnover_analysis import create_turnover_output
 from mbs_results.utilities.pounds_thousands import create_pounds_thousands_column
-from mbs_results.utilities.utils import (
-    append_filter_out_questions,
-    get_versioned_filename,
-)
+from mbs_results.utilities.utils import get_versioned_filename
 
 
 def get_additional_outputs_df(
@@ -31,11 +27,10 @@ def get_additional_outputs_df(
     """
     Creating dataframe that contains all variables needed for producing additional
     outputs.
+    Create adjustedresponse_pounds_thousands column based on question numbers in config.
 
     Parameters
     ----------
-    estimation_output : pd.DataFrame
-        Dataframe output from the estimation stage of the pipeline
     outlier_output : pd.DataFrame
         Dataframe output from the outliering stage of the pipeline
 
@@ -44,21 +39,11 @@ def get_additional_outputs_df(
     pd.DataFrame
 
     """
-
-    snapshot_name = os.path.basename(config["snapshot_file_path"]).split(".")[0]
-
-    filtered_questions_path = (
-        config["output_path"] + snapshot_name + "_filter_out_questions.csv"
-    )
-    outlier_output = append_filter_out_questions(
-        outlier_output, filtered_questions_path
-    )
-
-    # Create adjustedresponse_pounds_thousands column based on question numbers in conf
+    # Create pounds_thousands column
     questions_to_apply = config.get("pounds_thousands_questions")
-    question_col = config.get("question_no") or "questioncode"
-    source_col = config.get("target") or "adjustedresponse"
-    dest_col = config.get("pound_thousand_col") or "adjustedresponse_pounds_thousands"
+    question_col = config.get("question_no")
+    source_col = config.get("target")
+    dest_col = config.get("pound_thousand_col")
 
     outlier_output = create_pounds_thousands_column(
         outlier_output,
@@ -70,6 +55,12 @@ def get_additional_outputs_df(
     )
 
     additional_outputs_df = outlier_output
+
+    # converting cell_number to int
+    # needed for outputs that use cell_number for sizebands
+    additional_outputs_df[config["cell_number"]] = additional_outputs_df[
+        config["cell_number"]
+    ].astype(int)
 
     return additional_outputs_df
 
