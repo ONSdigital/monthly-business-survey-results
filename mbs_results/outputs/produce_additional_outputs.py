@@ -17,6 +17,7 @@ from mbs_results.outputs.selective_editing_question_output import (
     create_selective_editing_question_output,
 )
 from mbs_results.outputs.turnover_analysis import create_turnover_output
+from mbs_results.utilities.pounds_thousands import create_pounds_thousands_column
 from mbs_results.utilities.utils import get_versioned_filename
 
 
@@ -26,6 +27,7 @@ def get_additional_outputs_df(
     """
     Creating dataframe that contains all variables needed for producing additional
     outputs.
+    Create adjustedresponse_pounds_thousands column based on question numbers in config.
 
     Parameters
     ----------
@@ -37,6 +39,20 @@ def get_additional_outputs_df(
     pd.DataFrame
 
     """
+    # Create pounds_thousands column
+    questions_to_apply = config.get("pounds_thousands_questions")
+    question_col = config.get("question_no")
+    source_col = config.get("target")
+    dest_col = config.get("pound_thousand_col")
+
+    outlier_output = create_pounds_thousands_column(
+        outlier_output,
+        question_col=question_col,
+        source_col=source_col,
+        dest_col=dest_col,
+        questions_to_apply=questions_to_apply,
+        ensure_at_end=True,
+    )
 
     additional_outputs_df = outlier_output
 
