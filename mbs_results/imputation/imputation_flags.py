@@ -177,7 +177,7 @@ def create_imputation_logical_columns(
     df[f"fic_flag_{target}"] = (
         flag_rolling_impute(df, time_difference, auxiliary, fill_group)
         | backdata_fic_mask
-    ) & ~(prior_month_backdata_bir_mask)
+    ) & np.logical_not(prior_month_backdata_bir_mask)
 
     return df
 

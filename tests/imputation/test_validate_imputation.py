@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 
@@ -8,13 +6,13 @@ from tests.helper_functions import does_not_raise
 
 
 @pytest.fixture(scope="class")
-def filepath():
-    return Path("tests/data/imputation/validate_imputation")
+def data_dir(imputation_data_dir):
+    return imputation_data_dir / "validate_imputation"
 
 
 @pytest.fixture(scope="class")
-def missing_target_values_data(filepath):
-    return pd.read_csv(filepath / "target_missing_values.csv", index_col=False)
+def missing_target_values_data(data_dir):
+    return pd.read_csv(data_dir / "target_missing_values.csv", index_col=False)
 
 
 class TestValidateImputation:

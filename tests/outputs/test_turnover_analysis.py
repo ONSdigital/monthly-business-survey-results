@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -8,18 +6,19 @@ from mbs_results.outputs.turnover_analysis import create_turnover_output
 
 
 @pytest.fixture(scope="class")
-def filepath():
-    return Path("tests/data/outputs/turnover_analysis")
+def additional_outputs_df_input_data(outputs_data_dir):
+    return pd.read_csv(
+        outputs_data_dir / "turnover_analysis" / "additional_outputs_df_input.csv",
+        index_col=False,
+    )
 
 
 @pytest.fixture(scope="class")
-def additional_outputs_df_input_data(filepath):
-    return pd.read_csv(filepath / "additional_outputs_df_input.csv", index_col=False)
-
-
-@pytest.fixture(scope="class")
-def turnover_analysis_output(filepath):
-    return pd.read_csv(filepath / "turnover_analysis_output.csv", index_col=False)
+def turnover_analysis_output(outputs_data_dir):
+    return pd.read_csv(
+        outputs_data_dir / "turnover_analysis" / "turnover_analysis_output.csv",
+        index_col=False,
+    )
 
 
 class TestTurnoverAnalysis:

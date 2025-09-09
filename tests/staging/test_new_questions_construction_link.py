@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -8,21 +6,21 @@ from mbs_results.staging.stage_dataframe import new_questions_construction_link
 
 
 @pytest.fixture(scope="class")
-def filepath():
-    return Path("tests/data/staging/missing_construction_link")
+def data_dir(staging_data_dir):
+    return staging_data_dir / "missing_construction_link"
 
 
 @pytest.fixture(scope="class")
-def missing_construction_link_input(filepath):
+def missing_construction_link_input(data_dir):
     return pd.read_csv(
-        filepath / "missing_construction_link_inputs.csv", index_col=False
+        data_dir / "missing_construction_link_inputs.csv", index_col=False
     )
 
 
 @pytest.fixture(scope="class")
-def missing_construction_link_output(filepath):
+def missing_construction_link_output(data_dir):
     return pd.read_csv(
-        filepath / "missing_construction_link_outputs.csv", index_col=False
+        data_dir / "missing_construction_link_outputs.csv", index_col=False
     )
 
 

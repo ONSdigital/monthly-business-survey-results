@@ -16,7 +16,7 @@ from mbs_results.utilities.utils import (
 )
 
 
-def test_read_colon_separated_file():
+def test_read_colon_separated_file(utilities_data_dir):
     headers = ["int", "str", "float", "period"]
     expected = pd.DataFrame(
         {
@@ -28,14 +28,14 @@ def test_read_colon_separated_file():
     )
 
     actual = read_colon_separated_file(
-        "tests/data/utilities/read_colon_separated_file/colon_sep_202401", headers
+        utilities_data_dir / "read_colon_separated_file/colon_sep_202401", headers
     )
 
     assert_frame_equal(actual, expected)
 
 
-def test_compare_two_dataframes():
-    df1 = pd.read_csv("tests/data/utilities/utils/compare_two_dataframes_input.csv")
+def test_compare_two_dataframes(utilities_data_dir):
+    df1 = pd.read_csv(utilities_data_dir / "utils" / "compare_two_dataframes_input.csv")
     df2 = df1.copy()
 
     # Modifying some rows in df2
@@ -43,8 +43,8 @@ def test_compare_two_dataframes():
     df2.loc[0:4, "imputation_flags_adjustedresponse"] = ["mc", "mc", "mc", "mc", "mc"]
 
     # Creating the diff based on modified rows
-    df1_diff = df1.loc[0:4]
-    df2_diff = df2.loc[0:4]
+    df1_diff = df1.copy().loc[0:4]
+    df2_diff = df2.copy().loc[0:4]
 
     df1_diff["version"] = "df1"
     df2_diff["version"] = "df2"

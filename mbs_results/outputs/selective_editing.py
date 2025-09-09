@@ -173,8 +173,8 @@ def calculate_auxiliary_value(
 
     current_df = dataframe[(dataframe[period] == period_selected)]
 
-    q40 = current_df[current_df[question_no] == 40]
-    q49 = current_df[current_df[question_no] == 49]
+    q40 = current_df.copy()[current_df[question_no] == 40]
+    q49 = current_df.copy()[current_df[question_no] == 49]
 
     q40["auxiliary_value"] = q40[frozen_turnover]
     q49["auxiliary_value"] = q49[frozen_turnover] * q49[construction_link]

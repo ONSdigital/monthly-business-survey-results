@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -10,24 +8,18 @@ from mbs_results.outlier_detection.calculate_ratio_estimation import (
 
 
 @pytest.fixture(scope="class")
-def ratio_estimation_test_data():
+def ratio_estimation_test_data(outlier_data_dir):
     return pd.read_csv(
-        Path("tests")
-        / "data"
-        / "outlier_detection"
-        / "calculate_ratio_estimation"
-        / "ratio_estimation_data.csv",
+        outlier_data_dir / "calculate_ratio_estimation" / "ratio_estimation_data.csv",
         low_memory=False,
         usecols=lambda c: not c.startswith("Unnamed:"),
     )
 
 
 @pytest.fixture(scope="class")
-def ratio_estimation_test_output():
+def ratio_estimation_test_output(outlier_data_dir):
     return pd.read_csv(
-        Path("tests")
-        / "data"
-        / "outlier_detection"
+        outlier_data_dir
         / "calculate_ratio_estimation"
         / "ratio_estimation_data_output.csv",
         low_memory=False,

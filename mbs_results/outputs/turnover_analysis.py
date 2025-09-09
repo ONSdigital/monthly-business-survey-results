@@ -25,7 +25,7 @@ def create_turnover_output(
         dataframe in correct format for populating turnover analysis tool.
     """
 
-    turnover_df = additional_outputs_df.query(
+    turnover_df = additional_outputs_df.copy().query(
         "period == {} and questioncode == 40".format(current_period)
     )
 

@@ -42,6 +42,7 @@ def calculate_ratio_estimation(
         A pandas DataFrame with a new column containing the ratio estimation.
     """
 
+    df = df.copy()
     df["flag_calculation"] = df[a_weight] * df[g_weight]
     df["ratio_estimation_treshold"] = (df[predicted_unit_value]) + (
         df[l_values] / (df["flag_calculation"] - 1)
