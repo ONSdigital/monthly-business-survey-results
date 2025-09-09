@@ -108,5 +108,4 @@ def get_selective_editing_contributor_output(
         selective_editing_contributor_output["period"] == period_selected
     ].drop_duplicates()
 
-    print(type(contributor_output_without_dupes))
     return contributor_output_without_dupes
