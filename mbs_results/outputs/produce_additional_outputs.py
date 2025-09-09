@@ -156,7 +156,6 @@ def produce_selective_editing_outputs(
     for output, (df, name) in additional_outputs.items():
         if name:
             filename = name
-            print("if name")
         else:
             file = output.split("_")[-1]
             period = df["period"].unique()[0].astype(int)
