@@ -22,7 +22,7 @@ from mbs_results.utilities.utils import get_versioned_filename
 
 
 def get_additional_outputs_df(
-    estimation_output: pd.DataFrame, outlier_output: pd.DataFrame, config: dict
+        outlier_output: pd.DataFrame, config: dict
 ):
     """
     Creating dataframe that contains all variables needed for producing additional
@@ -33,6 +33,8 @@ def get_additional_outputs_df(
     ----------
     outlier_output : pd.DataFrame
         Dataframe output from the outliering stage of the pipeline
+    config : dict
+        main pipeline configuration.
 
     Returns
     -------
@@ -65,24 +67,38 @@ def get_additional_outputs_df(
     return additional_outputs_df
 
 
-def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame):
+def produce_additional_outputs(additional_outputs_df: pd.DataFrame,
+                               QA_outputs: bool,
+                               additional_outputs: bool,
+                               config: dict,
+                               ):
     """
-    Function to write additional outputs
+    Produces additional outputs.
+    
+    mandatory outputs are defined in config['mandatory_outputs'] and will
+    be created when mandatory_outputs arg is set to TRUE
+    
+    optional_outputs are all the available outputs apart from the ones
+    define in config['mandatory_outputs']
+    
 
     Parameters
     ----------
-    config : Dict
-        main pipeline configuration
     additional_outputs_df : pd.DataFrame
-        Dataframe to feed in as arguments for additional outputs
+        Post methods dataframe.
+    QA_outputs : bool
+        Whether to produce mandotaty for QA.
+    additional_outputs : bool
+        Whether to produce any non mandotaty outputs.
+    config : dict
+        main pipeline configuration.
 
     Returns
     -------
     None.
-        Outputs are written to output path defined in config
 
     """
-
+    
     additional_outputs = get_additional_outputs(
         config,
         {

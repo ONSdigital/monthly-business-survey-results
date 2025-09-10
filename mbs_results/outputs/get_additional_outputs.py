@@ -5,6 +5,8 @@ def get_additional_outputs(
     config: dict,
     function_mapper: dict,
     additional_outputs_df: pd.DataFrame,
+    QA_outputs: bool,
+    additional_outputs: bool,
     selective_editing: bool = False,
 ) -> dict:
     """
@@ -29,6 +31,12 @@ def get_additional_outputs(
 
     additional_outputs_df : pd.DataFrame
         A DataFrame containing the data required for the functions in function_mapper.
+        
+    QA_outputs : bool
+        Whether to produce mandotaty for QA.
+        
+    additional_outputs : bool
+        Whether to produce any non mandotaty outputs.
 
     selective_editing : bool, optional
         If True, returns only selective editing outputs. If False, returns
@@ -63,7 +71,7 @@ def get_additional_outputs(
 
     """
     additional_outputs = dict()
-    for config_list_name in ["optional_outputs", "mandatory_outputs"]:
+    for config_list_name in [ "mandatory_outputs"]:
         if not isinstance(config[config_list_name], list):
             raise TypeError(
                 f"""
@@ -74,17 +82,26 @@ def get_additional_outputs(
                 """
             )
 
-    if config["optional_outputs"] == ["all"]:
-        # Dont have to worry about mandatory outputs here, all functions from mapper
-        # will run. mandatory and optional outputs should be defined in the mapper
-        functions_to_run = function_mapper.keys()
 
-    else:
-        # If "all" is not specified, use the provided list combining with
-        # mandatory outputs
+    functions_to_run = function_mapper.keys()
+    
+    #all registered functions apart the ones in config ["mandatory_outputs"]
+    optional = sorted(
+        list(set(functions_to_run) - set(config["mandatory_outputs"]))
+    )
+    
+    mandatory_outputs = config["mandatory_outputs"]
+    
+    # If false remove mandatory_outputs from functions to run
+    if not QA_outputs:
         functions_to_run = sorted(
-            list(set(config["optional_outputs"]) | set(config["mandatory_outputs"]))
-        )
+            list(set(functions_to_run) - set(mandatory_outputs)))
+    
+    # If false remove optional from functions to run
+    if not additional_outputs:
+        functions_to_run = sorted(
+            list(set(functions_to_run) - set(optional)))
+
 
     if selective_editing:
         functions_to_run = [
