@@ -237,8 +237,8 @@ def devolved_outputs(
     df = pd.merge(
         df,
         local_unit_data,
-        left_on="reference",
-        right_on="ruref",
+        left_on=["reference","period"],
+        right_on=["ruref","period"],
         how="left",
         suffixes=["", "_local"],
     )
