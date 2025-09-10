@@ -1,5 +1,4 @@
 import logging
-import warnings
 
 import pandas as pd
 
@@ -60,7 +59,7 @@ def validate_snapshot(
             logger.warning(warning_message)
 
     else:
-        warnings.warn(
+        logger.warning(
             f"""No instances of status {','.join(non_response_statuses)}
                       in the status column in contributors"""
         )
