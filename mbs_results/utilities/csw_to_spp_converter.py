@@ -75,8 +75,6 @@ def create_snapshot(
 
     contributors_with_finalsel = load_and_join_finalsel(
         contributors,
-        input_directory + "finalsel*",
-        config["sample_column_names"],
         config,
     )
 
@@ -155,6 +153,7 @@ def convert_cp_to_contributors(df: pd.DataFrame) -> pd.DataFrame:
         axis=1,
     )
 
+    # Can't map from error markers -> de-receipted (excluded from results) status
     error_marker_map = {
         "C": ("Clear - overridden", "211"),
         "O": ("Clear", "210"),
@@ -234,10 +233,13 @@ def load_and_join_finalsel(
     pd.DataFrame
         Dataframe that is a join of input dataframe and finalsel data.
     """
+
+    # commenting out froempees and frosic2007 as I was getting an error
+    # but leaving them in case we need to add them back in in future
     finalsel_column_remapper = {
         "cell_no": "cellnumber",
-        "froempees": "frozenemployees",
-        "frosic2007": "frozensic",
+        # "froempees": "frozenemployees",
+        # "frosic2007": "frozensic",
         "frotover": "frozenturnover",
     }
     finalsel_data = read_and_combine_colon_sep_files(
@@ -249,8 +251,8 @@ def load_and_join_finalsel(
             "period",
             "cell_no",
             "formtype",
-            "froempees",
-            config["sic"],
+            # "froempees",
+            # config["sic"],
             "frotover",
         ]
     ]
