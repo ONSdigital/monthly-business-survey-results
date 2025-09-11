@@ -69,7 +69,7 @@ def get_additional_outputs_df(
 
 def produce_additional_outputs(additional_outputs_df: pd.DataFrame,
                                QA_outputs: bool,
-                               additional_outputs: bool,
+                               optional_outputs: bool,
                                config: dict,
                                ):
     """
@@ -112,7 +112,7 @@ def produce_additional_outputs(additional_outputs_df: pd.DataFrame,
         },
         additional_outputs_df,
         QA_outputs,
-        additional_outputs
+        optional_outputs
     )
 
     # Stop function if no additional_outputs are listed in config.

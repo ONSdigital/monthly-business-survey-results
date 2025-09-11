@@ -470,13 +470,6 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
 
     df = additional_outputs_df.copy()
 
-    snapshot_name = os.path.basename(config["snapshot_file_path"]).split(".")[0]
-
-    filtered_questions_path = (
-        config["output_path"] + snapshot_name + "_filter_out_questions.csv"
-    )
-    df = append_filter_out_questions(df, filtered_questions_path)
-
     # local unit data
     lu_data = read_and_combine_ludets_files(config)
 
