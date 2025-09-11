@@ -42,7 +42,7 @@ def run_mbs_main(config_user_dict=None):
     produce_additional_outputs(
         additional_outputs_df = df,
         QA_outputs = True,
-        additional_outputs = False,
+        optional_outputs = False,
         config = config)
 
 if __name__ == "__main__":
