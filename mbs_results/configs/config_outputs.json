@@ -1,0 +1,12 @@
+{
+    "bucket": "",
+    "ssl_file" : "",
+    "idbr_folder_path": "",
+    "snapshot_file_path": "",
+    "outlier_data_path": "",
+    "cdid_data_path": "",
+    "output_path": "",
+    "current_period": 202303,
+    "revision_window": 15,
+    "devolved_nations": ["Scotland", "Wales"]
+}
