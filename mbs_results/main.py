@@ -24,8 +24,8 @@ def run_mbs_main(config_user_dict=None):
     validate_staging(df, config)
 
     # imputation: RoM wrapper -> Rename wrapper to apply_imputation
-    imputation_output = impute(df, manual_constructions, config, filter_df)
-    validate_imputation(imputation_output, config)
+    df = impute(df, manual_constructions, config, filter_df)
+    validate_imputation(df, config)
 
     # Estimation Wrapper
     df = estimate(
