@@ -111,6 +111,8 @@ def produce_additional_outputs(additional_outputs_df: pd.DataFrame,
             "produce_qa_output": produce_qa_output,
         },
         additional_outputs_df,
+        QA_outputs,
+        additional_outputs
     )
 
     # Stop function if no additional_outputs are listed in config.
