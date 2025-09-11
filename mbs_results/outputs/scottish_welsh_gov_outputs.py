@@ -204,15 +204,15 @@ def output_column_name_mapping():
         "statusencoded": "status encoded",
         "start_date": "start date",
         "end_date": "end date",
-        "winsorised_value_exports": "returned to exports",
+        "response_exports": "returned to exports",
         "adjustedresponse_exports": "adjusted to exports",
         "imputed_and_derived_flag_exports": "imputed and derived flag exports",
         "statusencoded_exports": "status encoded exports",
-        "winsorised_value_total_turnover": "returned turnover",
+        "response_total_turnover": "returned turnover",
         "adjustedresponse_total_turnover": "adjusted turnover",
         "imputed_and_derived_flag_total_turnover": "imputed and derived flag turnover",
         "statusencoded_total_turnover": "status encoded turnover",
-        "winsorised_value_water": "returned volume water",
+        "response_water": "returned volume water",
         "adjustedresponse_water": "adjusted volume water",
         "imputed_and_derived_flag_water": "imputed and derived flag volume water",
         "statusencoded_water": "status encoded volume water",
@@ -262,8 +262,7 @@ def devolved_outputs(
 
     pivot_values = [
         "adjustedresponse",  # Original: adjusted_value -> adjustedresponse
-        "winsorised_value",  # Imputated/winsorised (new_target_variable ->
-        # adjustedresponse*outlier_weight)
+        "response", 
         "imputed_and_derived_flag",  # [response_type -> imputed_and_derived_flag]
         "statusencoded",  # single letter (str) [error_mkr -> statusencoded]
     ]
@@ -394,15 +393,15 @@ def devolved_outputs(
         "sizeband",
         "start_date",
         "end_date",
-        "winsorised_value_total_turnover",
+        "response_total_turnover",
         "adjustedresponse_total_turnover",
         "imputed_and_derived_flag_total_turnover",
         "statusencoded_total_turnover",
-        "winsorised_value_exports",
+        "response_exports",
         "adjustedresponse_exports",
         "imputed_and_derived_flag_exports",
         "statusencoded_exports",
-        "winsorised_value_water",
+        "response_water",
         "adjustedresponse_water",
         "imputed_and_derived_flag_water",
         "statusencoded_water",
