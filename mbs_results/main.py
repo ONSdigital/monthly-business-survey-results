@@ -17,7 +17,7 @@ from mbs_results.utilities.validation_checks import (
 
 
 def run_mbs_main(config_user_dict=None):
-    config = load_config(config_user_dict)
+    config = load_config("config_user.json",config_user_dict)
     validate_config(config)
 
     df, manual_constructions, filter_df = stage_dataframe(config)
