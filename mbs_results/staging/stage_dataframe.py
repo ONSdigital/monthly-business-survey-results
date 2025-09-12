@@ -20,6 +20,7 @@ from mbs_results.staging.data_cleaning import (
     run_live_or_frozen,
 )
 from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
+from mbs_results.staging.validate_snapshot import validate_snapshot
 from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.inputs import read_colon_separated_file, read_csv_wrapper
@@ -99,6 +100,24 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         snapshot_file_path,
         config["platform"],
         config["bucket"],
+    )
+
+    validate_snapshot(
+        responses=responses,
+        contributors=contributors,
+        status="status",
+        reference=config["reference"],
+        period=config["period"],
+        non_response_statuses=[
+            "Form sent out",
+            "Excluded from results",
+            "Combined child (NIL2)",
+            "Out of scope (NIL3)",
+            "Ceased trading (NIL4)",
+            "Dormant (NIL5)",
+            "Part year return (NIL8)",
+            "No UK activity (NIL9)",
+        ],
     )
 
     # Filter columns and set data types
