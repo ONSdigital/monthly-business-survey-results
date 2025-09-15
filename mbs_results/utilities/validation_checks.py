@@ -263,13 +263,14 @@ def validate_imputation(df: pd.DataFrame, config: dict):
 
     imputation_filename = get_versioned_filename("imputation", config)
 
-    write_csv_wrapper(
-        df=df,
-        save_path=output_path + imputation_filename,
-        import_platform=config["platform"],
-        bucket_name=config["bucket"],
-        index=False,
-    )
+    if config["debug_mode"]:
+        write_csv_wrapper(
+            df=df,
+            save_path=output_path + imputation_filename,
+            import_platform=config["platform"],
+            bucket_name=config["bucket"],
+            index=False,
+        )
 
 
 def validate_estimation(df: pd.DataFrame, config: dict):
@@ -307,14 +308,15 @@ def validate_estimation(df: pd.DataFrame, config: dict):
             population_frame=df,
             config=config,
         )
+    if config["debug_mode"]:
 
-    write_csv_wrapper(
-        df,
-        output_path + estimate_filename,
-        config["platform"],
-        config["bucket"],
-        index=False,
-    )
+        write_csv_wrapper(
+            df,
+            output_path + estimate_filename,
+            config["platform"],
+            config["bucket"],
+            index=False,
+        )
 
 
 def validate_combined_ratio_estimation(
@@ -393,13 +395,16 @@ def validate_outlier_detection(df: pd.DataFrame, config: dict):
         config["output_path"] + snapshot_name + "_filter_out_questions.csv"
     )
     df = append_filter_out_questions(df, filtered_questions_path)
-    write_csv_wrapper(
-        df,
-        output_path + outlier_filename,
-        config["platform"],
-        config["bucket"],
-        index=False,
-    )
+
+    if config["debug_mode"]:
+
+        write_csv_wrapper(
+            df,
+            output_path + outlier_filename,
+            config["platform"],
+            config["bucket"],
+            index=False,
+        )
 
 
 def validate_manual_outlier_df(
