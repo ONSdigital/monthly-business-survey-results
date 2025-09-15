@@ -20,9 +20,11 @@ from mbs_results.outputs.turnover_analysis import create_turnover_output
 from mbs_results.utilities.pounds_thousands import create_pounds_thousands_column
 from mbs_results.utilities.utils import get_versioned_filename
 
+from mbs_results.utilities.outputs import write_csv_wrapper
+
 
 def get_additional_outputs_df(
-        outlier_output: pd.DataFrame, config: dict
+        df: pd.DataFrame, config: dict
 ):
     """
     Creating dataframe that contains all variables needed for producing additional
@@ -31,7 +33,7 @@ def get_additional_outputs_df(
 
     Parameters
     ----------
-    outlier_output : pd.DataFrame
+    df : pd.DataFrame
         Dataframe output from the outliering stage of the pipeline
     config : dict
         main pipeline configuration.
@@ -41,14 +43,48 @@ def get_additional_outputs_df(
     pd.DataFrame
 
     """
-    # Create pounds_thousands column
     questions_to_apply = config.get("pounds_thousands_questions")
     question_col = config.get("question_no")
     source_col = config.get("target")
     dest_col = config.get("pound_thousand_col")
+    target =  config.get("target")
 
-    outlier_output = create_pounds_thousands_column(
-        outlier_output,
+    # below needed for mandotary and optional outputs
+    final_cols = [
+        "reference",
+        "period",
+        "sic",
+        "classification",
+        "cell_number",
+        "auxiliary",
+        "froempment",
+        "formtype",
+        "imputed_and_derived_flag",  
+        "question_no",
+        "target",
+        "status", 
+        "design_weight",
+        "calibration_factor",
+        "outlier_weight",
+        "total weight (A*G*O)",
+        "weighted adjusted value",
+        f"imputation_flags_{target}",
+        "imputation_class",
+        f"f_link_{target}",
+        f"default_link_f_match_{target}",
+        f"b_link_{target}",
+        f"default_link_b_match_{target}",
+        "construction_link",
+        "flag_construction_matches_count",
+        "default_link_flag_construction_matches",
+        "constrain_marker", 
+        'adjustedresponse',
+        'response',
+        "cell_number"
+    ]
+
+    df = create_pounds_thousands_column(
+        df,
         question_col=question_col,
         source_col=source_col,
         dest_col=dest_col,
@@ -56,15 +92,14 @@ def get_additional_outputs_df(
         ensure_at_end=True,
     )
 
-    additional_outputs_df = outlier_output
-
     # converting cell_number to int
     # needed for outputs that use cell_number for sizebands
-    additional_outputs_df[config["cell_number"]] = additional_outputs_df[
-        config["cell_number"]
-    ].astype(int)
+  
+    df = df.astype({"classification":str,config["cell_number"]:int})
 
-    return additional_outputs_df
+    df = df[final_cols]
+                  
+    return df
 
 
 def produce_additional_outputs(additional_outputs_df: pd.DataFrame,
@@ -130,11 +165,26 @@ def produce_additional_outputs(additional_outputs_df: pd.DataFrame,
             # we need to save each DataFrame in the dictionary
             for nation, df in df.items():
                 nation_filename = f"{config['output_path']}{nation.lower()}_{filename}"
-                df.to_csv(nation_filename, index=False)
+                write_csv_wrapper(
+                    df,
+                    nation_filename,
+                    config["platform"],
+                    config["bucket"],
+                    index=False,
+                )
+
+
+
                 logger.info(nation_filename + " saved")
         else:
             # if the output is a DataFrame, save it directly
-            df.to_csv(config["output_path"] + filename, index=False)
+            write_csv_wrapper(
+                    df,
+                    config["output_path"] + filename,
+                    config["platform"],
+                    config["bucket"],
+                    index=False,
+                )
             logger.info(config["output_path"] + filename + " saved")
 
 
@@ -191,9 +241,23 @@ def produce_selective_editing_outputs(
             # we need to save each DataFrame in the dictionary
             for nation, df in df.items():
                 nation_filename = f"{config['output_path']}{nation.lower()}_{filename}"
-                df.to_csv(nation_filename, index=False)
+                write_csv_wrapper(
+                df,
+                nation_filename,
+                config["platform"],
+                config["bucket"],
+                index=False,
+            )
+                
                 logger.info(nation_filename + " saved")
         else:
             # if the output is a DataFrame, save it directly
             df.to_csv(config["output_path"] + filename, index=False)
+            write_csv_wrapper(
+            df,
+            config["output_path"] + filename,
+            config["platform"],
+            config["bucket"],
+            index=False,
+             )
             logger.info(config["output_path"] + filename + " saved")
