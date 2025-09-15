@@ -1,8 +1,12 @@
+import os
+
 import numpy as np
 import pandas as pd
 
 from mbs_results import logger
+from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.inputs import read_colon_separated_file
+from mbs_results.utilities.utils import append_filter_out_questions
 
 # Missing reporting unit RU and name
 # Should SIC be frozenSIC or SIC)5_digit
@@ -27,6 +31,49 @@ def split_func(my_string: str) -> str:
         final part of string once separated on underscores
     """
     return my_string.split(sep=("_"))[-1]
+
+
+def read_and_combine_ludets_files(config: dict) -> pd.DataFrame:
+    """
+    reads in and combined colon separated files from the specified folder path
+
+    Parameters
+    ----------
+    config : dict
+        main pipeline config containing period column name
+
+    Returns
+    -------
+    pd.DataFrame
+        combined colon separated files returned as one dataframe.
+    """
+    sample_files = find_files(
+        file_path=config["idbr_folder_path"],
+        file_prefix="ludets009_",
+        current_period=config["current_period"],
+        revision_window=config["revision_window"],
+        config=config,
+    )
+    df = pd.concat(
+        [
+            read_colon_separated_file(
+                filepath=f,
+                column_names=config["local_unit_columns"],
+                keep_columns=["ruref", "employment", "region", "Name1", "entref"],
+                period=config["period"],
+                import_platform=config["platform"],
+                bucket_name=config["bucket"],
+            )
+            for f in sample_files
+        ],
+        ignore_index=True,
+    )
+
+    df = (
+        df.groupby(["ruref", "entref", "Name1", "region", "period"]).sum().reset_index()
+    )
+
+    return df
 
 
 def filter_and_calculate_percent_devolved(
@@ -55,7 +102,7 @@ def filter_and_calculate_percent_devolved(
         * df["calibration_factor"]
     )
     # Calculate froempment ratio:
-    # (sum of froempment in filtered LU data) / (sum of froempment in df)
+    # (sum of froempment in filtered LU data) / (froempment in df)
     # Filter LU data for the devolved nation region
     region_col = "region"
     froempment_col = "froempment"
@@ -63,9 +110,10 @@ def filter_and_calculate_percent_devolved(
 
     # Filter LU data for the devolved nation region and sum employment by reference
     local_unit_data["reference"] = local_unit_data["ruref"]
+    # local_unit_data["reference"] = local_unit_data["reference"].astype("int64")
     regional_employment = (
         local_unit_data[local_unit_data[region_col] == region_code]
-        .groupby("reference")[employment_col]
+        .groupby(["reference", "period"])[employment_col]
         .sum()
         .reset_index()
         .rename(columns={employment_col: f"{employment_col}_{devolved_nation}"})
@@ -73,9 +121,9 @@ def filter_and_calculate_percent_devolved(
 
     # Sum total employment by reference from the pipeline data
     total_employment = (
-        df.groupby("reference")[froempment_col]
-        .sum()
-        .reset_index()
+        df[["reference", "period", "froempment"]]
+        .drop_duplicates()
+        .reset_index(drop=True)
         .rename(columns={froempment_col: "total_employment"})
     )
 
@@ -83,7 +131,7 @@ def filter_and_calculate_percent_devolved(
     merged_df = pd.merge(
         regional_employment,
         total_employment,
-        on="reference",
+        on=["reference", "period"],
         how="left",
     )
 
@@ -95,10 +143,12 @@ def filter_and_calculate_percent_devolved(
         * 100
     ).round(2)
 
+    merged_df[percent_col] = merged_df[percent_col].clip(upper=100)
+
     # Add the percentage column to the original DataFrame
     df = df.merge(
-        merged_df[["reference", f"percentage_{devolved_nation}"]],
-        on="reference",
+        merged_df[["reference", "period", f"percentage_{devolved_nation}"]],
+        on=["reference", "period"],
         how="left",
     )
 
@@ -131,37 +181,6 @@ def get_question_no_plaintext(config: dict) -> dict:
     }
 
 
-def get_lu_cols(config: dict) -> list:
-    """Get local unit columns from config or use default."""
-    return config.get(
-        "local_unit_columns",
-        [
-            "ruref",
-            "entref",
-            "lu ref",
-            "check letter",
-            "sic03",
-            "sic07",
-            "employees",
-            "employment",
-            "fte",
-            "Name1",
-            "Name2",
-            "Name3",
-            "Address1",
-            "Address2",
-            "Address3",
-            "Address4",
-            "Address5",
-            "Postcode",
-            "trading as 1",
-            "trading as 2",
-            "trading as 3",
-            "region",
-        ],
-    )
-
-
 def output_column_name_mapping():
     """
     Mapping to convert column names used in the pipeline to column names in the
@@ -183,8 +202,8 @@ def output_column_name_mapping():
         "sizeband": "band",
         "imputed_and_derived_flag": "imputed and derived flag",
         "statusencoded": "status encoded",
-        "start date": "start date",
-        "end date": "end date",
+        "start_date": "start date",
+        "end_date": "end date",
         "winsorised_value_exports": "returned to exports",
         "adjustedresponse_exports": "adjusted to exports",
         "imputed_and_derived_flag_exports": "imputed and derived flag exports",
@@ -205,7 +224,7 @@ def devolved_outputs(
     question_dictionary: dict,
     devolved_nation: str,
     local_unit_data: pd.DataFrame,
-    devolved_questions: list = [11, 12, 40, 49, 110],  # 11, 12 might be 10, 11?
+    devolved_questions: list = [11, 12, 40, 49, 110],
     agg_function: str = "sum",  # potential remove, here for testing
 ) -> pd.DataFrame:
     """
@@ -213,6 +232,7 @@ def devolved_outputs(
     Produced a pivot table and converts question numbers into plaintext
     for devolved questions
     """
+    local_unit_data["ruref"] = local_unit_data["ruref"].astype("int64")
 
     df = pd.merge(
         df,
@@ -252,11 +272,28 @@ def devolved_outputs(
     pivot_agg_functions = [
         agg_function,
         agg_function,
-        lambda x: "".join(str(v) for v in x if pd.notnull(v)),
-        lambda x: "".join(str(int(v)) for v in x if pd.notnull(v)),
+        lambda x: next((str(v) for v in x if pd.notnull(v)), None),
+        lambda x: next((v for v in x.dropna().unique()), np.nan),
     ]
 
     dict_agg_funcs = dict(zip(pivot_values, pivot_agg_functions))
+
+    start_end_dates = df[df["questioncode"].isin([11, 12])][
+        ["reference", "period", "questioncode", "adjustedresponse"]
+    ]
+
+    start_end_pivot = (
+        start_end_dates.pivot_table(
+            index=["reference", "period"],
+            columns="questioncode",
+            values="adjustedresponse",
+            aggfunc="first",
+        )
+        .rename(columns={11: "start_date", 12: "end_date"})
+        .reset_index()
+    )
+
+    df = df[~df["questioncode"].isin([11, 12])]
 
     df_pivot = pd.pivot_table(
         df,
@@ -269,6 +306,24 @@ def devolved_outputs(
     df_pivot.columns = ["_".join(col).strip() for col in df_pivot.columns.values]
     df_pivot = df_pivot[sorted(df_pivot.columns, key=split_func)]
     df_pivot.reset_index(inplace=True)
+
+    # #Fill missing values of 'Name1' where imputed flag == d before merging
+    ru_name_mapping = local_unit_data.groupby("ruref")["Name1"].first()
+    mask_missing_name = df["entname1"].isna() & df["reference"].isin(
+        ru_name_mapping.index
+    )
+    df.loc[mask_missing_name, "entname1"] = df.loc[mask_missing_name, "reference"].map(
+        ru_name_mapping
+    )
+
+    # Fill missing values of 'Name1' where imputed flag == d before merging
+    ru_name_mapping = local_unit_data.groupby("ruref")["Name1"].first()
+    mask_missing_name = df["entname1"].isna() & df["reference"].isin(
+        ru_name_mapping.index
+    )
+    df.loc[mask_missing_name, "entname1"] = df.loc[mask_missing_name, "reference"].map(
+        ru_name_mapping
+    )
 
     # adding extra columns from df
     percent_devolved_nation_col = f"percentage_{devolved_nation.lower()}"
@@ -308,6 +363,10 @@ def devolved_outputs(
         suffixes=("", "_extra"),
     )
 
+    df_pivot = pd.merge(
+        df_pivot, start_end_pivot, on=["reference", "period"], how="left"
+    )
+
     # Drop the percentage column with the '_extra' suffix if it exists
     extra_col = f"{percent_devolved_nation_col}_extra"
     if extra_col in df_pivot.columns:
@@ -319,6 +378,37 @@ def devolved_outputs(
         existing_desired_order
         + [col for col in df_pivot.columns if col not in existing_desired_order]
     ]
+
+    # Reorder columns to match original output
+    original_column_order = [
+        "period",
+        "classification",
+        "cell_no",
+        "reference",
+        "entname1",
+        "entref",
+        "frosic2007",
+        "formtype",
+        percent_devolved_nation_col,
+        "froempment",
+        "sizeband",
+        "start_date",
+        "end_date",
+        "winsorised_value_total_turnover",
+        "adjustedresponse_total_turnover",
+        "imputed_and_derived_flag_total_turnover",
+        "statusencoded_total_turnover",
+        "winsorised_value_exports",
+        "adjustedresponse_exports",
+        "imputed_and_derived_flag_exports",
+        "statusencoded_exports",
+        "winsorised_value_water",
+        "adjustedresponse_water",
+        "imputed_and_derived_flag_water",
+        "statusencoded_water",
+    ]
+
+    df_pivot = df_pivot[original_column_order]
 
     # map the column names used in the pipeline to column names in the business template
     column_name_mapping = output_column_name_mapping()
@@ -380,10 +470,15 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
 
     df = additional_outputs_df.copy()
 
+    snapshot_name = os.path.basename(config["snapshot_file_path"]).split(".")[0]
+
+    filtered_questions_path = (
+        config["output_path"] + snapshot_name + "_filter_out_questions.csv"
+    )
+    df = append_filter_out_questions(df, filtered_questions_path)
+
     # local unit data
-    lu_cols = get_lu_cols(config)
-    lu_path = config.get("lu_path")
-    lu_data = read_colon_separated_file(lu_path, lu_cols)
+    lu_data = read_and_combine_ludets_files(config)
 
     question_no_plaintext = get_question_no_plaintext(config)
     devolved_questions = get_devolved_questions(config)

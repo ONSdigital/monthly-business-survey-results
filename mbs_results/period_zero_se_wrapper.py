@@ -24,7 +24,7 @@ logging.basicConfig(
 )
 
 
-def period_zero_se_wrapper():
+def period_zero_se_wrapper(config_user_dict=None):
     """
     wrapper for selective editing outputs when using period zero data supplied from csw
     function does some minor imputation processing to update cell_number and imputation
@@ -38,7 +38,7 @@ def period_zero_se_wrapper():
     # Double check which periods frotover and cell number should be used
     # for construction links.
 
-    config = load_config(None)
+    config = load_config(config_user_dict)
 
     # Read in back data
     back_data = read_and_process_back_data(config)

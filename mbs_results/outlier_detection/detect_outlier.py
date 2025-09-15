@@ -61,7 +61,7 @@ def detect_outlier(df, config):
             df,
             "calibration_group",
             config["period"],
-            config["auxiliary_converted"],
+            config["auxiliary"],
             config["census"],
             "design_weight",
             "calibration_factor",

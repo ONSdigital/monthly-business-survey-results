@@ -26,6 +26,7 @@
     "form_id_spp": "form_type_spp",
     "l_value_question_no": "question_no",
     "nil_status_col": "status",
+    "pound_thousand_col": "adjustedresponse_pounds_thousands",
 
     "master_column_type_dict" : {
         "reference": "int",
@@ -177,5 +178,8 @@
     ],
     "nil_values" : ["Combined child (NIL2)", "Out of scope (NIL3)", "Ceased trading (NIL4)" ,"Dormant (NIL5)",
     "Part year return (NIL8)",
-    "No UK activity (NIL9)"]
+    "No UK activity (NIL9)"],
+
+    "pounds_thousands_questions": [40, 42, 43, 46, 47, 48, 49, 90]
+
 }

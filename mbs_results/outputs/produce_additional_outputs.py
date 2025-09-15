@@ -17,20 +17,20 @@ from mbs_results.outputs.selective_editing_question_output import (
     create_selective_editing_question_output,
 )
 from mbs_results.outputs.turnover_analysis import create_turnover_output
+from mbs_results.utilities.pounds_thousands import create_pounds_thousands_column
 from mbs_results.utilities.utils import get_versioned_filename
 
 
 def get_additional_outputs_df(
-    estimation_output: pd.DataFrame, outlier_output: pd.DataFrame
+    estimation_output: pd.DataFrame, outlier_output: pd.DataFrame, config: dict
 ):
     """
     Creating dataframe that contains all variables needed for producing additional
     outputs.
+    Create adjustedresponse_pounds_thousands column based on question numbers in config.
 
     Parameters
     ----------
-    estimation_output : pd.DataFrame
-        Dataframe output from the estimation stage of the pipeline
     outlier_output : pd.DataFrame
         Dataframe output from the outliering stage of the pipeline
 
@@ -39,21 +39,28 @@ def get_additional_outputs_df(
     pd.DataFrame
 
     """
+    # Create pounds_thousands column
+    questions_to_apply = config.get("pounds_thousands_questions")
+    question_col = config.get("question_no")
+    source_col = config.get("target")
+    dest_col = config.get("pound_thousand_col")
 
-    additional_outputs_df = estimation_output.merge(
-        outlier_output[
-            [
-                "reference",
-                "period",
-                "questioncode",
-                "outlier_weight",
-                "classification",
-                "winsorised_value",
-            ]
-        ],
-        how="left",
-        on=["reference", "period", "questioncode"],
+    outlier_output = create_pounds_thousands_column(
+        outlier_output,
+        question_col=question_col,
+        source_col=source_col,
+        dest_col=dest_col,
+        questions_to_apply=questions_to_apply,
+        ensure_at_end=True,
     )
+
+    additional_outputs_df = outlier_output
+
+    # converting cell_number to int
+    # needed for outputs that use cell_number for sizebands
+    additional_outputs_df[config["cell_number"]] = additional_outputs_df[
+        config["cell_number"]
+    ].astype(int)
 
     return additional_outputs_df
 
@@ -149,9 +156,26 @@ def produce_selective_editing_outputs(
 
     file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
 
-    for output in additional_outputs:
-        file = output.split("_")[-1]
-        period = additional_outputs[output]["period"].unique()[0]
-        filename = f"se{file}009_{period}_v{file_version_mbs}.csv"
-        additional_outputs[output].to_csv(config["output_path"] + filename, index=False)
-        logger.info(config["output_path"] + filename + " saved")
+    # Stop function if no additional_outputs are listed in config.
+    if additional_outputs is None:
+        return
+
+    for output, (df, name) in additional_outputs.items():
+        if name:
+            filename = name
+        else:
+            file = output.split("_")[-1]
+            period = df["period"].unique()[0].astype(int)
+            filename = f"se{file}009_{period}_v{file_version_mbs}.csv"
+        # output_value = additional_outputs[output]
+        if isinstance(df, dict):
+            # if the output is a dictionary (e.g. from generate_devolved_outputs),
+            # we need to save each DataFrame in the dictionary
+            for nation, df in df.items():
+                nation_filename = f"{config['output_path']}{nation.lower()}_{filename}"
+                df.to_csv(nation_filename, index=False)
+                logger.info(nation_filename + " saved")
+        else:
+            # if the output is a DataFrame, save it directly
+            df.to_csv(config["output_path"] + filename, index=False)
+            logger.info(config["output_path"] + filename + " saved")
