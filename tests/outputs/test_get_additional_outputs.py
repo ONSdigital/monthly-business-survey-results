@@ -13,194 +13,43 @@ def test2(**kwargs):
 
 
 def selective_editing_test1(**kwargs):
-    print(1)  # dummy function
+    print(3)  # dummy function
 
 
 def selective_editing_test2(**kwargs):
-    print(2)  # dummy function
+    print(4)  # dummy function
 
 
 @pytest.fixture(scope="class")
 def function_mapper():
-    return {"test1": test1, "test2": test2}
-
-
-@pytest.fixture(scope="class")
-def se_function_mapper():
-    return {
+    return {"test1": test1, "test2": test2,
         "selective_editing_test1": selective_editing_test1,
-        "selective_editing_test2": selective_editing_test2,
-    }
+        "selective_editing_test2": selective_editing_test2}
 
 
 @pytest.mark.parametrize(
-    "inp, expected, selective_editing",
+    "config, qa_outputs, optional_outputs, selective_editing, expected",
     [
-        # testing optional outputs and no mandatory outputs
-        ({"optional_outputs": ["all"], "mandatory_outputs": []}, "1\n2\n", False),
-        ({"optional_outputs": ["test1"], "mandatory_outputs": []}, "1\n", False),
-        ({"optional_outputs": ["test2"], "mandatory_outputs": []}, "2\n", False),
-        (
-            {"optional_outputs": [], "mandatory_outputs": []},
-            "No additional_outputs produced\n",
-            False,
-        ),
-        (
-            {"optional_outputs": ["all"], "mandatory_outputs": []},
-            "No additional_outputs produced\n",
-            True,
-        ),
-        (
-            {
-                "optional_outputs": [
-                    "test1",
-                    "test2",
-                    "selective_editing_test1",
-                    "selective_editing_test2",
-                ],
-                "mandatory_outputs": [],
-            },
-            "1\n2\n",
-            False,
-        ),
-        # testing mandatory outputs and no optional outputs
-        (
-            {"optional_outputs": [], "mandatory_outputs": ["test1", "test2"]},
-            "1\n2\n",
-            False,
-        ),
-        ({"optional_outputs": [], "mandatory_outputs": ["test1"]}, "1\n", False),
-        ({"optional_outputs": [], "mandatory_outputs": ["test2"]}, "2\n", False),
-        # testing a mix of both mandatory and optional outputs
-        (
-            {"optional_outputs": ["test1"], "mandatory_outputs": ["test2"]},
-            "1\n2\n",
-            False,
-        ),
-        (
-            {"optional_outputs": ["test2"], "mandatory_outputs": ["test1"]},
-            "1\n2\n",
-            False,
-        ),
-        (
-            {"optional_outputs": ["all"], "mandatory_outputs": ["test2"]},
-            "1\n2\n",
-            False,
-        ),
-    ],
+        # run mandatory_outputs only
+        ({"mandatory_outputs": ["test1"]},True,False,False, "1\n"),
+        # run optional_outputs only
+        ({"mandatory_outputs": ["test1"]},False,True,False, "2\n"),
+        # Nothing to run
+        ({"mandatory_outputs": []},True,False,False,"No additional_outputs produced\n"),
+        # run selective editing only
+        ({"mandatory_outputs": ["test1"]},False,False,True,"3\n4\n")
+    ]
 )
-def test_output(capsys, function_mapper, inp, expected, selective_editing):
-    """Test that the right functions were run"""
-    get_additional_outputs(inp, function_mapper, pd.DataFrame(), selective_editing)
-    out, err = capsys.readouterr()
+def test_output(capsys, function_mapper, config,qa_outputs,optional_outputs, selective_editing,expected):
+    """Test that the right functions were run:
+        1. qa_outputs true rest false will run only test1
+        2. optional_outputs true rest false will run only test2"
+        3.selective_editing true rest false will run only selective_editing_test1
+        and selective_editing_test2"""
+    
+    get_additional_outputs(config, function_mapper, pd.DataFrame(),qa_outputs,optional_outputs, selective_editing)
+    out,err  = capsys.readouterr()
     assert out == expected
-
-
-@pytest.mark.parametrize(
-    "inp, expected, selective_editing",
-    [
-        # Testing optional outputs and empty mandatory outputs
-        ({"optional_outputs": ["all"], "mandatory_outputs": []}, "1\n2\n", True),
-        (
-            {
-                "optional_outputs": ["selective_editing_test1"],
-                "mandatory_outputs": [],
-            },
-            "1\n",
-            True,
-        ),
-        (
-            {
-                "optional_outputs": ["selective_editing_test2"],
-                "mandatory_outputs": [],
-            },
-            "2\n",
-            True,
-        ),
-        (
-            {"optional_outputs": [], "mandatory_outputs": []},
-            "No additional_outputs produced\n",
-            True,
-        ),
-        (
-            {"optional_outputs": ["all"], "mandatory_outputs": []},
-            "No additional_outputs produced\n",
-            False,
-        ),
-        (
-            {
-                "optional_outputs": [
-                    "test1",
-                    "test2",
-                    "selective_editing_test1",
-                    "selective_editing_test2",
-                ],
-                "mandatory_outputs": [],
-            },
-            "1\n2\n",
-            True,
-        ),
-        # Testing mandatory outputs and empty optional outputs
-        (
-            {
-                "optional_outputs": [],
-                "mandatory_outputs": ["selective_editing_test1"],
-            },
-            "1\n",
-            True,
-        ),
-        (
-            {
-                "optional_outputs": [],
-                "mandatory_outputs": ["selective_editing_test2"],
-            },
-            "2\n",
-            True,
-        ),
-        (
-            {
-                "optional_outputs": [],
-                "mandatory_outputs": [
-                    "selective_editing_test1",
-                    "selective_editing_test2",
-                ],
-            },
-            "1\n2\n",
-            True,
-        ),
-        # Testing a mix of both mandatory and optional outputs
-        (
-            {
-                "optional_outputs": ["selective_editing_test1"],
-                "mandatory_outputs": ["selective_editing_test2"],
-            },
-            "1\n2\n",
-            True,
-        ),
-        (
-            {
-                "optional_outputs": ["selective_editing_test2"],
-                "mandatory_outputs": ["selective_editing_test1"],
-            },
-            "1\n2\n",
-            True,
-        ),
-        (
-            {
-                "optional_outputs": ["all"],
-                "mandatory_outputs": ["selective_editing_test1"],
-            },
-            "1\n2\n",
-            True,
-        ),
-    ],
-)
-def test_se_output(capsys, se_function_mapper, inp, expected, selective_editing):
-    """Test that the right functions were run"""
-    get_additional_outputs(inp, se_function_mapper, pd.DataFrame(), selective_editing)
-    out, err = capsys.readouterr()
-    assert out == expected
-
 
 def test_raise_errors(function_mapper):
     """Test if error is raised when user doesn't pass a list or passes a
@@ -214,6 +63,8 @@ def test_raise_errors(function_mapper):
             },
             function_mapper,
             pd.DataFrame(),
+            False,
+            True
         )
 
     with pytest.raises(ValueError):
@@ -221,4 +72,6 @@ def test_raise_errors(function_mapper):
             {"optional_outputs": ["test3"], "mandatory_outputs": []},
             function_mapper,
             pd.DataFrame(),
+            False,
+            True
         )

@@ -83,38 +83,32 @@ def get_additional_outputs(
             )
 
 
-    functions_to_run = list(function_mapper.keys())
+    all_functions_to_run = list(function_mapper.keys())
     
-    #all registered functions apart the ones in config ["mandatory_outputs"]
-    optional = sorted(
-        list(set(functions_to_run) - set(config["mandatory_outputs"]))
+  
+    qa_functions = config["mandatory_outputs"]
+
+    selective_editing_functions = [
+        output
+        for output in all_functions_to_run
+        if output.startswith("selective_editing_")]
+    
+    #all registered functions apart the ones in config ["mandatory_outputs"] and SE
+    optional_functions = sorted(
+        list(set(all_functions_to_run) - set(config["mandatory_outputs"]) - set(selective_editing_functions))
     )
-    
-    mandatory_outputs = config["mandatory_outputs"]
-        
+    functions_to_run = []     
     # If false remove mandatory_outputs from functions to run
-    if not QA_outputs:
-        functions_to_run = sorted(
-            list(set(functions_to_run) - set(mandatory_outputs)))
+    if QA_outputs:
+        functions_to_run = functions_to_run + qa_functions
 
     # If false remove optional from functions to run
-    if not optional_outputs:
-        functions_to_run = sorted(
-            list(set(functions_to_run) - set(optional)))
+    if  optional_outputs:
+        functions_to_run = functions_to_run + optional_functions
 
     if selective_editing:
-        functions_to_run = [
-            output
-            for output in functions_to_run
-            if output.startswith("selective_editing_")
-        ]
-    else:
-        functions_to_run = [
-            output
-            for output in functions_to_run
-            if not output.startswith("selective_editing_")
-        ]
-
+        functions_to_run = functions_to_run + selective_editing_functions
+  
     if not functions_to_run:
         print("No additional_outputs produced")
         return None
