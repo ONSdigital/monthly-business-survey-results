@@ -163,6 +163,7 @@ def mock_user_config():
         "sic_domain_mapping_path": input_path + "test_sic_domain_mapping.csv",
         "threshold_filepath": input_path + "test_form_domain_threshold_mapping.csv",
         "filter": None,
+        "debug_mode": False,
     }
 
 

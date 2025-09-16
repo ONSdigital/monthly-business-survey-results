@@ -1,3 +1,4 @@
+import os
 from importlib import metadata
 
 import pandas as pd
@@ -19,7 +20,10 @@ from mbs_results.outputs.selective_editing_question_output import (
 from mbs_results.outputs.turnover_analysis import create_turnover_output
 from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.pounds_thousands import create_pounds_thousands_column
-from mbs_results.utilities.utils import get_versioned_filename
+from mbs_results.utilities.utils import (
+    append_filter_out_questions,
+    get_versioned_filename,
+)
 
 
 def get_additional_outputs_df(df: pd.DataFrame, config: dict):
@@ -100,6 +104,17 @@ def get_additional_outputs_df(df: pd.DataFrame, config: dict):
     df = df.astype({"classification": str, config["cell_number"]: int})
 
     df = df[final_cols]
+
+    # Must be same as save_full_path argument of filter_out_questions() (in staging)
+    # Path must be full path containing directory and file name
+    # e.g. folder1/folder2/snapsot_filter_out_questions.csv
+
+    snapshot_name = os.path.basename(config["snapshot_file_path"]).split(".")[0]
+
+    filtered_questions_path = (
+        config["output_path"] + snapshot_name + "_filter_out_questions.csv"
+    )
+    df = append_filter_out_questions(df, filtered_questions_path)
 
     return df
 
