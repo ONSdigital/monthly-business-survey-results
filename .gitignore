@@ -893,3 +893,5 @@ logs/
 
 # Ignore selective editing testing outputs
 tests/data/test_se_wrappers/output/*
+# Ignore csv files on top level
+*.csv
