@@ -1,4 +1,3 @@
-import os
 from importlib import metadata
 
 import pandas as pd
@@ -20,13 +19,12 @@ from mbs_results.outputs.selective_editing_question_output import (
 from mbs_results.outputs.turnover_analysis import create_turnover_output
 from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.pounds_thousands import create_pounds_thousands_column
-from mbs_results.utilities.utils import (
-    append_filter_out_questions,
-    get_versioned_filename,
-)
+from mbs_results.utilities.utils import get_versioned_filename
 
 
-def get_additional_outputs_df(df: pd.DataFrame, config: dict):
+def get_additional_outputs_df(
+    df: pd.DataFrame, unprocessed_data: pd.DataFrame, config: dict
+):
     """
     Creating dataframe that contains all variables needed for producing additional
     outputs.
@@ -36,6 +34,9 @@ def get_additional_outputs_df(df: pd.DataFrame, config: dict):
     ----------
     df : pd.DataFrame
         Dataframe output from the outliering stage of the pipeline
+    unprocessed_data : pd.DataFrame
+        Dataframe with all question codes which weren't processed through
+        mbs methods like qcode 11, 12, 146.
     config : dict
         main pipeline configuration.
 
@@ -105,16 +106,9 @@ def get_additional_outputs_df(df: pd.DataFrame, config: dict):
 
     df = df[final_cols]
 
-    # Must be same as save_full_path argument of filter_out_questions() (in staging)
-    # Path must be full path containing directory and file name
-    # e.g. folder1/folder2/snapsot_filter_out_questions.csv
+    df = pd.concat([df, unprocessed_data])
 
-    snapshot_name = os.path.basename(config["snapshot_file_path"]).split(".")[0]
-
-    filtered_questions_path = (
-        config["output_path"] + snapshot_name + "_filter_out_questions.csv"
-    )
-    df = append_filter_out_questions(df, filtered_questions_path)
+    df.reset_index(drop=True, inplace=True)
 
     return df
 

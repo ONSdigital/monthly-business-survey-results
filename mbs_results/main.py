@@ -24,7 +24,7 @@ def run_mbs_main(config_user_dict=None):
     config = load_config("config_user.json", config_user_dict)
     validate_config(config)
 
-    df, manual_constructions, filter_df = stage_dataframe(config)
+    df, unprocessed_data, manual_constructions, filter_df = stage_dataframe(config)
     validate_staging(df, config)
 
     # imputation: RoM wrapper -> Rename wrapper to apply_imputation
@@ -39,9 +39,9 @@ def run_mbs_main(config_user_dict=None):
     df = detect_outlier(df, config)
     validate_outlier_detection(df, config)
 
-    df = get_additional_outputs_df(df, config)
+    df = get_additional_outputs_df(df, unprocessed_data, config)
 
-    mbs_filename = get_versioned_filename("mbs", config)
+    mbs_filename = get_versioned_filename("mbs_results", config)
 
     write_csv_wrapper(
         df,

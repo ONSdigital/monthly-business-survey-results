@@ -149,16 +149,10 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
 
     df = append_back_data(df, config)
 
-    snapshot_name = os.path.basename(config["snapshot_file_path"]).split(".")[0]
-
-    df = filter_out_questions(
+    df, unprocessed_data = filter_out_questions(
         df=df,
         column=config["question_no"],
         questions_to_filter=config["filter_out_questions"],
-        save_full_path=config["output_path"]
-        + snapshot_name
-        + "_filter_out_questions.csv",
-        **config,
     )
 
     df = drop_derived_questions(
@@ -224,7 +218,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     )
 
     print("Staging Completed")
-    return pre_impute_df, manual_constructions, filter_df
+    return pre_impute_df, unprocessed_data, manual_constructions, filter_df
 
 
 def drop_derived_questions(
