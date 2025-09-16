@@ -17,15 +17,12 @@ from mbs_results.outputs.selective_editing_question_output import (
     create_selective_editing_question_output,
 )
 from mbs_results.outputs.turnover_analysis import create_turnover_output
+from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.pounds_thousands import create_pounds_thousands_column
 from mbs_results.utilities.utils import get_versioned_filename
 
-from mbs_results.utilities.outputs import write_csv_wrapper
 
-
-def get_additional_outputs_df(
-        df: pd.DataFrame, config: dict
-):
+def get_additional_outputs_df(df: pd.DataFrame, config: dict):
     """
     Creating dataframe that contains all variables needed for producing additional
     outputs.
@@ -46,7 +43,7 @@ def get_additional_outputs_df(
     questions_to_apply = config.get("pounds_thousands_questions")
     question_col = config.get("question_no")
     dest_col = config.get("pound_thousand_col")
-    target =  config.get("target")
+    target = config.get("target")
 
     # below needed for mandotary and optional outputs
     final_cols = [
@@ -58,9 +55,9 @@ def get_additional_outputs_df(
         config["auxiliary"],
         "froempment",
         "formtype",
-        "imputed_and_derived_flag",  
+        "imputed_and_derived_flag",
         question_col,
-        config["status"], 
+        config["status"],
         "design_weight",
         config["calibration_factor"],
         "outlier_weight",
@@ -73,10 +70,10 @@ def get_additional_outputs_df(
         "construction_link",
         "flag_construction_matches_count",
         "default_link_flag_construction_matches",
-        "constrain_marker", 
+        "constrain_marker",
         target,
-        'response',
-        "status"
+        "response",
+        "status",
     ]
     if not config["filter"]:
         count_variables = [f"b_match_{target}_count", f"f_match_{target}_count"]
@@ -99,28 +96,29 @@ def get_additional_outputs_df(
 
     # converting cell_number to int
     # needed for outputs that use cell_number for sizebands
-  
-    df = df.astype({"classification":str,config["cell_number"]:int})
+
+    df = df.astype({"classification": str, config["cell_number"]: int})
 
     df = df[final_cols]
-                  
+
     return df
 
 
-def produce_additional_outputs(additional_outputs_df: pd.DataFrame,
-                               qa_outputs: bool,
-                               optional_outputs: bool,
-                               config: dict,
-                               ):
+def produce_additional_outputs(
+    additional_outputs_df: pd.DataFrame,
+    qa_outputs: bool,
+    optional_outputs: bool,
+    config: dict,
+):
     """
     Produces additional outputs.
-    
+
     mandatory outputs are defined in config['mandatory_outputs'] and will
     be created when mandatory_outputs arg is set to TRUE
-    
+
     optional_outputs are all the available outputs apart from the ones
     define in config['mandatory_outputs']
-    
+
 
     Parameters
     ----------
@@ -138,7 +136,7 @@ def produce_additional_outputs(additional_outputs_df: pd.DataFrame,
     None.
 
     """
-    
+
     additional_outputs = get_additional_outputs(
         config,
         {
@@ -152,7 +150,7 @@ def produce_additional_outputs(additional_outputs_df: pd.DataFrame,
         },
         additional_outputs_df,
         qa_outputs,
-        optional_outputs
+        optional_outputs,
     )
 
     # Stop function if no additional_outputs are listed in config.
@@ -178,18 +176,16 @@ def produce_additional_outputs(additional_outputs_df: pd.DataFrame,
                     index=False,
                 )
 
-
-
                 logger.info(nation_filename + " saved")
         else:
             # if the output is a DataFrame, save it directly
             write_csv_wrapper(
-                    df,
-                    config["output_path"] + filename,
-                    config["platform"],
-                    config["bucket"],
-                    index=False,
-                )
+                df,
+                config["output_path"] + filename,
+                config["platform"],
+                config["bucket"],
+                index=False,
+            )
             logger.info(config["output_path"] + filename + " saved")
 
 
@@ -220,8 +216,8 @@ def produce_selective_editing_outputs(
             "selective_editing_questions": create_selective_editing_question_output,
         },
         additional_outputs_df,
-        qa_outputs = False,
-        optional_outputs = False,
+        qa_outputs=False,
+        optional_outputs=False,
         selective_editing=True,
     )
 
@@ -249,21 +245,21 @@ def produce_selective_editing_outputs(
             for nation, df in df.items():
                 nation_filename = f"{config['output_path']}{nation.lower()}_{filename}"
                 write_csv_wrapper(
-                df,
-                nation_filename,
-                config["platform"],
-                config["bucket"],
-                index=False,
-            )
-                
+                    df,
+                    nation_filename,
+                    config["platform"],
+                    config["bucket"],
+                    index=False,
+                )
+
                 logger.info(nation_filename + " saved")
         else:
             # if the output is a DataFrame, save it directly
             write_csv_wrapper(
-            df,
-            config["output_path"] + filename,
-            config["platform"],
-            config["bucket"],
-            index=False,
-             )
+                df,
+                config["output_path"] + filename,
+                config["platform"],
+                config["bucket"],
+                index=False,
+            )
             logger.info(config["output_path"] + filename + " saved")

@@ -1,12 +1,9 @@
-import os
-
 import numpy as np
 import pandas as pd
 
 from mbs_results import logger
 from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.inputs import read_colon_separated_file
-from mbs_results.utilities.utils import append_filter_out_questions
 
 # Missing reporting unit RU and name
 # Should SIC be frozenSIC or SIC)5_digit
@@ -237,8 +234,8 @@ def devolved_outputs(
     df = pd.merge(
         df,
         local_unit_data,
-        left_on=["reference","period"],
-        right_on=["ruref","period"],
+        left_on=["reference", "period"],
+        right_on=["ruref", "period"],
         how="left",
         suffixes=["", "_local"],
     )
@@ -262,7 +259,7 @@ def devolved_outputs(
 
     pivot_values = [
         "adjustedresponse",  # Original: adjusted_value -> adjustedresponse
-        "response", 
+        "response",
         "imputed_and_derived_flag",  # [response_type -> imputed_and_derived_flag]
         "statusencoded",  # single letter (str) [error_mkr -> statusencoded]
     ]

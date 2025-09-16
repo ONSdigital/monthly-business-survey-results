@@ -12,7 +12,7 @@ from mbs_results import logger
 from mbs_results.utilities.merge_two_config_files import merge_two_config_files
 
 
-def load_config(config_user_path,config_user_dict=None):
+def load_config(config_user_path, config_user_dict=None):
     """Load the dev and user configs and merges into one dictionary"""
     # Get the directory of the script that called this function
     # This is necessary to find the path of the config files relative to this script

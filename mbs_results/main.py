@@ -6,7 +6,9 @@ from mbs_results.outputs.produce_additional_outputs import (
     produce_additional_outputs,
 )
 from mbs_results.staging.stage_dataframe import stage_dataframe
-from mbs_results.utilities.inputs import load_config
+from mbs_results.utilities.inputs import load_config, read_csv_wrapper
+from mbs_results.utilities.outputs import write_csv_wrapper
+from mbs_results.utilities.utils import get_versioned_filename
 from mbs_results.utilities.validation_checks import (
     validate_config,
     validate_estimation,
@@ -15,14 +17,11 @@ from mbs_results.utilities.validation_checks import (
     validate_staging,
 )
 
-from mbs_results.utilities.inputs import  read_csv_wrapper
-from mbs_results.utilities.outputs import write_csv_wrapper
-
 
 def run_mbs_main(config_user_dict=None):
     """Main function to run MBS methods pipeline"""
 
-    config = load_config("config_user.json",config_user_dict)
+    config = load_config("config_user.json", config_user_dict)
     validate_config(config)
 
     df, manual_constructions, filter_df = stage_dataframe(config)
@@ -33,37 +32,41 @@ def run_mbs_main(config_user_dict=None):
     validate_imputation(df, config)
 
     # Estimation Wrapper
-    df = estimate(
-        df=df, method="combined", convert_NI_GB_cells=True, config=config
-    )
+    df = estimate(df=df, method="combined", convert_NI_GB_cells=True, config=config)
     validate_estimation(df, config)
 
     # Outlier Wrapper
     df = detect_outlier(df, config)
     validate_outlier_detection(df, config)
 
-    df = get_additional_outputs_df(df, config
+    df = get_additional_outputs_df(df, config)
+
+    mbs_filename = get_versioned_filename("mbs", config)
+
+    write_csv_wrapper(
+        df,
+        config["output_path"] + mbs_filename,
+        config["platform"],
+        config["bucket"],
+        index=False,
     )
+
     produce_additional_outputs(
-        additional_outputs_df = df,
-        qa_outputs = True,
-        optional_outputs = False,
-        config = config)
+        additional_outputs_df=df, qa_outputs=True, optional_outputs=False, config=config
+    )
+
 
 def produce_additional_outputs_wrapper(config_user_dict=None):
     """Produces any additional outputs based on MBS methods output"""
 
-    config = load_config("config_outputs.json",config_user_dict)
+    config = load_config("config_outputs.json", config_user_dict)
 
     df = read_csv_wrapper(
-    filepath = config["mbs_output_path"],
-    import_platform = config["platform"],
-    bucket_name = config["bucket"]
+        filepath=config["mbs_output_path"],
+        import_platform=config["platform"],
+        bucket_name=config["bucket"],
     )
 
     produce_additional_outputs(
-        additional_outputs_df = df,
-        QA_outputs = True,
-        optional_outputs = False,
-        config = config)
-
+        additional_outputs_df=df, QA_outputs=True, optional_outputs=False, config=config
+    )
