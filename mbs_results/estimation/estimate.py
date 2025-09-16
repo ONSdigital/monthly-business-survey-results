@@ -35,7 +35,7 @@ def estimate(
     estimate_df = estimate_df.drop(columns=["cell_no", "frotover", config["sic"]])
     # Dropping region column if already exists in imputation, to prevent duplicate
     # region columns in construction.
-    if config["region"] in df.cols:
+    if config["region"] in df.columns:
         estimate_df = estimate_df.drop(columns="region")
 
     post_estimate = pd.merge(
