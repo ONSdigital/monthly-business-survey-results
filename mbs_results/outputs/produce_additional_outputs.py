@@ -45,29 +45,25 @@ def get_additional_outputs_df(
     """
     questions_to_apply = config.get("pounds_thousands_questions")
     question_col = config.get("question_no")
-    source_col = config.get("target")
     dest_col = config.get("pound_thousand_col")
     target =  config.get("target")
 
     # below needed for mandotary and optional outputs
     final_cols = [
-        "reference",
-        "period",
-        "sic",
+        config["reference"],
+        config["period"],
+        config["sic"],
         "classification",
-        "cell_number",
-        "auxiliary",
+        config["cell_number"],
+        config["auxiliary"],
         "froempment",
         "formtype",
         "imputed_and_derived_flag",  
-        "question_no",
-        "target",
-        "status", 
+        question_col,
+        config["status"], 
         "design_weight",
-        "calibration_factor",
+        config["calibration_factor"],
         "outlier_weight",
-        "total weight (A*G*O)",
-        "weighted adjusted value",
         f"imputation_flags_{target}",
         "imputation_class",
         f"f_link_{target}",
@@ -78,15 +74,24 @@ def get_additional_outputs_df(
         "flag_construction_matches_count",
         "default_link_flag_construction_matches",
         "constrain_marker", 
-        'adjustedresponse',
+        target,
         'response',
-        "cell_number"
+        "status"
     ]
+    if not config["filter"]:
+        count_variables = [f"b_match_{target}_count", f"f_match_{target}_count"]
+    else:
+        count_variables = [
+            f"b_match_filtered_{target}_count",
+            f"f_match_filtered_{target}_count",
+        ]
+
+    final_cols += count_variables
 
     df = create_pounds_thousands_column(
         df,
         question_col=question_col,
-        source_col=source_col,
+        source_col=target,
         dest_col=dest_col,
         questions_to_apply=questions_to_apply,
         ensure_at_end=True,

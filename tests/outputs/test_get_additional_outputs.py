@@ -51,9 +51,8 @@ def test_output(capsys, function_mapper, config,qa_outputs,optional_outputs, sel
     out,err  = capsys.readouterr()
     assert out == expected
 
-def test_raise_errors(function_mapper):
-    """Test if error is raised when user doesn't pass a list or passes a
-    function which does not link to a function"""
+def test_raise_error_not_list(function_mapper):
+    """Test if error is raised when user doesn't pass a list"""
 
     with pytest.raises(TypeError):
         get_additional_outputs(
@@ -66,12 +65,16 @@ def test_raise_errors(function_mapper):
             False,
             True
         )
+def test_raise_error_function_not_defined(function_mapper):
+    """Test if error is raised when user passes a
+    keyword which does not link to a function"""
+
 
     with pytest.raises(ValueError):
         get_additional_outputs(
-            {"optional_outputs": ["test3"], "mandatory_outputs": []},
+            {"mandatory_outputs": ["test3"]},
             function_mapper,
             pd.DataFrame(),
-            False,
-            True
+            True,
+            False
         )
