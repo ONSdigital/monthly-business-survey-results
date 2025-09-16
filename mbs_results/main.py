@@ -15,8 +15,13 @@ from mbs_results.utilities.validation_checks import (
     validate_staging,
 )
 
+from mbs_results.utilities.inputs import  read_csv_wrapper
+from mbs_results.utilities.outputs import write_csv_wrapper
+
 
 def run_mbs_main(config_user_dict=None):
+    """Main function to run MBS methods pipeline"""
+
     config = load_config("config_user.json",config_user_dict)
     validate_config(config)
 
@@ -41,9 +46,24 @@ def run_mbs_main(config_user_dict=None):
     )
     produce_additional_outputs(
         additional_outputs_df = df,
+        qa_outputs = True,
+        optional_outputs = False,
+        config = config)
+
+def produce_additional_outputs_wrapper(config_user_dict=None):
+    """Produces any additional outputs based on MBS methods output"""
+
+    config = load_config("config_outputs.json",config_user_dict)
+
+    df = read_csv_wrapper(
+    filepath = config["mbs_output_path"],
+    import_platform = config["platform"],
+    bucket_name = config["bucket"]
+    )
+
+    produce_additional_outputs(
+        additional_outputs_df = df,
         QA_outputs = True,
         optional_outputs = False,
         config = config)
 
-if __name__ == "__main__":
-    run_mbs_main()

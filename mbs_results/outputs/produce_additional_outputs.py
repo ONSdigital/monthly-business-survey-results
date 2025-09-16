@@ -108,7 +108,7 @@ def get_additional_outputs_df(
 
 
 def produce_additional_outputs(additional_outputs_df: pd.DataFrame,
-                               QA_outputs: bool,
+                               qa_outputs: bool,
                                optional_outputs: bool,
                                config: dict,
                                ):
@@ -126,7 +126,7 @@ def produce_additional_outputs(additional_outputs_df: pd.DataFrame,
     ----------
     additional_outputs_df : pd.DataFrame
         Post methods dataframe.
-    QA_outputs : bool
+    qa_outputs : bool
         Whether to produce mandotaty for QA.
     additional_outputs : bool
         Whether to produce any non mandotaty outputs.
@@ -151,7 +151,7 @@ def produce_additional_outputs(additional_outputs_df: pd.DataFrame,
             "produce_qa_output": produce_qa_output,
         },
         additional_outputs_df,
-        QA_outputs,
+        qa_outputs,
         optional_outputs
     )
 
@@ -220,7 +220,7 @@ def produce_selective_editing_outputs(
             "selective_editing_questions": create_selective_editing_question_output,
         },
         additional_outputs_df,
-        QA_outputs = False,
+        qa_outputs = False,
         optional_outputs = False,
         selective_editing=True,
     )
@@ -259,7 +259,6 @@ def produce_selective_editing_outputs(
                 logger.info(nation_filename + " saved")
         else:
             # if the output is a DataFrame, save it directly
-            df.to_csv(config["output_path"] + filename, index=False)
             write_csv_wrapper(
             df,
             config["output_path"] + filename,

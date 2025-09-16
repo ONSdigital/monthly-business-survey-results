@@ -5,7 +5,7 @@ def get_additional_outputs(
     config: dict,
     function_mapper: dict,
     additional_outputs_df: pd.DataFrame,
-    QA_outputs: bool,
+    qa_outputs: bool,
     optional_outputs: bool,
     selective_editing: bool = False,
 ) -> dict:
@@ -32,7 +32,7 @@ def get_additional_outputs(
     additional_outputs_df : pd.DataFrame
         A DataFrame containing the data required for the functions in function_mapper.
         
-    QA_outputs : bool
+    qa_outputs : bool
         Whether to produce mandotaty for QA.
         
     optional_outputs : bool
@@ -99,7 +99,7 @@ def get_additional_outputs(
     )
     functions_to_run = []     
     # If false remove mandatory_outputs from functions to run
-    if QA_outputs:
+    if qa_outputs:
         functions_to_run = functions_to_run + qa_functions
 
     # If false remove optional from functions to run
