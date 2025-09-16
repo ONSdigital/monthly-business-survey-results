@@ -220,6 +220,8 @@ def produce_selective_editing_outputs(
             "selective_editing_questions": create_selective_editing_question_output,
         },
         additional_outputs_df,
+        QA_outputs = False,
+        optional_outputs = False,
         selective_editing=True,
     )
 
