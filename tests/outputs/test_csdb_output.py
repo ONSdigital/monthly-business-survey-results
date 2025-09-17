@@ -31,7 +31,7 @@ class TestCSDBOutput:
     ):
         config = {"platform": "network", "bucket": ""}
         expected_output = output_df
-        input_df["classification"] = input_df["classification"].astype(str)
+        input_df["classification"] = input_df["classification"].astype(float)
         input_df["questioncode"] = input_df["questioncode"].astype(int)
         actual_output = create_csdb_output(
             input_df,
