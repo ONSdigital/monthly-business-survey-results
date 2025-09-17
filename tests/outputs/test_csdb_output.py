@@ -29,12 +29,14 @@ class TestCSDBOutput:
         filepath,
         output_df,
     ):
+        config = {"platform": "network", "bucket": ""}
         expected_output = output_df
         input_df["classification"] = input_df["classification"].astype(str)
         input_df["questioncode"] = input_df["questioncode"].astype(int)
         actual_output = create_csdb_output(
             additional_outputs_df=input_df,
             cdid_data_path=Path(filepath / "cdid_mapping.csv"),
+            config=config,
         )
 
         assert_frame_equal(actual_output, expected_output)
