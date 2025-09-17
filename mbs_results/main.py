@@ -68,5 +68,5 @@ def produce_additional_outputs_wrapper(config_user_dict=None):
     )
 
     produce_additional_outputs(
-        additional_outputs_df=df, QA_outputs=True, optional_outputs=False, config=config
+        additional_outputs_df=df, qa_outputs=True, optional_outputs=False, config=config
     )

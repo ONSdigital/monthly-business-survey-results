@@ -1,8 +1,10 @@
+import filecmp
 import os.path
+from glob import glob
 
 import pytest
 
-from mbs_results.main import run_mbs_main
+from mbs_results.main import produce_additional_outputs_wrapper, run_mbs_main
 
 input_path = "tests/data/test_main/input/"
 
@@ -31,11 +33,7 @@ test_config = {
     "sic": "frosic2007",
     "current_period": 202206,
     "revision_window": 6,
-    "snapshot_alternate_path_OPTIONAL": None,
     "state": "frozen",
-    "devolved_nations": ["Scotland", "Wales"],
-    "optional_outputs": ["all"],
-    "cdid_data_path": "tests/data/outputs/csdb_output/cdid_mapping.csv",
     "debug_mode": False,
 }
 
@@ -47,10 +45,17 @@ def test_main():
     config_user_test as a parameter to run_mbs_main. The config
     dictionary will be updated in the mbs_results/utilites/inputs.py.
     """
-    # Create config dictionary
-    config_user_test = test_config
 
-    run_mbs_main(config_user_dict=config_user_test)
+    run_mbs_main(config_user_dict=test_config)
+
+    out_path = "tests/data/test_main/output/"
+
+    # check pattern due different version in file name
+    patern = glob(out_path + "mbs_results_*.csv")
+
+    assert filecmp.cmp(
+        out_path + "expected_from_mbs_main.csv", patern[0], shallow=False
+    )
 
 
 # We want to avoid running it in the workflows
@@ -77,3 +82,22 @@ def test_main_json():
     config_user_test["back_data_format"] = "json"
 
     run_mbs_main(config_user_dict=config_user_test)
+
+
+def test_produce_additional_outputs_wrapper():
+    """Triggers a produce_additional_outputs_wrapper run, the output
+    of mbs main is the input of this"""
+
+    test_outputs_config = {
+        "platform": "network",
+        "bucket": "",
+        "idbr_folder_path": input_path,
+        "snapshot_file_path": input_path + "test_snaphot.json",
+        "mbs_output_path": "tests/data/test_main/output/expected_from_mbs_main.csv",
+        "cdid_data_path": "tests/data/outputs/csdb_output/cdid_mapping.csv",
+        "output_path": "tests/data/test_main/output/",
+        "current_period": 202206,
+        "revision_window": 6,
+        "devolved_nations": ["Scotland", "Wales"],
+    }
+    produce_additional_outputs_wrapper(config_user_dict=test_outputs_config)
