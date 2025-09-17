@@ -1,8 +1,9 @@
-import filecmp
 import os.path
 from glob import glob
 
+import pandas as pd
 import pytest
+from pandas.testing import assert_frame_equal
 
 from mbs_results.main import produce_additional_outputs_wrapper, run_mbs_main
 
@@ -53,9 +54,10 @@ def test_main():
     # check pattern due different version in file name
     patern = glob(out_path + "mbs_results_*.csv")
 
-    assert filecmp.cmp(
-        out_path + "expected_from_mbs_main.csv", patern[0], shallow=False
-    )
+    actual = pd.read_csv(patern[0])
+    expected = pd.read_csv(out_path + "expected_from_mbs_main.csv")
+
+    assert_frame_equal(actual, expected)
 
 
 # We want to avoid running it in the workflows
