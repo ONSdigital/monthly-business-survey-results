@@ -28,7 +28,7 @@ def create_csdb_output(
         cdid_data_path,
         config["platform"],
         config["bucket"],
-        dtype={"questioncode": int, "classification": str},
+        dtype={"questioncode": int, "classification": float},
     )
 
     df_combined = pd.merge(
