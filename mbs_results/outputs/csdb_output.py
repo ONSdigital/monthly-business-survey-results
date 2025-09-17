@@ -1,5 +1,6 @@
 import pandas as pd
 
+from mbs_results.utilities.inputs import read_csv_wrapper
 from mbs_results.utilities.utils import convert_column_to_datetime
 
 
@@ -23,8 +24,11 @@ def create_csdb_output(
         thousands. Only returns aggregations of month and not higher periods.
     """
 
-    cdid_mapping = pd.read_csv(
-        cdid_data_path, dtype={"questioncode": int, "classification": str}
+    cdid_mapping = read_csv_wrapper(
+        cdid_data_path,
+        config["platform"],
+        config["bucket"],
+        dtype={"questioncode": int, "classification": str},
     )
 
     df_combined = pd.merge(
