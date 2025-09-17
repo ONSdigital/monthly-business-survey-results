@@ -5,7 +5,7 @@ from mbs_results.utilities.utils import convert_column_to_datetime
 
 
 def create_csdb_output(
-    additional_outputs_df: pd.DataFrame, cdid_data_path: str, config
+    additional_outputs_df: pd.DataFrame, cdid_data_path: str, **config
 ) -> pd.DataFrame:
     """
     creates outputs for CSDB, only produces monthly aggregations as all higher
