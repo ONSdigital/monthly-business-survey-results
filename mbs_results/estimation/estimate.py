@@ -33,6 +33,11 @@ def estimate(
     """
     estimate_df = apply_estimation(method, convert_NI_GB_cells, config)
     estimate_df = estimate_df.drop(columns=["cell_no", "frotover", config["sic"]])
+    # Dropping region column if already exists in imputation, to prevent duplicate
+    # region columns in construction.
+    if config["region"] in df.columns:
+        estimate_df = estimate_df.drop(columns="region")
+
     post_estimate = pd.merge(
         df, estimate_df, how="left", on=[config["period"], config["reference"]]
     )
