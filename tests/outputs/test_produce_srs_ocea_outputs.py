@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -8,18 +6,17 @@ from mbs_results.outputs.ocea_srs_outputs import produce_ocea_srs_outputs
 
 
 @pytest.fixture(scope="class")
-def filepath():
-    return Path("tests/data/outputs/ocea_srs_outputs")
+def ocea_srs_input(outputs_data_dir):
+    return pd.read_csv(
+        outputs_data_dir / "ocea_srs_outputs" / "ocea_srs_input.csv", index_col=False
+    )
 
 
 @pytest.fixture(scope="class")
-def ocea_srs_input(filepath):
-    return pd.read_csv(filepath / "ocea_srs_input.csv", index_col=False)
-
-
-@pytest.fixture(scope="class")
-def ocea_srs_output(filepath):
-    return pd.read_csv(filepath / "ocea_srs_output.csv", index_col=False)
+def ocea_srs_output(outputs_data_dir):
+    return pd.read_csv(
+        outputs_data_dir / "ocea_srs_outputs" / "ocea_srs_output.csv", index_col=False
+    )
 
 
 class TestProduceOceaSrsOutputs:

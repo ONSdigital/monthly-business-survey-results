@@ -23,7 +23,9 @@ def impute(
         post imputation dataframe, values have been derived and constrained following
         imputation
     """
-    post_impute = dataframe.groupby(config["question_no"]).apply(
+    post_impute = dataframe.groupby(config["question_no"], group_keys=False)[
+        dataframe.columns
+    ].apply(
         lambda df: ratio_of_means(
             df=df,
             manual_constructions=manual_constructions,

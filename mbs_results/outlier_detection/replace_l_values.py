@@ -55,8 +55,8 @@ def replace_l_values(
     l_values_overwrite = l_values_col + "_overwrite"
 
     merged["replaced_l_value"] = merged[l_values_overwrite].notna()
-    merged.loc[merged[l_values_overwrite].notna(), l_values_col] = merged[
-        l_values_overwrite
+    merged.loc[merged[l_values_overwrite].notna(), l_values_col] = merged.loc[
+        merged[l_values_overwrite].notna(), l_values_overwrite
     ]
     merged.drop(columns=[l_values_overwrite], inplace=True)
     return merged

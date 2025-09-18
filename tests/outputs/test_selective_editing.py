@@ -15,8 +15,8 @@ from mbs_results.period_zero_se_wrapper import period_zero_se_wrapper
 
 
 @pytest.fixture(scope="class")
-def filepath():
-    return Path("tests/data/outputs/selective_editing")
+def filepath(outputs_data_dir):
+    return outputs_data_dir / "selective_editing"
 
 
 @pytest.fixture(scope="class")

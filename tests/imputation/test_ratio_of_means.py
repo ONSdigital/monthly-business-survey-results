@@ -5,7 +5,11 @@ from pandas.testing import assert_frame_equal
 from mbs_results.imputation.ratio_of_means import ratio_of_means
 from tests.helper_functions import load_and_format, load_filter
 
-scenario_path_prefix = "tests/data/imputation/ratio_of_means/"
+
+@pytest.fixture(scope="class")
+def data_dir(imputation_data_dir):
+    return imputation_data_dir / "ratio_of_means"
+
 
 base_scenarios = [
     "01_C",
@@ -59,104 +63,101 @@ manual_constructions_scenarios = [
 ]
 
 
-@pytest.mark.parametrize("base_file_name", base_scenarios)
-def test_ratio_of_means(base_file_name):
+class TestRatioOfMeans:
+    @pytest.mark.parametrize("base_file_name", base_scenarios)
+    def test_ratio_of_means(self, base_file_name, data_dir):
 
-    input_data = load_and_format(scenario_path_prefix + base_file_name + "_input.csv")
+        input_data = load_and_format(data_dir / (base_file_name + "_input.csv"))
 
-    expected_output = load_and_format(
-        scenario_path_prefix + base_file_name + "_output.csv"
-    )
+        expected_output = load_and_format(data_dir / (base_file_name + "_output.csv"))
 
-    filter_df = load_filter(
-        scenario_path_prefix + "ratio_of_means_filters/" + base_file_name + ".csv"
-    )
+        filter_df = load_filter(
+            data_dir / "ratio_of_means_filters" / (base_file_name + ".csv")
+        )
 
-    # add imputation_flag onto data
-    input_data["imputation_flags_question"] = pd.Series(dtype="str")
+        # add imputation_flag onto data
+        input_data["imputation_flags_question"] = pd.Series(dtype="str")
 
-    actual_output = ratio_of_means(
-        input_data.copy(),
-        target="question",
-        period="period",
-        reference="identifier",
-        strata="group",
-        auxiliary="other",
-        question_no="questioncode",
-        filters=filter_df,
-        current_period=202001,
-        revision_window=10,
-    )
+        actual_output = ratio_of_means(
+            input_data.copy(),
+            target="question",
+            period="period",
+            reference="identifier",
+            strata="group",
+            auxiliary="other",
+            question_no="questioncode",
+            filters=filter_df,
+            current_period=202001,
+            revision_window=10,
+        )
 
-    assert_frame_equal(actual_output, expected_output, check_dtype=False)
+        assert_frame_equal(actual_output, expected_output, check_dtype=False)
 
+    @pytest.mark.parametrize("link_scenario", pre_defined_link_scenarios)
+    def test_ratio_of_means_with_links(self, link_scenario, data_dir):
 
-@pytest.mark.parametrize("link_scenario", pre_defined_link_scenarios)
-def test_ratio_of_means_with_links(link_scenario):
+        input_data = load_and_format(data_dir / (link_scenario + "_input.csv"))
 
-    input_data = load_and_format(scenario_path_prefix + link_scenario + "_input.csv")
+        expected_output = load_and_format(data_dir / (link_scenario + "_output.csv"))
 
-    expected_output = load_and_format(
-        scenario_path_prefix + link_scenario + "_output.csv"
-    )
+        filter_df = load_filter(
+            data_dir / "ratio_of_means_filters" / (link_scenario + ".csv")
+        )
 
-    filter_df = load_filter(
-        scenario_path_prefix + "ratio_of_means_filters/" + link_scenario + ".csv"
-    )
+        # add imputation_flag onto data
+        input_data["imputation_flags_question"] = pd.Series(dtype="str")
 
-    # add imputation_flag onto data
-    input_data["imputation_flags_question"] = pd.Series(dtype="str")
+        actual_output = ratio_of_means(
+            input_data,
+            target="question",
+            period="period",
+            reference="identifier",
+            strata="group",
+            auxiliary="other",
+            question_no="questioncode",
+            filters=filter_df,
+            imputation_links={
+                "forward": "f_link_question",
+                "backward": "b_link_question",
+                "construction": "construction_link",
+            },
+            current_period=202001,
+            revision_window=10,
+        )
 
-    actual_output = ratio_of_means(
-        input_data,
-        target="question",
-        period="period",
-        reference="identifier",
-        strata="group",
-        auxiliary="other",
-        question_no="questioncode",
-        filters=filter_df,
-        imputation_links={
-            "forward": "f_link_question",
-            "backward": "b_link_question",
-            "construction": "construction_link",
-        },
-        current_period=202001,
-        revision_window=10,
-    )
+        assert_frame_equal(actual_output, expected_output, check_dtype=False)
 
-    assert_frame_equal(actual_output, expected_output, check_dtype=False)
+    @pytest.mark.parametrize("mc_base_file_name", manual_constructions_scenarios)
+    def test_ratio_of_means_with_manual_constructions(
+        self, mc_base_file_name, data_dir
+    ):
 
+        df = load_and_format(data_dir / (mc_base_file_name + "_input.csv"))
 
-@pytest.mark.parametrize("mc_base_file_name", manual_constructions_scenarios)
-def test_ratio_of_means_with_manual_constructions(mc_base_file_name):
+        df["imputation_flags_question"] = pd.Series(dtype="str")
 
-    df = load_and_format(scenario_path_prefix + mc_base_file_name + "_input.csv")
+        expected_output = load_and_format(
+            data_dir / (mc_base_file_name + "_output.csv")
+        )
 
-    df["imputation_flags_question"] = pd.Series(dtype="str")
+        manual_constructions = df.copy()[
+            ["identifier", "period", "question_man", "question_no"]
+        ]
+        manual_constructions.rename(columns={"question_man": "question"}, inplace=True)
 
-    expected_output = load_and_format(
-        scenario_path_prefix + mc_base_file_name + "_output.csv"
-    )
+        df.drop(columns=["question_man"], inplace=True)
 
-    manual_constructions = df.copy()[
-        ["identifier", "period", "question_man", "question_no"]
-    ]
-    manual_constructions.rename(columns={"question_man": "question"}, inplace=True)
+        actual_output = ratio_of_means(
+            df,
+            target="question",
+            period="period",
+            reference="identifier",
+            strata="group",
+            auxiliary="other",
+            question_no="question_no",
+            manual_constructions=manual_constructions,
+            current_period=202001,
+            revision_window=10,
+        )
 
-    df.drop(columns=["question_man"], inplace=True)
-
-    actual_output = ratio_of_means(
-        df,
-        target="question",
-        period="period",
-        reference="identifier",
-        strata="group",
-        auxiliary="other",
-        question_no="question_no",
-        manual_constructions=manual_constructions,
-        current_period=202001,
-        revision_window=10,
-    )
-
-    assert_frame_equal(actual_output, expected_output, check_dtype=False)
+        assert_frame_equal(actual_output, expected_output, check_dtype=False)

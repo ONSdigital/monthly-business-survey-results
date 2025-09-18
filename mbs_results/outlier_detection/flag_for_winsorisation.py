@@ -22,7 +22,7 @@ def winsorisation_flag(df, a_weight, g_weight):
         Dataframe with an additional column (nw_ag_flag) that indicates if
         winsorisation should be applied.
     """
-
+    df = df.copy()
     df["flag_calculation"] = df[a_weight] * df[g_weight]
 
     df["nw_ag_flag"] = df["flag_calculation"].apply(lambda x: True if x <= 1 else False)

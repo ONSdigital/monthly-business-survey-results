@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 from pandas.testing import assert_frame_equal
 
@@ -8,13 +6,9 @@ from tests.helper_functions import load_and_format
 
 
 @pytest.fixture(scope="class")
-def replace_l_values_input_path():
+def replace_l_values_input_path(outlier_data_dir):
     return load_and_format(
-        Path("tests")
-        / "data"
-        / "outlier_detection"
-        / "replace_l_values"
-        / "replace_l_values_input.csv"
+        outlier_data_dir / "replace_l_values" / "replace_l_values_input.csv"
     )
 
 
@@ -23,9 +17,10 @@ class TestReplaceLValue:
         df = replace_l_values_input_path
         df["strata"] = df["strata"].astype(str)
         df["question_no"] = df["question_no"].astype(str)
-        df_input = df[["strata", "question_no", "period", "l_value_input"]]
+        df_input = df.copy()[["strata", "question_no", "period", "l_value_input"]]
         df_input.rename(columns={"l_value_input": "l_value"}, inplace=True)
-        df_expected_output = df[
+
+        df_expected_output = df.copy()[
             ["strata", "question_no", "period", "l_value_output", "replaced_l_value"]
         ]
         df_expected_output.rename(columns={"l_value_output": "l_value"}, inplace=True)
