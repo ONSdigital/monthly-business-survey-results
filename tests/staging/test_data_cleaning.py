@@ -1,6 +1,3 @@
-from pathlib import Path
-
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal, assert_series_equal
@@ -182,8 +179,17 @@ def test_is_census(data_dir):
     assert_series_equal(actual_output, expected_output)
 
 
-def test_convert_nil_values(filepath):
-
+class TestNilValues:
+    @pytest.fixture(scope="class")
+    def nil_values(self):
+        return [
+            "Combined child (NIL2)",
+            "Out of scope (NIL3)",
+            "Ceased trading (NIL4)",
+            "Dormant (NIL5)",
+            "Part year return (NIL8)",
+            "No UK activity (NIL9)",
+        ]
 
     def test_convert_nil_values(self, data_dir, nil_values):
         df_in = pd.read_csv(data_dir / "test_convert_nil_values_input.csv")

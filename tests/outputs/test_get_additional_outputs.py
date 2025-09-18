@@ -4,11 +4,11 @@ import pytest
 from mbs_results.outputs.get_additional_outputs import get_additional_outputs
 
 
-def dummy_test1(**kwargs):
+def test1(**kwargs):
     print(1)  # dummy function
 
 
-def dummy_test2(**kwargs):
+def test2(**kwargs):
     print(2)  # dummy function
 
 
