@@ -1,18 +1,14 @@
 import logging
-import os
 import warnings
 
 import numpy as np
 import pandas as pd
 
-from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.utils import (
-    append_filter_out_questions,
     check_above_one,
     check_duplicates,
     check_non_negative,
     check_unique_per_cell_period,
-    get_versioned_filename,
 )
 
 logger = logging.getLogger(__name__)
@@ -259,17 +255,6 @@ def validate_staging(df: pd.DataFrame, config: dict):
 
 def validate_imputation(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post imputation")
-    output_path = config["output_path"]
-
-    imputation_filename = get_versioned_filename("imputation", config)
-
-    write_csv_wrapper(
-        df=df,
-        save_path=output_path + imputation_filename,
-        import_platform=config["platform"],
-        bucket_name=config["bucket"],
-        index=False,
-    )
 
 
 def validate_estimation(df: pd.DataFrame, config: dict):
@@ -288,8 +273,6 @@ def validate_estimation(df: pd.DataFrame, config: dict):
     ValueError
         ValueError if there are any null values in either the census or sampled columns.
     """
-    output_path = config["output_path"]
-    estimate_filename = get_versioned_filename("estimation_output", config)
     census_nas = df[config["census"]].isna().sum()
     if census_nas > 0:
         raise ValueError(
@@ -307,14 +290,6 @@ def validate_estimation(df: pd.DataFrame, config: dict):
             population_frame=df,
             config=config,
         )
-
-    write_csv_wrapper(
-        df,
-        output_path + estimate_filename,
-        config["platform"],
-        config["bucket"],
-        index=False,
-    )
 
 
 def validate_combined_ratio_estimation(
@@ -366,7 +341,6 @@ def validate_combined_ratio_estimation(
 
 def validate_outlier_detection(df: pd.DataFrame, config: dict):
     warnings.warn("A placeholder function for validating dataframe post outliering")
-    output_path = config["output_path"]
 
     design_weight = config["design_weight"]
 
@@ -380,26 +354,6 @@ def validate_outlier_detection(df: pd.DataFrame, config: dict):
             "There are instances where the design weight = 1 and outlier_weight != 1."
             f"References: {references}"
         )
-
-    outlier_filename = get_versioned_filename("outlier_output", config)
-
-    # Must be same as save_full_path argument of filter_out_questions() (in staging)
-    # Path must be full path containing directory and file name
-    # e.g. folder1/folder2/snapsot_filter_out_questions.csv
-
-    snapshot_name = os.path.basename(config["snapshot_file_path"]).split(".")[0]
-
-    filtered_questions_path = (
-        config["output_path"] + snapshot_name + "_filter_out_questions.csv"
-    )
-    df = append_filter_out_questions(df, filtered_questions_path)
-    write_csv_wrapper(
-        df,
-        output_path + outlier_filename,
-        config["platform"],
-        config["bucket"],
-        index=False,
-    )
 
 
 def validate_manual_outlier_df(

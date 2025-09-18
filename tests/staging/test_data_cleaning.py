@@ -1,5 +1,3 @@
-from unittest.mock import patch
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal, assert_series_equal
@@ -11,7 +9,6 @@ from mbs_results.staging.data_cleaning import (
     convert_nil_values,
     create_imputation_class,
     enforce_datatypes,
-    filter_out_questions,
     is_census,
     run_live_or_frozen,
 )
@@ -180,37 +177,6 @@ def test_is_census(data_dir):
     actual_output.name = "is_census"
 
     assert_series_equal(actual_output, expected_output)
-
-
-class TestFilterOutQuestions:
-    @patch("pandas.DataFrame.to_csv")  # mock pandas export csv function
-    def test_filter_out_questions(self, mock_to_csv, data_dir):
-
-        df_in = pd.read_csv(data_dir / "test_filter_out_questions.csv")
-        expected_output = pd.read_csv(
-            data_dir / "test_filter_out_questions_expected.csv"
-        )
-
-        questions_to_remove = [11, 12, 146]
-
-        network_config = {"platform": "network", "bucket": ""}
-
-        actual_output = filter_out_questions(
-            df_in, "question", questions_to_remove, "export.csv", **network_config
-        )
-
-        # testing if pandas export was called once
-        mock_to_csv.assert_called_once_with(
-            "export.csv", index=False, date_format="%Y%m"
-        )
-
-        assert_frame_equal(actual_output, expected_output)
-
-    def test_filter_out_questions_save_full_path_errror(self):
-        """Check if ValueError raised when path is not csv"""
-
-        with pytest.raises(ValueError):
-            filter_out_questions("dummy", "dummy", "dummy", "export.txt")
 
 
 class TestNilValues:

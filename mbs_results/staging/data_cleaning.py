@@ -5,7 +5,6 @@ from typing import List
 import pandas as pd
 
 from mbs_results.utilities.inputs import read_csv_wrapper
-from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.utils import convert_column_to_datetime
 from mbs_results.utilities.validation_checks import (  # validate_manual_constructions,
     validate_indices,
@@ -494,8 +493,6 @@ def filter_out_questions(
     df: pd.DataFrame,
     column: str,
     questions_to_filter: List[int],
-    save_full_path: str,
-    **config,
 ) -> pd.DataFrame:
     """
     Removes questions defined in `questions_to_filter` from df. The removed
@@ -509,37 +506,25 @@ def filter_out_questions(
         Column name to search for questions.
     questions_to_filter : List(int)
         List of questions to removes.
-    save_full_path : str
-        Full path to save removeed values, e.g. `folder1/folder2/mydata.csv`.
-    config
-        Main configuration of pipeline.
     Returns
     -------
-    keep_questions_df : pd.DataFrame
-        Original dataframe without questions_to_filter questions.
+    keep_questions_df : pd.DataFrame, filter_out_questions_df : pd.DataFrame
+        Original dataframes with and without questions_to_filter questions.
 
     """
-    if not save_full_path.endswith(".csv"):
-        raise ValueError(
-            "Function argument {} is not a csv file.".format(save_full_path)
-        )
 
     filter_out_questions_df = df[df[column].isin(questions_to_filter)]
 
     keep_questions_df = df[~df[column].isin(questions_to_filter)]
 
-    write_csv_wrapper(
-        filter_out_questions_df,
-        save_full_path,
-        config["platform"],
-        config["bucket"],
-        index=False,
-        date_format="%Y%m",
+    keep_questions_df.reset_index(drop=True, inplace=True)
+    filter_out_questions_df.reset_index(drop=True, inplace=True)
+
+    filter_out_questions_df["period"] = (
+        filter_out_questions_df["period"].dt.strftime("%Y%m").astype("int")
     )
 
-    keep_questions_df.reset_index(drop=True, inplace=True)
-
-    return keep_questions_df
+    return keep_questions_df, filter_out_questions_df
 
 
 def convert_nil_values(

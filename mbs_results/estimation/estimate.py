@@ -1,8 +1,8 @@
 import pandas as pd
 
 from mbs_results.estimation.apply_estimation import apply_estimation
-
-# from mbs_results.staging.data_cleaning import correct_values
+from mbs_results.utilities.outputs import write_csv_wrapper
+from mbs_results.utilities.utils import get_versioned_filename
 
 
 def estimate(
@@ -41,5 +41,18 @@ def estimate(
     post_estimate = pd.merge(
         df, estimate_df, how="left", on=[config["period"], config["reference"]]
     )
+
+    # export on demand
+    if config["debug_mode"]:
+
+        estimate_filename = get_versioned_filename("estimation_output", config)
+
+        write_csv_wrapper(
+            post_estimate,
+            config["output_path"] + estimate_filename,
+            config["platform"],
+            config["bucket"],
+            index=False,
+        )
 
     return post_estimate

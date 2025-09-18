@@ -192,4 +192,4 @@ def find_files(
     )
 
     logger.info("File selection completed successfully")
-    return valid_files
+    return sorted(valid_files)

@@ -12,7 +12,7 @@ from mbs_results import logger
 from mbs_results.utilities.merge_two_config_files import merge_two_config_files
 
 
-def load_config(config_user_dict=None):
+def load_config(config_user_path, config_user_dict=None):
     """Load the dev and user configs and merges into one dictionary"""
     # Get the directory of the script that called this function
     # This is necessary to find the path of the config files relative to this script
@@ -22,7 +22,6 @@ def load_config(config_user_dict=None):
     logger.info(f"load_config caller directory: {caller_dir}")
 
     # Get config paths relative to the caller directory and check if the files exist
-    config_user_path = "config_user.json"
     if not os.path.exists(config_user_path):
         warning_message = f"config_user.json not found at {config_user_path}"
         logger.warning(warning_message)
