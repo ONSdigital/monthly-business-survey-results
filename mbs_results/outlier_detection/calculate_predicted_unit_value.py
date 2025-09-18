@@ -33,7 +33,7 @@ def calculate_predicted_unit_value(
     """
 
     winsorised = (~df[is_census]) & (~df[nw_ag_flag])
-    filtered_df = df.loc[winsorised]
+    filtered_df = df.copy().loc[winsorised]
 
     filtered_df["weighted_target_values"] = (
         filtered_df[a_weight] * filtered_df[target_variable]

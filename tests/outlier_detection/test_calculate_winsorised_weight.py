@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
@@ -10,24 +8,18 @@ from mbs_results.outlier_detection.calculate_winsorised_weight import (
 
 
 @pytest.fixture(scope="class")
-def winsorised_weight_test_data():
+def winsorised_weight_test_data(outlier_data_dir):
     return pd.read_csv(
-        Path("tests")
-        / "data"
-        / "outlier_detection"
-        / "calculate_winsorised_weight"
-        / "winsorised_weight_data.csv",
+        outlier_data_dir / "calculate_winsorised_weight" / "winsorised_weight_data.csv",
         low_memory=False,
         usecols=lambda c: not c.startswith("Unnamed:"),
     )
 
 
 @pytest.fixture(scope="class")
-def winsorised_weight_test_output():
+def winsorised_weight_test_output(outlier_data_dir):
     return pd.read_csv(
-        Path("tests")
-        / "data"
-        / "outlier_detection"
+        outlier_data_dir
         / "calculate_winsorised_weight"
         / "winsorised_weight_data_output.csv",
         low_memory=False,

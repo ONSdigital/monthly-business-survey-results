@@ -29,14 +29,6 @@ def get_estimation_data(
         platform - either "s3" or "network"
         bucket_name - S3 bucket name for file storage. (optional)
         population_column_names: list of column names for the population frames
-    sample_column_names: list of column names for the sample data
-    population_keep_columns: list of names of columns to keep from population frame
-    sample_keep_columns: list of names of columns to keep from sample
-    calibration_group_map: dataframe containing map between cell number and
-                            calibration group
-    period: the name of the period column
-    reference: the name of the reference column
-    cell_number: the name of the cell number column
 
     Returns
     -------
@@ -85,8 +77,7 @@ def derive_estimation_variables(
     calibration_group_map: pd.DataFrame = None,
     **config
 ):
-    """
-    Derive extra variables required for estimation.
+    """Derive extra variables required for estimation.
 
     Parameters
     ----------
@@ -125,6 +116,11 @@ def derive_estimation_variables(
     sample = sample.copy()[[reference, period]]
     sample["is_sampled"] = True
 
-    return population_frame.merge(sample, on=[reference, period], how="left").fillna(
-        value={"is_sampled": False}
+    population_frame = population_frame.merge(
+        sample, on=[reference, period], how="left"
     )
+    population_frame["is_sampled"] = (
+        population_frame["is_sampled"].fillna(0).astype(bool)
+    )
+
+    return population_frame

@@ -62,6 +62,5 @@ def test_remove_derived_if_newly_sampled(
     actual = remove_derived_if_newly_sampled(
         df=current_period, previous_period_df=previous_period, config=config
     )
-    print(actual)
 
     assert_frame_equal(actual, expected, check_dtype=False)

@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import pandas as pd  # noqa F401
 import pytest
 from pandas.testing import assert_frame_equal
 
@@ -27,17 +26,16 @@ match_inputs = [
 
 
 @pytest.fixture(scope="class")
-def count_test_data():
+def count_test_data(imputation_data_dir):
     return load_and_format(
-        Path("tests/data/imputation")
-        / "flag_and_count_matched_pairs/count_matches_input.csv"
+        imputation_data_dir / "flag_and_count_matched_pairs/count_matches_input.csv"
     )
 
 
 @pytest.fixture(scope="class")
-def count_expected_output():
+def count_expected_output(imputation_data_dir):
     return load_and_format(
-        Path("tests/data/imputation")
+        imputation_data_dir
         / "flag_and_count_matched_pairs/count_matches_expected_output.csv"
     )
 

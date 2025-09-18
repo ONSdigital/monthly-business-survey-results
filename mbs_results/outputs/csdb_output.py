@@ -40,7 +40,7 @@ def create_csdb_output(
     df_combined["period"] = convert_column_to_datetime(
         df_combined["period"]
     ).dt.strftime("%Y%m")
-    df_combined["cdid"] = df_combined.replace()["cdid"].apply(
+    df_combined["cdid"] = df_combined["cdid"].apply(
         lambda x: x.strip() if isinstance(x, str) else x
     )
     # Convert grossed_column into pounds thousands before agg

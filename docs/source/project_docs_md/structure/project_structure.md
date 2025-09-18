@@ -1,13 +1,6 @@
 # `monthly-business-survey-results` structure
 
-This page provides information on the repository's structure. The repository's folder
-structure is explained here:
-
-```{toctree}
-:maxdepth: 2
-./src.md
-./tests.md
-```
+This page provides information on the repository's structure.
 
 ## Top-level files
 

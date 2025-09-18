@@ -87,6 +87,7 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+docs/source/generated/
 doc/_build/
 
 # PyBuilder
@@ -891,7 +892,5 @@ debug_script*
 # Ignore logs
 logs/
 
-# Ignore selective editing testing outputs
-tests/data/test_se_wrappers/output/*
-# Ignore csv files on top level
-*.csv
+# Ignore validation checks testing outputs
+valueError_validate_manual_constructions.csv

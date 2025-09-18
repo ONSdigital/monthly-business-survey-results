@@ -16,8 +16,8 @@ from mbs_results.utilities.constrains import (
 
 
 @pytest.fixture(scope="class")
-def filepath():
-    return Path("tests/data/utilities/constrains")
+def filepath(utilities_data_dir):
+    return utilities_data_dir / "constrains"
 
 
 def test_replace_values_index_base(filepath):
@@ -140,182 +140,184 @@ def test_constrain_functionality(filepath):
     assert_frame_equal(df_output, df_expected_output)
 
 
-def test_calculate_derived_outlier_weights(filepath):
-    config = {"sic": "frosic2007"}
-    df = pd.read_csv(
-        filepath / "derived-questions-winsor.csv",
-        index_col=False,
-    )
-    df["target_variable"] = df["target_variable"].astype(float)
-    df["new_target_variable"] = df["new_target_variable"].astype(float)
-    # Drop q40 rows
-    df_input = df.drop(df[df["question_no"] == 40].index)
-    df_input.drop(
-        columns=["default_o_weight", "constrain_marker", "post_wins_marker"],
-        inplace=True,
-    )
-
-    df_output = calculate_derived_outlier_weights(
-        df_input,
-        "period",
-        "reference",
-        "target_variable",
-        "question_no",
-        "spp_form_id",
-        "outlier_weight",
-        "new_target_variable",
-        config,
-    )
-
-    sorting_by = ["reference", "period", "question_no", "spp_form_id"]
-    input_col_order = df.columns
-    df_output = (
-        df_output[input_col_order].sort_values(by=sorting_by).reset_index(drop=True)
-    )
-    df = df.sort_values(by=sorting_by).reset_index(drop=True)
-
-    assert_frame_equal(df, df_output)
-
-
-def test_calculate_derived_outlier_weights_missing(filepath):
-    config = {"sic": "frosic2007"}
-    df = pd.read_csv(
-        filepath / "derived-questions-winsor-missing.csv",
-        index_col=False,
-    )
-    df["target_variable"] = df["target_variable"].astype(float)
-    df["new_target_variable"] = df["new_target_variable"].astype(float)
-    # Drop q40 rows
-    df_input = df.drop(df[df["question_no"] == 40].index)
-    df_input.drop(
-        columns=["default_o_weight", "constrain_marker", "post_wins_marker"],
-        inplace=True,
-    )
-    # Manually change the input data to be missing one value in
-    # new_target_variable . data is present in dataset to compare against
-    df_input.loc[
-        (df_input["reference"] == 101)
-        & (df_input["period"] == 202401)
-        & (df_input["question_no"] == 46)
-        & (df_input["spp_form_id"] == 13),
-        "new_target_variable",
-    ] = None
-
-    df_output = calculate_derived_outlier_weights(
-        df_input,
-        "period",
-        "reference",
-        "target_variable",
-        "question_no",
-        "spp_form_id",
-        "outlier_weight",
-        "new_target_variable",
-        config,
-    )
-
-    sorting_by = ["reference", "period", "question_no", "spp_form_id"]
-    input_col_order = df.columns
-    df_output = (
-        df_output[input_col_order].sort_values(by=sorting_by).reset_index(drop=True)
-    )
-    df = df.sort_values(by=sorting_by).reset_index(drop=True)
-
-    assert_frame_equal(df, df_output)
-
-
-scenarios = [
-    "no_further_processing_required",
-    "outlier_identified_example_1",
-    "outlier_identified_example_2",
-    "outlier_identified_example_q46_q47",
-    "outlier_identified_example_derived_q42",
-    "outlier_identified_example_derived_q46",
-    "outlier_identifies_non_contributor",
-    "outlier_identifies_example_3",
-]
-
-
-@pytest.mark.parametrize("base_file_name", scenarios)
-def test_update_derived_weight_and_winsorised_value(filepath, base_file_name):
-
-    df_in = pd.read_csv(filepath / Path(base_file_name + ".csv"))
-    df_expected = pd.read_csv(filepath / Path(base_file_name + "_expected.csv"))
-    df_actual = update_derived_weight_and_winsorised_value(
-        df_in,
-        "reference",
-        "period",
-        "questioncode",
-        "spp_form_id",
-        "outlier_weight",
-        "value",
-    )
-
-    assert_frame_equal(df_actual, df_expected)
-
-
-def test_replace_outlier_weights(filepath):
-
-    df = pd.read_csv(filepath / "test_replace_outliers_in.csv", index_col=False)
-
-    df_in = df.drop(columns=["manual_outlier_weight"])
-
-    df_expected = pd.read_csv(
-        filepath / "test_replace_outliers_out.csv", index_col=False
-    )
-
-    test_config = {
-        "manual_outlier_path": filepath / "manual_outliers.csv",
-        "platform": "network",
-        "bucket": "",
-    }
-
-    df_actual = replace_with_manual_outlier_weights(
-        df_in,
-        "reference",
-        "period",
-        "question_no",
-        "outlier_weight",
-        test_config,
-    )
-
-    assert_frame_equal(df_actual, df_expected)
-
-
-def test_no_manual_outliers(filepath):
-
-    df = pd.read_csv(filepath / "test_replace_outliers_in.csv", index_col=False)
-
-    df_in = df.drop(columns=["manual_outlier_weight"])
-
-    test_config = {"manual_outlier_path": "", "platform": "network", "bucket": ""}
-
-    df_actual = replace_with_manual_outlier_weights(
-        df_in,
-        "reference",
-        "period",
-        "question_no",
-        "outlier_weight",
-        test_config,
-    )
-
-    assert_frame_equal(df_actual, df_in)
-
-
-def test_manual_outliers_unmatched_warning(filepath, caplog):
-
-    df = pd.read_csv(filepath / "test_replace_outliers_in.csv", index_col=False)
-
-    df_in = df.drop(columns=["manual_outlier_weight"])
-
-    test_config = {
-        "manual_outlier_path": filepath / "manual_outliers.csv",
-        "platform": "network",
-        "bucket": "",
-    }
-
-    with caplog.at_level(logging.WARN):
-        replace_with_manual_outlier_weights(
-            df_in, "reference", "period", "question_no", "outlier_weight", test_config
+class TestDerivedOutlierWeights:
+    def test_calculate_derived_outlier_weights(self, filepath):
+        config = {"sic": "frosic2007"}
+        df = pd.read_csv(
+            filepath / "derived-questions-winsor.csv",
+            index_col=False,
+        )
+        df["target_variable"] = df["target_variable"].astype(float)
+        df["new_target_variable"] = df["new_target_variable"].astype(float)
+        # Drop q40 rows
+        df_input = df.drop(df[df["question_no"] == 40].index)
+        df_input.drop(
+            columns=["default_o_weight", "constrain_marker", "post_wins_marker"],
+            inplace=True,
         )
 
-    assert "There are 1 unmatched references" in caplog.text
+        df_output = calculate_derived_outlier_weights(
+            df_input,
+            "period",
+            "reference",
+            "target_variable",
+            "question_no",
+            "spp_form_id",
+            "outlier_weight",
+            "new_target_variable",
+            config,
+        )
+
+        sorting_by = ["reference", "period", "question_no", "spp_form_id"]
+        input_col_order = df.columns
+        df_output = (
+            df_output[input_col_order].sort_values(by=sorting_by).reset_index(drop=True)
+        )
+        df = df.sort_values(by=sorting_by).reset_index(drop=True)
+
+        assert_frame_equal(df, df_output)
+
+    def test_calculate_derived_outlier_weights_missing(self, filepath):
+        config = {"sic": "frosic2007"}
+        df = pd.read_csv(
+            filepath / "derived-questions-winsor-missing.csv",
+            index_col=False,
+        )
+        df["target_variable"] = df["target_variable"].astype(float)
+        df["new_target_variable"] = df["new_target_variable"].astype(float)
+        # Drop q40 rows
+        df_input = df.drop(df[df["question_no"] == 40].index)
+        df_input.drop(
+            columns=["default_o_weight", "constrain_marker", "post_wins_marker"],
+            inplace=True,
+        )
+        # Manually change the input data to be missing one value in
+        # new_target_variable . data is present in dataset to compare against
+        df_input.loc[
+            (df_input["reference"] == 101)
+            & (df_input["period"] == 202401)
+            & (df_input["question_no"] == 46)
+            & (df_input["spp_form_id"] == 13),
+            "new_target_variable",
+        ] = None
+
+        df_output = calculate_derived_outlier_weights(
+            df_input,
+            "period",
+            "reference",
+            "target_variable",
+            "question_no",
+            "spp_form_id",
+            "outlier_weight",
+            "new_target_variable",
+            config,
+        )
+
+        sorting_by = ["reference", "period", "question_no", "spp_form_id"]
+        input_col_order = df.columns
+        df_output = (
+            df_output[input_col_order].sort_values(by=sorting_by).reset_index(drop=True)
+        )
+        df = df.sort_values(by=sorting_by).reset_index(drop=True)
+
+        assert_frame_equal(df, df_output)
+
+    scenarios = [
+        "no_further_processing_required",
+        "outlier_identified_example_1",
+        "outlier_identified_example_2",
+        "outlier_identified_example_q46_q47",
+        "outlier_identified_example_derived_q42",
+        "outlier_identified_example_derived_q46",
+        "outlier_identifies_non_contributor",
+        "outlier_identifies_example_3",
+    ]
+
+    @pytest.mark.parametrize("base_file_name", scenarios)
+    def test_update_derived_weight_and_winsorised_value(self, filepath, base_file_name):
+
+        df_in = pd.read_csv(filepath / Path(base_file_name + ".csv"))
+        df_expected = pd.read_csv(filepath / Path(base_file_name + "_expected.csv"))
+        df_actual = update_derived_weight_and_winsorised_value(
+            df_in,
+            "reference",
+            "period",
+            "questioncode",
+            "spp_form_id",
+            "outlier_weight",
+            "value",
+        )
+
+        assert_frame_equal(df_actual, df_expected)
+
+    def test_replace_outlier_weights(self, filepath):
+
+        df = pd.read_csv(filepath / "test_replace_outliers_in.csv", index_col=False)
+
+        df_in = df.drop(columns=["manual_outlier_weight"])
+
+        df_expected = pd.read_csv(
+            filepath / "test_replace_outliers_out.csv", index_col=False
+        )
+
+        test_config = {
+            "manual_outlier_path": filepath / "manual_outliers.csv",
+            "platform": "network",
+            "bucket": "",
+        }
+
+        df_actual = replace_with_manual_outlier_weights(
+            df_in,
+            "reference",
+            "period",
+            "question_no",
+            "outlier_weight",
+            test_config,
+        )
+
+        assert_frame_equal(df_actual, df_expected)
+
+
+class TestManualOutliers:
+    def test_no_manual_outliers(self, filepath):
+
+        df = pd.read_csv(filepath / "test_replace_outliers_in.csv", index_col=False)
+
+        df_in = df.drop(columns=["manual_outlier_weight"])
+
+        test_config = {"manual_outlier_path": "", "platform": "network", "bucket": ""}
+
+        df_actual = replace_with_manual_outlier_weights(
+            df_in,
+            "reference",
+            "period",
+            "question_no",
+            "outlier_weight",
+            test_config,
+        )
+
+        assert_frame_equal(df_actual, df_in)
+
+    def test_manual_outliers_unmatched_warning(self, filepath, caplog):
+
+        df = pd.read_csv(filepath / "test_replace_outliers_in.csv", index_col=False)
+
+        df_in = df.drop(columns=["manual_outlier_weight"])
+
+        test_config = {
+            "manual_outlier_path": filepath / "manual_outliers.csv",
+            "platform": "network",
+            "bucket": "",
+        }
+
+        with caplog.at_level(logging.WARN):
+            replace_with_manual_outlier_weights(
+                df_in,
+                "reference",
+                "period",
+                "question_no",
+                "outlier_weight",
+                test_config,
+            )
+
+        assert "There are 1 unmatched references" in caplog.text

@@ -4,7 +4,11 @@ from pandas.testing import assert_frame_equal
 from mbs_results.imputation.imputation_flags import generate_imputation_marker
 from tests.helper_functions import load_and_format
 
-scenario_path_prefix = "tests/data/imputation/imputation_flags/"
+
+@pytest.fixture(scope="class")
+def data_dir(imputation_data_dir):
+    return imputation_data_dir / "imputation_flags"
+
 
 scenarios = [
     "imputation_flag_data.csv",
@@ -14,9 +18,9 @@ scenarios = [
 
 
 @pytest.mark.parametrize("file_name", scenarios)
-class TestImputationFlags:
-    def test_imputation_marker(self, file_name):
-        df = load_and_format(scenario_path_prefix + file_name)
+class TestImputationMarkers:
+    def test_imputation_marker(self, data_dir, file_name):
+        df = load_and_format(data_dir / file_name)
 
         df_expected_output = df.copy()
         df_input = df.copy()

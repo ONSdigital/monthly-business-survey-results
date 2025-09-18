@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 from pandas.testing import assert_frame_equal
 
@@ -8,9 +6,9 @@ from tests.helper_functions import load_and_format
 
 
 @pytest.fixture(scope="class")
-def predictive_variable_test_data():
+def predictive_variable_test_data(imputation_data_dir):
     return load_and_format(
-        Path("tests/data/imputation/predictive_variable") / "predictive_variable.csv"
+        imputation_data_dir / "predictive_variable" / "predictive_variable.csv"
     )
 
 

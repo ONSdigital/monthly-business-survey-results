@@ -4,11 +4,11 @@ import pytest
 from mbs_results.outputs.get_additional_outputs import get_additional_outputs
 
 
-def test1(**kwargs):
+def dummy_test1(**kwargs):
     print(1)  # dummy function
 
 
-def test2(**kwargs):
+def dummy_test2(**kwargs):
     print(2)  # dummy function
 
 
@@ -22,6 +22,7 @@ def selective_editing_test2(**kwargs):
 
 @pytest.fixture(scope="class")
 def function_mapper():
+
     return {
         "test1": test1,
         "test2": test2,
