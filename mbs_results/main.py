@@ -7,6 +7,7 @@ from mbs_results.outputs.produce_additional_outputs import (
 )
 from mbs_results.staging.stage_dataframe import stage_dataframe
 from mbs_results.utilities.inputs import load_config
+from mbs_results.utilities.utils import generate_schemas
 from mbs_results.utilities.validation_checks import (
     validate_config,
     validate_estimation,
@@ -41,6 +42,8 @@ def run_mbs_main(config_user_dict=None):
         estimation_output, outlier_output, config
     )
     produce_additional_outputs(config, additional_outputs_df)
+
+    generate_schemas(config)
 
 
 if __name__ == "__main__":
