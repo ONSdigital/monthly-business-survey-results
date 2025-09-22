@@ -1,8 +1,15 @@
+import glob
+import json
 import os
+import re
 from importlib import metadata
 
 import numpy as np
 import pandas as pd
+from pandas.io.json._table_schema import build_table_schema
+
+from mbs_results import logger
+from mbs_results.utilities.singleton_boto import SingletonBoto
 
 
 def convert_column_to_datetime(dates):
@@ -155,3 +162,70 @@ def check_above_one(df, column):
         raise ValueError(f"Missing required column: {column}")
     if (df[column] < 1).any():
         raise ValueError(f"Column {column} contains values not greater than 1.")
+
+
+def generate_schemas(config):
+    """
+    Generate schema files for output data.
+
+    Parameters
+    ----------
+
+    config : dict
+        Configuration dictionary containing paths for output and schema folders.
+
+    Returns
+    -------
+    None
+    """
+
+    if config["generate_schemas"] is True and config["schema_path"] is not None:
+
+        output_p = config["output_path"]
+        schema_p = config["schema_path"]
+
+        logger.info("Generating schema files for output data...")
+
+        # Create schemas using a local outputs folder, write them locally
+        if config["platform"] == "network":
+            output_files = glob.glob(f"{output_p}/*.csv")
+
+            for file in output_files:
+                df = pd.read_csv(file, low_memory=False)
+                schema = build_table_schema(df, index=False, version=False)
+
+                # Extract substring between last '/' or '\\' and first '.csv'
+                filename = re.search(r"[^/\\]+(?=\.csv)", file)[0]
+
+                logger.info(f"Generating schema for {filename}")
+
+                with open(f"{schema_p}/{filename}_schema.json", "w") as f:
+                    json.dump(schema, f, indent=4)
+
+        # Create schemas using S3 bucket, write them to S3 bucket
+        if config["platform"] == "s3":
+            s3_client = SingletonBoto.get_client(config)
+            s3_bucket = SingletonBoto.get_bucket()
+
+            output_response = s3_client.list_objects(Bucket=s3_bucket, Prefix=output_p)
+
+            for content in output_response["Contents"]:
+                file_key = content["Key"]
+                if file_key.endswith(".csv"):
+                    csv_response = s3_client.get_object(Bucket=s3_bucket, Key=file_key)
+                    df = pd.read_csv(csv_response["Body"], low_memory=False)
+
+                    schema = build_table_schema(df, index=False, version=False)
+
+                    # Extract substring between last '/' or '\\' and first '.csv'
+                    filename = re.search(r"[^/\\]+(?=\.csv)", file_key)[0]
+
+                    logger.info(f"Generating schema for {filename}")
+
+                    s3_client.put_object(
+                        Body=json.dump(schema, indent=4),
+                        Bucket=s3_bucket,
+                        Key=f"{schema_p}/{filename}_schema.json",
+                    )
+    else:
+        logger.info("Schema generation not enabled in config, skipping...")
