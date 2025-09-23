@@ -36,6 +36,8 @@ test_config = {
     "devolved_nations": ["Scotland", "Wales"],
     "optional_outputs": ["all"],
     "cdid_data_path": "tests/data/outputs/csdb_output/cdid_mapping.csv",
+    "generate_schemas": True,
+    "schema_path": "tests/data/test_main/schemas/",
 }
 
 
