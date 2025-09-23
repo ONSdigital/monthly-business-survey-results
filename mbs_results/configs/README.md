@@ -3,22 +3,33 @@
 | Parameter | Description | Data Type | Acceptable Values |
 |---|---|---|---|
 | bucket | The path to the bucket. | string | Any filepath. |
+| ssl_file | - | - | - |
 | calibration_group_map_path | The filepath to the calibration group mapping file. | string | Any filepath. |
 | classification_values_path | The filepath to the file containing SIC classification values. | string | Any filepath. |
 | snapshot_file_path | The full filepath to the snapshot data | string | Any filepath. |
 | idbr_folder_path | The path to the folder containing the IDBR data. | string | Any filepath. |
 | l_values_path | The filepath to the file containing l values. | string | Any filepath. |
 | manual_constructions_path | The filepath to the file containing manual constructions data. | string | Any filepath. |
+| filter | - | - | - |
+| manual_outlier_path | - | - | - |
 | output_path | The filepath where outputs should be saved to. | string | Any filepath. |
-| population_path | The filepath to the file containing population frame data. | string | Any filepath. |
+| population_prefix | - | - | - |
+| sample_prefix | - | - | - | - |
 | back_data_qv_path | The filepath for the file containing QV backdata. | string | Any filepath. |
 | back_data_cp_path | The filepath for the file containing CP backdata. | string | Any filepath. |
+| back_data_qv_cp_json_path | - | - | - |
 | back_data_finalsel_path | The filepath for the file containing final selection backdata. | string | Any filepath. |
 | sic_domain_mapping_path | The filepath for the data containing the mapping from SIC codes to domains. | string | Any filepath. |
 | threshold_filepath | The filepath for the data containing thresholds for selective editing. | string | Any filepath. |
+| lu_path | - | - | - |
+| cdid_data_path | - | - | - |
 | current_period | The most recent period to include in the outputs (same as above). | int | Any int in the form `yyyymm`. |
 | revision_window | The number of months to use as a revision window. | int | Any int in the form `mm` or `m` (does not need to be zero-padded). |
+| state | - | - | - |
+| devolved_nations | - | - | - |
 | optional_outputs | A list of optional outputs to produce after the pipeline has run. | `[]` | list | Any of the outputs listed in `mbs_results/outputs/produce_additional_outputs.py` within the `produce_additional_outputs` function which can be produced. |
+| generate_schemas | Setting to control if schemas are automatically generated for outputs | bool | `True` or `False` |
+| schema_path | Location to save generated schemas | string | Any filepath |
 
 
 ## Guidance for use
@@ -29,6 +40,7 @@ As an end user, you will only need to change the user config (named `config_user
 |---|---|---|---|---|
 | platform | Specifies whether you're running the pipeline locally or on DAP. | `"s3"` | string | `"network"`, `"s3"` |
 | back_data_type | The name of the backdata type marker column. | `"type"` | string | Any valid column name. |
+| back_data_format | The file type to use for back data | - | string | `"csv"`, `"json"` |
 | imputation_marker_col | The name of the column being used as an imputation marker. | `"imputation_flags_adjustedresponse"` | string | Any valid column name. |
 | auxiliary | The name of the column containing the auxiliary variable. | `"frotover"` | string | Any valid column name. |
 | auxiliary_converted | The name of the column containing the auxiliary variable converted into monthly actual pounds. | `"converted_frotover"` | string | Any valid column name. |
