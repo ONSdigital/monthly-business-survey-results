@@ -1,0 +1,19 @@
+reference,period,question_no,status,adjustedresponse,imputation_marker_adjustedresponse,
+1,202201,1,Clear,100,r
+1,202201,2,Clear,101,r
+1,202201,3,Clear,102,r
+1,202202,1,Clear,100,r
+1,202202,2,Clear,101,r
+1,202202,3,Clear,102,r
+2,202201,1,Form sent out,,,
+2,202201,2,Form sent out,,,
+2,202201,3,Form sent out,,,
+2,202202,1,Clear,100,r
+2,202202,2,Clear,101,r
+2,202202,3,Clear,102,r
+3,202201,1,Excluded from Results,,,
+3,202201,2,Excluded from Results,,,
+3,202201,3,Excluded from Results,,,
+3,202202,1,Excluded from Results,,,
+3,202202,2,Excluded from Results,,,
+3,202202,3,Excluded from Results,,,

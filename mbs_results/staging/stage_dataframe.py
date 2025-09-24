@@ -701,3 +701,59 @@ def check_construction_links(df: pd.DataFrame, config: dict):
         logger.info(
             f"references with construction link > 1 for q49 saved to {output_file}"
         )
+
+
+def exclude_from_results(
+    df,
+    non_response_statuses,
+    reference,
+    period,
+    status,
+    target,
+    imputation_marker,
+    question_no,
+):
+    """
+    Excludes rows from the DataFrame based on non-response statuses.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The input DataFrame containing response and contributor data.
+    non_response_statuses : list
+        A list of statuses that should be treated as non-responders. These
+        should be present in the `status` column of the DataFrame.
+    reference : str
+        The column name of the reference variable.
+    period : str
+        The column name of the period variable.
+    status : str
+        The column name of the status variable.
+    target : str
+        The column name of the target variable.
+    imputation_marker : str
+        The column name of the imputation marker variable.
+
+    Returns
+    -------
+    pd.DataFrame
+        The modified DataFrame with rows excluded based on non-response statuses.
+    """
+
+    excluded_mask = (df[status].isin(non_response_statuses)) & (df[target].notna())
+    excluded_rows = df[excluded_mask]
+
+    df.loc[excluded_mask, [target, imputation_marker]] = None
+
+    logger.info(
+        f"""{len(excluded_rows)} rows set to null for target and imputation_marker
+        based on non-response statuses.
+        See excluded_from_results.csv to see original values."""
+    )
+
+    excluded_rows = excluded_rows[
+        [reference, period, status, target, imputation_marker, question_no]
+    ]
+    excluded_rows.to_csv("excluded_from_results.csv", index=False)
+
+    return df

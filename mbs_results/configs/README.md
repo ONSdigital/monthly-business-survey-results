@@ -19,6 +19,7 @@
 | current_period | The most recent period to include in the outputs (same as above). | int | Any int in the form `yyyymm`. |
 | revision_window | The number of months to use as a revision window. | int | Any int in the form `mm` or `m` (does not need to be zero-padded). |
 | optional_outputs | A list of optional outputs to produce after the pipeline has run. | `[]` | list | Any of the outputs listed in `mbs_results/outputs/produce_additional_outputs.py` within the `produce_additional_outputs` function which can be produced. |
+| non_response_statuses | A list of status values that refer to non-responses. | `["Form sent out", "Excluded from Results"]` | list | A list of statuses found in the "status" column. |
 
 
 ## Guidance for use
