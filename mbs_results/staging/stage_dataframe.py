@@ -704,7 +704,8 @@ def check_construction_links(df: pd.DataFrame, config: dict):
 
 
 def exclude_from_results(
-    df,
+    responses,
+    contributors,
     non_response_statuses,
     reference,
     period,
@@ -712,14 +713,17 @@ def exclude_from_results(
     target,
     imputation_marker,
     question_no,
+    output_path,
 ):
     """
     Excludes rows from the DataFrame based on non-response statuses.
 
     Parameters
     ----------
-    df : pd.DataFrame
-        The input DataFrame containing response and contributor data.
+    responses : pd.DataFrame
+        The responses DataFrame containing response-level data.
+    contributors : pd.DataFrame
+        The contributors DataFrame containing contributor-level data.
     non_response_statuses : list
         A list of statuses that should be treated as non-responders. These
         should be present in the `status` column of the DataFrame.
@@ -733,6 +737,10 @@ def exclude_from_results(
         The column name of the target variable.
     imputation_marker : str
         The column name of the imputation marker variable.
+    question_no : str
+        The column name of the question_no variable.
+    output_path : str
+        The path to write the excluded_to_results.csv to.
 
     Returns
     -------
@@ -740,20 +748,37 @@ def exclude_from_results(
         The modified DataFrame with rows excluded based on non-response statuses.
     """
 
-    excluded_mask = (df[status].isin(non_response_statuses)) & (df[target].notna())
-    excluded_rows = df[excluded_mask]
-
-    df.loc[excluded_mask, [target, imputation_marker]] = None
-
-    logger.info(
-        f"""{len(excluded_rows)} rows set to null for target and imputation_marker
-        based on non-response statuses.
-        See excluded_from_results.csv to see original values."""
+    # creating CSV for checking original values
+    excluded_responses = responses.merge(
+        contributors, how="inner", on=["reference", "period"]
     )
 
-    excluded_rows = excluded_rows[
-        [reference, period, status, target, imputation_marker, question_no]
-    ]
-    excluded_rows.to_csv("excluded_from_results.csv", index=False)
+    excluded_mask = (
+        excluded_responses[status].isin(non_response_statuses)
+        & excluded_responses[target].notna()
+    )
+    excluded_responses = excluded_responses[excluded_mask]
 
-    return df
+    if len(excluded_responses) > 0:
+        print("executed")
+
+        logger.info(
+            f"""{len(excluded_responses)} rows set to null for target and
+            imputation_marker based on non-response statuses.
+            See excluded_from_results.csv to see original values."""
+        )
+
+        excluded_responses = excluded_responses[
+            [reference, period, question_no, status, target, imputation_marker]
+        ]
+
+        output_path = os.path.join(output_path, "excluded_from_results.csv")
+        excluded_responses.to_csv(output_path, index=False)
+
+        # selecting only the rows in excluded_index in responses
+        excluded_responses.set_index([reference, period, question_no], inplace=True)
+        responses.set_index([reference, period, question_no], inplace=True)
+
+        responses.loc[excluded_responses.index, [target, imputation_marker]] = None
+
+        return responses.reset_index()

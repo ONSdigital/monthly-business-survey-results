@@ -1,4 +1,6 @@
 import logging
+import os
+import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -43,8 +45,15 @@ def filepath():
 
 
 @pytest.fixture(scope="class")
-def input(filepath):
-    return pd.read_csv(filepath / "exclude_from_results_input.csv", index_col=False)
+def responses(filepath):
+    return pd.read_csv(filepath / "exclude_from_results_responses.csv", index_col=False)
+
+
+@pytest.fixture(scope="class")
+def contributors(filepath):
+    return pd.read_csv(
+        filepath / "exclude_from_results_contributors.csv", index_col=False
+    )
 
 
 @pytest.fixture(scope="class")
@@ -53,7 +62,7 @@ def expected_output(filepath):
 
 
 @pytest.fixture(scope="class")
-def expected_csv(filepath):
+def expected_output_csv(filepath):
     return pd.read_csv(
         filepath / "exclude_from_results_output_csv.csv", index_col=False
     )
@@ -61,15 +70,11 @@ def expected_csv(filepath):
 
 class TestExcludeFromResults:
     @patch("pandas.DataFrame.to_csv")  # mock pandas export to csv function
-    def test_warning_and_csv(
-        self,
-        mock_to_csv,
-        caplog,
-        input,
-    ):
+    def test_warning_and_csv(self, mock_to_csv, caplog, responses, contributors):
         with caplog.at_level(logging.INFO):
             exclude_from_results(
-                df=input,
+                responses=responses,
+                contributors=contributors,
                 non_response_statuses=["Excluded from Results", "Form sent out"],
                 reference="reference",
                 period="period",
@@ -77,6 +82,7 @@ class TestExcludeFromResults:
                 target="adjustedresponse",
                 imputation_marker="imputation_marker_adjustedresponse",
                 question_no="question_no",
+                output_path="test_outputs/",
             )
 
             assert (
@@ -84,14 +90,17 @@ class TestExcludeFromResults:
             )
 
             mock_to_csv.assert_called_once_with(
-                "excluded_from_results.csv", index=False
+                "test_outputs/excluded_from_results.csv", index=False
             )
 
     @patch("pandas.DataFrame.to_csv")  # mock pandas export to csv function
-    def test_exclude_from_results(self, mock_to_csv, input, expected_output):
+    def test_exclude_from_results(
+        self, mock_to_csv, responses, contributors, expected_output
+    ):
 
         actual_output = exclude_from_results(
-            df=input,
+            responses=responses,
+            contributors=contributors,
             non_response_statuses=["Excluded from Results", "Form sent out"],
             reference="reference",
             period="period",
@@ -99,6 +108,32 @@ class TestExcludeFromResults:
             target="adjustedresponse",
             imputation_marker="imputation_marker_adjustedresponse",
             question_no="question_no",
+            output_path="test_outputs/",
         )
-        mock_to_csv.assert_called_once_with("excluded_from_results.csv", index=False)
+        mock_to_csv.assert_called_once_with(
+            "test_outputs/excluded_from_results.csv", index=False
+        )
+        print(actual_output.columns)
         assert_frame_equal(actual_output, expected_output)
+
+    def test_exclude_from_results_csv(
+        self, responses, contributors, expected_output_csv
+    ):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            actual_output = exclude_from_results(
+                responses=responses,
+                contributors=contributors,
+                non_response_statuses=["Excluded from Results", "Form sent out"],
+                reference="reference",
+                period="period",
+                status="status",
+                target="adjustedresponse",
+                imputation_marker="imputation_marker_adjustedresponse",
+                question_no="question_no",
+                output_path=tmpdirname,
+            )
+            actual_output = pd.read_csv(
+                os.path.join(tmpdirname, "excluded_from_results.csv")
+            )
+
+        assert_frame_equal(actual_output, expected_output_csv)
