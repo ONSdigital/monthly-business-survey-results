@@ -1,5 +1,5 @@
 {
-    "bucket": "onscdp-dev-data01-5320d6ca",
+    "bucket": "",
     "ssl_file" : "/etc/pki/tls/certs/ca-bundle.crt",
     "calibration_group_map_path": "",
     "classification_values_path": "",
@@ -18,11 +18,8 @@
     "back_data_finalsel_path":"",
     "sic_domain_mapping_path": "",
     "threshold_filepath": "",
-    "lu_path": "",
-    "cdid_data_path": "",
     "current_period": 202303,
     "revision_window": 15,
     "state": "frozen",
-    "devolved_nations": ["Scotland", "Wales"],
-    "optional_outputs":["generate_devolved_outputs"]
+    "debug_mode": false
 }

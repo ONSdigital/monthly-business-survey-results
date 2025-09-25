@@ -47,17 +47,12 @@ def produce_qa_output(
         "flag_construction_matches_count",
         "default_link_flag_construction_matches",
         "constrain_marker",  # these not requested but useful
+        # column names for counts depends if a filter was applied in mbs
+        f"b_match_{target}_count",
+        f"f_match_{target}_count",
+        f"b_match_filtered_{target}_count",
+        f"f_match_filtered_{target}_count",
     ]
-
-    if not config["filter"]:
-        count_variables = [f"b_match_{target}_count", f"f_match_{target}_count"]
-    else:
-        count_variables = [
-            f"b_match_filtered_{target}_count",
-            f"f_match_filtered_{target}_count",
-        ]
-
-    requested_columns += count_variables
 
     # Check if column names specified in config, if not, use above as default
     cols_from_config = []
@@ -75,5 +70,7 @@ def produce_qa_output(
         additional_outputs_df[config["target"]]
         * additional_outputs_df["total weight (A*G*O)"]
     )
-
-    return additional_outputs_df[cols_from_config]
+    additional_outputs_df = additional_outputs_df[
+        additional_outputs_df.columns.intersection(cols_from_config)
+    ]
+    return additional_outputs_df

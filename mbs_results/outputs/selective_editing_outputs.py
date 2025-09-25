@@ -3,7 +3,6 @@ import pandas as pd
 from mbs_results.estimation.estimate import estimate
 from mbs_results.outlier_detection.detect_outlier import detect_outlier
 from mbs_results.outputs.produce_additional_outputs import (
-    get_additional_outputs_df,
     produce_selective_editing_outputs,
 )
 from mbs_results.outputs.selective_editing_validations import (
@@ -101,16 +100,6 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
         index=False,
     )
 
-    se_outputs_df = get_additional_outputs_df(
-        estimation_output, outlier_output, config_se
-    )
-
-    se_outputs_df.to_csv(
-        config_se["output_path"]
-        + f"se_outputs_full_df_{config_se['period_selected']}.csv",
-        index=False,
-    )
-
-    produce_selective_editing_outputs(config_se, se_outputs_df)
+    produce_selective_editing_outputs(config_se, outlier_output)
 
     qa_selective_editing_outputs(config_se)

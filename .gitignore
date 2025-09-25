@@ -892,8 +892,5 @@ debug_script*
 # Ignore logs
 logs/
 
-# Ignore selective editing testing outputs
-tests/data/test_se_wrappers/output/*
-
 # Ignore validation checks testing outputs
 valueError_validate_manual_constructions.csv

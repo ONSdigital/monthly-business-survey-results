@@ -238,6 +238,7 @@ def test_validate_outlier_weight_error(caplog):
             "snapshot_file_path": "test_snapshot.json",
             "platform": "network",
             "bucket": "",
+            "debug_mode": False,
         }
 
         test_data_dict = {

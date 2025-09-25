@@ -145,8 +145,8 @@
 
 
     "mandatory_outputs": ["produce_qa_output",
-                        "selective_editing_contributors",
-                        "selective_editing_questions"],
+                        "turnover_output",
+                        "growth_rates_output"],
 
 
 
