@@ -5,6 +5,8 @@ def get_additional_outputs(
     config: dict,
     function_mapper: dict,
     additional_outputs_df: pd.DataFrame,
+    qa_outputs: bool,
+    optional_outputs: bool,
     selective_editing: bool = False,
 ) -> dict:
     """
@@ -29,6 +31,12 @@ def get_additional_outputs(
 
     additional_outputs_df : pd.DataFrame
         A DataFrame containing the data required for the functions in function_mapper.
+
+    qa_outputs : bool
+        Whether to produce mandotaty for QA.
+
+    optional_outputs : bool
+        Whether to produce any non mandotaty outputs.
 
     selective_editing : bool, optional
         If True, returns only selective editing outputs. If False, returns
@@ -63,7 +71,7 @@ def get_additional_outputs(
 
     """
     additional_outputs = dict()
-    for config_list_name in ["optional_outputs", "mandatory_outputs"]:
+    for config_list_name in ["mandatory_outputs"]:
         if not isinstance(config[config_list_name], list):
             raise TypeError(
                 f"""
@@ -74,30 +82,32 @@ def get_additional_outputs(
                 """
             )
 
-    if config["optional_outputs"] == ["all"]:
-        # Dont have to worry about mandatory outputs here, all functions from mapper
-        # will run. mandatory and optional outputs should be defined in the mapper
-        functions_to_run = function_mapper.keys()
+    all_functions_to_run = list(function_mapper.keys())
 
-    else:
-        # If "all" is not specified, use the provided list combining with
-        # mandatory outputs
-        functions_to_run = sorted(
-            list(set(config["optional_outputs"]) | set(config["mandatory_outputs"]))
+    qa_functions = config["mandatory_outputs"]
+
+    selective_editing_functions = [
+        output
+        for output in all_functions_to_run
+        if output.startswith("selective_editing_")
+    ]
+
+    # all registered functions apart the ones in config ["mandatory_outputs"] and SE
+    optional_functions = sorted(
+        list(
+            set(all_functions_to_run)
+            - set(config["mandatory_outputs"])
+            - set(selective_editing_functions)
         )
+    )
+    functions_to_run = []
 
-    if selective_editing:
-        functions_to_run = [
-            output
-            for output in functions_to_run
-            if output.startswith("selective_editing_")
-        ]
-    else:
-        functions_to_run = [
-            output
-            for output in functions_to_run
-            if not output.startswith("selective_editing_")
-        ]
+    for select_output, functions in zip(
+        [qa_outputs, optional_outputs, selective_editing],
+        [qa_functions, optional_functions, selective_editing_functions],
+    ):
+        if select_output:
+            functions_to_run = functions_to_run + functions
 
     if not functions_to_run:
         print("No additional_outputs produced")
