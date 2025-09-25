@@ -5,6 +5,7 @@ from mbs_results.outputs.selective_editing import (
     create_standardising_factor,
 )
 from mbs_results.staging.merge_domain import merge_domain
+from mbs_results.utilities.outputs import write_csv_wrapper
 
 
 def create_selective_editing_question_output(
@@ -111,10 +112,14 @@ def create_selective_editing_question_output(
 
     question_output.fillna({"auxiliary_value": 0}, inplace=True)
 
-    question_output.to_csv(
+    write_csv_wrapper(
+        question_output,
         output_path + "se_question_full_output_" + f"se_period_{period_selected}.csv",
+        config["platform"],
+        config["bucket"],
         index=False,
     )
+
     question_output.drop(
         columns=[
             "imputation_class",

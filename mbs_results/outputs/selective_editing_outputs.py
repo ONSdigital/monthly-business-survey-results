@@ -9,6 +9,7 @@ from mbs_results.outputs.selective_editing_validations import (
     qa_selective_editing_outputs,
 )
 from mbs_results.staging.stage_dataframe import start_of_period_staging
+from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.utils import get_versioned_filename
 
 
@@ -73,9 +74,12 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
         inplace=True,
     )
 
-    imputation_output.to_csv(
+    write_csv_wrapper(
+        imputation_output,
         config_se["output_path"]
         + f"post_imputation_processing_{config_se['period_selected']}.csv",
+        config_se["platform"],
+        config_se["bucket"],
         index=False,
     )
 
@@ -86,17 +90,23 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
         config=config_se,
     )
 
-    estimation_output.to_csv(
+    write_csv_wrapper(
+        estimation_output,
         config_se["output_path"]
         + f"se_outputs_estimation_output_{config_se['period_selected']}_testing.csv",
+        config_se["platform"],
+        config_se["bucket"],
         index=False,
     )
 
     outlier_output = detect_outlier(estimation_output, config_se)
 
-    outlier_output.to_csv(
+    write_csv_wrapper(
+        outlier_output,
         config_se["output_path"]
         + f"se_outputs_outlier_output_{config_se['period_selected']}_testing.csv",
+        config_se["platform"],
+        config_se["bucket"],
         index=False,
     )
 
