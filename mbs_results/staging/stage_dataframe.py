@@ -152,6 +152,19 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     contributors = create_form_type_spp_column(contributors, config)
     mapper = create_mapper()  # Needs to be defined
 
+    responses = exclude_from_results(
+        responses=responses,
+        contributors=contributors,
+        non_response_statuses=config["non_response_statuses"],
+        reference=config["reference"],
+        period=config["period"],
+        status="status",
+        target=config["target"],
+        imputation_marker=config["imputation_marker_col"],
+        question_no=config["question_no"],
+        output_path=config["output_path"],
+    )
+
     responses_with_missing = create_missing_questions(
         contributors_df=contributors,
         responses_df=responses,
@@ -781,4 +794,4 @@ def exclude_from_results(
 
         responses.loc[excluded_responses.index, [target, imputation_marker]] = None
 
-        return responses.reset_index()
+    return responses.reset_index()
