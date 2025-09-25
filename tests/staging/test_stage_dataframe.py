@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
@@ -51,9 +52,18 @@ def expected_output(filepath):
     return pd.read_csv(filepath / "exclude_from_results_output.csv", index_col=False)
 
 
+@pytest.fixture(scope="class")
+def expected_csv(filepath):
+    return pd.read_csv(
+        filepath / "exclude_from_results_output_csv.csv", index_col=False
+    )
+
+
 class TestExcludeFromResults:
-    def test_warning(
+    @patch("pandas.DataFrame.to_csv")  # mock pandas export to csv function
+    def test_warning_and_csv(
         self,
+        mock_to_csv,
         caplog,
         input,
     ):
@@ -73,7 +83,12 @@ class TestExcludeFromResults:
                 """9 rows set to null for target and imputation_marker""" in caplog.text
             )
 
-    def test_exclude_from_results(self, input, expected_output):
+            mock_to_csv.assert_called_once_with(
+                "excluded_from_results.csv", index=False
+            )
+
+    @patch("pandas.DataFrame.to_csv")  # mock pandas export to csv function
+    def test_exclude_from_results(self, mock_to_csv, input, expected_output):
 
         actual_output = exclude_from_results(
             df=input,
@@ -85,5 +100,5 @@ class TestExcludeFromResults:
             imputation_marker="imputation_marker_adjustedresponse",
             question_no="question_no",
         )
-
+        mock_to_csv.assert_called_once_with("excluded_from_results.csv", index=False)
         assert_frame_equal(actual_output, expected_output)
