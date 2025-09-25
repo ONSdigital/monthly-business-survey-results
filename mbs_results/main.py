@@ -70,3 +70,7 @@ def produce_additional_outputs_wrapper(config_user_dict=None):
     produce_additional_outputs(
         additional_outputs_df=df, qa_outputs=False, optional_outputs=True, config=config
     )
+
+
+if __name__ == "__main__":
+    run_mbs_main()
