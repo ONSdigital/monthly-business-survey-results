@@ -764,7 +764,7 @@ def exclude_from_results(
     excluded_responses = excluded_responses[excluded_mask]
 
     if len(excluded_responses) > 0:
-        
+
         logger.info(
             f"""{len(excluded_responses)} rows have been dropped from responses,
             due to containing non-response statuses.
