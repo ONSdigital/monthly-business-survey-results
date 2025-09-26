@@ -9,6 +9,7 @@ from mbs_results.outputs.selective_editing_validations import (
     qa_selective_editing_outputs,
 )
 from mbs_results.staging.stage_dataframe import start_of_period_staging
+from mbs_results.utilities.inputs import read_csv_wrapper
 from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.utils import get_versioned_filename
 
@@ -33,7 +34,9 @@ def load_imputation_output(config: dict) -> pd.DataFrame:
     output_path = config["output_path"]
     imputation_filename = get_versioned_filename("imputation", config)
 
-    imputation_output = pd.read_csv(output_path + imputation_filename)
+    imputation_output = read_csv_wrapper(
+        output_path + imputation_filename, config["platform"], config["bucket"]
+    )
 
     return imputation_output
 

@@ -40,7 +40,6 @@ def period_zero_se_wrapper(config_user_dict=None):
     # for construction links.
 
     config = load_config("config_user.json", config_user_dict)
-
     # Read in back data
     back_data = read_and_process_back_data(config)
 
