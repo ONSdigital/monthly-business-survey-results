@@ -180,6 +180,8 @@
     "Part year return (NIL8)",
     "No UK activity (NIL9)"],
 
-    "pounds_thousands_questions": [40, 42, 43, 46, 47, 48, 49, 90]
+    "pounds_thousands_questions": [40, 42, 43, 46, 47, 48, 49, 90],
+
+    "non_response_statuses": ["Excluded from Results", "Form sent out"]
 
 }
