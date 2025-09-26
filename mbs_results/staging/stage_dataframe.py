@@ -787,5 +787,6 @@ def exclude_from_results(
         responses.set_index([reference, period, question_no], inplace=True)
 
         responses.loc[excluded_responses.index, [target, imputation_marker]] = None
+        responses = responses.reset_index()
 
-    return responses.reset_index()
+    return responses
