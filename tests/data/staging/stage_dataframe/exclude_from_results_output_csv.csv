@@ -1,10 +1,10 @@
-reference,period,question_no,status,adjustedresponse,imputation_marker_adjustedresponse
-2,202201,1,Form sent out,100,r
-2,202201,2,Form sent out,101,r
-2,202201,3,Form sent out,102,r
-3,202201,1,Excluded from Results,100,r
-3,202201,2,Excluded from Results,101,r
-3,202201,3,Excluded from Results,102,r
-3,202202,1,Excluded from Results,100,r
-3,202202,2,Excluded from Results,101,r
-3,202202,3,Excluded from Results,102,r
+reference,period,question_no,status,adjustedresponse
+2,202201,1,Form sent out,100
+2,202201,2,Form sent out,101
+2,202201,3,Form sent out,102
+3,202201,1,Excluded from Results,100
+3,202201,2,Excluded from Results,101
+3,202201,3,Excluded from Results,102
+3,202202,1,Excluded from Results,100
+3,202202,2,Excluded from Results,101
+3,202202,3,Excluded from Results,102

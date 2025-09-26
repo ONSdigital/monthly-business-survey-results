@@ -160,7 +160,6 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         period=config["period"],
         status="status",
         target=config["target"],
-        imputation_marker=config["imputation_marker_col"],
         question_no=config["question_no"],
         output_path=config["output_path"],
     )
@@ -718,7 +717,6 @@ def exclude_from_results(
     period,
     status,
     target,
-    imputation_marker,
     question_no,
     output_path,
 ):
@@ -742,8 +740,6 @@ def exclude_from_results(
         The column name of the status variable.
     target : str
         The column name of the target variable.
-    imputation_marker : str
-        The column name of the imputation marker variable.
     question_no : str
         The column name of the question_no variable.
     output_path : str
@@ -764,19 +760,20 @@ def exclude_from_results(
         excluded_responses[status].isin(non_response_statuses)
         & excluded_responses[target].notna()
     )
+
     excluded_responses = excluded_responses[excluded_mask]
 
     if len(excluded_responses) > 0:
         print("executed")
 
         logger.info(
-            f"""{len(excluded_responses)} rows set to null for target and
-            imputation_marker based on non-response statuses.
+            f"""{len(excluded_responses)} rows have been dropped from responses,
+            due to containing non-response statuses.
             See excluded_from_results.csv to see original values."""
         )
 
         excluded_responses = excluded_responses[
-            [reference, period, question_no, status, target, imputation_marker]
+            [reference, period, question_no, status, target]
         ]
 
         output_path = os.path.join(output_path, "excluded_from_results.csv")
@@ -786,7 +783,7 @@ def exclude_from_results(
         excluded_responses.set_index([reference, period, question_no], inplace=True)
         responses.set_index([reference, period, question_no], inplace=True)
 
-        responses.loc[excluded_responses.index, [target, imputation_marker]] = None
+        responses.drop(index=excluded_responses.index, inplace=True)
         responses = responses.reset_index()
 
     return responses

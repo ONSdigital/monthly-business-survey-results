@@ -78,7 +78,6 @@ def test_exclude_from_results_csv(responses, contributors, expected_output_csv):
             period="period",
             status="status",
             target="adjustedresponse",
-            imputation_marker="imputation_marker_adjustedresponse",
             question_no="question_no",
             output_path=tmpdirname,
         )
@@ -100,12 +99,11 @@ def test_warning_and_csv(mock_to_csv, caplog, responses, contributors):
             period="period",
             status="status",
             target="adjustedresponse",
-            imputation_marker="imputation_marker_adjustedresponse",
             question_no="question_no",
             output_path="test_outputs/",
         )
 
-        assert """9 rows set to null for target and""" in caplog.text
+        assert """9 rows have been dropped from responses,""" in caplog.text
 
         mock_to_csv.assert_called_once_with(
             "test_outputs/excluded_from_results.csv", index=False
@@ -123,7 +121,6 @@ def test_exclude_from_results(mock_to_csv, responses, contributors, expected_out
         period="period",
         status="status",
         target="adjustedresponse",
-        imputation_marker="imputation_marker_adjustedresponse",
         question_no="question_no",
         output_path="test_outputs/",
     )
