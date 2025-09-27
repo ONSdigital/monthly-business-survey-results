@@ -24,6 +24,7 @@ from mbs_results.staging.validate_snapshot import validate_snapshot
 from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.inputs import read_colon_separated_file, read_csv_wrapper
+from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.utils import convert_column_to_datetime
 from mbs_results.utilities.validation_checks import validate_manual_constructions
 
@@ -424,10 +425,15 @@ def start_of_period_staging(
                 axis=1,
             )
         ]
-        dropped_questions.to_csv(
+
+        write_csv_wrapper(
+            dropped_questions,
             config["output_path"]
             + "dropped_previous_period_"
-            + f"se_period_{config['period_selected']}.csv"
+            + f"se_period_{config['period_selected']}.csv",
+            config["platform"],
+            config["bucket"],
+            index=False,
         )
 
         # Keep only the rows that match the condition
@@ -700,10 +706,15 @@ def check_construction_links(df: pd.DataFrame, config: dict):
             config["output_path"],
             f"q49_references_con_link_greater_1_{config['current_period']}.csv",
         )
-        df_large_construction_link.to_csv(
+        print(config)
+        write_csv_wrapper(
+            df_large_construction_link,
             output_file,
+            config["platform"],
+            config["bucket"],
             index=False,
         )
+
         logger.info(
             f"references with construction link > 1 for q49 saved to {output_file}"
         )

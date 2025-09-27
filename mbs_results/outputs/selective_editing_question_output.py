@@ -5,6 +5,8 @@ from mbs_results.outputs.selective_editing import (
     create_standardising_factor,
 )
 from mbs_results.staging.merge_domain import merge_domain
+from mbs_results.utilities.inputs import read_csv_wrapper
+from mbs_results.utilities.outputs import write_csv_wrapper
 
 
 def create_selective_editing_question_output(
@@ -49,7 +51,10 @@ def create_selective_editing_question_output(
         additional_outputs_df["questioncode"].isin(questions_selected)
     ]
     input_data = input_data[(input_data["period"] == period_selected)]
-    sic_domain_mapping = pd.read_csv(sic_domain_mapping_path).astype(str)
+
+    sic_domain_mapping = read_csv_wrapper(
+        sic_domain_mapping_path, config["platform"], config["bucket"]
+    ).astype(str)
 
     df_with_domain = merge_domain(
         input_df=input_data,
@@ -111,10 +116,14 @@ def create_selective_editing_question_output(
 
     question_output.fillna({"auxiliary_value": 0}, inplace=True)
 
-    question_output.to_csv(
+    write_csv_wrapper(
+        question_output,
         output_path + "se_question_full_output_" + f"se_period_{period_selected}.csv",
+        config["platform"],
+        config["bucket"],
         index=False,
     )
+
     question_output.drop(
         columns=[
             "imputation_class",

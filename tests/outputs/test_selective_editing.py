@@ -199,6 +199,7 @@ def clear_outputs_folder():
 class TestSelectiveEditingWrappers:
     def test_period_zero_se_wrapper(self, mock_user_config, mock_create_mapper):
         mock_user_config["current_period"] = 202112
+
         period_zero_se_wrapper(config_user_dict=mock_user_config)
 
     def test_run_final_outputs(

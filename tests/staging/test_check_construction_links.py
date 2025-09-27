@@ -17,6 +17,8 @@ class TestCheckConstructionLinks:
             }
         )
         test_config = {
+            "platform": "network",
+            "bucket": "",
             "question_no": "question_no",
             "reference": "reference",
             "output_path": "",
@@ -44,6 +46,8 @@ class TestCheckConstructionLinks:
             }
         )
         test_config = {
+            "platform": "network",
+            "bucket": "",
             "question_no": "question_no",
             "reference": "reference",
             "output_path": "",
