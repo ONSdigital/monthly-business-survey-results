@@ -1,9 +1,8 @@
 import logging
 from importlib import metadata
 
-import pandas as pd
-
 from mbs_results.staging.stage_dataframe import read_and_combine_colon_sep_files
+from mbs_results.utilities.inputs import read_csv_wrapper
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +32,13 @@ def qa_selective_editing_outputs(config: dict):
         config["output_path"] + f"sequestions009_{period}_v{file_version_mbs}.csv"
     )
 
-    contributor_df = pd.read_csv(se_contributor_path).rename(
-        columns={"ruref": "reference"}
-    )
-    question_df = pd.read_csv(se_question_path).rename(columns={"ruref": "reference"})
+    contributor_df = read_csv_wrapper(
+        se_contributor_path, config["platform"], config["bucket"]
+    ).rename(columns={"ruref": "reference"})
+
+    question_df = read_csv_wrapper(
+        se_question_path, config["platform"], config["bucket"]
+    ).rename(columns={"ruref": "reference"})
 
     # Checking that references match
     contributor_unique_reference = contributor_df["reference"].tolist()
