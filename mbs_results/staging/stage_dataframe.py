@@ -108,7 +108,8 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         status="status",
         reference=config["reference"],
         period=config["period"],
-        non_response_statuses=config["non_response_statuses] + [
+        non_response_statuses=config["non_response_statuses"]
+        + [
             "Combined child (NIL2)",
             "Out of scope (NIL3)",
             "Ceased trading (NIL4)",
