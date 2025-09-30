@@ -12,6 +12,7 @@
     "output_path": "",
     "population_prefix": "",
     "sample_prefix": "",
+    "ludets_prefix": "",
     "back_data_qv_path":"",
     "back_data_cp_path":"",
     "back_data_qv_cp_json_path":"",
