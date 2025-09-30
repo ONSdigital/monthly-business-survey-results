@@ -56,9 +56,13 @@ def copy_script_and_config(
     main_path = os.path.join(pkg_dir, "main.py")
     config_user_path = os.path.join(pkg_dir, "configs", "config_user.json")
     readme_path = os.path.join(pkg_dir, "README.md")
+    config_output_path = os.path.join(pkg_dir, "configs", "config_outputs.json")
+    config_export_path = os.path.join(pkg_dir, "configs", "config_export.json") or None
 
     missing = [
-        p for p in (main_path, config_user_path, readme_path) if not os.path.exists(p)
+        p
+        for p in (main_path, config_user_path, readme_path, config_output_path)
+        if not os.path.exists(p)
     ]
     if missing:
         logger.error(
@@ -77,6 +81,13 @@ def copy_script_and_config(
     logger.info(f"{config_user_path} copied to {dest_dir}")
     shutil.copy2(readme_path, dest_dir)
     logger.info(f"{readme_path} copied to {dest_dir}")
+    shutil.copy2(config_output_path, dest_dir)
+    logger.info(f"{config_output_path} copied to {dest_dir}")
+    shutil.copy2(config_export_path, dest_dir)
+    try:
+        logger.info(f"{config_export_path} copied to {dest_dir}")
+    except Exception as e:
+        logger.warning(f"config_export.json is not copied: {e}")
 
 
 if __name__ == "__main__":

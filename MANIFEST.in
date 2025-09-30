@@ -1,3 +1,5 @@
 include mbs_results/configs/config_dev.json
 include mbs_results/configs/config_user.json
+include mbs_results/configs/config_outputs.json
+include mbs_results/configs/config_export.json
 include mbs_results/README.md
