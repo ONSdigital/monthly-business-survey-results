@@ -79,7 +79,7 @@ def get_additional_outputs_df(
         target,
         "response",
         "status",
-        "winsorised_value"
+        "winsorised_value",
     ]
     if not config["filter"]:
         count_variables = [f"b_match_{target}_count", f"f_match_{target}_count"]

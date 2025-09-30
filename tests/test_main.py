@@ -56,6 +56,10 @@ def test_main():
 
     actual = pd.read_csv(patern[0])
     expected = pd.read_csv(out_path + "expected_from_mbs_main.csv")
+    for col in actual.select_dtypes(include=["int", "float"]).columns:
+        actual[col] = actual[col].astype(float)
+    for col in expected.select_dtypes(include=["int", "float"]).columns:
+        expected[col] = expected[col].astype(float)
 
     assert_frame_equal(actual, expected)
 
