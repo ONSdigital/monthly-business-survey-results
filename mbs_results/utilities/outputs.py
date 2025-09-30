@@ -3,6 +3,8 @@ import pandas as pd
 import raz_client
 from rdsa_utils.cdp.helpers.s3_utils import write_csv
 
+from mbs_results.utilities.utils import get_versioned_filename
+
 
 def write_csv_wrapper(
     df: pd.DataFrame,
@@ -53,3 +55,38 @@ def write_csv_wrapper(
         return True
 
     raise Exception("platform must either be 's3' or 'network'")
+
+
+def save_df(df: pd.DataFrame, base_filename: str, config: dict, on_demand=True):
+    """
+    Adds a version tag to the filename and saves the dataframe based on
+    settings in the config.
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        The dataframe to write to the specified path.
+    base_filename : str
+        The base text for the filename.
+    config : str, optional
+        The pipeline configuration
+    on_demand: bool
+        Wether to foce the save, default is True.
+
+    Returns
+    -------
+    None
+    """
+
+    # export on demand
+    if on_demand:
+
+        filename = get_versioned_filename(base_filename, config)
+
+        write_csv_wrapper(
+            df,
+            config["output_path"] + filename,
+            config["platform"],
+            config["bucket"],
+            index=False,
+        )

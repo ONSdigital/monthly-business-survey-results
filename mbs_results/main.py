@@ -7,8 +7,7 @@ from mbs_results.outputs.produce_additional_outputs import (
 )
 from mbs_results.staging.stage_dataframe import stage_dataframe
 from mbs_results.utilities.inputs import load_config, read_csv_wrapper
-from mbs_results.utilities.outputs import write_csv_wrapper
-from mbs_results.utilities.utils import get_versioned_filename
+from mbs_results.utilities.outputs import save_df
 from mbs_results.utilities.validation_checks import (
     validate_config,
     validate_estimation,
@@ -30,26 +29,19 @@ def run_mbs_main(config_user_dict=None):
     # imputation: RoM wrapper -> Rename wrapper to apply_imputation
     df = impute(df, manual_constructions, config, filter_df)
     validate_imputation(df, config)
-
-    # Estimation Wrapper
+    save_df(df, "imputation", config, config["debug_mode"])
+    # Estimation Wrap
     df = estimate(df=df, method="combined", convert_NI_GB_cells=True, config=config)
     validate_estimation(df, config)
+    save_df(df, "estimation_output", config, config["debug_mode"])
 
     # Outlier Wrapper
     df = detect_outlier(df, config)
     validate_outlier_detection(df, config)
+    save_df(df, "outlier_output", config, config["debug_mode"])
 
     df = get_additional_outputs_df(df, unprocessed_data, config)
-
-    mbs_filename = get_versioned_filename("mbs_results", config)
-
-    write_csv_wrapper(
-        df,
-        config["output_path"] + mbs_filename,
-        config["platform"],
-        config["bucket"],
-        index=False,
-    )
+    save_df(df, "mbs_results", config)  # main methods output
 
     produce_additional_outputs(
         additional_outputs_df=df, qa_outputs=True, optional_outputs=False, config=config
