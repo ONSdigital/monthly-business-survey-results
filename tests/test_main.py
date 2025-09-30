@@ -98,6 +98,7 @@ def test_produce_additional_outputs_wrapper():
         "mbs_output_path": "tests/data/test_main/output/expected_from_mbs_main.csv",
         "cdid_data_path": "tests/data/outputs/csdb_output/cdid_mapping.csv",
         "output_path": "tests/data/test_main/output/",
+        "ludets_prefix": "ludets009_",
         "current_period": 202206,
         "revision_window": 6,
         "devolved_nations": ["Scotland", "Wales"],
