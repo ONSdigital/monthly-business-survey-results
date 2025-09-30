@@ -52,11 +52,14 @@ def copy_script_and_config(
     # Get the directory where mbs_results is installed
     pkg_dir = os.path.dirname(pkg.__file__)
 
-    # Get main.py and config_user.json path
+    # Get main.py, config_user.json path and README.md
     main_path = os.path.join(pkg_dir, "main.py")
     config_user_path = os.path.join(pkg_dir, "configs", "config_user.json")
+    readme_path = os.path.join(pkg_dir, "README.md")
 
-    missing = [p for p in (main_path, config_user_path) if not os.path.exists(p)]
+    missing = [
+        p for p in (main_path, config_user_path, readme_path) if not os.path.exists(p)
+    ]
     if missing:
         logger.error(
             f"Missing expected files in package {package_name}: {', '.join(missing)}"
@@ -72,6 +75,8 @@ def copy_script_and_config(
     logger.info(f"{main_path} copied to {dest_dir}")
     shutil.copy2(config_user_path, dest_dir)
     logger.info(f"{config_user_path} copied to {dest_dir}")
+    shutil.copy2(readme_path, dest_dir)
+    logger.info(f"{readme_path} copied to {dest_dir}")
 
 
 if __name__ == "__main__":
