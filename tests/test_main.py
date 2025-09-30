@@ -35,7 +35,7 @@ test_config = {
     "current_period": 202206,
     "revision_window": 6,
     "state": "frozen",
-    "debug_mode": False,
+    "debug_mode": True,
 }
 
 

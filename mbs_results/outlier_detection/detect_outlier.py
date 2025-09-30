@@ -6,8 +6,6 @@ from mbs_results.utilities.constrains import (
     update_derived_weight_and_winsorised_value,
 )
 from mbs_results.utilities.inputs import read_csv_wrapper
-from mbs_results.utilities.outputs import write_csv_wrapper
-from mbs_results.utilities.utils import get_versioned_filename
 
 
 def join_l_values(df, l_values_path, classification_values_path, config):
@@ -93,17 +91,5 @@ def detect_outlier(df, config):
         "outlier_weight",
         config["target"],
     )
-    # export on demand
-    if config["debug_mode"]:
-
-        outlier_filename = get_versioned_filename("outlier_output", config)
-
-        write_csv_wrapper(
-            df,
-            config["output_path"] + outlier_filename,
-            config["platform"],
-            config["bucket"],
-            index=False,
-        )
 
     return post_win
