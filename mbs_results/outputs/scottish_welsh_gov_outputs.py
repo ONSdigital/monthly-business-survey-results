@@ -236,10 +236,26 @@ def output_column_name_mapping(config: dict):
             "statusencoded": "status encoded",
             "start_date": "start date",
             "end_date": "end date",
-            "winsorised_value_total_turnover": "returned turnover",
-            "adjustedresponse_total_turnover": "adjusted turnover",
-            "imputed_and_derived_flag_total_turnover": "imputed and derived flag turnover",  # noqa
-            "statusencoded_total_turnover": "status encoded turnover",
+            "winsorised_value_public_housing": "returned public housing",
+            "adjustedresponse_public_housing": "adjusted public housing",
+            "imputation_flags_adjustedresponse_public_housing": "imputed and derived flag public housing",  # noqa
+            "statusencoded_public_housing": "status encoded public housing",
+            "winsorised_value_private_housing": "returned private housing",
+            "adjustedresponse_private_housing": "adjusted private housing",
+            "imputation_flags_adjustedresponse_private_housing": "imputed and derived flag private housing",  # noqa
+            "statusencoded_private_housing": "status encoded private housing",
+            "winsorised_value_infrastructure": "returned infrastructure",
+            "adjustedresponse_infrastructure": "adjusted infrastructure",
+            "imputation_flags_adjustedresponse_infrastructure": "imputed and derived flag infrastructure",  # noqa
+            "statusencoded_infrastructure": "status encoded infrastructure",
+            "winsorised_value_public_non_housing": "returned public non housing",
+            "adjustedresponse_public_non_housing": "adjusted public non housing",
+            "imputation_flags_adjustedresponse_public_non_housing": "imputed and derived flag public non housing",  # noqa
+            "statusencoded_public_non_housing": "status encoded public non housing",
+            "winsorised_value_private_non_housing": "returned private non housing",
+            "adjustedresponse_private_non_housing": "adjusted private non housing",
+            "imputation_flags_adjustedresponse_private_non_housing": "imputed and derived flag private non housing",  # noqa
+            "statusencoded_private_non_housing": "status encoded private non housing",
         }
 
 
@@ -285,14 +301,23 @@ def devolved_outputs(
         "formtype",
         "froempment",
     ]
-
-    pivot_values = [
-        "adjustedresponse",  # Original: adjusted_value -> adjustedresponse
-        "winsorised_value",  # Imputated/winsorised (new_target_variable ->
-        # adjustedresponse*outlier_weight)
-        "imputed_and_derived_flag",  # [response_type -> imputed_and_derived_flag]
-        "statusencoded",  # single letter (str) [error_mkr -> statusencoded]
-    ]
+    if "009" in config["ludets_prefix"]:
+        pivot_values = [
+            "adjustedresponse",  # Original: adjusted_value -> adjustedresponse
+            "winsorised_value",  # Imputated/winsorised (new_target_variable ->
+            # adjustedresponse*outlier_weight)
+            "imputed_and_derived_flag",  # [response_type -> imputed_and_derived_flag]
+            "statusencoded",  # single letter (str) [error_mkr -> statusencoded]
+        ]
+    elif "228" in config["ludets_prefix"]:
+        pivot_values = [
+            "adjustedresponse",  # Original: adjusted_value -> adjustedresponse
+            "winsorised_value",  # Imputated/winsorised (new_target_variable ->
+            # adjustedresponse*outlier_weight)
+            "imputation_flags_adjustedresponse",
+            # [response_type -> imputed_and_derived_flag]
+            "statusencoded",  # single letter (str) [error_mkr -> statusencoded]
+        ]
 
     # Can use any agg function on numerical values, have to use lambda func for str cols
     pivot_agg_functions = [
@@ -332,15 +357,6 @@ def devolved_outputs(
     df_pivot.columns = ["_".join(col).strip() for col in df_pivot.columns.values]
     df_pivot = df_pivot[sorted(df_pivot.columns, key=split_func)]
     df_pivot.reset_index(inplace=True)
-
-    # #Fill missing values of 'Name1' where imputed flag == d before merging
-    ru_name_mapping = local_unit_data.groupby("ruref")["Name1"].first()
-    mask_missing_name = df["entname1"].isna() & df["reference"].isin(
-        ru_name_mapping.index
-    )
-    df.loc[mask_missing_name, "entname1"] = df.loc[mask_missing_name, "reference"].map(
-        ru_name_mapping
-    )
 
     # Fill missing values of 'Name1' where imputed flag == d before merging
     ru_name_mapping = local_unit_data.groupby("ruref")["Name1"].first()
@@ -407,33 +423,70 @@ def devolved_outputs(
 
     # Reorder columns to match original output
     # TODO: Add MBS/Cons arg to switch between different cols.
-    original_column_order = [
-        "period",
-        "classification",
-        "cell_no",
-        "reference",
-        "entname1",
-        "entref",
-        "frosic2007",
-        "formtype",
-        percent_devolved_nation_col,
-        "froempment",
-        "sizeband",
-        "start_date",
-        "end_date",
-        "winsorised_value_total_turnover",
-        "adjustedresponse_total_turnover",
-        "imputed_and_derived_flag_total_turnover",
-        "statusencoded_total_turnover",
-        "winsorised_value_exports",
-        "adjustedresponse_exports",
-        "imputed_and_derived_flag_exports",
-        "statusencoded_exports",
-        "winsorised_value_water",
-        "adjustedresponse_water",
-        "imputed_and_derived_flag_water",
-        "statusencoded_water",
-    ]
+    if "009" in config["ludets_prefix"]:
+        original_column_order = [
+            "period",
+            "classification",
+            "cell_no",
+            "reference",
+            "entname1",
+            "entref",
+            "frosic2007",
+            "formtype",
+            percent_devolved_nation_col,
+            "froempment",
+            "sizeband",
+            "start_date",
+            "end_date",
+            "winsorised_value_total_turnover",
+            "adjustedresponse_total_turnover",
+            "imputed_and_derived_flag_total_turnover",
+            "statusencoded_total_turnover",
+            "winsorised_value_exports",
+            "adjustedresponse_exports",
+            "imputed_and_derived_flag_exports",
+            "statusencoded_exports",
+            "winsorised_value_water",
+            "adjustedresponse_water",
+            "imputed_and_derived_flag_water",
+            "statusencoded_water",
+        ]
+    elif "228" in config["ludets_prefix"]:
+        original_column_order = [
+            "period",
+            "classification",
+            "cell_no",
+            "reference",
+            "entname1",
+            "entref",
+            "frosic2007",
+            "formtype",
+            percent_devolved_nation_col,
+            "froempment",
+            "sizeband",
+            "start_date",
+            "end_date",
+            "winsorised_value_public_housing",
+            "adjustedresponse_public_housing",
+            "imputation_flags_adjustedresponse_public_housing",
+            "statusencoded_public_housing",
+            "winsorised_value_private_housing",
+            "adjustedresponse_private_housing",
+            "imputation_flags_adjustedresponse_private_housing",
+            "statusencoded_private_housing",
+            "winsorised_value_infrastructure",
+            "adjustedresponse_infrastructure",
+            "imputation_flags_adjustedresponse_infrastructure",
+            "statusencoded_infrastructure",
+            "winsorised_value_public_non_housing",
+            "adjustedresponse_public_non_housing",
+            "imputation_flags_adjustedresponse_public_non_housing",
+            "statusencoded_public_non_housing",
+            "winsorised_value_private_non_housing",
+            "adjustedresponse_private_non_housing",
+            "imputation_flags_adjustedresponse_private_non_housing",
+            "statusencoded_private_non_housing",
+        ]
 
     df_pivot = df_pivot[original_column_order]
 
@@ -496,6 +549,10 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
     logger.info(f"Generating devolved outputs for {config['devolved_nations']}")
 
     df = additional_outputs_df.copy()
+
+    # MBS and Cons have different column names for the business name
+    if "228" in config["ludets_prefix"]:
+        df = df.rename(columns={"runame1": "entname1"})
 
     # local unit data
     lu_data = read_and_combine_ludets_files(config)
