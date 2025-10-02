@@ -79,7 +79,20 @@ def filter_and_calculate_percent_devolved(
     """Filter by devolved nation and calculate percentage column"""
     logger.info(f"Calculating percentage for {devolved_nation}")
     devolved_nation = devolved_nation.lower()
-    nation_to_code = {"scotland": "XX", "wales": "WW"}
+    nation_to_code = {
+        "scotland": ["XX"],
+        "wales": ["WW"],
+        "north_east": ["AA"],
+        "north_west": ["BB", "BA"],
+        "yorkshire_and_the_humber": ["DC"],
+        "east_midlands": ["ED"],
+        "west_midlands": ["FE"],
+        "east_of_england": ["GF", "GG"],
+        "london": ["HH"],
+        "south_east": ["JG"],
+        "south_west": ["KJ"],
+    }
+
     if devolved_nation not in nation_to_code:
         error_msg = (
             f"Invalid devolved nation '{devolved_nation}'. "
@@ -109,7 +122,7 @@ def filter_and_calculate_percent_devolved(
     local_unit_data["reference"] = local_unit_data["ruref"]
     # local_unit_data["reference"] = local_unit_data["reference"].astype("int64")
     regional_employment = (
-        local_unit_data[local_unit_data[region_col] == region_code]
+        local_unit_data[local_unit_data[region_col].isin(region_code)]
         .groupby(["reference", "period"])[employment_col]
         .sum()
         .reset_index()
