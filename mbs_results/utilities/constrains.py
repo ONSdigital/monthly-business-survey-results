@@ -601,6 +601,62 @@ def update_derived_weight_and_winsorised_value(
     return df
 
 
+def enforce_export_weight_constraint(
+    df: pd.DataFrame,
+    reference: str,
+    period: str,
+    question_code: str,
+    outlier_weight: str,
+    target: str,
+) -> pd.DataFrame:
+    """
+    For each (reference, period), if weighted exports (Q49) > weighted total (Q40),
+    set Q49's outlier weight to match Q40's outlier weight.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Original dataframe.
+    reference : str
+        Column name for reference.
+    period : str
+        Column name for period.
+    question_code : str
+        Column name for question code.
+    outlier_weight : str
+        Column name for outlier weight.
+    target : str
+        Column name for target value.
+
+    Returns
+    -------
+    pd.DataFrame
+        DataFrame with weighted exports updated where needed.
+    """
+
+    df["winsorised_value"] = df[outlier_weight] * df[target]
+    pivot = df.pivot(
+        index=[reference, period],
+        columns=question_code,
+        values=["winsorised_value", outlier_weight, target],
+    )
+
+    mask = pivot["winsorised_value"][49] > pivot["winsorised_value"][40]
+    affected = pivot.index[mask].tolist()
+
+    for ref, per in affected:
+
+        idx = (df[reference] == ref) & (df[period] == per) & (df[question_code] == 49)
+
+        q40_weight = pivot.loc[(ref, per), ("outlier_weight", 40)]
+        df.loc[idx, outlier_weight] = q40_weight
+
+        q49_target = pivot.loc[(ref, per), ("target", 49)]
+        df.loc[idx, "winsorised_value"] = q40_weight * q49_target
+
+    return df
+
+
 def replace_with_manual_outlier_weights(
     df: pd.DataFrame,
     reference: str,
