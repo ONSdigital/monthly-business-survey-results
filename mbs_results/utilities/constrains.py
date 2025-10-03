@@ -634,6 +634,7 @@ def enforce_export_weight_constraint(
         DataFrame with weighted exports updated where needed.
     """
 
+    df = df.copy()
     df["winsorised_value"] = df[outlier_weight] * df[target]
     pivot = df.pivot(
         index=[reference, period],
