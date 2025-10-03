@@ -82,15 +82,15 @@ def filter_and_calculate_percent_devolved(
     nation_to_code = {
         "scotland": ["XX"],
         "wales": ["WW"],
-        "north_east": ["AA"],
-        "north_west": ["BB", "BA"],
-        "yorkshire_and_the_humber": ["DC"],
-        "east_midlands": ["ED"],
-        "west_midlands": ["FE"],
-        "east_of_england": ["GF", "GG"],
+        "north east": ["AA"],
+        "north west": ["BB", "BA"],
+        "yorkshire and the humber": ["DC"],
+        "east midlands": ["ED"],
+        "west midlands": ["FE"],
+        "east of england": ["GF", "GG"],
         "london": ["HH"],
-        "south_east": ["JG"],
-        "south_west": ["KJ"],
+        "south east": ["JG"],
+        "south west": ["KJ"],
     }
 
     if devolved_nation not in nation_to_code:
@@ -292,11 +292,14 @@ def devolved_outputs(
     df = pd.merge(
         df,
         local_unit_data,
-        left_on="reference",
-        right_on="ruref",
+        left_on=["reference", "period"],
+        right_on=["ruref", "period"],
         how="left",
         suffixes=["", "_local"],
     )
+
+    df["region_local"] = df["region_local"].fillna(df["region"])
+
     df = filter_and_calculate_percent_devolved(df, local_unit_data, devolved_nation)
 
     devolved_dict = dict(
@@ -357,6 +360,8 @@ def devolved_outputs(
         .reset_index()
     )
 
+    start_end_pivot.to_csv("start_end_pivot.csv")
+
     df = df[~df["questioncode"].isin([11, 12])]
 
     df_pivot = pd.pivot_table(
@@ -366,6 +371,8 @@ def devolved_outputs(
         columns=["text_question"],
         aggfunc=dict_agg_funcs,
     )
+
+    df_pivot.to_csv("df_pivot_line_375.csv")
 
     df_pivot.columns = ["_".join(col).strip() for col in df_pivot.columns.values]
     df_pivot = df_pivot[sorted(df_pivot.columns, key=split_func)]
@@ -417,10 +424,12 @@ def devolved_outputs(
         how="left",
         suffixes=("", "_extra"),
     )
+    df_pivot.to_csv("df_pivot_line_427.csv")
 
     df_pivot = pd.merge(
         df_pivot, start_end_pivot, on=["reference", "period"], how="left"
     )
+    df_pivot.to_csv("df_pivot_line_432.csv")
 
     # Drop the percentage column with the '_extra' suffix if it exists
     extra_col = f"{percent_devolved_nation_col}_extra"
@@ -506,7 +515,7 @@ def devolved_outputs(
     # map the column names used in the pipeline to column names in the business template
     column_name_mapping = output_column_name_mapping(config)
     df_pivot = df_pivot.rename(columns=column_name_mapping)
-
+    df_pivot.to_csv("final_df_pivot.csv")
     return df_pivot
 
 
@@ -583,6 +592,7 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
     ).astype(int)
 
     outputs = {}
+
     for nation in nations:
         df_pivot = devolved_outputs(
             df,
@@ -590,7 +600,7 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
             devolved_nation=nation,
             local_unit_data=lu_data,
             devolved_questions=devolved_questions,
-            agg_function="sum",
+            agg_function="first",
             config=config,
         )
 
