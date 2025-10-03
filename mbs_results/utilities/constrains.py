@@ -648,10 +648,10 @@ def enforce_export_weight_constraint(
 
         idx = (df[reference] == ref) & (df[period] == per) & (df[question_code] == 49)
 
-        q40_weight = pivot.loc[(ref, per), ("outlier_weight", 40)]
+        q40_weight = pivot.loc[(ref, per), (outlier_weight, 40)]
         df.loc[idx, outlier_weight] = q40_weight
 
-        q49_target = pivot.loc[(ref, per), ("target", 49)]
+        q49_target = pivot.loc[(ref, per), (target, 49)]
         df.loc[idx, "winsorised_value"] = q40_weight * q49_target
 
     return df

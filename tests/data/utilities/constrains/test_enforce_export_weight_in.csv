@@ -1,0 +1,5 @@
+reference,period,questioncode,outlier_weight,value
+1,202401,40,0.2,100
+1,202401,49,0.5,120
+2,202401,40,0.7,200
+2,202401,49,0.3,150
