@@ -642,18 +642,25 @@ def enforce_export_weight_constraint(
         values=["winsorised_value", outlier_weight, target],
     )
 
-    mask = pivot["winsorised_value"][49] > pivot["winsorised_value"][40]
-    affected = pivot.index[mask].tolist()
+    if (
+        49 in pivot["winsorised_value"].columns
+        and 40 in pivot["winsorised_value"].columns
+    ):
 
-    for ref, per in affected:
+        mask = pivot["winsorised_value"][49] > pivot["winsorised_value"][40]
+        affected = pivot.index[mask].tolist()
 
-        idx = (df[reference] == ref) & (df[period] == per) & (df[question_code] == 49)
+        for ref, per in affected:
 
-        q40_weight = pivot.loc[(ref, per), (outlier_weight, 40)]
-        df.loc[idx, outlier_weight] = q40_weight
+            idx = (
+                (df[reference] == ref) & (df[period] == per) & (df[question_code] == 49)
+            )
 
-        q49_target = pivot.loc[(ref, per), (target, 49)]
-        df.loc[idx, "winsorised_value"] = q40_weight * q49_target
+            q40_weight = pivot.loc[(ref, per), (outlier_weight, 40)]
+            df.loc[idx, outlier_weight] = q40_weight
+
+            q49_target = pivot.loc[(ref, per), (target, 49)]
+            df.loc[idx, "winsorised_value"] = q40_weight * q49_target
 
     return df
 
