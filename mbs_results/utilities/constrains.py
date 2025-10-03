@@ -642,10 +642,7 @@ def enforce_export_weight_constraint(
         values=["winsorised_value", outlier_weight, target],
     )
 
-    if (
-        49 in pivot["winsorised_value"].columns
-        and 40 in pivot["winsorised_value"].columns
-    ):
+    if all(q in pivot["winsorised_value"].columns for q in [40, 49]):
 
         mask = pivot["winsorised_value"][49] > pivot["winsorised_value"][40]
         affected = pivot.index[mask].tolist()
