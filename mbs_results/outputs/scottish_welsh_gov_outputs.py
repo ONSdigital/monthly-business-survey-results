@@ -161,7 +161,18 @@ def filter_and_calculate_percent_devolved(
         on=["reference", "period"],
         how="left",
     )
-
+    # Amending cases where there's no data in ludets for these references
+    # Setting to 100% where region_code matches region in df, else 0%
+    df.loc[
+        df[f"percentage_{devolved_nation}"].isnull() & (df["region"].isin(region_code)),
+        f"percentage_{devolved_nation}",
+    ] = 100
+    df.loc[
+        df[f"percentage_{devolved_nation}"].isnull()
+        & (~df["region"].isin(region_code)),
+        f"percentage_{devolved_nation}",
+    ] = 0
+    
     return df
 
 
