@@ -1,0 +1,5 @@
+reference,period,questioncode,outlier_weight,value,winsorised_value
+1,202401,40,0.2,100,20.0
+1,202401,49,0.2,120,24.0
+2,202401,40,0.7,200,140.0
+2,202401,49,0.3,150,45.0

@@ -2,6 +2,7 @@ import pandas as pd
 
 from mbs_results.outlier_detection.winsorisation import winsorise
 from mbs_results.utilities.constrains import (
+    enforce_export_weight_constraint,
     replace_with_manual_outlier_weights,
     update_derived_weight_and_winsorised_value,
 )
@@ -88,6 +89,15 @@ def detect_outlier(df, config):
         config["period"],
         config["question_no"],
         config["form_id_spp"],
+        "outlier_weight",
+        config["target"],
+    )
+
+    post_win = enforce_export_weight_constraint(
+        post_win,
+        config["reference"],
+        config["period"],
+        config["question_no"],
         "outlier_weight",
         config["target"],
     )
