@@ -152,7 +152,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     contributors = create_form_type_spp_column(contributors, config)
     mapper = create_mapper()  # Needs to be defined
 
-    responses = exclude_from_results(
+    responses, excluded_responses = exclude_from_results(
         responses=responses,
         contributors=contributors,
         non_response_statuses=config["non_response_statuses"],
@@ -161,7 +161,15 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         status="status",
         target=config["target"],
         question_no=config["question_no"],
-        output_path=config["output_path"],
+    )
+    output_path = os.path.join(config["output_path"], "excluded_from_results.csv")
+
+    write_csv_wrapper(
+        excluded_responses,
+        output_path,
+        config["platform"],
+        config["bucket"],
+        index=False,
     )
 
     responses_with_missing = create_missing_questions(
@@ -728,7 +736,6 @@ def exclude_from_results(
     status,
     target,
     question_no,
-    output_path,
 ):
     """
     Excludes rows from the DataFrame based on non-response statuses.
@@ -752,8 +759,6 @@ def exclude_from_results(
         The column name of the target variable.
     question_no : str
         The column name of the question_no variable.
-    output_path : str
-        The path to write the excluded_to_results.csv to.
 
     Returns
     -------
@@ -785,9 +790,6 @@ def exclude_from_results(
             [reference, period, question_no, status, target]
         ]
 
-        output_path = os.path.join(output_path, "excluded_from_results.csv")
-        excluded_responses.to_csv(output_path, index=False)
-
         # selecting only the rows in excluded_index in responses
         excluded_responses.set_index([reference, period, question_no], inplace=True)
         responses.set_index([reference, period, question_no], inplace=True)
@@ -795,4 +797,6 @@ def exclude_from_results(
         responses.drop(index=excluded_responses.index, inplace=True)
         responses = responses.reset_index()
 
-    return responses
+        excluded_responses.reset_index(inplace=True)
+
+    return responses, excluded_responses

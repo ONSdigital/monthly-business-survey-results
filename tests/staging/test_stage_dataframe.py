@@ -1,6 +1,4 @@
 import logging
-import os
-import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -69,23 +67,23 @@ def expected_output_csv(filepath):
 
 
 def test_exclude_from_results_csv(responses, contributors, expected_output_csv):
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        actual_output = exclude_from_results(
-            responses=responses,
-            contributors=contributors,
-            non_response_statuses=["Excluded from Results", "Form sent out"],
-            reference="reference",
-            period="period",
-            status="status",
-            target="adjustedresponse",
-            question_no="question_no",
-            output_path=tmpdirname,
-        )
-        actual_output = pd.read_csv(
-            os.path.join(tmpdirname, "excluded_from_results.csv")
-        )
 
-    assert_frame_equal(actual_output, expected_output_csv)
+    actual_output, excluded = exclude_from_results(
+        responses=responses,
+        contributors=contributors,
+        non_response_statuses=["Excluded from Results", "Form sent out"],
+        reference="reference",
+        period="period",
+        status="status",
+        target="adjustedresponse",
+        question_no="question_no",
+    )
+
+    print(list(excluded))
+
+    print(expected_output_csv)
+
+    assert_frame_equal(excluded, expected_output_csv)
 
 
 @patch("pandas.DataFrame.to_csv")  # mock pandas export to csv function
@@ -100,20 +98,15 @@ def test_warning_and_csv(mock_to_csv, caplog, responses, contributors):
             status="status",
             target="adjustedresponse",
             question_no="question_no",
-            output_path="test_outputs/",
         )
 
         assert """9 rows have been dropped from responses,""" in caplog.text
-
-        mock_to_csv.assert_called_once_with(
-            "test_outputs/excluded_from_results.csv", index=False
-        )
 
 
 @patch("pandas.DataFrame.to_csv")  # mock pandas export to csv function
 def test_exclude_from_results(mock_to_csv, responses, contributors, expected_output):
 
-    actual_output = exclude_from_results(
+    actual_output, excluded = exclude_from_results(
         responses=responses,
         contributors=contributors,
         non_response_statuses=["Excluded from Results", "Form sent out"],
@@ -122,7 +115,6 @@ def test_exclude_from_results(mock_to_csv, responses, contributors, expected_out
         status="status",
         target="adjustedresponse",
         question_no="question_no",
-        output_path="test_outputs/",
     )
-    print(actual_output.columns)
+
     assert_frame_equal(actual_output, expected_output)
