@@ -10,7 +10,8 @@ def copy_script_and_config(
     package_name: str = "mbs_results", dest_dir: Optional[str] = None
 ) -> None:
     """
-    Copy package_name/main.py and package_name/configs/config_user.json from
+    Copy package_name/main.py and package_name/configs/config_*.json (excluding
+    package_name/configs/config_dev.json),  package_name/configs/README.md from
     the installed package identified by package_name into dest_dir (defaults to
     current working directory).
 
@@ -57,7 +58,15 @@ def copy_script_and_config(
     config_user_path = os.path.join(pkg_dir, "configs", "config_user.json")
     readme_path = os.path.join(pkg_dir, "README.md")
     config_output_path = os.path.join(pkg_dir, "configs", "config_outputs.json")
-    config_export_path = os.path.join(pkg_dir, "configs", "config_export.json") or None
+    config_export_path = os.path.join(pkg_dir, "configs", "config_export.json")
+
+    file_paths = [
+        main_path,
+        config_user_path,
+        readme_path,
+        config_output_path,
+        config_export_path,
+    ]
 
     missing = [
         p
@@ -68,26 +77,19 @@ def copy_script_and_config(
         logger.error(
             f"Missing expected files in package {package_name}: {', '.join(missing)}"
         )
-        raise FileNotFoundError(
-            f"Expected files not found in package: {', '.join(missing)}"
-        )
 
     # Get the destination for the copy
     dest_dir = dest_dir or os.getcwd()
+    if not os.path.exists(dest_dir):
+        os.makedirs(dest_dir)
+        logger.info(f"Created destination directory: {dest_dir}")
 
-    shutil.copy2(main_path, dest_dir)
-    logger.info(f"{main_path} copied to {dest_dir}")
-    shutil.copy2(config_user_path, dest_dir)
-    logger.info(f"{config_user_path} copied to {dest_dir}")
-    shutil.copy2(readme_path, dest_dir)
-    logger.info(f"{readme_path} copied to {dest_dir}")
-    shutil.copy2(config_output_path, dest_dir)
-    logger.info(f"{config_output_path} copied to {dest_dir}")
-    shutil.copy2(config_export_path, dest_dir)
-    try:
-        logger.info(f"{config_export_path} copied to {dest_dir}")
-    except Exception as e:
-        logger.warning(f"config_export.json is not copied: {e}")
+    for file_path in file_paths:
+        if not os.path.exists(file_path):
+            logger.warning(f"File {file_path} does not exist and will be skipped.")
+        else:
+            shutil.copy2(file_path, dest_dir)
+            logger.info(f"{file_path} copied to {dest_dir}")
 
 
 if __name__ == "__main__":
