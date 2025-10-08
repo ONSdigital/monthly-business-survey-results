@@ -371,8 +371,6 @@ def devolved_outputs(
         .reset_index()
     )
 
-    start_end_pivot.to_csv("start_end_pivot.csv")
-
     df = df[~df["questioncode"].isin([11, 12])]
 
     df_pivot = pd.pivot_table(
@@ -382,8 +380,6 @@ def devolved_outputs(
         columns=["text_question"],
         aggfunc=dict_agg_funcs,
     )
-
-    df_pivot.to_csv("df_pivot_line_375.csv")
 
     df_pivot.columns = ["_".join(col).strip() for col in df_pivot.columns.values]
     df_pivot = df_pivot[sorted(df_pivot.columns, key=split_func)]
@@ -435,12 +431,10 @@ def devolved_outputs(
         how="left",
         suffixes=("", "_extra"),
     )
-    df_pivot.to_csv("df_pivot_line_427.csv")
 
     df_pivot = pd.merge(
         df_pivot, start_end_pivot, on=["reference", "period"], how="left"
     )
-    df_pivot.to_csv("df_pivot_line_432.csv")
 
     # Drop the percentage column with the '_extra' suffix if it exists
     extra_col = f"{percent_devolved_nation_col}_extra"
@@ -526,7 +520,7 @@ def devolved_outputs(
     # map the column names used in the pipeline to column names in the business template
     column_name_mapping = output_column_name_mapping(config)
     df_pivot = df_pivot.rename(columns=column_name_mapping)
-    df_pivot.to_csv("final_df_pivot.csv")
+
     return df_pivot
 
 
