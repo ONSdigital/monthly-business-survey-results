@@ -74,7 +74,7 @@ def copy_script_and_config(
         if not os.path.exists(p)
     ]
     if missing:
-        logger.error(
+        logger.warning(
             f"Missing expected files in package {package_name}: {', '.join(missing)}"
         )
 
