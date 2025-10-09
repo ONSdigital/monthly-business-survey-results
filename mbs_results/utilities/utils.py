@@ -200,8 +200,6 @@ def generate_schemas(config):
 
                 logger.info(f"Generating schema for {filename}")
 
-                # De-version filename
-
                 with open(f"{schema_p}/{filename}_schema.toml", "w") as f:
                     toml.dump(schema, f)
 
