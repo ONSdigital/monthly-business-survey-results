@@ -1,0 +1,23 @@
+[period]
+old_name = "period"
+Deduced_Data_Type = "int64"
+
+[cell_no]
+old_name = "cell_no"
+Deduced_Data_Type = "int64"
+
+[population_turnover_sum]
+old_name = "population_turnover_sum"
+Deduced_Data_Type = "int64"
+
+[population_count]
+old_name = "population_count"
+Deduced_Data_Type = "int64"
+
+[sample_turnover_sum]
+old_name = "sample_turnover_sum"
+Deduced_Data_Type = "int64"
+
+[sample_count]
+old_name = "sample_count"
+Deduced_Data_Type = "int64"

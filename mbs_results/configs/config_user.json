@@ -21,5 +21,9 @@
     "current_period": 202303,
     "revision_window": 15,
     "state": "frozen",
+    "devolved_nations": ["Scotland", "Wales"],
+    "optional_outputs":["generate_devolved_outputs"],
+    "generate_schemas": false,
+    "schema_path": "",
     "debug_mode": false
 }

@@ -145,27 +145,3 @@ Deduced_Data_Type = "float64"
 [imputed_and_derived_flag]
 old_name = "imputed_and_derived_flag"
 Deduced_Data_Type = "object"
-
-[region]
-old_name = "region"
-Deduced_Data_Type = "object"
-
-[calibration_group]
-old_name = "calibration_group"
-Deduced_Data_Type = "int64"
-
-[is_sampled]
-old_name = "is_sampled"
-Deduced_Data_Type = "bool"
-
-[design_weight]
-old_name = "design_weight"
-Deduced_Data_Type = "float64"
-
-[calibration_factor]
-old_name = "calibration_factor"
-Deduced_Data_Type = "float64"
-
-[is_census]
-old_name = "is_census"
-Deduced_Data_Type = "bool"
