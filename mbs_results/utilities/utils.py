@@ -1,12 +1,11 @@
 import glob
-import json
 import os
 import re
 from importlib import metadata
 
 import numpy as np
 import pandas as pd
-from pandas.io.json._table_schema import build_table_schema
+import toml
 
 from mbs_results import logger
 from mbs_results.utilities.singleton_boto import SingletonBoto
@@ -192,15 +191,15 @@ def generate_schemas(config):
 
             for file in output_files:
                 df = pd.read_csv(file, low_memory=False)
-                schema = build_table_schema(df, index=False, version=False)
+                schema = build_toml_schema(df)
 
                 # Extract substring between last '/' or '\\' and first '.csv'
                 filename = re.search(r"[^/\\]+(?=\.csv)", file)[0]
 
                 logger.info(f"Generating schema for {filename}")
 
-                with open(f"{schema_p}/{filename}_schema.json", "w") as f:
-                    json.dump(schema, f, indent=4)
+                with open(f"{schema_p}/{filename}_schema.toml", "w") as f:
+                    toml.dump(schema, f)
 
         # Create schemas using S3 bucket, write them to S3 bucket
         if config["platform"] == "s3":
@@ -215,7 +214,7 @@ def generate_schemas(config):
                     csv_response = s3_client.get_object(Bucket=s3_bucket, Key=file_key)
                     df = pd.read_csv(csv_response["Body"], low_memory=False)
 
-                    schema = build_table_schema(df, index=False, version=False)
+                    schema = build_toml_schema(df)
 
                     # Extract substring between last '/' or '\\' and first '.csv'
                     filename = re.search(r"[^/\\]+(?=\.csv)", file_key)[0]
@@ -223,9 +222,33 @@ def generate_schemas(config):
                     logger.info(f"Generating schema for {filename}")
 
                     s3_client.put_object(
-                        Body=json.dump(schema, indent=4),
+                        Body=toml.dump(schema),
                         Bucket=s3_bucket,
                         Key=f"{schema_p}/{filename}_schema.json",
                     )
     else:
         logger.info("Schema generation not enabled in config, skipping...")
+
+
+def build_toml_schema(df: pd.DataFrame) -> dict:
+    """
+    Build a dict ready for conversion into a TOML schema
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to build the schema from.
+
+    Returns
+    -------
+    schema : dict
+        A dictionary representing the schema of the DataFrame.
+    """
+    schema = {}
+
+    for name, values in df.items():
+        schema.update(
+            {name: {"old_name": name, "Deduced_Data_Type": str(values.dtype)}}
+        )
+
+    return schema
