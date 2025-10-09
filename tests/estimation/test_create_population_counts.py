@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pandas as pd
 import pytest
 
@@ -49,10 +51,21 @@ class TestTurnoverPopulationCounts:
         )
         pd.testing.assert_frame_equal(output, expected_output)
 
+    @patch("pandas.DataFrame.to_csv")
     def test_create_population_count_output(
-        self, input_dataframe, expected_output_dataframe
+        self,
+        mock_to_csv,
+        input_dataframe,
+        expected_output_dataframe,
     ):
+        config = {
+            "period": "period",
+            "strata": "strata",
+            "output_path": "",
+            "platform": "network",
+            "bucket": "",
+        }
         # producing output
-        output = create_population_count_output(input_dataframe, "period", "strata")
+        output = create_population_count_output(input_dataframe, **config)
 
         pd.testing.assert_frame_equal(output, expected_output_dataframe)

@@ -1,5 +1,6 @@
 import pandas as pd
 
+from mbs_results.utilities.inputs import read_csv_wrapper
 from mbs_results.utilities.outputs import write_csv_wrapper
 
 
@@ -41,13 +42,13 @@ def calculate_turnover_sum_count(
     return df_pop_count
 
 
-
 def create_population_count_output(
     df: pd.DataFrame,
     period: str,
     strata: str,
-    output_path: str = "",
-    save_output: bool = False,
+    output_path: str,
+    platform: str,
+    bucket: str,
     **config: dict,
 ) -> pd.DataFrame:
     """
@@ -73,66 +74,89 @@ def create_population_count_output(
         Contains both population and sampled sum and counts for output.
         Returns none if save_output is True
     """
-    #KM REMOVE - FIND CODE FOR PREV_PERIOD  
-    current_period = int(config["current_period"])
-    previous_period = 202201
+
+    population = calculate_turnover_sum_count(
+        df, period, strata, "population", **config
+    )
+    sample = calculate_turnover_sum_count(
+        df[df["is_sampled"]], period, strata, "sample", **config
+    )
+    full_combined = pd.merge(
+        population, sample, on=[period, strata], how="outer"
+    ).fillna(0)
+
+    write_csv_wrapper(
+        full_combined,
+        output_path + "population_counts.csv",
+        platform,
+        bucket,
+        index=False,
+    )
+
+    return full_combined
+
+
+def format_population_counts_mbs(
+    period: str, strata: str, output_path: str, **config: dict
+):
+
+    df = read_csv_wrapper(
+        filepath=output_path + "population_counts.csv",
+        import_platform=config["platform"],
+        bucket_name=config["bucket"],
+    )
+
+    # Better way to do this?
+    current_period = pd.to_datetime(config["current_period"], format="%Y%m")
+    previous_period = int((current_period - pd.DateOffset(months=1)).strftime("%Y%m"))
+    current_period = int(current_period.strftime("%Y%m"))
 
     print("unique periods in df:", df[period].unique())
-    print("current eriod:", current_period)
+    print("current period:", current_period)
     print("previous period:", previous_period)
     print("rows matching prev period:", df[df[period] == previous_period].shape[0])
-    print("rows matching curremt period:", df[df[period] == current_period].shape[0])
-    
+    print("rows matching current period:", df[df[period] == current_period].shape[0])
+
     df_prev = df[df[period] == previous_period]
     df_curr = df[df[period] == current_period]
 
-    population_prev = calculate_turnover_sum_count(df_prev, period, strata, "population", **config)
-    population_curr = calculate_turnover_sum_count(df_curr, period, strata, "population", **config)
+    df_prev = df_prev.drop(columns=[period])
+    df_curr = df_curr.drop(columns=[period])
 
-    sample_prev = calculate_turnover_sum_count(df_prev[df_prev["is_sampled"]], period, strata, "sample", **config)
-    sample_curr = calculate_turnover_sum_count(df_curr[df_curr["is_sampled"]], period, strata, "sample", **config)
+    prev = df_prev.rename(
+        columns={
+            "population_turnover_sum": "population_turnover_sum_previous",
+            "population_count": "population_count_previous",
+            "sample_turnover_sum": "sample_turnover_sum_previous",
+            "sample_count": "sample_count_previous",
+        }
+    )
 
-    population_prev = population_prev.drop(columns=[period])
-    population_curr = population_curr.drop(columns=[period])
-    sample_prev = sample_prev.drop(columns=[period])
-    sample_curr = sample_curr.drop(columns=[period])
+    curr = df_curr.rename(
+        columns={
+            "population_turnover_sum": "population_turnover_sum_current",
+            "population_count": "population_count_current",
+            "sample_turnover_sum": "sample_turnover_sum_current",
+            "sample_count": "sample_count_current",
+        }
+    )
 
-    prev = pd.merge(population_prev, sample_prev, on=[strata], how="outer").fillna(0)
-    curr = pd.merge(population_curr, sample_curr, on=[strata], how="outer").fillna(0)
+    combined = pd.merge(curr, prev, on=strata, how="outer").fillna(0)
 
-    
+    combined["population_turnover_difference"] = (
+        combined["population_turnover_sum_current"]
+        - combined["population_turnover_sum_previous"]
+    )
+    combined["sample_turnover_difference"] = (
+        combined["sample_turnover_sum_current"]
+        - combined["sample_turnover_sum_previous"]
+    )
+    combined["population_count_difference"] = (
+        combined["population_count_current"] - combined["population_count_previous"]
+    )
+    combined["sample_count_difference"] = (
+        combined["sample_count_current"] - combined["sample_count_previous"]
+    )
 
-    prev = prev.rename(columns={
-        "population_turnover_sum": "population_turnover_previous",
-        "population_count": "population_count_previous",
-        "sample_turnover_sum": "sample_turnover_previous",
-        "sample_count": "sample_count_previous",
-    })
-
-    curr = curr.rename(columns={
-        "population_turnover_sum": "population_turnover_current",
-        "population_count": "population_count_current",
-        "sample_turnover_sum": "sample_turnover_current",
-        "sample_count": "sample_count_current",
-    })
-
-    combined = pd.merge(curr, prev, on=[strata], how="outer").fillna(0)
-
-    combined["population_turnover_difference"] = combined["population_turnover_current"] - combined["population_turnover_previous"]
-    combined["sample_turnover_difference"] = combined["sample_turnover_current"] - combined["sample_turnover_previous"]
-    combined["population_count_difference"] = combined["population_count_current"] - combined["population_count_previous"]
-    combined["sample_count_difference"] = combined["sample_count_current"] - combined["sample_count_previous"]
-
-
-    if save_output:
-        write_csv_wrapper(
-            combined,
-            output_path + "population_counts.csv",
-            config["platform"],
-            config["bucket"],
-            index=False,
-        )
-
-        return
-    else:
-        return combined
+    filename = f"mbs_population_count_{current_period}_{previous_period}.csv"
+    return (combined, filename)
