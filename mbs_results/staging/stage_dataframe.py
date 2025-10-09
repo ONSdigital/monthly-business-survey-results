@@ -162,6 +162,8 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         target=config["target"],
         question_no=config["question_no"],
         output_path=config["output_path"],
+        platform=config["platform"],
+        bucket=config["bucket"],
     )
 
     responses_with_missing = create_missing_questions(
@@ -729,6 +731,8 @@ def exclude_from_results(
     target,
     question_no,
     output_path,
+    platform,
+    bucket,
 ):
     """
     Excludes rows from the DataFrame based on non-response statuses.
@@ -752,8 +756,12 @@ def exclude_from_results(
         The column name of the target variable.
     question_no : str
         The column name of the question_no variable.
-    output_path : str
-        The path to write the excluded_to_results.csv to.
+    output_path: str
+        Path to save the file.
+    platform : str
+        Argument to pass to the csv wrapper.
+    bucket : str
+        S3 bucket to save te file, needed only when platform is set to S3.
 
     Returns
     -------
@@ -785,14 +793,23 @@ def exclude_from_results(
             [reference, period, question_no, status, target]
         ]
 
-        output_path = os.path.join(output_path, "excluded_from_results.csv")
-        excluded_responses.to_csv(output_path, index=False)
-
         # selecting only the rows in excluded_index in responses
         excluded_responses.set_index([reference, period, question_no], inplace=True)
         responses.set_index([reference, period, question_no], inplace=True)
 
         responses.drop(index=excluded_responses.index, inplace=True)
         responses = responses.reset_index()
+
+        excluded_responses.reset_index(inplace=True)
+
+        output_path = os.path.join(output_path, "excluded_from_results.csv")
+
+        write_csv_wrapper(
+            excluded_responses,
+            output_path,
+            platform,
+            bucket,
+            index=False,
+        )
 
     return responses

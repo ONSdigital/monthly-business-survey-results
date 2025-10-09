@@ -80,6 +80,8 @@ def test_exclude_from_results_csv(responses, contributors, expected_output_csv):
             target="adjustedresponse",
             question_no="question_no",
             output_path=tmpdirname,
+            platform="network",
+            bucket="",
         )
         actual_output = pd.read_csv(
             os.path.join(tmpdirname, "excluded_from_results.csv")
@@ -101,13 +103,11 @@ def test_warning_and_csv(mock_to_csv, caplog, responses, contributors):
             target="adjustedresponse",
             question_no="question_no",
             output_path="test_outputs/",
+            platform="network",
+            bucket="",
         )
 
         assert """9 rows have been dropped from responses,""" in caplog.text
-
-        mock_to_csv.assert_called_once_with(
-            "test_outputs/excluded_from_results.csv", index=False
-        )
 
 
 @patch("pandas.DataFrame.to_csv")  # mock pandas export to csv function
@@ -123,6 +123,8 @@ def test_exclude_from_results(mock_to_csv, responses, contributors, expected_out
         target="adjustedresponse",
         question_no="question_no",
         output_path="test_outputs/",
+        platform="network",
+        bucket="",
     )
-    print(actual_output.columns)
+
     assert_frame_equal(actual_output, expected_output)
