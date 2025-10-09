@@ -3,19 +3,19 @@
 This repository for MBS (Monthly Business Suvery) Results provides console entry point (installed as scripts) to run pipeline
 task and to copy runnable project files into a working folder.
 
-## Install (development)
-- From the repo root (Windows Powershell or CDP Terminal):
+## Install
+- Install the MBS package:
     ```bash
-    pip install -e .
+    pip install monthly-business-survey-results
     ```
-    - This registers the console scripts below.
+    - This installs the package in your active environment.
 
 ## Available Console Script
 - `setup_mbs`
     - **Purpose:** Copy runnable files into your current working directory so you can run the pipeline without editing package sources.
     - **What is Copies:** `main.py`, `configs/config_user.json`, and the package `README.md` (if present).
     - **When to use:** First time you want local copies of the scripts/config tp adapt or run the pipeline.
-    - Example (Powershell and bash):
+    - **Example:**
         ```bash
         setup_mbs
         ```
@@ -26,7 +26,7 @@ task and to copy runnable project files into a working folder.
         ```bash
         run_mbs_main
         ```
-    - **How to run MBS:** Step-by-step on how to run MBS is documented in the [MBS Configuration COnfluence page.](https://officefornationalstatistics.atlassian.net/wiki/spaces/MC/pages/59643308/MBS+Configuration).
+    - **How to run MBS:** Step-by-step on how to run MBS is documented in the [MBS Configuration Confluence page.](https://officefornationalstatistics.atlassian.net/wiki/spaces/MC/pages/59643308/MBS+Configuration).
 
 - `run_se_period_zero`
     - **Purpose:** Run the period_zero standard-error routine (pipeline-specific helper).
@@ -60,4 +60,4 @@ task and to copy runnable project files into a working folder.
   - If a console script is not found after install, ensure your virtual environment's Scripts folder is on PATH or that the package was installed into the active environment.
 
 Contact / maintainers
-- See [infomation the confluence](https://officefornationalstatistics.atlassian.net/wiki/spaces/MC/pages/59643314/Introduction) for details.
+- See [infomation in the confluence](https://officefornationalstatistics.atlassian.net/wiki/spaces/MC/pages/59643314/Introduction) for details.
