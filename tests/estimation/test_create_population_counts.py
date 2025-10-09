@@ -6,6 +6,7 @@ import pytest
 from mbs_results.estimation.create_population_counts import (
     calculate_turnover_sum_count,
     create_population_count_output,
+    format_population_counts_mbs,
 )
 
 
@@ -69,3 +70,22 @@ class TestTurnoverPopulationCounts:
         output = create_population_count_output(input_dataframe, **config)
 
         pd.testing.assert_frame_equal(output, expected_output_dataframe)
+
+    def test_format_population_counts_mbs(self):
+        config = {
+            "period": "period",
+            "strata": "strata",
+            "output_path": "tests/data/estimation/population_counts/",
+            "platform": "network",
+            "bucket": "",
+            "current_period": "202202",
+        }
+        output_df, filename = format_population_counts_mbs(**config)
+
+        expected = pd.read_csv(
+            "tests/data/estimation/population_counts"
+            + "/population_counts_formatted_output.csv"
+        )
+
+        pd.testing.assert_frame_equal(output_df, expected)
+        assert filename == "mbs_population_counts_202202_202201.csv"
