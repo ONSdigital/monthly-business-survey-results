@@ -196,7 +196,11 @@ def generate_schemas(config):
                 # Extract substring between last '/' or '\\' and first '.csv'
                 filename = re.search(r"[^/\\]+(?=\.csv)", file)[0]
 
+                filename = de_version_filename(filename)
+
                 logger.info(f"Generating schema for {filename}")
+
+                # De-version filename
 
                 with open(f"{schema_p}/{filename}_schema.toml", "w") as f:
                     toml.dump(schema, f)
@@ -218,6 +222,8 @@ def generate_schemas(config):
 
                     # Extract substring between last '/' or '\\' and first '.csv'
                     filename = re.search(r"[^/\\]+(?=\.csv)", file_key)[0]
+
+                    filename = de_version_filename(filename)
 
                     logger.info(f"Generating schema for {filename}")
 
@@ -252,3 +258,26 @@ def build_toml_schema(df: pd.DataFrame) -> dict:
         )
 
     return schema
+
+
+def de_version_filename(filename: str) -> str:
+    """
+    De-version a filename by removing version information.
+
+    Parameters
+    ----------
+    filename : str
+        The versioned filename.
+
+    Returns
+    -------
+    de_versioned_filename : str
+        The de-versioned filename.
+    """
+    # Use regex to remove version information (e.g., _v1.0.0)
+    de_versioned_filename = re.sub(r"_v\d+(\.\d+)*", "", filename)
+
+    # Use regex to remove snapshot information (e.g., snapshot_009_202301_1)
+    cleaned_filename = re.sub(r"_?snapshot_\d+_\d+_\d+", "", de_versioned_filename)
+
+    return cleaned_filename
