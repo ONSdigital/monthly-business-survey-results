@@ -1,0 +1,99 @@
+[period]
+old_name = "period"
+Deduced_Data_Type = "int64"
+
+[SUT]
+old_name = "SUT"
+Deduced_Data_Type = "int64"
+
+[cell]
+old_name = "cell"
+Deduced_Data_Type = "int64"
+
+[RU]
+old_name = "RU"
+Deduced_Data_Type = "int64"
+
+[name]
+old_name = "name"
+Deduced_Data_Type = "object"
+
+["enterprise group"]
+old_name = "enterprise group"
+Deduced_Data_Type = "float64"
+
+[SIC]
+old_name = "SIC"
+Deduced_Data_Type = "int64"
+
+["form type"]
+old_name = "form type"
+Deduced_Data_Type = "int64"
+
+["%scottish"]
+old_name = "%scottish"
+Deduced_Data_Type = "float64"
+
+["frozen employment"]
+old_name = "frozen employment"
+Deduced_Data_Type = "int64"
+
+[band]
+old_name = "band"
+Deduced_Data_Type = "int64"
+
+["start date"]
+old_name = "start date"
+Deduced_Data_Type = "float64"
+
+["end date"]
+old_name = "end date"
+Deduced_Data_Type = "float64"
+
+["returned turnover"]
+old_name = "returned turnover"
+Deduced_Data_Type = "float64"
+
+["adjusted turnover"]
+old_name = "adjusted turnover"
+Deduced_Data_Type = "float64"
+
+["imputed and derived flag turnover"]
+old_name = "imputed and derived flag turnover"
+Deduced_Data_Type = "object"
+
+["status encoded turnover"]
+old_name = "status encoded turnover"
+Deduced_Data_Type = "float64"
+
+["returned to exports"]
+old_name = "returned to exports"
+Deduced_Data_Type = "float64"
+
+["adjusted to exports"]
+old_name = "adjusted to exports"
+Deduced_Data_Type = "float64"
+
+["imputed and derived flag exports"]
+old_name = "imputed and derived flag exports"
+Deduced_Data_Type = "object"
+
+["status encoded exports"]
+old_name = "status encoded exports"
+Deduced_Data_Type = "float64"
+
+["returned volume water"]
+old_name = "returned volume water"
+Deduced_Data_Type = "float64"
+
+["adjusted volume water"]
+old_name = "adjusted volume water"
+Deduced_Data_Type = "float64"
+
+["imputed and derived flag volume water"]
+old_name = "imputed and derived flag volume water"
+Deduced_Data_Type = "object"
+
+["status encoded volume water"]
+old_name = "status encoded volume water"
+Deduced_Data_Type = "float64"

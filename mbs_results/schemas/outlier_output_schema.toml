@@ -4,11 +4,11 @@ Deduced_Data_Type = "float64"
 
 [period]
 old_name = "period"
-Deduced_Data_Type = "float64"
+Deduced_Data_Type = "int64"
 
 [reference]
 old_name = "reference"
-Deduced_Data_Type = "float64"
+Deduced_Data_Type = "int64"
 
 [adjustedresponse]
 old_name = "adjustedresponse"
@@ -18,21 +18,25 @@ Deduced_Data_Type = "float64"
 old_name = "response"
 Deduced_Data_Type = "float64"
 
-[rusic2007]
-old_name = "rusic2007"
+[frosic2007]
+old_name = "frosic2007"
 Deduced_Data_Type = "int64"
 
 [froempment]
 old_name = "froempment"
-Deduced_Data_Type = "float64"
+Deduced_Data_Type = "int64"
 
 [frotover]
 old_name = "frotover"
 Deduced_Data_Type = "float64"
 
+[entname1]
+old_name = "entname1"
+Deduced_Data_Type = "object"
+
 [cell_no]
 old_name = "cell_no"
-Deduced_Data_Type = "float64"
+Deduced_Data_Type = "int64"
 
 [formtype]
 old_name = "formtype"
@@ -40,7 +44,7 @@ Deduced_Data_Type = "int64"
 
 [form_type_spp]
 old_name = "form_type_spp"
-Deduced_Data_Type = "float64"
+Deduced_Data_Type = "int64"
 
 [imputation_flags_adjustedresponse]
 old_name = "imputation_flags_adjustedresponse"
@@ -84,11 +88,11 @@ Deduced_Data_Type = "float64"
 
 [f_match_adjustedresponse]
 old_name = "f_match_adjustedresponse"
-Deduced_Data_Type = "bool"
+Deduced_Data_Type = "object"
 
 [b_match_adjustedresponse]
 old_name = "b_match_adjustedresponse"
-Deduced_Data_Type = "bool"
+Deduced_Data_Type = "object"
 
 [f_link_adjustedresponse]
 old_name = "f_link_adjustedresponse"
@@ -96,7 +100,7 @@ Deduced_Data_Type = "float64"
 
 [default_link_f_match_adjustedresponse]
 old_name = "default_link_f_match_adjustedresponse"
-Deduced_Data_Type = "bool"
+Deduced_Data_Type = "object"
 
 [b_link_adjustedresponse]
 old_name = "b_link_adjustedresponse"
@@ -104,7 +108,7 @@ Deduced_Data_Type = "float64"
 
 [default_link_b_match_adjustedresponse]
 old_name = "default_link_b_match_adjustedresponse"
-Deduced_Data_Type = "bool"
+Deduced_Data_Type = "object"
 
 [construction_link]
 old_name = "construction_link"
@@ -112,7 +116,7 @@ Deduced_Data_Type = "float64"
 
 [default_link_flag_construction_matches]
 old_name = "default_link_flag_construction_matches"
-Deduced_Data_Type = "bool"
+Deduced_Data_Type = "object"
 
 [f_match_adjustedresponse_count]
 old_name = "f_match_adjustedresponse_count"
@@ -148,11 +152,11 @@ Deduced_Data_Type = "object"
 
 [calibration_group]
 old_name = "calibration_group"
-Deduced_Data_Type = "int64"
+Deduced_Data_Type = "float64"
 
 [is_sampled]
 old_name = "is_sampled"
-Deduced_Data_Type = "bool"
+Deduced_Data_Type = "object"
 
 [design_weight]
 old_name = "design_weight"
@@ -164,15 +168,15 @@ Deduced_Data_Type = "float64"
 
 [is_census]
 old_name = "is_census"
-Deduced_Data_Type = "bool"
+Deduced_Data_Type = "object"
 
 [classification]
 old_name = "classification"
-Deduced_Data_Type = "int64"
+Deduced_Data_Type = "float64"
 
 [sic_5_digit]
 old_name = "sic_5_digit"
-Deduced_Data_Type = "int64"
+Deduced_Data_Type = "float64"
 
 [l_value]
 old_name = "l_value"
@@ -180,7 +184,7 @@ Deduced_Data_Type = "float64"
 
 [nw_ag_flag]
 old_name = "nw_ag_flag"
-Deduced_Data_Type = "bool"
+Deduced_Data_Type = "object"
 
 [predicted_unit_value]
 old_name = "predicted_unit_value"
@@ -204,4 +208,4 @@ Deduced_Data_Type = "float64"
 
 [post_winsorised]
 old_name = "post_winsorised"
-Deduced_Data_Type = "bool"
+Deduced_Data_Type = "object"
