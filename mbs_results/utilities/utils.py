@@ -178,7 +178,7 @@ def generate_schemas(config):
     None
     """
 
-    if config["generate_schemas"] is True and config["schema_path"] is not None:
+    if config["generate_schemas"] and config["schema_path"]:
 
         output_p = config["output_path"]
         schema_p = config["schema_path"]
