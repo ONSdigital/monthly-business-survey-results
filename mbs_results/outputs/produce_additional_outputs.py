@@ -17,12 +17,13 @@ from mbs_results.outputs.selective_editing_question_output import (
     create_selective_editing_question_output,
 )
 from mbs_results.outputs.turnover_analysis import create_turnover_output
+from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.pounds_thousands import create_pounds_thousands_column
 from mbs_results.utilities.utils import get_versioned_filename
 
 
 def get_additional_outputs_df(
-    estimation_output: pd.DataFrame, outlier_output: pd.DataFrame, config: dict
+    df: pd.DataFrame, unprocessed_data: pd.DataFrame, config: dict
 ):
     """
     Creating dataframe that contains all variables needed for producing additional
@@ -31,55 +32,117 @@ def get_additional_outputs_df(
 
     Parameters
     ----------
-    outlier_output : pd.DataFrame
+    df : pd.DataFrame
         Dataframe output from the outliering stage of the pipeline
+    unprocessed_data : pd.DataFrame
+        Dataframe with all question codes which weren't processed through
+        mbs methods like qcode 11, 12, 146.
+    config : dict
+        main pipeline configuration.
 
     Returns
     -------
     pd.DataFrame
 
     """
-    # Create pounds_thousands column
     questions_to_apply = config.get("pounds_thousands_questions")
     question_col = config.get("question_no")
-    source_col = config.get("target")
     dest_col = config.get("pound_thousand_col")
+    target = config.get("target")
 
-    outlier_output = create_pounds_thousands_column(
-        outlier_output,
+    # below needed for mandotary and optional outputs
+    final_cols = [
+        config["reference"],
+        config["period"],
+        config["sic"],
+        "classification",
+        config["cell_number"],
+        config["auxiliary"],
+        "froempment",
+        "formtype",
+        "imputed_and_derived_flag",
+        question_col,
+        config["status"],
+        "design_weight",
+        config["calibration_factor"],
+        "outlier_weight",
+        f"imputation_flags_{target}",
+        "imputation_class",
+        f"f_link_{target}",
+        f"default_link_f_match_{target}",
+        f"b_link_{target}",
+        f"default_link_b_match_{target}",
+        "construction_link",
+        "flag_construction_matches_count",
+        "default_link_flag_construction_matches",
+        "constrain_marker",
+        target,
+        "response",
+        "status",
+    ]
+    if not config["filter"]:
+        count_variables = [f"b_match_{target}_count", f"f_match_{target}_count"]
+    else:
+        count_variables = [
+            f"b_match_filtered_{target}_count",
+            f"f_match_filtered_{target}_count",
+        ]
+
+    final_cols += count_variables
+
+    df = create_pounds_thousands_column(
+        df,
         question_col=question_col,
-        source_col=source_col,
+        source_col=target,
         dest_col=dest_col,
         questions_to_apply=questions_to_apply,
         ensure_at_end=True,
     )
 
-    additional_outputs_df = outlier_output
-
     # converting cell_number to int
     # needed for outputs that use cell_number for sizebands
-    additional_outputs_df[config["cell_number"]] = additional_outputs_df[
-        config["cell_number"]
-    ].astype(int)
 
-    return additional_outputs_df
+    df = df.astype({"classification": str, config["cell_number"]: int})
+
+    df = df[final_cols]
+
+    df = pd.concat([df, unprocessed_data])
+
+    df.reset_index(drop=True, inplace=True)
+
+    return df
 
 
-def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame):
+def produce_additional_outputs(
+    additional_outputs_df: pd.DataFrame,
+    qa_outputs: bool,
+    optional_outputs: bool,
+    config: dict,
+):
     """
-    Function to write additional outputs
+    Produces additional outputs.
+
+    mandatory outputs are defined in config['mandatory_outputs'] and will
+    be created when mandatory_outputs arg is set to TRUE
+
+    optional_outputs are all the available outputs apart from the ones
+    define in config['mandatory_outputs']
+
 
     Parameters
     ----------
-    config : Dict
-        main pipeline configuration
     additional_outputs_df : pd.DataFrame
-        Dataframe to feed in as arguments for additional outputs
+        Post methods dataframe.
+    qa_outputs : bool
+        Whether to produce mandotaty for QA.
+    additional_outputs : bool
+        Whether to produce any non mandotaty outputs.
+    config : dict
+        main pipeline configuration.
 
     Returns
     -------
     None.
-        Outputs are written to output path defined in config
 
     """
 
@@ -95,6 +158,8 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
             "produce_qa_output": produce_qa_output,
         },
         additional_outputs_df,
+        qa_outputs,
+        optional_outputs,
     )
 
     # Stop function if no additional_outputs are listed in config.
@@ -112,11 +177,24 @@ def produce_additional_outputs(config: dict, additional_outputs_df: pd.DataFrame
             # we need to save each DataFrame in the dictionary
             for nation, df in df.items():
                 nation_filename = f"{config['output_path']}{nation.lower()}_{filename}"
-                df.to_csv(nation_filename, index=False)
+                write_csv_wrapper(
+                    df,
+                    nation_filename,
+                    config["platform"],
+                    config["bucket"],
+                    index=False,
+                )
+
                 logger.info(nation_filename + " saved")
         else:
             # if the output is a DataFrame, save it directly
-            df.to_csv(config["output_path"] + filename, index=False)
+            write_csv_wrapper(
+                df,
+                config["output_path"] + filename,
+                config["platform"],
+                config["bucket"],
+                index=False,
+            )
             logger.info(config["output_path"] + filename + " saved")
 
 
@@ -147,6 +225,8 @@ def produce_selective_editing_outputs(
             "selective_editing_questions": create_selective_editing_question_output,
         },
         additional_outputs_df,
+        qa_outputs=False,
+        optional_outputs=False,
         selective_editing=True,
     )
 
@@ -173,9 +253,22 @@ def produce_selective_editing_outputs(
             # we need to save each DataFrame in the dictionary
             for nation, df in df.items():
                 nation_filename = f"{config['output_path']}{nation.lower()}_{filename}"
-                df.to_csv(nation_filename, index=False)
+                write_csv_wrapper(
+                    df,
+                    nation_filename,
+                    config["platform"],
+                    config["bucket"],
+                    index=False,
+                )
+
                 logger.info(nation_filename + " saved")
         else:
             # if the output is a DataFrame, save it directly
-            df.to_csv(config["output_path"] + filename, index=False)
+            write_csv_wrapper(
+                df,
+                config["output_path"] + filename,
+                config["platform"],
+                config["bucket"],
+                index=False,
+            )
             logger.info(config["output_path"] + filename + " saved")

@@ -1,6 +1,8 @@
 import pandas as pd
 
 from mbs_results.staging.merge_domain import merge_domain
+from mbs_results.utilities.inputs import read_csv_wrapper
+from mbs_results.utilities.outputs import write_csv_wrapper
 
 
 def get_selective_editing_contributor_output(
@@ -67,12 +69,19 @@ def get_selective_editing_contributor_output(
 
     input_data[config["sic"]] = input_data[config["sic"]].astype(str)
 
-    domain_data = pd.read_csv(
-        sic_domain_mapping_path, dtype={"sic_5_digit": str, "domain": str}
+    domain_data = read_csv_wrapper(
+        sic_domain_mapping_path,
+        config["platform"],
+        config["bucket"],
+        dtype={"sic_5_digit": str, "domain": str},
     )
-    threshold_mapping = pd.read_csv(
-        threshold_filepath, dtype={"formtype": int, "domain": str, "threshold": float}
+    threshold_mapping = read_csv_wrapper(
+        threshold_filepath,
+        config["platform"],
+        config["bucket"],
+        dtype={"formtype": int, "domain": str, "threshold": float},
     )
+
     # Loading as int to remove leading 0, converting back to str to match main df
     threshold_mapping["formtype"] = threshold_mapping["formtype"].astype(str)
 
@@ -89,8 +98,11 @@ def get_selective_editing_contributor_output(
         on=["formtype", "domain"],
         how="left",
     )
-    selective_editing_contributor_output.to_csv(
+    write_csv_wrapper(
+        selective_editing_contributor_output,
         output_path + "se_contributor_full_" + f"se_period_{period_selected}.csv",
+        config["platform"],
+        config["bucket"],
         index=False,
     )
     selective_editing_contributor_output.drop(columns=["formtype"], inplace=True)

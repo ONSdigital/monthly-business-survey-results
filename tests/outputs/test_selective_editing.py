@@ -162,6 +162,8 @@ def mock_user_config():
         "idbr_to_spp": {"9999": 999},
         "sic_domain_mapping_path": input_path + "test_sic_domain_mapping.csv",
         "threshold_filepath": input_path + "test_form_domain_threshold_mapping.csv",
+        "filter": None,
+        "debug_mode": False,
     }
 
 
@@ -197,6 +199,7 @@ def clear_outputs_folder():
 class TestSelectiveEditingWrappers:
     def test_period_zero_se_wrapper(self, mock_user_config, mock_create_mapper):
         mock_user_config["current_period"] = 202112
+
         period_zero_se_wrapper(config_user_dict=mock_user_config)
 
     def test_run_final_outputs(

@@ -2,8 +2,6 @@ import pandas as pd
 
 from mbs_results.estimation.apply_estimation import apply_estimation
 
-# from mbs_results.staging.data_cleaning import correct_values
-
 
 def estimate(
     df: pd.DataFrame, method: str, convert_NI_GB_cells: bool, config: dict

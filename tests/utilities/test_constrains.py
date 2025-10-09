@@ -8,6 +8,7 @@ from pandas.testing import assert_frame_equal
 from mbs_results.utilities.constrains import (
     calculate_derived_outlier_weights,
     constrain,
+    enforce_export_weight_constraint,
     replace_values_index_based,
     replace_with_manual_outlier_weights,
     sum_sub_df,
@@ -246,6 +247,21 @@ class TestDerivedOutlierWeights:
             "spp_form_id",
             "outlier_weight",
             "value",
+        )
+
+        assert_frame_equal(df_actual, df_expected)
+
+    def test_enforce_export_weight_constraint(self, filepath):
+        df_in = pd.read_csv(filepath / "test_enforce_export_weight_in.csv")
+        df_expected = pd.read_csv(filepath / "test_enforce_export_weight_out.csv")
+
+        df_actual = enforce_export_weight_constraint(
+            df_in,
+            reference="reference",
+            period="period",
+            question_code="questioncode",
+            outlier_weight="outlier_weight",
+            target="value",
         )
 
         assert_frame_equal(df_actual, df_expected)

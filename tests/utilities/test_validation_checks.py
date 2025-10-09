@@ -238,6 +238,7 @@ def test_validate_outlier_weight_error(caplog):
             "snapshot_file_path": "test_snapshot.json",
             "platform": "network",
             "bucket": "",
+            "debug_mode": False,
         }
 
         test_data_dict = {
@@ -272,6 +273,7 @@ def config():
         "current_period": "202301",
         "revision_window": 1,
         "platform": "network",
+        "bucket": "",
     }
 
 
@@ -295,7 +297,7 @@ def mock_logger():
 @pytest.fixture
 def mock_read_csv():
     with patch(
-        "mbs_results.outputs.selective_editing_validations.pd.read_csv"
+        "mbs_results.outputs.selective_editing_validations.read_csv_wrapper"
     ) as mock_read_csv:
         mock_read_csv.side_effect = [
             pd.DataFrame(

@@ -6,8 +6,9 @@ from mbs_results.outputs.produce_additional_outputs import (
     produce_additional_outputs,
 )
 from mbs_results.staging.stage_dataframe import stage_dataframe
-from mbs_results.utilities.inputs import load_config
 from mbs_results.utilities.utils import generate_schemas
+from mbs_results.utilities.inputs import load_config, read_csv_wrapper
+from mbs_results.utilities.outputs import save_df
 from mbs_results.utilities.validation_checks import (
     validate_config,
     validate_estimation,
@@ -18,30 +19,50 @@ from mbs_results.utilities.validation_checks import (
 
 
 def run_mbs_main(config_user_dict=None):
-    config = load_config(config_user_dict)
+    """Main function to run MBS methods pipeline"""
+
+    config = load_config("config_user.json", config_user_dict)
     validate_config(config)
 
-    staged_data, manual_constructions, filter_df = stage_dataframe(config)
-    validate_staging(staged_data, config)
+    df, unprocessed_data, manual_constructions, filter_df = stage_dataframe(config)
+    validate_staging(df, config)
 
     # imputation: RoM wrapper -> Rename wrapper to apply_imputation
-    imputation_output = impute(staged_data, manual_constructions, config, filter_df)
-    validate_imputation(imputation_output, config)
-
-    # Estimation Wrapper
-    estimation_output = estimate(
-        df=imputation_output, method="combined", convert_NI_GB_cells=True, config=config
-    )
-    validate_estimation(estimation_output, config)
+    df = impute(df, manual_constructions, config, filter_df)
+    validate_imputation(df, config)
+    save_df(df, "imputation", config, config["debug_mode"])
+    # Estimation Wrap
+    df = estimate(df=df, method="combined", convert_NI_GB_cells=True, config=config)
+    validate_estimation(df, config)
+    save_df(df, "estimation_output", config, config["debug_mode"])
 
     # Outlier Wrapper
-    outlier_output = detect_outlier(estimation_output, config)
-    validate_outlier_detection(outlier_output, config)
+    df = detect_outlier(df, config)
+    validate_outlier_detection(df, config)
+    save_df(df, "outlier_output", config, config["debug_mode"])
 
-    additional_outputs_df = get_additional_outputs_df(
-        estimation_output, outlier_output, config
+    df = get_additional_outputs_df(df, unprocessed_data, config)
+    save_df(df, "mbs_results", config)  # main methods output
+
+    produce_additional_outputs(
+        additional_outputs_df=df, qa_outputs=True, optional_outputs=False, config=config
     )
-    produce_additional_outputs(config, additional_outputs_df)
+
+
+def produce_additional_outputs_wrapper(config_user_dict=None):
+    """Produces any additional outputs based on MBS methods output"""
+
+    config = load_config("config_outputs.json", config_user_dict)
+
+    df = read_csv_wrapper(
+        filepath=config["mbs_output_path"],
+        import_platform=config["platform"],
+        bucket_name=config["bucket"],
+    )
+
+    produce_additional_outputs(
+        additional_outputs_df=df, qa_outputs=False, optional_outputs=True, config=config
+    )
 
     generate_schemas(config)
 

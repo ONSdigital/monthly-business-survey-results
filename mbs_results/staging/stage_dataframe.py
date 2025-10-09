@@ -24,6 +24,7 @@ from mbs_results.staging.validate_snapshot import validate_snapshot
 from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.inputs import read_colon_separated_file, read_csv_wrapper
+from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.utils import convert_column_to_datetime
 from mbs_results.utilities.validation_checks import validate_manual_constructions
 
@@ -108,9 +109,8 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         status="status",
         reference=config["reference"],
         period=config["period"],
-        non_response_statuses=[
-            "Form sent out",
-            "Excluded from results",
+        non_response_statuses=config["non_response_statuses"]
+        + [
             "Combined child (NIL2)",
             "Out of scope (NIL3)",
             "Ceased trading (NIL4)",
@@ -152,6 +152,20 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     contributors = create_form_type_spp_column(contributors, config)
     mapper = create_mapper()  # Needs to be defined
 
+    responses = exclude_from_results(
+        responses=responses,
+        contributors=contributors,
+        non_response_statuses=config["non_response_statuses"],
+        reference=config["reference"],
+        period=config["period"],
+        status="status",
+        target=config["target"],
+        question_no=config["question_no"],
+        output_path=config["output_path"],
+        platform=config["platform"],
+        bucket=config["bucket"],
+    )
+
     responses_with_missing = create_missing_questions(
         contributors_df=contributors,
         responses_df=responses,
@@ -168,16 +182,10 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
 
     df = append_back_data(df, config)
 
-    snapshot_name = os.path.basename(config["snapshot_file_path"]).split(".")[0]
-
-    df = filter_out_questions(
+    df, unprocessed_data = filter_out_questions(
         df=df,
         column=config["question_no"],
         questions_to_filter=config["filter_out_questions"],
-        save_full_path=config["output_path"]
-        + snapshot_name
-        + "_filter_out_questions.csv",
-        **config,
     )
 
     df = drop_derived_questions(
@@ -243,7 +251,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     )
 
     print("Staging Completed")
-    return pre_impute_df, manual_constructions, filter_df
+    return pre_impute_df, unprocessed_data, manual_constructions, filter_df
 
 
 def drop_derived_questions(
@@ -418,10 +426,15 @@ def start_of_period_staging(
                 axis=1,
             )
         ]
-        dropped_questions.to_csv(
+
+        write_csv_wrapper(
+            dropped_questions,
             config["output_path"]
             + "dropped_previous_period_"
-            + f"se_period_{config['period_selected']}.csv"
+            + f"se_period_{config['period_selected']}.csv",
+            config["platform"],
+            config["bucket"],
+            index=False,
         )
 
         # Keep only the rows that match the condition
@@ -694,10 +707,109 @@ def check_construction_links(df: pd.DataFrame, config: dict):
             config["output_path"],
             f"q49_references_con_link_greater_1_{config['current_period']}.csv",
         )
-        df_large_construction_link.to_csv(
+        print(config)
+        write_csv_wrapper(
+            df_large_construction_link,
             output_file,
+            config["platform"],
+            config["bucket"],
             index=False,
         )
+
         logger.info(
             f"references with construction link > 1 for q49 saved to {output_file}"
         )
+
+
+def exclude_from_results(
+    responses,
+    contributors,
+    non_response_statuses,
+    reference,
+    period,
+    status,
+    target,
+    question_no,
+    output_path,
+    platform,
+    bucket,
+):
+    """
+    Excludes rows from the DataFrame based on non-response statuses.
+
+    Parameters
+    ----------
+    responses : pd.DataFrame
+        The responses DataFrame containing response-level data.
+    contributors : pd.DataFrame
+        The contributors DataFrame containing contributor-level data.
+    non_response_statuses : list
+        A list of statuses that should be treated as non-responders. These
+        should be present in the `status` column of the DataFrame.
+    reference : str
+        The column name of the reference variable.
+    period : str
+        The column name of the period variable.
+    status : str
+        The column name of the status variable.
+    target : str
+        The column name of the target variable.
+    question_no : str
+        The column name of the question_no variable.
+    output_path: str
+        Path to save the file.
+    platform : str
+        Argument to pass to the csv wrapper.
+    bucket : str
+        S3 bucket to save te file, needed only when platform is set to S3.
+
+    Returns
+    -------
+    pd.DataFrame
+        The modified DataFrame with rows excluded based on non-response statuses.
+    """
+
+    # creating CSV for checking original values
+    excluded_responses = responses.merge(
+        contributors, how="inner", on=["reference", "period"]
+    )
+
+    excluded_mask = (
+        excluded_responses[status].isin(non_response_statuses)
+        & excluded_responses[target].notna()
+    )
+
+    excluded_responses = excluded_responses[excluded_mask]
+
+    if len(excluded_responses) > 0:
+
+        logger.info(
+            f"""{len(excluded_responses)} rows have been dropped from responses,
+            due to containing non-response statuses.
+            See excluded_from_results.csv to see original values."""
+        )
+
+        excluded_responses = excluded_responses[
+            [reference, period, question_no, status, target]
+        ]
+
+        # selecting only the rows in excluded_index in responses
+        excluded_responses.set_index([reference, period, question_no], inplace=True)
+        responses.set_index([reference, period, question_no], inplace=True)
+
+        responses.drop(index=excluded_responses.index, inplace=True)
+        responses = responses.reset_index()
+
+        excluded_responses.reset_index(inplace=True)
+
+        output_path = os.path.join(output_path, "excluded_from_results.csv")
+
+        write_csv_wrapper(
+            excluded_responses,
+            output_path,
+            platform,
+            bucket,
+            index=False,
+        )
+
+    return responses

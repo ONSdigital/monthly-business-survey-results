@@ -3,7 +3,7 @@
 | Parameter | Description | Data Type | Acceptable Values |
 |---|---|---|---|
 | bucket | The path to the bucket. | string | Any filepath. |
-| ssl_file | - | - | - |
+| ssl_file | The path to the ssl certificate. | string | Any filepath. |
 | calibration_group_map_path | The filepath to the calibration group mapping file. | string | Any filepath. |
 | classification_values_path | The filepath to the file containing SIC classification values. | string | Any filepath. |
 | snapshot_file_path | The full filepath to the snapshot data | string | Any filepath. |
@@ -30,10 +30,30 @@
 | optional_outputs | A list of optional outputs to produce after the pipeline has run. | `[]` | list | Any of the outputs listed in `mbs_results/outputs/produce_additional_outputs.py` within the `produce_additional_outputs` function which can be produced. |
 | generate_schemas | Setting to control if schemas are automatically generated for outputs | bool | `True` or `False` |
 | schema_path | Location to save generated schemas | string | Any filepath |
-
+| non_response_statuses | A list of status values that refer to non-responses. | `["Form sent out", "Excluded from Results"]` | list | A list of statuses found in the "status" column. |
+| state | To run the pipeline with `frozen` or `live` status. | string | Either `frozen` or `live`. |
+| debug_mode | Whether to export all the intermediate methods outputs (imputation, estimation, winsorisation) . | bool | Either `true` or `false`. |
 
 ## Guidance for use
 As an end user, you will only need to change the user config (named `config_user.json`) - you just need to update the filepaths and period information in the user config. Note: for ONS users, you can find example filepaths in the Confluence documentation.
+
+# Outputs Config
+
+| Parameter | Description | Data Type | Acceptable Values |
+|---|---|---|---|
+| bucket | The path to the bucket. | string | Any filepath. |
+| ssl_file | The path to the ssl certificate. | string | Any filepath. |
+| idbr_folder_path | The path to the folder containing the IDBR data. | string | Any filepath. |
+| snapshot_file_path | The full filepath to the snapshot data | string | Any filepath. |
+| mbs_output_path | The filepath to the file containing the methods output. | string | Any filepath. |
+| output_path | The filepath where outputs should be saved to. | string | Any filepath. |
+| cdid_data_path | The filepath to the file containing cdid data. | string | Any filepath. |
+| current_period | The most recent period to include in the outputs (same as above). | int | Any int in the form `yyyymm`. |
+| revision_window | The number of months to use as a revision window. | int | Any int in the form `mm` or `m` (does not need to be zero-padded). |
+| devolved_nations | Nations to create outputs for choose between `Scotland`, `Wales`. | List of string | List of nations. |
+
+## Guidance for additional outputs
+As an end user, you will only need to change the outputs config (named `config_outputs.json`) - you just need to update the filepaths and period information in the output config. Note: for ONS users, you can find example filepaths in the Confluence documentation.
 
 # Dev Config
 | Parameter | Description | Default | Data Type | Acceptable Values |
@@ -75,7 +95,7 @@ As an end user, you will only need to change the user config (named `config_user
 | idbr_to_spp | Mapping between IDBR and SPP. | `{"201": 9, "202": 9, "203": 10, "204": 10, "205": 11, "216": 11, "106": 12, "111": 12, "117": 13, "167": 13, "123": 14, "173": 14, "817": 15, "867": 15, "823": 16, "873": 16}` | dict | A dictionary in the format `{"IDBR_value": SPP_value}` where IDBR value is a string and SPP value is an int. |
 | csw_to_spp_columns | Mapping of CSW to SPP columns. | `{"returned_value":"response", "adjusted_value":"adjustedresponse", "question_no":"questioncode"}` | dict | A dictionary in the format `{"CSW_col_name": "SPP_col_name"}`. |
 | type_to_imputation_marker | A dictionary mapper mapping type to imputation marker. | `{"0": "r", "1": "r", "2": "derived", "3": "fir", "4": "bir", "5": "c", "6": "mc", "10": "r", "11": "r", "12": "derived", "13": "fir" }` | dict | A dictionary in the format `{"type":"imputation_marker"}` where imputation marker is a value found in the imputation_marker_col. |
-| mandatory_outputs | A list of mandatory outputs to produce after the pipeline has run. | `["produce_qa_output", "selective_editing_contributors",               "selective_editing_questions"]` | list | Any of the outputs listed in `mbs_results/outputs/produce_additional_outputs.py` within the `produce_additional_outputs` function which must be produced. |
+| mandatory_outputs | A list of mandatory outputs to produce after the pipeline has run. | `["produce_qa_output", "turnover_output",               "growth_rates_output"]` | list | Any of the outputs listed in `mbs_results/outputs/produce_additional_outputs.py` within the `produce_additional_outputs` function which must be produced. |
 | form_to_derived_map | A dictionary mapper mapping form type to question number for derived questions | `{"13": [40],"14": [40],"15": [46],"16": [42]}` | dict | A dictionary in the format `{"formtype":["question_no"]}` where each key-value pair represents the form type and question number for each derived question in the data. Note that question number is a list, even if there's only one. |
 ## Usage
 
