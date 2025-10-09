@@ -152,7 +152,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     contributors = create_form_type_spp_column(contributors, config)
     mapper = create_mapper()  # Needs to be defined
 
-    responses, excluded_responses = exclude_from_results(
+    responses = exclude_from_results(
         responses=responses,
         contributors=contributors,
         non_response_statuses=config["non_response_statuses"],
@@ -161,15 +161,9 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         status="status",
         target=config["target"],
         question_no=config["question_no"],
-    )
-    output_path = os.path.join(config["output_path"], "excluded_from_results.csv")
-
-    write_csv_wrapper(
-        excluded_responses,
-        output_path,
-        config["platform"],
-        config["bucket"],
-        index=False,
+        output_path=config["output_path"],
+        platform=config["platform"],
+        bucket=config["bucket"],
     )
 
     responses_with_missing = create_missing_questions(
@@ -736,6 +730,9 @@ def exclude_from_results(
     status,
     target,
     question_no,
+    output_path,
+    platform,
+    bucket,
 ):
     """
     Excludes rows from the DataFrame based on non-response statuses.
@@ -759,6 +756,12 @@ def exclude_from_results(
         The column name of the target variable.
     question_no : str
         The column name of the question_no variable.
+    output_path: str
+        Path to save the file.
+    platform : str
+        Argument to pass to the csv wrapper.
+    bucket : str
+        S3 bucket to save te file, needed only when platform is set to S3.
 
     Returns
     -------
@@ -799,4 +802,14 @@ def exclude_from_results(
 
         excluded_responses.reset_index(inplace=True)
 
-    return responses, excluded_responses
+        output_path = os.path.join(output_path, "excluded_from_results.csv")
+
+        write_csv_wrapper(
+            excluded_responses,
+            output_path,
+            platform,
+            bucket,
+            index=False,
+        )
+
+    return responses
