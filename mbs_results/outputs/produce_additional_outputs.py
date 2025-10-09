@@ -3,6 +3,7 @@ from importlib import metadata
 import pandas as pd
 
 from mbs_results import logger
+from mbs_results.estimation.create_population_counts import format_population_counts_mbs
 from mbs_results.outputs.csdb_output import create_csdb_output
 from mbs_results.outputs.get_additional_outputs import get_additional_outputs
 from mbs_results.outputs.growth_rates_output import get_growth_rates_output
@@ -160,6 +161,12 @@ def produce_additional_outputs(
         additional_outputs_df,
         qa_outputs,
         optional_outputs,
+    )
+
+    # The formatted population counts output is always produced for MBS, but does not
+    # Require the additional_output_df and loads the full population counts from file
+    additional_outputs["mbs_format_population_counts"] = format_population_counts_mbs(
+        **config
     )
 
     # Stop function if no additional_outputs are listed in config.
