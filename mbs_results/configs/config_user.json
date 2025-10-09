@@ -24,6 +24,6 @@
     "devolved_nations": ["Scotland", "Wales"],
     "optional_outputs":["generate_devolved_outputs"],
     "generate_schemas": false,
-    "schema_path": ""
+    "schema_path": "",
     "debug_mode": false
 }
