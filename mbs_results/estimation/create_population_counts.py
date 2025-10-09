@@ -97,17 +97,48 @@ def create_population_count_output(
 
 
 def format_population_counts_mbs(
-    period: str, strata: str, output_path: str, **config: dict
+    period: str,
+    strata: str,
+    output_path: str,
+    platform: str,
+    bucket: str,
+    current_period: str,
+    **config: dict,
 ):
+    """
+    produces the formatted population counts for mbs pipeline.
+    Loads the full
+
+    Parameters
+    ----------
+    period : str
+        period column name
+    strata : str
+        strata column name
+    output_path : str
+        output path where population_counts.csv has been stored
+    platform : str
+        platform name, either "s3" or "network"
+    bucket : str
+        bucket name when loading from "s3"
+    current_period : str
+        current period in "YYYYMM" format
+
+    Returns
+    -------
+    tuple of (pd.DataFrame, str)
+        returns the formatted dataframe and the filename including current and previous
+        period in filename
+    """
 
     df = read_csv_wrapper(
         filepath=output_path + "population_counts.csv",
-        import_platform=config["platform"],
-        bucket_name=config["bucket"],
+        import_platform=platform,
+        bucket_name=bucket,
     )
 
     # Better way to do this?
-    current_period = pd.to_datetime(config["current_period"], format="%Y%m")
+    current_period = pd.to_datetime(current_period, format="%Y%m")
     previous_period = int((current_period - pd.DateOffset(months=1)).strftime("%Y%m"))
     current_period = int(current_period.strftime("%Y%m"))
 
