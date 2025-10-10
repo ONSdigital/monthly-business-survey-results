@@ -291,7 +291,7 @@ def devolved_outputs(
     config: dict,
     # TODO: Make sure construction has appropriate Qs
     devolved_questions: list = [11, 12, 40, 49, 110],
-    agg_function: str = "sum",  # potential remove, here for testing
+    agg_function: str = "first",  # potential remove, here for testing
 ) -> pd.DataFrame:
     """
     Run to produce devolved outputs (excluding GB-NIR)
@@ -365,7 +365,7 @@ def devolved_outputs(
             index=["reference", "period"],
             columns="questioncode",
             values="adjustedresponse",
-            aggfunc="first",
+            aggfunc=agg_function,
         )
         .rename(columns={11: "start_date", 12: "end_date"})
         .reset_index()
