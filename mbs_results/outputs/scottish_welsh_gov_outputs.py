@@ -74,11 +74,10 @@ def read_and_combine_ludets_files(config: dict) -> pd.DataFrame:
 
 
 def filter_and_calculate_percent_devolved(
-    df: pd.DataFrame, local_unit_data: pd.DataFrame, devolved_nation: str
+    df: pd.DataFrame,
+    local_unit_data: pd.DataFrame,
 ) -> pd.DataFrame:
     """Filter by devolved nation and calculate percentage column"""
-    logger.info(f"Calculating percentage for {devolved_nation}")
-    devolved_nation = devolved_nation.lower()
     nation_to_code = {
         "scotland": ["XX"],
         "wales": ["WW"],
@@ -93,85 +92,70 @@ def filter_and_calculate_percent_devolved(
         "south west": ["KJ"],
     }
 
-    if devolved_nation not in nation_to_code:
-        error_msg = (
-            f"Invalid devolved nation '{devolved_nation}'. "
-            "Expected 'Scotland' or 'Wales'."
+    for devolved_nation in nation_to_code.keys():
+
+        region_code = nation_to_code[devolved_nation]
+        logger.info(f"Filtering for {devolved_nation} with region code {region_code}")
+        percent_col = f"percentage_{devolved_nation}"
+
+        # compute the grossed UK turnover or returns
+        df["gross_turnover_uk"] = (
+            df["adjustedresponse"]
+            * df["design_weight"]
+            * df["outlier_weight"]
+            * df["calibration_factor"]
         )
-        logger.error(error_msg)
-        raise ValueError(error_msg)
-    region_code = nation_to_code[devolved_nation]
-    logger.info(f"Filtering for {devolved_nation} with region code {region_code}")
-    percent_col = f"percentage_{devolved_nation}"
+        # Calculate froempment ratio:
+        # (sum of froempment in filtered LU data) / (froempment in df)
+        # Filter LU data for the devolved nation region
+        region_col = "region"
+        employment_col = "employment"
 
-    # compute the grossed UK turnover or returns
-    df["gross_turnover_uk"] = (
-        df["adjustedresponse"]
-        * df["design_weight"]
-        * df["outlier_weight"]
-        * df["calibration_factor"]
-    )
-    # Calculate froempment ratio:
-    # (sum of froempment in filtered LU data) / (froempment in df)
-    # Filter LU data for the devolved nation region
-    region_col = "region"
-    froempment_col = "froempment"
-    employment_col = "employment"
+        # Filter LU data for the devolved nation region and sum employment by reference
+        local_unit_data["reference"] = local_unit_data["ruref"]
+        # local_unit_data["reference"] = local_unit_data["reference"].astype("int64")
+        regional_employment = (
+            local_unit_data[local_unit_data[region_col].isin(region_code)]
+            .groupby(["reference", "period"])[employment_col]
+            .sum()
+            .reset_index()
+            .rename(columns={employment_col: f"{employment_col}_{devolved_nation}"})
+        )
 
-    # Filter LU data for the devolved nation region and sum employment by reference
-    local_unit_data["reference"] = local_unit_data["ruref"]
-    # local_unit_data["reference"] = local_unit_data["reference"].astype("int64")
-    regional_employment = (
-        local_unit_data[local_unit_data[region_col].isin(region_code)]
-        .groupby(["reference", "period"])[employment_col]
-        .sum()
-        .reset_index()
-        .rename(columns={employment_col: f"{employment_col}_{devolved_nation}"})
-    )
+        # Sum total employment by reference from the pipeline data
+        total_employment = (
+            local_unit_data.groupby(["reference", "period"])["employment"]
+            .sum()
+            .reset_index()
+            .rename(columns={"employment": "total_employment"})
+        )
 
-    # Sum total employment by reference from the pipeline data
-    total_employment = (
-        df[["reference", "period", "froempment"]]
-        .drop_duplicates()
-        .reset_index(drop=True)
-        .rename(columns={froempment_col: "total_employment"})
-    )
+        # Merge the two Dataframes and calculate the percentage
+        merged_df = pd.merge(
+            regional_employment,
+            total_employment,
+            on=["reference", "period"],
+            how="left",
+        )
 
-    # Merge the two Dataframes and calculate the percentage
-    merged_df = pd.merge(
-        regional_employment,
-        total_employment,
-        on=["reference", "period"],
-        how="left",
-    )
-
-    merged_df[percent_col] = (
-        (
+        merged_df[percent_col] = (
             merged_df[f"{employment_col}_{devolved_nation}"]
             / merged_df["total_employment"]
+        ) * 100
+
+        # Add the percentage column to the original DataFrame
+        df = df.merge(
+            merged_df[["reference", "period", f"percentage_{devolved_nation}"]],
+            on=["reference", "period"],
+            how="left",
         )
-        * 100
-    ).round(2)
 
-    merged_df[percent_col] = merged_df[percent_col].clip(upper=100)
-
-    # Add the percentage column to the original DataFrame
-    df = df.merge(
-        merged_df[["reference", "period", f"percentage_{devolved_nation}"]],
-        on=["reference", "period"],
-        how="left",
-    )
-    # Amending cases where there's no data in ludets for these references
-    # Setting to 100% where region_code matches region in df, else 0%
-    df.loc[
-        df[f"percentage_{devolved_nation}"].isnull() & (df["region"].isin(region_code)),
-        f"percentage_{devolved_nation}",
-    ] = 100
-    df.loc[
-        df[f"percentage_{devolved_nation}"].isnull()
-        & (~df["region"].isin(region_code)),
-        f"percentage_{devolved_nation}",
-    ] = 0
+        # Set percentage to 100% where region code matches but no data in ludets
+        df.loc[
+            df[f"percentage_{devolved_nation}"].isnull()
+            & (df["region"].isin(region_code)),
+            f"percentage_{devolved_nation}",
+        ] = 100
 
     return df
 
@@ -298,21 +282,6 @@ def devolved_outputs(
     Produced a pivot table and converts question numbers into plaintext
     for devolved questions
     """
-    local_unit_data["ruref"] = local_unit_data["ruref"].astype("int64")
-
-    df = pd.merge(
-        df,
-        local_unit_data,
-        left_on=["reference", "period"],
-        right_on=["ruref", "period"],
-        how="left",
-        suffixes=["", "_local"],
-    )
-
-    df["region_local"] = df["region_local"].fillna(df["region"])
-
-    df = filter_and_calculate_percent_devolved(df, local_unit_data, devolved_nation)
-
     devolved_dict = dict(
         (k, question_dictionary[k])
         for k in devolved_questions
@@ -577,7 +546,8 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
 
     df = additional_outputs_df.copy()
 
-    # MBS and Cons have different column names for the business name
+    # TODO: runame1 is different to entname1
+    # local unit < reporting unit < enterprise unit
     if "228" in config["ludets_prefix"]:
         df = df.rename(columns={"runame1": "entname1"})
 
@@ -597,6 +567,23 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
     ).astype(int)
 
     outputs = {}
+
+    lu_data["ruref"] = lu_data["ruref"].astype("int64")
+
+    df = pd.merge(
+        df,
+        lu_data,
+        left_on=["reference", "period"],
+        right_on=["ruref", "period"],
+        how="left",
+        suffixes=["", "_local"],
+    )
+
+    # TODO: Check whether it's expected that something
+    # Should be in the snapshot but not ludets?
+    df["region_local"] = df["region_local"].fillna(df["region"])
+
+    df = filter_and_calculate_percent_devolved(df, lu_data)
 
     for nation in nations:
         df_pivot = devolved_outputs(
