@@ -565,6 +565,8 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
 
     lu_data["ruref"] = lu_data["ruref"].astype("int64")
 
+    lu_data.to_csv("lu_data.csv", index=False)
+
     df = pd.merge(
         df,
         lu_data,
@@ -573,10 +575,6 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
         how="left",
         suffixes=["", "_local"],
     )
-
-    # TODO: Check whether it's expected that something
-    # Should be in the snapshot but not ludets?
-    df["region_local"] = df["region_local"].fillna(df["region"])
 
     df = filter_and_calculate_percent_devolved(df, lu_data)
 

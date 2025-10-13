@@ -78,6 +78,7 @@ def get_additional_outputs_df(
         "constrain_marker",
         target,
         "response",
+        "region",
         "status",
         "winsorised_value",
     ]
