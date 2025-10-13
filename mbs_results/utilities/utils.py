@@ -1,8 +1,14 @@
+import glob
 import os
+import re
 from importlib import metadata
 
 import numpy as np
 import pandas as pd
+import toml
+
+from mbs_results import logger
+from mbs_results.utilities.singleton_boto import SingletonBoto
 
 
 def convert_column_to_datetime(dates):
@@ -121,3 +127,121 @@ def check_above_one(df, column):
         raise ValueError(f"Missing required column: {column}")
     if (df[column] < 1).any():
         raise ValueError(f"Column {column} contains values not greater than 1.")
+
+
+def generate_schemas(config):
+    """
+    Generate schema files for output data.
+
+    Parameters
+    ----------
+
+    config : dict
+        Configuration dictionary containing paths for output and schema folders.
+
+    Returns
+    -------
+    None
+    """
+
+    if config["generate_schemas"] and config["schema_path"]:
+
+        output_p = config["output_path"]
+        schema_p = config["schema_path"]
+
+        logger.info("Generating schema files for output data...")
+
+        # Create schemas using a local outputs folder, write them locally
+        if config["platform"] == "network":
+            output_files = glob.glob(f"{output_p}/*.csv")
+
+            for file in output_files:
+                df = pd.read_csv(file, low_memory=False)
+                schema = build_toml_schema(df)
+
+                # Extract substring between last '/' or '\\' and first '.csv'
+                filename = re.search(r"[^/\\]+(?=\.csv)", file)[0]
+
+                filename = de_version_filename(filename)
+
+                logger.info(f"Generating schema for {filename}")
+
+                with open(f"{schema_p}/{filename}_schema.toml", "w") as f:
+                    toml.dump(schema, f)
+
+        # Create schemas using S3 bucket, write them to S3 bucket
+        if config["platform"] == "s3":
+            s3_client = SingletonBoto.get_client(config)
+            s3_bucket = SingletonBoto.get_bucket()
+
+            output_response = s3_client.list_objects(Bucket=s3_bucket, Prefix=output_p)
+
+            for content in output_response["Contents"]:
+                file_key = content["Key"]
+                if file_key.endswith(".csv"):
+                    csv_response = s3_client.get_object(Bucket=s3_bucket, Key=file_key)
+                    df = pd.read_csv(csv_response["Body"], low_memory=False)
+
+                    schema = build_toml_schema(df)
+
+                    # Extract substring between last '/' or '\\' and first '.csv'
+                    filename = re.search(r"[^/\\]+(?=\.csv)", file_key)[0]
+
+                    filename = de_version_filename(filename)
+
+                    logger.info(f"Generating schema for {filename}")
+
+                    s3_client.put_object(
+                        Body=toml.dump(schema),
+                        Bucket=s3_bucket,
+                        Key=f"{schema_p}/{filename}_schema.json",
+                    )
+    else:
+        logger.info("Schema generation not enabled in config, skipping...")
+
+
+def build_toml_schema(df: pd.DataFrame) -> dict:
+    """
+    Build a dict ready for conversion into a TOML schema
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to build the schema from.
+
+    Returns
+    -------
+    schema : dict
+        A dictionary representing the schema of the DataFrame.
+    """
+    schema = {}
+
+    for name, values in df.items():
+        schema.update(
+            {name: {"old_name": name, "Deduced_Data_Type": str(values.dtype)}}
+        )
+
+    return schema
+
+
+def de_version_filename(filename: str) -> str:
+    """
+    De-version a filename by removing version information.
+
+    Parameters
+    ----------
+    filename : str
+        The versioned filename.
+
+    Returns
+    -------
+    de_versioned_filename : str
+        The de-versioned filename.
+    """
+    # Use regex to remove version information (e.g., _v1.0.0)
+    de_versioned_filename = re.sub(r"_v\d+(\.\d+)*", "", filename)
+
+    # Use regex to remove snapshot information (e.g., snapshot_009_202301_1)
+    cleaned_filename = re.sub(r"_?snapshot_\d+_\d+_\d+", "", de_versioned_filename)
+
+    return cleaned_filename

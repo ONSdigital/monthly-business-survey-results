@@ -1,0 +1,59 @@
+[adjustedresponse]
+old_name = "adjustedresponse"
+Deduced_Data_Type = "float64"
+
+[period]
+old_name = "period"
+Deduced_Data_Type = "int64"
+
+[questioncode]
+old_name = "questioncode"
+Deduced_Data_Type = "float64"
+
+[reference]
+old_name = "reference"
+Deduced_Data_Type = "int64"
+
+[response]
+old_name = "response"
+Deduced_Data_Type = "float64"
+
+[frosic2007]
+old_name = "frosic2007"
+Deduced_Data_Type = "int64"
+
+[froempment]
+old_name = "froempment"
+Deduced_Data_Type = "int64"
+
+[frotover]
+old_name = "frotover"
+Deduced_Data_Type = "float64"
+
+[entname1]
+old_name = "entname1"
+Deduced_Data_Type = "object"
+
+[cell_no]
+old_name = "cell_no"
+Deduced_Data_Type = "int64"
+
+[formtype]
+old_name = "formtype"
+Deduced_Data_Type = "int64"
+
+[form_type_spp]
+old_name = "form_type_spp"
+Deduced_Data_Type = "int64"
+
+[imputation_flags_adjustedresponse]
+old_name = "imputation_flags_adjustedresponse"
+Deduced_Data_Type = "object"
+
+[status]
+old_name = "status"
+Deduced_Data_Type = "object"
+
+[statusencoded]
+old_name = "statusencoded"
+Deduced_Data_Type = "float64"
