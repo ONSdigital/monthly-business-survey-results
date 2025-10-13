@@ -546,11 +546,6 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
 
     df = additional_outputs_df.copy()
 
-    # TODO: runame1 is different to entname1
-    # local unit < reporting unit < enterprise unit
-    if "228" in config["ludets_prefix"]:
-        df = df.rename(columns={"runame1": "entname1"})
-
     # local unit data
     lu_data = read_and_combine_ludets_files(config)
 
