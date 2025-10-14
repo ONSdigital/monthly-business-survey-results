@@ -2,9 +2,11 @@ import numpy as np
 import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
+import toml
 
 from mbs_results.utilities.inputs import read_colon_separated_file
 from mbs_results.utilities.utils import (
+    generate_schemas,
     check_above_one,
     check_duplicates,
     check_input_types,
@@ -158,3 +160,30 @@ def test_check_above_one_raises_value_error():
         ValueError, match="Column col1 contains values not greater than 1."
     ):
         check_above_one(df, column)
+
+
+@pytest.fixture(scope="class")
+def filepath():
+    return "tests/data/utilities/utils/generate_schemas/"
+
+
+class TestGenerateSchemas:
+    
+    def test_generate_schemas_no_error(self, filepath):
+        config = {
+            "platform": "network",
+            "output_path": filepath,
+            "schema_path": filepath,
+            "generate_schemas": True,
+        }
+
+        generate_schemas(config)
+
+        schema = toml.load(config["schema_path"] + "non_empty_dataset_schema.toml")
+
+        assert schema == {
+            "variable_1": {"old_name": "variable_1", "Deduced_Data_Type": "object"},
+            "variable_2": {"old_name": "variable_2", "Deduced_Data_Type": "int64"},
+            "variable_3": {"old_name": "variable_3", "Deduced_Data_Type": "float64"},
+            "variable_4": {"old_name": "variable_4", "Deduced_Data_Type": "bool"},
+        }
