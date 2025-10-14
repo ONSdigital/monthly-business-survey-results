@@ -1,12 +1,11 @@
 import numpy as np
 import pandas as pd
 import pytest
-from pandas.testing import assert_frame_equal
 import toml
+from pandas.testing import assert_frame_equal
 
 from mbs_results.utilities.inputs import read_colon_separated_file
 from mbs_results.utilities.utils import (
-    generate_schemas,
     check_above_one,
     check_duplicates,
     check_input_types,
@@ -15,6 +14,7 @@ from mbs_results.utilities.utils import (
     check_population_sample,
     check_unique_per_cell_period,
     compare_two_dataframes,
+    generate_schemas,
 )
 
 
@@ -168,7 +168,7 @@ def filepath():
 
 
 class TestGenerateSchemas:
-    
+
     def test_generate_schemas_no_error(self, filepath):
         config = {
             "platform": "network",
