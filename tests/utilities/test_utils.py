@@ -167,16 +167,18 @@ def filepath():
     return "tests/data/utilities/utils/generate_schemas/"
 
 
+@pytest.fixture(scope="class")
+def config(filepath):
+    return {
+        "platform": "network",
+        "output_path": filepath,
+        "schema_path": filepath,
+        "generate_schemas": True,
+    }
+
+
 class TestGenerateSchemas:
-
-    def test_generate_schemas_no_error(self, filepath):
-        config = {
-            "platform": "network",
-            "output_path": filepath,
-            "schema_path": filepath,
-            "generate_schemas": True,
-        }
-
+    def test_generate_schemas_no_error(self, config):
         generate_schemas(config)
 
         schema = toml.load(config["schema_path"] + "non_empty_dataset_schema.toml")
@@ -187,3 +189,10 @@ class TestGenerateSchemas:
             "variable_3": {"old_name": "variable_3", "Deduced_Data_Type": "float64"},
             "variable_4": {"old_name": "variable_4", "Deduced_Data_Type": "bool"},
         }
+
+    def test_generate_schemas_unversioned_name(self, config):
+        generate_schemas(config)
+
+        schema = toml.load(config["schema_path"] + "versioned_name_schema.toml")
+
+        assert schema
