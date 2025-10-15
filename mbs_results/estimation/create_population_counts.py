@@ -81,9 +81,7 @@ def create_population_count_output(
     sample = calculate_turnover_sum_count(
         df[df["is_sampled"]], period, strata, "sample", **config
     )
-    full_combined = pd.merge(
-        population, sample, on=[period, strata], how="outer"
-    ).fillna(0)
+    full_combined = pd.merge(population, sample, on=[period, strata])
 
     write_csv_wrapper(
         full_combined,
@@ -141,12 +139,6 @@ def format_population_counts_mbs(
     current_period = pd.to_datetime(current_period, format="%Y%m")
     previous_period = int((current_period - pd.DateOffset(months=1)).strftime("%Y%m"))
     current_period = int(current_period.strftime("%Y%m"))
-
-    print("unique periods in df:", df[period].unique())
-    print("current period:", current_period)
-    print("previous period:", previous_period)
-    print("rows matching prev period:", df[df[period] == previous_period].shape[0])
-    print("rows matching current period:", df[df[period] == current_period].shape[0])
 
     df_prev = df[df[period] == previous_period]
     df_curr = df[df[period] == current_period]
