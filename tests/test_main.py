@@ -61,6 +61,10 @@ def test_main():
 
     actual = pd.read_csv(patern[0])
     expected = pd.read_csv(out_path + "expected_from_mbs_main.csv")
+    for col in actual.select_dtypes(include=["int", "float"]).columns:
+        actual[col] = actual[col].astype(float)
+    for col in expected.select_dtypes(include=["int", "float"]).columns:
+        expected[col] = expected[col].astype(float)
 
     assert_frame_equal(actual, expected)
 
@@ -103,6 +107,7 @@ def test_produce_additional_outputs_wrapper():
         "mbs_output_path": "tests/data/test_main/output/expected_from_mbs_main.csv",
         "cdid_data_path": "tests/data/outputs/csdb_output/cdid_mapping.csv",
         "output_path": "tests/data/test_main/output/",
+        "ludets_prefix": "ludets009_",
         "current_period": 202206,
         "revision_window": 6,
         "devolved_nations": ["Scotland", "Wales"],

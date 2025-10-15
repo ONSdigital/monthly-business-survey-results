@@ -46,7 +46,7 @@ def read_and_combine_ludets_files(config: dict) -> pd.DataFrame:
     """
     sample_files = find_files(
         file_path=config["idbr_folder_path"],
-        file_prefix="ludets009_",
+        file_prefix=config["ludets_prefix"],
         current_period=config["current_period"],
         revision_window=config["revision_window"],
         config=config,
@@ -74,86 +74,95 @@ def read_and_combine_ludets_files(config: dict) -> pd.DataFrame:
 
 
 def filter_and_calculate_percent_devolved(
-    df: pd.DataFrame, local_unit_data: pd.DataFrame, devolved_nation: str
+    df: pd.DataFrame,
+    local_unit_data: pd.DataFrame,
 ) -> pd.DataFrame:
     """Filter by devolved nation and calculate percentage column"""
-    logger.info(f"Calculating percentage for {devolved_nation}")
-    devolved_nation = devolved_nation.lower()
-    nation_to_code = {"scotland": "XX", "wales": "WW"}
-    if devolved_nation not in nation_to_code:
-        error_msg = (
-            f"Invalid devolved nation '{devolved_nation}'. "
-            "Expected 'Scotland' or 'Wales'."
+    nation_to_code = {
+        "scotland": ["XX"],
+        "wales": ["WW"],
+        "north east": ["AA"],
+        "north west": ["BB", "BA"],
+        "yorkshire and the humber": ["DC"],
+        "east midlands": ["ED"],
+        "west midlands": ["FE"],
+        "east of england": ["GF", "GG"],
+        "london": ["HH"],
+        "south east": ["JG"],
+        "south west": ["KJ"],
+    }
+
+    for devolved_nation in nation_to_code.keys():
+
+        region_code = nation_to_code[devolved_nation]
+        logger.info(f"Filtering for {devolved_nation} with region code {region_code}")
+        percent_col = f"percentage_{devolved_nation}"
+
+        # compute the grossed UK turnover or returns
+        df["gross_turnover_uk"] = (
+            df["adjustedresponse"]
+            * df["design_weight"]
+            * df["outlier_weight"]
+            * df["calibration_factor"]
         )
-        logger.error(error_msg)
-        raise ValueError(error_msg)
-    region_code = nation_to_code[devolved_nation]
-    logger.info(f"Filtering for {devolved_nation} with region code {region_code}")
-    percent_col = f"percentage_{devolved_nation}"
+        # Calculate froempment ratio:
+        # (sum of froempment in filtered LU data) / (froempment in df)
+        # Filter LU data for the devolved nation region
+        region_col = "region"
+        employment_col = "employment"
 
-    # compute the grossed UK turnover or returns
-    df["gross_turnover_uk"] = (
-        df["adjustedresponse"]
-        * df["design_weight"]
-        * df["outlier_weight"]
-        * df["calibration_factor"]
-    )
-    # Calculate froempment ratio:
-    # (sum of froempment in filtered LU data) / (froempment in df)
-    # Filter LU data for the devolved nation region
-    region_col = "region"
-    froempment_col = "froempment"
-    employment_col = "employment"
+        # Filter LU data for the devolved nation region and sum employment by reference
+        local_unit_data["reference"] = local_unit_data["ruref"]
+        # local_unit_data["reference"] = local_unit_data["reference"].astype("int64")
+        regional_employment = (
+            local_unit_data[local_unit_data[region_col].isin(region_code)]
+            .groupby(["reference", "period"])[employment_col]
+            .sum()
+            .reset_index()
+            .rename(columns={employment_col: f"{employment_col}_{devolved_nation}"})
+        )
 
-    # Filter LU data for the devolved nation region and sum employment by reference
-    local_unit_data["reference"] = local_unit_data["ruref"]
-    # local_unit_data["reference"] = local_unit_data["reference"].astype("int64")
-    regional_employment = (
-        local_unit_data[local_unit_data[region_col] == region_code]
-        .groupby(["reference", "period"])[employment_col]
-        .sum()
-        .reset_index()
-        .rename(columns={employment_col: f"{employment_col}_{devolved_nation}"})
-    )
+        # Sum total employment by reference from the pipeline data
+        total_employment = (
+            local_unit_data.groupby(["reference", "period"])["employment"]
+            .sum()
+            .reset_index()
+            .rename(columns={"employment": "total_employment"})
+        )
 
-    # Sum total employment by reference from the pipeline data
-    total_employment = (
-        df[["reference", "period", "froempment"]]
-        .drop_duplicates()
-        .reset_index(drop=True)
-        .rename(columns={froempment_col: "total_employment"})
-    )
+        # Merge the two Dataframes and calculate the percentage
+        merged_df = pd.merge(
+            regional_employment,
+            total_employment,
+            on=["reference", "period"],
+            how="left",
+        )
 
-    # Merge the two Dataframes and calculate the percentage
-    merged_df = pd.merge(
-        regional_employment,
-        total_employment,
-        on=["reference", "period"],
-        how="left",
-    )
-
-    merged_df[percent_col] = (
-        (
+        merged_df[percent_col] = (
             merged_df[f"{employment_col}_{devolved_nation}"]
             / merged_df["total_employment"]
+        ) * 100
+
+        # Add the percentage column to the original DataFrame
+        df = df.merge(
+            merged_df[["reference", "period", f"percentage_{devolved_nation}"]],
+            on=["reference", "period"],
+            how="left",
         )
-        * 100
-    ).round(2)
 
-    merged_df[percent_col] = merged_df[percent_col].clip(upper=100)
-
-    # Add the percentage column to the original DataFrame
-    df = df.merge(
-        merged_df[["reference", "period", f"percentage_{devolved_nation}"]],
-        on=["reference", "period"],
-        how="left",
-    )
+        # Set percentage to 100% where region code matches but no data in ludets
+        df.loc[
+            df[f"percentage_{devolved_nation}"].isnull()
+            & (df["region"].isin(region_code)),
+            f"percentage_{devolved_nation}",
+        ] = 100
 
     return df
 
 
 def get_devolved_questions(config: dict) -> list:
     """Get devolved questions from config or use default. Integer values expected."""
+    # TODO: add as config arg in construction. Potentially change default
     return config.get("devolved_questions", [11, 12, 40, 49, 110])
 
 
@@ -162,6 +171,7 @@ def get_question_no_plaintext(config: dict) -> dict:
     Get question number to plaintext mapping from config or use default.
     Ensures all keys are integers, even if loaded as strings from JSON.
     """
+    # TODO: as above, add arg in construction config
     mapping = config.get("question_no_plaintext")
     if mapping is not None:
         return {int(k): v for k, v in mapping.items()}
@@ -178,42 +188,83 @@ def get_question_no_plaintext(config: dict) -> dict:
     }
 
 
-def output_column_name_mapping():
+def output_column_name_mapping(config: dict):
     """
     Mapping to convert column names used in the pipeline to column names in the
     business template.
     """
-    return {
-        "period": "period",
-        "classification": "SUT",
-        "cell_no": "cell",
-        "reference": "RU",
-        "entname1": "name",
-        "entref": "enterprise group",
-        "frosic2007": "SIC",
-        "formtype": "form type",
-        "status": "status",
-        "percentage_scotland": "%scottish",
-        "percentage_wales": "%welsh",
-        "froempment": "frozen employment",
-        "sizeband": "band",
-        "imputed_and_derived_flag": "imputed and derived flag",
-        "statusencoded": "status encoded",
-        "start_date": "start date",
-        "end_date": "end date",
-        "response_exports": "returned to exports",
-        "adjustedresponse_exports": "adjusted to exports",
-        "imputed_and_derived_flag_exports": "imputed and derived flag exports",
-        "statusencoded_exports": "status encoded exports",
-        "response_total_turnover": "returned turnover",
-        "adjustedresponse_total_turnover": "adjusted turnover",
-        "imputed_and_derived_flag_total_turnover": "imputed and derived flag turnover",
-        "statusencoded_total_turnover": "status encoded turnover",
-        "response_water": "returned volume water",
-        "adjustedresponse_water": "adjusted volume water",
-        "imputed_and_derived_flag_water": "imputed and derived flag volume water",
-        "statusencoded_water": "status encoded volume water",
-    }
+    if "009" in config["ludets_prefix"]:
+        return {
+            "period": "period",
+            "classification": "SUT",
+            "cell_no": "cell",
+            "reference": "RU",
+            "entname1": "name",
+            "entref": "enterprise group",
+            "frosic2007": "SIC",
+            "formtype": "form type",
+            "status": "status",
+            "percentage_scotland": "%scottish",
+            "percentage_wales": "%welsh",
+            "froempment": "frozen employment",
+            "sizeband": "band",
+            "imputed_and_derived_flag": "imputed and derived flag",
+            "statusencoded": "status encoded",
+            "start_date": "start date",
+            "end_date": "end date",
+            "winsorised_value_exports": "returned to exports",
+            "adjustedresponse_exports": "adjusted to exports",
+            "imputed_and_derived_flag_exports": "imputed and derived flag exports",
+            "statusencoded_exports": "status encoded exports",
+            "winsorised_value_total_turnover": "returned turnover",
+            "adjustedresponse_total_turnover": "adjusted turnover",
+            "imputed_and_derived_flag_total_turnover": "imputed and derived flag turnover",  # noqa
+            "statusencoded_total_turnover": "status encoded turnover",
+            "winsorised_value_water": "returned volume water",
+            "adjustedresponse_water": "adjusted volume water",
+            "imputed_and_derived_flag_water": "imputed and derived flag volume water",
+            "statusencoded_water": "status encoded volume water",
+        }
+    elif "228" in config["ludets_prefix"]:
+        return {
+            "period": "period",
+            "classification": "SUT",
+            "cell_no": "cell",
+            "reference": "RU",
+            "entname1": "name",
+            "entref": "enterprise group",
+            "frosic2007": "SIC",
+            "formtype": "form type",
+            "status": "status",
+            "percentage_scotland": "%scottish",
+            "percentage_wales": "%welsh",
+            "froempment": "frozen employment",
+            "sizeband": "band",
+            "imputed_and_derived_flag": "imputed and derived flag",
+            "statusencoded": "status encoded",
+            "start_date": "start date",
+            "end_date": "end date",
+            "winsorised_value_public_housing": "returned public housing",
+            "adjustedresponse_public_housing": "adjusted public housing",
+            "imputation_flags_adjustedresponse_public_housing": "imputed and derived flag public housing",  # noqa
+            "statusencoded_public_housing": "status encoded public housing",
+            "winsorised_value_private_housing": "returned private housing",
+            "adjustedresponse_private_housing": "adjusted private housing",
+            "imputation_flags_adjustedresponse_private_housing": "imputed and derived flag private housing",  # noqa
+            "statusencoded_private_housing": "status encoded private housing",
+            "winsorised_value_infrastructure": "returned infrastructure",
+            "adjustedresponse_infrastructure": "adjusted infrastructure",
+            "imputation_flags_adjustedresponse_infrastructure": "imputed and derived flag infrastructure",  # noqa
+            "statusencoded_infrastructure": "status encoded infrastructure",
+            "winsorised_value_public_non_housing": "returned public non housing",
+            "adjustedresponse_public_non_housing": "adjusted public non housing",
+            "imputation_flags_adjustedresponse_public_non_housing": "imputed and derived flag public non housing",  # noqa
+            "statusencoded_public_non_housing": "status encoded public non housing",
+            "winsorised_value_private_non_housing": "returned private non housing",
+            "adjustedresponse_private_non_housing": "adjusted private non housing",
+            "imputation_flags_adjustedresponse_private_non_housing": "imputed and derived flag private non housing",  # noqa
+            "statusencoded_private_non_housing": "status encoded private non housing",
+        }
 
 
 def devolved_outputs(
@@ -221,26 +272,16 @@ def devolved_outputs(
     question_dictionary: dict,
     devolved_nation: str,
     local_unit_data: pd.DataFrame,
+    config: dict,
+    # TODO: Make sure construction has appropriate Qs
     devolved_questions: list = [11, 12, 40, 49, 110],
-    agg_function: str = "sum",  # potential remove, here for testing
+    agg_function: str = "first",  # potential remove, here for testing
 ) -> pd.DataFrame:
     """
     Run to produce devolved outputs (excluding GB-NIR)
     Produced a pivot table and converts question numbers into plaintext
     for devolved questions
     """
-    local_unit_data["ruref"] = local_unit_data["ruref"].astype("int64")
-
-    df = pd.merge(
-        df,
-        local_unit_data,
-        left_on=["reference", "period"],
-        right_on=["ruref", "period"],
-        how="left",
-        suffixes=["", "_local"],
-    )
-    df = filter_and_calculate_percent_devolved(df, local_unit_data, devolved_nation)
-
     devolved_dict = dict(
         (k, question_dictionary[k])
         for k in devolved_questions
@@ -256,13 +297,23 @@ def devolved_outputs(
         "formtype",
         "froempment",
     ]
-
-    pivot_values = [
-        "adjustedresponse",  # Original: adjusted_value -> adjustedresponse
-        "response",
-        "imputed_and_derived_flag",  # [response_type -> imputed_and_derived_flag]
-        "statusencoded",  # single letter (str) [error_mkr -> statusencoded]
-    ]
+    if "009" in config["ludets_prefix"]:
+        pivot_values = [
+            "adjustedresponse",  # Original: adjusted_value -> adjustedresponse
+            "winsorised_value",  # Imputated/winsorised (new_target_variable ->
+            # adjustedresponse*outlier_weight)
+            "imputed_and_derived_flag",  # [response_type -> imputed_and_derived_flag]
+            "statusencoded",  # single letter (str) [error_mkr -> statusencoded]
+        ]
+    elif "228" in config["ludets_prefix"]:
+        pivot_values = [
+            "adjustedresponse",  # Original: adjusted_value -> adjustedresponse
+            "winsorised_value",  # Imputated/winsorised (new_target_variable ->
+            # adjustedresponse*outlier_weight)
+            "imputation_flags_adjustedresponse",
+            # [response_type -> imputed_and_derived_flag]
+            "statusencoded",  # single letter (str) [error_mkr -> statusencoded]
+        ]
 
     # Can use any agg function on numerical values, have to use lambda func for str cols
     pivot_agg_functions = [
@@ -283,7 +334,7 @@ def devolved_outputs(
             index=["reference", "period"],
             columns="questioncode",
             values="adjustedresponse",
-            aggfunc="first",
+            aggfunc=agg_function,
         )
         .rename(columns={11: "start_date", 12: "end_date"})
         .reset_index()
@@ -302,15 +353,6 @@ def devolved_outputs(
     df_pivot.columns = ["_".join(col).strip() for col in df_pivot.columns.values]
     df_pivot = df_pivot[sorted(df_pivot.columns, key=split_func)]
     df_pivot.reset_index(inplace=True)
-
-    # #Fill missing values of 'Name1' where imputed flag == d before merging
-    ru_name_mapping = local_unit_data.groupby("ruref")["Name1"].first()
-    mask_missing_name = df["entname1"].isna() & df["reference"].isin(
-        ru_name_mapping.index
-    )
-    df.loc[mask_missing_name, "entname1"] = df.loc[mask_missing_name, "reference"].map(
-        ru_name_mapping
-    )
 
     # Fill missing values of 'Name1' where imputed flag == d before merging
     ru_name_mapping = local_unit_data.groupby("ruref")["Name1"].first()
@@ -376,38 +418,76 @@ def devolved_outputs(
     ]
 
     # Reorder columns to match original output
-    original_column_order = [
-        "period",
-        "classification",
-        "cell_no",
-        "reference",
-        "entname1",
-        "entref",
-        "frosic2007",
-        "formtype",
-        percent_devolved_nation_col,
-        "froempment",
-        "sizeband",
-        "start_date",
-        "end_date",
-        "response_total_turnover",
-        "adjustedresponse_total_turnover",
-        "imputed_and_derived_flag_total_turnover",
-        "statusencoded_total_turnover",
-        "response_exports",
-        "adjustedresponse_exports",
-        "imputed_and_derived_flag_exports",
-        "statusencoded_exports",
-        "response_water",
-        "adjustedresponse_water",
-        "imputed_and_derived_flag_water",
-        "statusencoded_water",
-    ]
+    # TODO: Add MBS/Cons arg to switch between different cols.
+    if "009" in config["ludets_prefix"]:
+        original_column_order = [
+            "period",
+            "classification",
+            "cell_no",
+            "reference",
+            "entname1",
+            "entref",
+            "frosic2007",
+            "formtype",
+            percent_devolved_nation_col,
+            "froempment",
+            "sizeband",
+            "start_date",
+            "end_date",
+            "winsorised_value_total_turnover",
+            "adjustedresponse_total_turnover",
+            "imputed_and_derived_flag_total_turnover",
+            "statusencoded_total_turnover",
+            "winsorised_value_exports",
+            "adjustedresponse_exports",
+            "imputed_and_derived_flag_exports",
+            "statusencoded_exports",
+            "winsorised_value_water",
+            "adjustedresponse_water",
+            "imputed_and_derived_flag_water",
+            "statusencoded_water",
+        ]
+    elif "228" in config["ludets_prefix"]:
+        original_column_order = [
+            "period",
+            "classification",
+            "cell_no",
+            "reference",
+            "entname1",
+            "entref",
+            "frosic2007",
+            "formtype",
+            percent_devolved_nation_col,
+            "froempment",
+            "sizeband",
+            "start_date",
+            "end_date",
+            "winsorised_value_public_housing",
+            "adjustedresponse_public_housing",
+            "imputation_flags_adjustedresponse_public_housing",
+            "statusencoded_public_housing",
+            "winsorised_value_private_housing",
+            "adjustedresponse_private_housing",
+            "imputation_flags_adjustedresponse_private_housing",
+            "statusencoded_private_housing",
+            "winsorised_value_infrastructure",
+            "adjustedresponse_infrastructure",
+            "imputation_flags_adjustedresponse_infrastructure",
+            "statusencoded_infrastructure",
+            "winsorised_value_public_non_housing",
+            "adjustedresponse_public_non_housing",
+            "imputation_flags_adjustedresponse_public_non_housing",
+            "statusencoded_public_non_housing",
+            "winsorised_value_private_non_housing",
+            "adjustedresponse_private_non_housing",
+            "imputation_flags_adjustedresponse_private_non_housing",
+            "statusencoded_private_non_housing",
+        ]
 
     df_pivot = df_pivot[original_column_order]
 
     # map the column names used in the pipeline to column names in the business template
-    column_name_mapping = output_column_name_mapping()
+    column_name_mapping = output_column_name_mapping(config)
     df_pivot = df_pivot.rename(columns=column_name_mapping)
 
     return df_pivot
@@ -482,6 +562,22 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
     ).astype(int)
 
     outputs = {}
+
+    lu_data["ruref"] = lu_data["ruref"].astype("int64")
+
+    lu_data.to_csv("lu_data.csv", index=False)
+
+    df = pd.merge(
+        df,
+        lu_data,
+        left_on=["reference", "period"],
+        right_on=["ruref", "period"],
+        how="left",
+        suffixes=["", "_local"],
+    )
+
+    df = filter_and_calculate_percent_devolved(df, lu_data)
+
     for nation in nations:
         df_pivot = devolved_outputs(
             df,
@@ -489,7 +585,8 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
             devolved_nation=nation,
             local_unit_data=lu_data,
             devolved_questions=devolved_questions,
-            agg_function="sum",
+            agg_function="first",
+            config=config,
         )
 
         outputs[nation] = df_pivot

@@ -6,6 +6,7 @@
     "mbs_output_path": "",
     "cdid_data_path": "",
     "output_path": "",
+    "ludets_prefix": "",
     "current_period": 202303,
     "revision_window": 15,
     "devolved_nations": ["Scotland", "Wales"]
