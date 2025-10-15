@@ -172,8 +172,6 @@ def generate_schemas(config):
                         toml.dump(schema, f)
                 except pd.errors.EmptyDataError:
                     logger.warning(f"Skipping schema for empty file: {file}")
-                else:
-                    logger.exception(f"Error generating schema for file: {file}")
 
         # Create schemas using S3 bucket, write them to S3 bucket
         if config["platform"] == "s3":
@@ -207,10 +205,7 @@ def generate_schemas(config):
                         )
                     except pd.errors.EmptyDataError:
                         logger.warning(f"Skipping schema for empty file: {file_key}")
-                    else:
-                        logger.exception(
-                            f"Error generating schema for file: {file_key}"
-                        )
+
     else:
         logger.info("Schema generation not enabled in config, skipping...")
 
@@ -253,10 +248,13 @@ def de_version_filename(filename: str) -> str:
     de_versioned_filename : str
         The de-versioned filename.
     """
-    # Use regex to remove version information (e.g., _v1.0.0)
-    de_versioned_filename = re.sub(r"_v\d+(\.\d+)*", "", filename)
+    # Regex to remove version information (e.g., v1.0.0)
+    filename = re.sub(r"_?v\d+(\.\d+)*", "", filename)
 
-    # Use regex to remove snapshot information (e.g., snapshot_009_202301_1)
-    cleaned_filename = re.sub(r"_?snapshot_\d+_\d+_\d+", "", de_versioned_filename)
+    # Regex to remove snapshot information (e.g., snapshot_009_202301_1)
+    filename = re.sub(r"_?snapshot_?(qv_cp)?(_\d+)?_(\d+)?(_\d+)?", "", filename)
 
-    return cleaned_filename
+    # Regex to remove quarter (e.g., 2023Q1)
+    filename = re.sub(r"_?\d+Q[1-4]", "", filename)
+
+    return filename
