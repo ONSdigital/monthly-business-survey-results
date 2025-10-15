@@ -166,6 +166,7 @@ def test_check_above_one_raises_value_error():
 def filepath():
     return "tests/data/utilities/utils/generate_schemas/"
 
+
 @pytest.fixture(scope="class")
 def config(filepath):
     return {
@@ -174,6 +175,7 @@ def config(filepath):
         "schema_path": filepath,
         "generate_schemas": True,
     }
+
 
 class TestGenerateSchemas:
     def test_generate_schemas_no_error(self, config):
@@ -191,8 +193,6 @@ class TestGenerateSchemas:
     def test_generate_schemas_unversioned_name(self, config):
         generate_schemas(config)
 
-        schema = toml.load(
-            config["schema_path"] + "versioned_name_schema.toml"
-        )
+        schema = toml.load(config["schema_path"] + "versioned_name_schema.toml")
 
         assert schema
