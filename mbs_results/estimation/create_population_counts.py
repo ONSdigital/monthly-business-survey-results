@@ -81,7 +81,13 @@ def create_population_count_output(
     sample = calculate_turnover_sum_count(
         df[df["is_sampled"]], period, strata, "sample", **config
     )
-    full_combined = pd.merge(population, sample, on=[period, strata])
+
+    # left join and filling na to keep cases when population is is non-zero,
+    # and nothing is in sample (i.e. cell has not been sampled)
+    # Should not use outer as we can never have a population without being sampled
+    full_combined = pd.merge(
+        population, sample, on=[period, strata], how="left"
+    ).fillna(0)
 
     write_csv_wrapper(
         full_combined,
