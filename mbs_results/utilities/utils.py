@@ -129,6 +129,7 @@ def check_above_one(df, column):
         raise ValueError(f"Column {column} contains values not greater than 1.")
 
 
+# flake8: noqa: C901
 def generate_schemas(config):
     """
     Generate schema files for output data.
@@ -156,18 +157,23 @@ def generate_schemas(config):
             output_files = glob.glob(f"{output_p}/*.csv")
 
             for file in output_files:
-                df = pd.read_csv(file, low_memory=False)
-                schema = build_toml_schema(df)
+                try:
+                    df = pd.read_csv(file, low_memory=False)
+                    schema = build_toml_schema(df)
 
-                # Extract substring between last '/' or '\\' and first '.csv'
-                filename = re.search(r"[^/\\]+(?=\.csv)", file)[0]
+                    # Extract substring between last '/' or '\\' and first '.csv'
+                    filename = re.search(r"[^/\\]+(?=\.csv)", file)[0]
 
-                filename = de_version_filename(filename)
+                    filename = de_version_filename(filename)
 
-                logger.info(f"Generating schema for {filename}")
+                    logger.info(f"Generating schema for {filename}")
 
-                with open(f"{schema_p}/{filename}_schema.toml", "w") as f:
-                    toml.dump(schema, f)
+                    with open(f"{schema_p}/{filename}_schema.toml", "w") as f:
+                        toml.dump(schema, f)
+                except pd.errors.EmptyDataError:
+                    logger.warning(f"Skipping schema for empty file: {file}")
+                else:
+                    logger.exception(f"Error generating schema for file: {file}")
 
         # Create schemas using S3 bucket, write them to S3 bucket
         if config["platform"] == "s3":
@@ -178,24 +184,33 @@ def generate_schemas(config):
 
             for content in output_response["Contents"]:
                 file_key = content["Key"]
+
                 if file_key.endswith(".csv"):
                     csv_response = s3_client.get_object(Bucket=s3_bucket, Key=file_key)
-                    df = pd.read_csv(csv_response["Body"], low_memory=False)
 
-                    schema = build_toml_schema(df)
+                    try:
+                        df = pd.read_csv(csv_response["Body"], low_memory=False)
 
-                    # Extract substring between last '/' or '\\' and first '.csv'
-                    filename = re.search(r"[^/\\]+(?=\.csv)", file_key)[0]
+                        schema = build_toml_schema(df)
 
-                    filename = de_version_filename(filename)
+                        # Extract substring between last '/' or '\\' and first '.csv'
+                        filename = re.search(r"[^/\\]+(?=\.csv)", file_key)[0]
 
-                    logger.info(f"Generating schema for {filename}")
+                        filename = de_version_filename(filename)
 
-                    s3_client.put_object(
-                        Body=toml.dump(schema),
-                        Bucket=s3_bucket,
-                        Key=f"{schema_p}/{filename}_schema.json",
-                    )
+                        logger.info(f"Generating schema for {filename}")
+
+                        s3_client.put_object(
+                            Body=toml.dump(schema),
+                            Bucket=s3_bucket,
+                            Key=f"{schema_p}/{filename}_schema.json",
+                        )
+                    except pd.errors.EmptyDataError:
+                        logger.warning(f"Skipping schema for empty file: {file_key}")
+                    else:
+                        logger.exception(
+                            f"Error generating schema for file: {file_key}"
+                        )
     else:
         logger.info("Schema generation not enabled in config, skipping...")
 
