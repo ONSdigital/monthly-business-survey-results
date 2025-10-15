@@ -565,8 +565,6 @@ def generate_devolved_outputs(additional_outputs_df=None, **config: dict) -> dic
 
     lu_data["ruref"] = lu_data["ruref"].astype("int64")
 
-    lu_data.to_csv("lu_data.csv", index=False)
-
     df = pd.merge(
         df,
         lu_data,
