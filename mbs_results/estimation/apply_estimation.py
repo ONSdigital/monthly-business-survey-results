@@ -130,7 +130,7 @@ def apply_estimation(method: str, convert_NI_GB_cells: bool, config: dict):
 
     estimation_df = pd.concat(estimation_df_list, ignore_index=True)
 
-    create_population_count_output(estimation_df, save_output=True, **config)
+    create_population_count_output(estimation_df, **config)
 
     # validate_estimation(estimation_df, **config)
 
