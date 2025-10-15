@@ -82,11 +82,10 @@ def create_population_count_output(
         df[df["is_sampled"]], period, strata, "sample", **config
     )
 
-    # left join and filling na to keep cases when population is is non-zero,
+    # outer join and filling na to keep cases when population is is non-zero,
     # and nothing is in sample (i.e. cell has not been sampled)
-    # Should not use outer as we can never have a population without being sampled
     full_combined = pd.merge(
-        population, sample, on=[period, strata], how="left"
+        population, sample, on=[period, strata], how="outer"
     ).fillna(0)
 
     write_csv_wrapper(
