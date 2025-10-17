@@ -31,6 +31,12 @@ def create_csdb_output(
         dtype={"questioncode": int, "classification": float},
     )
 
+    additional_outputs_df = additional_outputs_df[
+        ~additional_outputs_df[config["question_no"]].isin(
+            config["filter_out_questions"]
+        )
+    ]
+
     df_combined = pd.merge(
         additional_outputs_df,
         cdid_mapping,
@@ -45,11 +51,11 @@ def create_csdb_output(
     )
     # Convert grossed_column into pounds thousands before agg
     df_combined["curr_grossed_value"] = (
-        df_combined["adjustedresponse"]
+        df_combined[config["pound_thousand_col"]]
         * df_combined["design_weight"]
         * df_combined["outlier_weight"]
         * df_combined["calibration_factor"]
-    ) / 1e3
+    )
 
     df_pivot = (
         pd.pivot_table(

@@ -26,7 +26,13 @@ class TestCSDBOutput:
         outputs_data_dir,
         output_df,
     ):
-        config = {"platform": "network", "bucket": ""}
+        config = {
+            "platform": "network",
+            "bucket": "",
+            "filter_out_questions": [11, 12, 146],
+            "question_no": "questioncode",
+            "pound_thousand_col": "adjustedresponse_pounds_thousands",
+        }
 
         expected_output = output_df
         input_df["classification"] = input_df["classification"].astype(float)
