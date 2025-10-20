@@ -154,8 +154,8 @@ accept a dataset containing back data. This dataset must contain the period
 directly preceding the first period in the main dataset. This data shall be
 the result of a prior imputation run and must not appear in the output.
 
-Note that back data will be provided as a seperate dataset (to the dataset 
-provided for imputation). However, the imputation and back data datasets need 
+Note that back data will be provided as a seperate dataset (to the dataset
+provided for imputation). However, the imputation and back data datasets need
 to be combined into a single dataset to run the method code. This is different
 to the PySpark method where imputation and back data datasets are called seperately
 by the method.
@@ -192,8 +192,8 @@ predictive record can take any response type (i.e. response, imputed or
 constructed value).
 
 Note, the method loops over question number, so imputes one variable at a
-time. The method has no awareness of the combination of questions that 
-individual contributors complete. 
+time. The method has no awareness of the combination of questions that
+individual contributors complete.
 
 The following imputation types comprise the complete method:
 
@@ -255,9 +255,9 @@ to avoid any assumptions within the method as to the relationship between
 provided links.
 
 Note, this functionality was not required for MBS/CON (it was developed for
-QBS which required the Q50 link to be copied to apply to Q51-Q54). However, 
+QBS which required the Q50 link to be copied to apply to Q51-Q54). However,
 this functionality was still built for flexibility if required on other surveys
-in future. 
+in future.
 
 ### 7.3 Responder Matching
 
@@ -311,12 +311,12 @@ each other: Unable to calculate links; and Zero in link calculations.
 #### 7.6.1 Unable to calculate links
 
 Sometimes an imputation link cannot be calculated because there are not enough
-matched pairs. Here, a default link of 1 is applied and the matched pair counts 
+matched pairs. Here, a default link of 1 is applied and the matched pair counts
 are set to 0 (across the class/period/question).
 
 #### 7.6.2 Zero in link calculations
 
-Sometimes an imputation link cannot be calculated because the denominator of the 
+Sometimes an imputation link cannot be calculated because the denominator of the
 imputation link calculation is zero. Here a default link of 1 is applied, but to
 distinguish this from the above default (in 7.6.1), the matched pair count is set
 to the number of matched pairs that would have fed into the link calculation (across
