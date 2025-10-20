@@ -97,6 +97,7 @@ Input records must include the following fields of the correct types:
 * Imputation Class - Numeric
 * Target Variable - Numeric - Nulls Allowed
 * Auxiliary Variable - Numeric
+* Question - Numeric
 * Imputation links (Optional but will need all below) - Dictionary
     * Forward Link - Numeric
     * Backward Link - Numeric
