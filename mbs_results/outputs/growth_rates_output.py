@@ -24,6 +24,18 @@ def get_growth_rates_output(
         wider on period with adjusted values.
     """
 
+    additional_outputs_df = additional_outputs_df[
+        ~additional_outputs_df[config["question_no"]].isin(
+            config["filter_out_questions"]
+        )
+    ]
+
+    # This is needed to ensure the Cons' CORD output continues working
+    if "adjustedresponse_pounds_thousands" in additional_outputs_df.columns:
+        additional_outputs_df["adjustedresponse"] = additional_outputs_df[
+            "adjustedresponse_pounds_thousands"
+        ]
+
     additional_outputs_df["weighted_target"] = (
         additional_outputs_df["adjustedresponse"]
         * additional_outputs_df["design_weight"]
