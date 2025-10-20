@@ -157,7 +157,7 @@ the result of a prior imputation run and must not appear in the output.
 Note that back data will be provided as a seperate dataset (to the dataset 
 provided for imputation). However, the imputation and back data datasets need 
 to be combined into a single dataset to run the method code. This is different
-to the SML method where imputation and back data datasets are called seperately
+to the PySpark method where imputation and back data datasets are called seperately
 by the method.
 
 Back data records shall always contain the following fields:
