@@ -316,7 +316,7 @@ are set to 0 (across the class/period/question).
 
 #### 7.6.2 Zero in link calculations
 
-Sometimes an imputation link cannot be calculated becuase the denominator of the 
+Sometimes an imputation link cannot be calculated because the denominator of the 
 imputation link calculation is zero. Here a default link of 1 is applied, but to
 distinguish this from the above default (in 7.6.1), the matched pair count is set
 to the number of matched pairs that would have fed into the link calculation (across
