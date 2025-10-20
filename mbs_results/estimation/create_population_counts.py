@@ -192,5 +192,5 @@ def format_population_counts_mbs(
         combined["sample_count_current"] - combined["sample_count_previous"]
     )
 
-    filename = f"mbs_population_counts{current_period}_{previous_period}.csv"
+    filename = f"mbs_population_counts_{run_id}_{current_period}_{previous_period}.csv"
     return (combined, filename)

@@ -162,6 +162,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         target=config["target"],
         question_no=config["question_no"],
         output_path=config["output_path"],
+        run_id=config["run_id"],
         platform=config["platform"],
         bucket=config["bucket"],
     )
@@ -731,6 +732,7 @@ def exclude_from_results(
     target,
     question_no,
     output_path,
+    run_id,
     platform,
     bucket,
 ):
@@ -758,6 +760,8 @@ def exclude_from_results(
         The column name of the question_no variable.
     output_path: str
         Path to save the file.
+    run_id : int
+        Unique run id of the run
     platform : str
         Argument to pass to the csv wrapper.
     bucket : str
@@ -802,7 +806,7 @@ def exclude_from_results(
 
         excluded_responses.reset_index(inplace=True)
 
-        output_path = os.path.join(output_path, "excluded_from_results.csv")
+        output_path = os.path.join(output_path, f"excluded_from_results_{run_id}.csv")
 
         write_csv_wrapper(
             excluded_responses,

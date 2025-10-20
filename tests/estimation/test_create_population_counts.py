@@ -65,7 +65,7 @@ class TestTurnoverPopulationCounts:
             "output_path": "",
             "platform": "network",
             "bucket": "",
-            "run_id":"1"
+            "run_id": "1",
         }
         # producing output
         output = create_population_count_output(input_dataframe, **config)
@@ -80,7 +80,7 @@ class TestTurnoverPopulationCounts:
             "platform": "network",
             "bucket": "",
             "current_period": "202202",
-            "run_id":"1"
+            "run_id": "1",
         }
         output_df, filename = format_population_counts_mbs(**config)
 
@@ -90,4 +90,4 @@ class TestTurnoverPopulationCounts:
         )
 
         pd.testing.assert_frame_equal(output_df, expected)
-        assert filename == "mbs_population_counts202202_202201.csv"
+        assert filename == "mbs_population_counts_1_202202_202201.csv"

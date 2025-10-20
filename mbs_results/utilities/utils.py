@@ -1,8 +1,8 @@
+import datetime
 import glob
 import os
 import re
 from importlib import metadata
-import datetime
 
 import numpy as np
 import pandas as pd
@@ -29,7 +29,7 @@ def convert_column_to_datetime(dates):
 
 def get_versioned_filename(prefix, config):
 
-    run_id =  config["run_id"]
+    run_id = config["run_id"]
 
     filename = f"{prefix}_{run_id}.csv"
 
@@ -260,18 +260,19 @@ def de_version_filename(filename: str) -> str:
 
     return filename
 
+
 def get_datetime_now_as_int():
     """Returns datetime up to minutes as an integer.
-    
+
     Returns
     -------
     now_as_int : int
         Datetime now as integer.
 
     """
-    
+
     now = datetime.datetime.now()
 
-    now_as_int = int(now.strftime('%Y%m%d%H%M'))
-    
+    now_as_int = int(now.strftime("%Y%m%d%H%M"))
+
     return now_as_int
