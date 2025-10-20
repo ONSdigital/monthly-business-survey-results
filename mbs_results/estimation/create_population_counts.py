@@ -47,6 +47,7 @@ def create_population_count_output(
     period: str,
     strata: str,
     output_path: str,
+    run_id: int,
     platform: str,
     bucket: str,
     **config: dict,
@@ -64,6 +65,8 @@ def create_population_count_output(
         strata column name
     output_path : str, optional
         Output path to save dataframe
+    run_id : int
+        Unique run id of the run
     save_output : bool, optional
         Default False. If True, saves the output to output_path
 
@@ -90,7 +93,7 @@ def create_population_count_output(
 
     write_csv_wrapper(
         full_combined,
-        output_path + "population_counts.csv",
+        output_path + f"population_counts_{run_id}.csv",
         platform,
         bucket,
         index=False,
@@ -103,6 +106,7 @@ def format_population_counts_mbs(
     period: str,
     strata: str,
     output_path: str,
+    run_id: int,
     platform: str,
     bucket: str,
     current_period: str,
@@ -120,6 +124,8 @@ def format_population_counts_mbs(
         strata column name
     output_path : str
         output path where population_counts.csv has been stored
+    run_id : int
+        Unique run id of the run
     platform : str
         platform name, either "s3" or "network"
     bucket : str
@@ -135,7 +141,7 @@ def format_population_counts_mbs(
     """
 
     df = read_csv_wrapper(
-        filepath=output_path + "population_counts.csv",
+        filepath=output_path + f"population_counts_{run_id}.csv",
         import_platform=platform,
         bucket_name=bucket,
     )
@@ -186,5 +192,5 @@ def format_population_counts_mbs(
         combined["sample_count_current"] - combined["sample_count_previous"]
     )
 
-    filename = f"mbs_population_counts_{current_period}_{previous_period}.csv"
+    filename = f"mbs_population_counts{current_period}_{previous_period}.csv"
     return (combined, filename)
