@@ -113,6 +113,7 @@ config = {
     "sic": "frosic2007",
     "population_prefix": "universe",
     "sample_prefix": "finalsel",
+    "debug_mode": False,
 }
 
 
