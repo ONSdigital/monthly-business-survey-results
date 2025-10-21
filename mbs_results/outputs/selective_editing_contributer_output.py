@@ -2,7 +2,7 @@ import pandas as pd
 
 from mbs_results.staging.merge_domain import merge_domain
 from mbs_results.utilities.inputs import read_csv_wrapper
-from mbs_results.utilities.outputs import write_csv_wrapper
+from mbs_results.utilities.outputs import save_df
 
 
 def get_selective_editing_contributor_output(
@@ -98,12 +98,11 @@ def get_selective_editing_contributor_output(
         on=["formtype", "domain"],
         how="left",
     )
-    write_csv_wrapper(
+    save_df(
         selective_editing_contributor_output,
-        output_path + "se_contributor_full_" + f"se_period_{period_selected}.csv",
-        config["platform"],
-        config["bucket"],
-        index=False,
+        "selective_editing_contributor_full_" + f"se_period_{period_selected}.csv",
+        config,
+        config["debug_mode"],
     )
     selective_editing_contributor_output.drop(columns=["formtype"], inplace=True)
 

@@ -24,7 +24,7 @@ from mbs_results.staging.validate_snapshot import validate_snapshot
 from mbs_results.utilities.constrains import constrain
 from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.inputs import read_colon_separated_file, read_csv_wrapper
-from mbs_results.utilities.outputs import write_csv_wrapper
+from mbs_results.utilities.outputs import save_df, write_csv_wrapper
 from mbs_results.utilities.utils import convert_column_to_datetime
 from mbs_results.utilities.validation_checks import validate_manual_constructions
 
@@ -427,14 +427,11 @@ def start_of_period_staging(
             )
         ]
 
-        write_csv_wrapper(
+        save_df(
             dropped_questions,
-            config["output_path"]
-            + "dropped_previous_period_"
-            + f"se_period_{config['period_selected']}.csv",
-            config["platform"],
-            config["bucket"],
-            index=False,
+            "dropped_previous_period_" + f"se_period_{config['period_selected']}.csv",
+            config,
+            config["debug_mode"],
         )
 
         # Keep only the rows that match the condition
