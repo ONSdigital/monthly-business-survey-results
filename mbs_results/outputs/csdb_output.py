@@ -61,8 +61,8 @@ def create_csdb_output(
         pd.pivot_table(
             df_combined,
             values="curr_grossed_value",
-            index="cdid",
-            columns="period",
+            index="period",
+            columns="cdid",
             aggfunc="sum",
         )
         .reset_index()

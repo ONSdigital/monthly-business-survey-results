@@ -37,10 +37,13 @@ class TestCSDBOutput:
         expected_output = output_df
         input_df["classification"] = input_df["classification"].astype(float)
         input_df["questioncode"] = input_df["questioncode"].astype(int)
+
         actual_output = create_csdb_output(
             additional_outputs_df=input_df,
             cdid_data_path=outputs_data_dir / "csdb_output" / "cdid_mapping.csv",
             **config
         )
+
+        actual_output["period"] = actual_output["period"].astype(int)
 
         assert_frame_equal(actual_output, expected_output)
