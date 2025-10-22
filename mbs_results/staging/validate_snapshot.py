@@ -44,7 +44,6 @@ def check_for_null_target(
                 .drop_duplicates()
                 .values.tolist()
             )
-
         logger.warning(
             f"There are {len(empty_string_rows)} rows with empty strings in the "
             f"'{target}' column. The first 5 (or less) (reference, period) groups are: "
@@ -64,12 +63,30 @@ def check_for_null_target(
                 .drop_duplicates()
                 .values.tolist()
             )
-
         logger.warning(
             f"There are {len(null_rows)} rows with nulls in the '{target}' column "
             f"after filtering out questions in {filter_out_qs}.  "
             f"The first 5 (or less) (reference, period) groups are: {first_5}"
         )
+
+    # Output and return concat of both null and empty string rows
+    output_df = (
+        pd.concat([empty_string_rows, null_rows])
+        .drop_duplicates()
+        .reset_index(drop=True)
+    )
+    if not output_df.empty:
+        save_df(
+            output_df,
+            "check_for_null_target.csv",
+            config,
+            config["debug_mode"],
+        )
+        logger.warning(
+            "A file containing all rows with nulls or empty strings in "
+            "the target column has been produced as check_for_null_target.csv."
+        )
+    return output_df
 
 
 def non_response_in_responses(
@@ -82,8 +99,9 @@ def non_response_in_responses(
     config: dict,
 ):
     """
-    Validate that there are no reference and period groupings that are listed as
-    non-response statuses in contributors but are present in responses.
+    Validate that there are no reference and period groupings
+    that are listed as non-response statuses in contributors
+    but are present in responses.
 
     Parameters
     ----------

@@ -25,7 +25,32 @@ def config():
     }
 
 
+@pytest.fixture(scope="class")
+def expected_check_for_null_target(filepath):
+    return pd.read_csv(
+        filepath.parent
+        / "validate_snapshot"
+        / "check_for_null_target_expected_output.csv",
+        index_col=False,
+    )
+
+
 class TestCheckForNullTarget:
+    def test_check_for_null_target_output(
+        self, check_for_null_target_responses, config, expected_check_for_null_target
+    ):
+        result_df = check_for_null_target(
+            config=config,
+            responses=check_for_null_target_responses,
+            target="target",
+            question_no="questioncode",
+        )
+        # Only compare columns present in expected output
+        pd.testing.assert_frame_equal(
+            result_df.reset_index(drop=True)[expected_check_for_null_target.columns],
+            expected_check_for_null_target,
+        )
+
     def test_check_for_null_target_nulls(
         self, caplog, check_for_null_target_responses, config
     ):
