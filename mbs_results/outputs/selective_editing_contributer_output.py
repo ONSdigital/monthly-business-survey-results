@@ -10,10 +10,8 @@ def get_selective_editing_contributor_output(
     sic_domain_mapping_path: str,
     threshold_filepath: str,
     period_selected: int,
-    question_no: str,
     period: str,
     reference: str,
-    output_path: str,
     **config,
 ) -> pd.DataFrame:
     """
@@ -31,14 +29,10 @@ def get_selective_editing_contributor_output(
         Filepath to csv file containing form type, domain and threshold columns.
     period_selected : int
         period to include in outputs
-    question_no : str
-        Column name containing question number.
     period : str
         Column name containing date information.
     reference : str
         Column name containing reference.
-    output_path : str
-        path to save output files.
     **config: Dict
           main pipeline configuration. Can be used to input the entire config dictionary
 
@@ -100,7 +94,7 @@ def get_selective_editing_contributor_output(
     )
     save_df(
         selective_editing_contributor_output,
-        "selective_editing_contributor_full_" + f"se_period_{period_selected}.csv",
+        f"selective_editing_contributor_full_period_{period_selected}.csv",
         config,
         config["debug_mode"],
     )

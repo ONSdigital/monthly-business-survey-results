@@ -429,7 +429,8 @@ def start_of_period_staging(
 
         save_df(
             dropped_questions,
-            "dropped_previous_period_" + f"se_period_{config['period_selected']}.csv",
+            "selective_editing_dropped_question_previous_"
+            + f"period_{config['period_selected']}.csv",
             config,
             config["debug_mode"],
         )

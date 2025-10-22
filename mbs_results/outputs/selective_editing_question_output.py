@@ -13,7 +13,6 @@ def create_selective_editing_question_output(
     additional_outputs_df: pd.DataFrame,
     sic_domain_mapping_path: str,
     period_selected: int,
-    output_path: str,
     **config,
 ) -> pd.DataFrame:
     """
@@ -117,7 +116,7 @@ def create_selective_editing_question_output(
     question_output.fillna({"auxiliary_value": 0}, inplace=True)
     save_df(
         question_output,
-        "selective_editing_question_full_output_" + f"se_period_{period_selected}.csv",
+        f"selective_editing_question_full_output_period_{period_selected}.csv",
         config,
         config["debug_mode"],
     )
