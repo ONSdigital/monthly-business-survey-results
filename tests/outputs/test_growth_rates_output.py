@@ -29,6 +29,8 @@ class TestGrowthRatesOutput:
             "period": "period",
             "target": "adjustedresponse",
             "filter_out_questions": [11, 12, 146],
+            "pound_thousand_col": "adjustedresponse_pounds_thousands",
+            "target": "adjustedresponse",
         }
 
         expected_output = output_df
