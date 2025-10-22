@@ -23,12 +23,12 @@ def output_df(outputs_data_dir):
 
 class TestGrowthRatesOutput:
     def test_growth_rates_output(self, input_df, output_df):
-
         config = {
             "question_no": "questioncode",
             "cell_number": "cell_no",
             "period": "period",
             "target": "adjustedresponse",
+            "filter_out_questions": [11, 12, 146],
         }
 
         expected_output = output_df
