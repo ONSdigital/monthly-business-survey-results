@@ -5,6 +5,33 @@ import pandas as pd
 from mbs_results.utilities.outputs import save_df
 
 
+def validate_snapshot(
+    responses: pd.DataFrame,
+    contributors: pd.DataFrame,
+    config: dict,
+):
+    """
+    Wrapper to run validate snapshot functions.
+    """
+    # Run non_response_in_responses
+    non_response_in_responses(
+        responses=responses,
+        contributors=contributors,
+        status=config["status"],
+        reference=config["reference"],
+        period=config["period"],
+        non_response_statuses=config["non_response_statuses"],
+        config=config,
+    )
+    # Run check_for_null_target
+    check_for_null_target(
+        config=config,
+        responses=responses,
+        target=config["target"],
+        question_no=config["question_no"],
+    )
+
+
 def check_for_null_target(
     config: dict,
     responses: pd.DataFrame,
@@ -78,14 +105,15 @@ def check_for_null_target(
     if not output_df.empty:
         save_df(
             output_df,
-            "check_for_null_target.csv",
+            "null_or_empty_adjustedresponse.csv",
             config,
             config["debug_mode"],
         )
-        logger.warning(
-            "A file containing all rows with nulls or empty strings in "
-            "the target column has been produced as check_for_null_target.csv."
-        )
+        if config["debug_mode"]:
+            logger.warning(
+                "A file containing all rows with a null/empty adjustedresponse"
+                "has been produced as check_for_null_target.csv."
+            )
     return output_df
 
 
@@ -139,9 +167,6 @@ def non_response_in_responses(
         non_responses = non_responses.set_index([reference, period])
         responses = responses.set_index([reference, period])
 
-        non_responses.to_csv("debug_non_responses.csv")
-        responses.to_csv("debug_responses.csv")
-
         common_index = responses.index.intersection(non_responses.index)
 
         if len(common_index) > 0:
@@ -162,6 +187,11 @@ def non_response_in_responses(
                 config["debug_mode"],
             )
 
+            if config["debug_mode"]:
+                logger.warning(
+                    "A file containing all rows with non-response statuses present"
+                    "in responses has been produced as non_response_in_responses.csv."
+                )
             return non_response_in_responses
 
     else:

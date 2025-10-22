@@ -22,6 +22,7 @@ def config():
     return {
         "filter_out_questions": [11, 12],
         "debug_mode": False,
+        "status": "status",
     }
 
 
@@ -61,7 +62,7 @@ class TestCheckForNullTarget:
                 target="target",
                 question_no="questioncode",
             )
-        assert "nulls" in caplog.text
+        assert "There are 4 rows with nulls" in caplog.text
 
     def test_check_for_null_target_empty_strings(
         self, caplog, check_for_null_target_responses, config
@@ -75,7 +76,7 @@ class TestCheckForNullTarget:
                 target="target",
                 question_no="questioncode",
             )
-        assert "empty strings" in caplog.text
+        assert "There are 6 rows with empty strings" in caplog.text
 
 
 @pytest.fixture(scope="class")
@@ -125,8 +126,6 @@ class TestNonResponseInResponses:
             config=config,
         )
         result_df = result_df.reset_index()
-
-        result_df.to_csv("debug_result_df.csv", index=False)
 
         pd.testing.assert_frame_equal(
             result_df,

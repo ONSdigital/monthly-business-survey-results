@@ -106,18 +106,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
     validate_snapshot(
         responses=responses,
         contributors=contributors,
-        status="status",
-        reference=config["reference"],
-        period=config["period"],
-        non_response_statuses=config["non_response_statuses"]
-        + [
-            "Combined child (NIL2)",
-            "Out of scope (NIL3)",
-            "Ceased trading (NIL4)",
-            "Dormant (NIL5)",
-            "Part year return (NIL8)",
-            "No UK activity (NIL9)",
-        ],
+        config=config,
     )
 
     # Filter columns and set data types
