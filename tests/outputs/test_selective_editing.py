@@ -168,10 +168,10 @@ def mock_user_config():
 
 
 @pytest.fixture(scope="class")
-def mock_load_imputation_output():
+def mock_load_main_output():
     path = "tests/data/test_se_wrappers/inputs/imputation_test_snapshot.csv"
     with patch(
-        "mbs_results.final_outputs.load_imputation_output",
+        "mbs_results.final_outputs.load_main_output",
         return_value=pd.read_csv(path),
     ):
         yield pd.read_csv(path)
@@ -203,7 +203,7 @@ class TestSelectiveEditingWrappers:
         period_zero_se_wrapper(config_user_dict=mock_user_config)
 
     def test_run_final_outputs(
-        self, mock_user_config, mock_load_imputation_output, mock_create_mapper
+        self, mock_user_config, mock_load_main_output, mock_create_mapper
     ):
         mock_user_config["current_period"] = 202201
         run_final_outputs(mock_user_config)

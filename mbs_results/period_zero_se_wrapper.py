@@ -14,7 +14,7 @@ from mbs_results.staging.data_cleaning import (
 )
 from mbs_results.staging.stage_dataframe import drop_derived_questions
 from mbs_results.utilities.inputs import load_config
-from mbs_results.utilities.outputs import write_csv_wrapper
+from mbs_results.utilities.outputs import save_df
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -56,12 +56,11 @@ def period_zero_se_wrapper(config_user_dict=None):
     )
     back_data_imputation = imputation_processing(back_data, config)
 
-    write_csv_wrapper(
+    save_df(
         back_data_imputation,
-        config["output_path"] + "back_data_imputation.csv",
-        config["platform"],
-        config["bucket"],
-        index=False,
+        "selective_editing_back_data_imputation",
+        config,
+        config["debug_mode"],
     )
 
     create_se_outputs(back_data_imputation, config)
