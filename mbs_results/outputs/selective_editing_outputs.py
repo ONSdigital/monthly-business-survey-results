@@ -10,13 +10,13 @@ from mbs_results.outputs.selective_editing_validations import (
 )
 from mbs_results.staging.stage_dataframe import start_of_period_staging
 from mbs_results.utilities.inputs import read_csv_wrapper
-from mbs_results.utilities.outputs import write_csv_wrapper
+from mbs_results.utilities.outputs import save_df
 from mbs_results.utilities.utils import get_versioned_filename
 
 
-def load_imputation_output(config: dict) -> pd.DataFrame:
+def load_main_output(config: dict) -> pd.DataFrame:
     """
-    Loads the imputation output from a CSV file.
+    Loads the main output from a CSV file.
 
     Parameters
     ----------
@@ -32,7 +32,7 @@ def load_imputation_output(config: dict) -> pd.DataFrame:
         A DataFrame containing the imputation output data.
     """
     output_path = config["output_path"]
-    imputation_filename = get_versioned_filename("imputation", config)
+    imputation_filename = get_versioned_filename("mbs_results", config)
 
     imputation_output = read_csv_wrapper(
         output_path + imputation_filename, config["platform"], config["bucket"]
@@ -77,13 +77,12 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
         inplace=True,
     )
 
-    write_csv_wrapper(
+    save_df(
         imputation_output,
-        config_se["output_path"]
-        + f"post_imputation_processing_{config_se['period_selected']}.csv",
-        config_se["platform"],
-        config_se["bucket"],
-        index=False,
+        "selective_editing_postprocessing"
+        + f"_imputation_output_{config_se['period_selected']}",
+        config,
+        config["debug_mode"],
     )
 
     estimation_output = estimate(
@@ -93,24 +92,20 @@ def create_se_outputs(imputation_output: pd.DataFrame, config: dict) -> pd.DataF
         config=config_se,
     )
 
-    write_csv_wrapper(
+    save_df(
         estimation_output,
-        config_se["output_path"]
-        + f"se_outputs_estimation_output_{config_se['period_selected']}_testing.csv",
-        config_se["platform"],
-        config_se["bucket"],
-        index=False,
+        f"selective_editing_estimation_output_{config_se['period_selected']}",
+        config,
+        config["debug_mode"],
     )
 
     outlier_output = detect_outlier(estimation_output, config_se)
 
-    write_csv_wrapper(
+    save_df(
         outlier_output,
-        config_se["output_path"]
-        + f"se_outputs_outlier_output_{config_se['period_selected']}_testing.csv",
-        config_se["platform"],
-        config_se["bucket"],
-        index=False,
+        f"selective_editing_outlier_output_{config_se['period_selected']}",
+        config,
+        config["debug_mode"],
     )
 
     produce_selective_editing_outputs(config_se, outlier_output)

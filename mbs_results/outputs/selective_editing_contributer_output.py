@@ -2,7 +2,7 @@ import pandas as pd
 
 from mbs_results.staging.merge_domain import merge_domain
 from mbs_results.utilities.inputs import read_csv_wrapper
-from mbs_results.utilities.outputs import write_csv_wrapper
+from mbs_results.utilities.outputs import save_df
 
 
 def get_selective_editing_contributor_output(
@@ -10,10 +10,8 @@ def get_selective_editing_contributor_output(
     sic_domain_mapping_path: str,
     threshold_filepath: str,
     period_selected: int,
-    question_no: str,
     period: str,
     reference: str,
-    output_path: str,
     **config,
 ) -> pd.DataFrame:
     """
@@ -31,14 +29,10 @@ def get_selective_editing_contributor_output(
         Filepath to csv file containing form type, domain and threshold columns.
     period_selected : int
         period to include in outputs
-    question_no : str
-        Column name containing question number.
     period : str
         Column name containing date information.
     reference : str
         Column name containing reference.
-    output_path : str
-        path to save output files.
     **config: Dict
           main pipeline configuration. Can be used to input the entire config dictionary
 
@@ -98,12 +92,11 @@ def get_selective_editing_contributor_output(
         on=["formtype", "domain"],
         how="left",
     )
-    write_csv_wrapper(
+    save_df(
         selective_editing_contributor_output,
-        output_path + "se_contributor_full_" + f"se_period_{period_selected}.csv",
-        config["platform"],
-        config["bucket"],
-        index=False,
+        f"selective_editing_contributor_full_period_{period_selected}.csv",
+        config,
+        config["debug_mode"],
     )
     selective_editing_contributor_output.drop(columns=["formtype"], inplace=True)
 
