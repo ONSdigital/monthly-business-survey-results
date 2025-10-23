@@ -91,10 +91,7 @@ def check_for_null_target(
     null_rows = filtered_responses[filtered_responses[target].isnull()]
     if not null_rows.empty:
         first_5 = (
-            null_rows[["reference", "period"]]
-            .head(5)
-            .drop_duplicates()
-            .values.tolist()
+            null_rows[["reference", "period"]].head(5).drop_duplicates().values.tolist()
         )
         logger.warning(
             f"There are {len(null_rows)} rows with nulls in the '{target}' column "
