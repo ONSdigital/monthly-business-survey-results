@@ -37,7 +37,7 @@ def check_for_null_target(
     responses: pd.DataFrame,
     target: str,
     question_no: str,
-) -> None:
+) -> pd.DataFrame:
     """
     Validates that there are no empty strings and nulls in the target column of
     responses.
@@ -125,7 +125,7 @@ def non_response_in_responses(
     period: str,
     non_response_statuses: list,
     config: dict,
-):
+) -> pd.DataFrame:
     """
     Validate that there are no reference and period groupings
     that are listed as non-response statuses in contributors
