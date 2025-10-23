@@ -12,8 +12,17 @@ def validate_snapshot(
 ):
     """
     Wrapper to run validate snapshot functions.
+
+    Parameters
+    ----------
+    responses : pd.DataFrame
+        DataFrame containing responses data.
+    contributors : pd.DataFrame
+        DataFrame containing contributors data.
+    config : dict
+        Dictionary containing "filter_out_questions" key.
     """
-    # Run non_response_in_responses
+
     non_response_in_responses(
         responses=responses,
         contributors=contributors,
@@ -23,7 +32,7 @@ def validate_snapshot(
         non_response_statuses=config["non_response_statuses"],
         config=config,
     )
-    # Run check_for_null_target
+
     check_for_null_target(
         config=config,
         responses=responses,
@@ -64,13 +73,12 @@ def check_for_null_target(
     # Check for empty strings in the target column
     empty_string_rows = responses[responses[target] == ""]
     if not empty_string_rows.empty:
-        if {"reference", "period"}.issubset(empty_string_rows.columns):
-            first_5 = (
-                empty_string_rows[["reference", "period"]]
-                .head(5)
-                .drop_duplicates()
-                .values.tolist()
-            )
+        first_5 = (
+            empty_string_rows[["reference", "period"]]
+            .head(5)
+            .drop_duplicates()
+            .values.tolist()
+        )
         logger.warning(
             f"There are {len(empty_string_rows)} rows with empty strings in the "
             f"'{target}' column. The first 5 (or less) (reference, period) groups are: "
@@ -80,23 +88,20 @@ def check_for_null_target(
     filter_out_qs = config["filter_out_questions"]
     filtered_responses = responses[~responses[question_no].isin(filter_out_qs)]
 
-    # Check for nulls in the target column
     null_rows = filtered_responses[filtered_responses[target].isnull()]
     if not null_rows.empty:
-        if {"reference", "period"}.issubset(null_rows.columns):
-            first_5 = (
-                null_rows[["reference", "period"]]
-                .head(5)
-                .drop_duplicates()
-                .values.tolist()
-            )
+        first_5 = (
+            null_rows[["reference", "period"]]
+            .head(5)
+            .drop_duplicates()
+            .values.tolist()
+        )
         logger.warning(
             f"There are {len(null_rows)} rows with nulls in the '{target}' column "
             f"after filtering out questions in {filter_out_qs}.  "
             f"The first 5 (or less) (reference, period) groups are: {first_5}"
         )
 
-    # Output and return concat of both null and empty string rows
     output_df = (
         pd.concat([empty_string_rows, null_rows])
         .drop_duplicates()
