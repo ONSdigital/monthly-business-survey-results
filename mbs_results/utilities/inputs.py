@@ -10,6 +10,7 @@ from rdsa_utils.cdp.helpers.s3_utils import load_csv
 
 from mbs_results import logger
 from mbs_results.utilities.merge_two_config_files import merge_two_config_files
+from mbs_results.utilities.utils import get_datetime_now_as_int
 
 
 def load_config(config_user_path, config_user_dict=None):
@@ -47,6 +48,9 @@ def load_config(config_user_path, config_user_dict=None):
     logger.info("Appending config files with selected sic column name")
     config["finalsel_keep_cols"].append(config["sic"])
     config["population_keep_columns"].append(config["sic"])
+
+    # set run id as YYYYMMDDHHMM
+    config["run_id"] = get_datetime_now_as_int()
 
     return config
 

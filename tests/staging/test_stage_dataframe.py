@@ -80,11 +80,12 @@ def test_exclude_from_results_csv(responses, contributors, expected_output_csv):
             target="adjustedresponse",
             question_no="question_no",
             output_path=tmpdirname,
+            run_id="1",
             platform="network",
             bucket="",
         )
         actual_output = pd.read_csv(
-            os.path.join(tmpdirname, "excluded_from_results.csv")
+            os.path.join(tmpdirname, "excluded_from_results_1.csv")
         )
 
     assert_frame_equal(actual_output, expected_output_csv)
@@ -103,6 +104,7 @@ def test_warning_and_csv(mock_to_csv, caplog, responses, contributors):
             target="adjustedresponse",
             question_no="question_no",
             output_path="test_outputs/",
+            run_id="1",
             platform="network",
             bucket="",
         )
@@ -123,6 +125,7 @@ def test_exclude_from_results(mock_to_csv, responses, contributors, expected_out
         target="adjustedresponse",
         question_no="question_no",
         output_path="test_outputs/",
+        run_id="1",
         platform="network",
         bucket="",
     )
