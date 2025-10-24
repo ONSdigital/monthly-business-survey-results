@@ -115,11 +115,12 @@ class TestFormatCreateImputationLinkOutput:
     def test_format_create_imputation_link_output(
         self, create_imputation_link_column_input, format_imputation_link_output
     ):
+        config = {"question_no": "questioncode", "filter_out_questions": [11, 12, 146]}
 
         input_df = create_imputation_link_column_input
 
         expected_output = format_imputation_link_output
 
-        actual_output = create_imputation_link_output(input_df, "frosic2007")
+        actual_output = create_imputation_link_output(input_df, "frosic2007", **config)
 
         assert_frame_equal(actual_output, expected_output)
