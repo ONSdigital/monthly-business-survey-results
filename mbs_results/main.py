@@ -8,7 +8,7 @@ from mbs_results.outputs.produce_additional_outputs import (
 from mbs_results.staging.stage_dataframe import stage_dataframe
 from mbs_results.utilities.inputs import load_config, read_csv_wrapper
 from mbs_results.utilities.outputs import save_df
-from mbs_results.utilities.utils import generate_schemas
+from mbs_results.utilities.utils import export_run_id, generate_schemas, read_run_id
 from mbs_results.utilities.validation_checks import (
     validate_config,
     validate_estimation,
@@ -50,11 +50,14 @@ def run_mbs_main(config_user_dict=None):
 
     generate_schemas(config)
 
+    export_run_id(config["run_id"])
+
 
 def produce_additional_outputs_wrapper(config_user_dict=None):
     """Produces any additional outputs based on MBS methods output"""
 
     config = load_config("config_outputs.json", config_user_dict)
+    config["run_id"] = read_run_id()
 
     df = read_csv_wrapper(
         filepath=config["mbs_output_path"],

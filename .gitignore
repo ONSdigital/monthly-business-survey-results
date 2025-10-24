@@ -894,3 +894,6 @@ logs/
 
 # Ignore validation checks testing outputs
 valueError_validate_manual_constructions.csv
+
+# Ignore run id
+.RUN_ID

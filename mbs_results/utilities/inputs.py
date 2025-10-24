@@ -38,6 +38,8 @@ def load_config(config_user_path, config_user_dict=None):
         f"config dictionary created from merging {config_user_path} "
         f"and {config_dev_path}"
     )
+    # set run id as YYYYMMDDHHMM
+    config["run_id"] = get_datetime_now_as_int()
 
     if config_user_dict is not None:
         config.update(config_user_dict)
@@ -48,9 +50,6 @@ def load_config(config_user_path, config_user_dict=None):
     logger.info("Appending config files with selected sic column name")
     config["finalsel_keep_cols"].append(config["sic"])
     config["population_keep_columns"].append(config["sic"])
-
-    # set run id as YYYYMMDDHHMM
-    config["run_id"] = get_datetime_now_as_int()
 
     return config
 
