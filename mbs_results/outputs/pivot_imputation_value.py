@@ -68,6 +68,12 @@ def create_imputation_link_output(
     sic
         Using the SIC value from config to be used
     """
+    additional_outputs_df = additional_outputs_df[
+        ~additional_outputs_df[config["question_no"]].isin(
+            config["filter_out_questions"]
+        )
+    ]
+
     output_df = (
         additional_outputs_df.pipe(create_imputation_link_column)
         .pipe(create_count_imps_column)
