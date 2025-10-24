@@ -291,7 +291,7 @@ def export_run_id(value: str):
     """
 
     with open(".RUN_ID", "w") as file:
-        file.write(value)
+        file.write(str(value))
 
 
 def read_run_id() -> str:
