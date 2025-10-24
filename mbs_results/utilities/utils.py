@@ -274,3 +274,41 @@ def get_datetime_now_as_int():
     now_as_int = int(now.strftime("%Y%m%d%H%M"))
 
     return now_as_int
+
+
+def export_run_id(value: str):
+    """Save a value in .RUN_ID text file.
+
+    Parameters
+    ----------
+    value : str
+        Value to export.
+
+    Returns
+    -------
+    None.
+
+    """
+
+    with open(".RUN_ID", "w") as file:
+        file.write(str(value))
+
+
+def read_run_id() -> str:
+    """Read a value from .RUN_ID text file.
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+    A string value.
+
+    """
+
+    file = open(".RUN_ID", "r").readlines()
+
+    if len(file) != 1:
+        raise ValueError(".RUN_ID must be one line")
+
+    return file[0]
