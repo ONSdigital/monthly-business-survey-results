@@ -107,14 +107,14 @@ def check_for_null_target(
     if not output_df.empty:
         save_df(
             output_df,
-            "null_or_empty_adjustedresponse.csv",
+            "null_or_empty_adjustedresponse",
             config,
             config["debug_mode"],
         )
         if config["debug_mode"]:
             logger.warning(
                 "A file containing all rows with a null/empty adjustedresponse"
-                "has been produced as check_for_null_target.csv."
+                "has been produced as null_or_empty_adjustedresponse.csv."
             )
     return output_df
 
