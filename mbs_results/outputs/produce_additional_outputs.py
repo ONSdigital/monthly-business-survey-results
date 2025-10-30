@@ -81,6 +81,7 @@ def get_additional_outputs_df(
         "status",
         "winsorised_value",
         config["pound_thousand_col"],
+        "runame1",
     ]
     if not config["filter"]:
         count_variables = [f"b_match_{target}_count", f"f_match_{target}_count"]
