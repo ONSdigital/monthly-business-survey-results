@@ -1,5 +1,3 @@
-from importlib import metadata
-
 import pandas as pd
 
 from mbs_results import logger
@@ -244,8 +242,6 @@ def produce_selective_editing_outputs(
     if additional_outputs is None:
         return
 
-    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
-
     # Stop function if no additional_outputs are listed in config.
     if additional_outputs is None:
         return
@@ -256,7 +252,7 @@ def produce_selective_editing_outputs(
         else:
             file = output.split("_")[-1]
             period = df["period"].unique()[0].astype(int)
-            filename = f"se{file}009_{period}_v{file_version_mbs}.csv"
+            filename = f"se{file}009_{period}.csv"
         # output_value = additional_outputs[output]
         if isinstance(df, dict):
             # if the output is a dictionary (e.g. from generate_devolved_outputs),
