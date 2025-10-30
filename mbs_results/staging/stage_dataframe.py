@@ -91,7 +91,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         to uk.
     """
 
-    print("Staging started")
+    logger.info("Staging started")
     period = config["period"]
     reference = config["reference"]
 
@@ -240,7 +240,7 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         pre_impute_df, config["nil_status_col"], config["target"], config["nil_values"]
     )
 
-    print("Staging Completed")
+    logger.info("Staging Completed")
     return pre_impute_df, unprocessed_data, manual_constructions, filter_df
 
 
@@ -695,7 +695,7 @@ def check_construction_links(df: pd.DataFrame, config: dict):
             config["output_path"],
             f"q49_references_con_link_greater_1_{config['current_period']}.csv",
         )
-        print(config)
+        logger.info(config)
         write_csv_wrapper(
             df_large_construction_link,
             output_file,
