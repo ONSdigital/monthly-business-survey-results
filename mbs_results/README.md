@@ -29,8 +29,8 @@ task and to copy runnable project files into a working folder.
     - **How to run MBS:** Step-by-step on how to run MBS is documented in the [MBS Configuration Confluence page.](https://officefornationalstatistics.atlassian.net/wiki/spaces/MC/pages/59643308/MBS+Configuration).
 
 - `run_se_period_zero`
-    - **Purpose:** Run the period_zero standard-error routine (pipeline-specific helper).
-    - **When to use:** For variance/SE procedures that are separate from the main estimation flow.
+    - **Purpose:** Run the period_zero selective editing routine (pipeline-specific helper).
+    - **When to use:** For running start of period processing when IDBR files have been provided, produces selective editing contributor and responses files for SPP.
     - **Example:**
         ```bash
         run_se_period_zero
