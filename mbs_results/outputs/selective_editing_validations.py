@@ -1,5 +1,4 @@
 import logging
-from importlib import metadata
 
 from mbs_results.staging.stage_dataframe import read_and_combine_colon_sep_files
 from mbs_results.utilities.inputs import read_csv_wrapper
@@ -23,14 +22,9 @@ def qa_selective_editing_outputs(config: dict):
 
     logger.info("QA checking selective editing outputs")
 
-    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
     period = config["period_selected"]
-    se_contributor_path = (
-        config["output_path"] + f"secontributors009_{period}_v{file_version_mbs}.csv"
-    )
-    se_question_path = (
-        config["output_path"] + f"sequestions009_{period}_v{file_version_mbs}.csv"
-    )
+    se_contributor_path = config["output_path"] + f"secontributors009_{period}.csv"
+    se_question_path = config["output_path"] + f"sequestions009_{period}.csv"
 
     contributor_df = read_csv_wrapper(
         se_contributor_path, config["platform"], config["bucket"]
