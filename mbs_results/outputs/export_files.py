@@ -273,15 +273,23 @@ def run_export(export_config_path: str):
         read_header_func=mods.rd_read_header,
         string_to_file_func=mods.rd_write_string_to_file,
     )
+    # get headers from schemas and validate columns when user supplies a schema
+    if config["general"]["schemas_dir"]:
 
-    schemas_header_dict = get_schema_headers(config, file_select_dict)
+        schemas_header_dict = get_schema_headers(config, file_select_dict)
+        validate_col_name_length_bool = True
+
+    # Default,  headers will be "" in manifest file if no schemas in config
+    else:
+        schemas_header_dict = {key: "" for key in file_select_dict.keys()}
+        validate_col_name_length_bool = False
 
     # Add all output files to the manifest object
     for file_name, file_path in file_select_dict.items():
         manifest.add_file(
             file_path,
             column_header=schemas_header_dict[f"{file_name}"],
-            validate_col_name_length=True,
+            validate_col_name_length=validate_col_name_length_bool,
             sep=",",
         )
     # Write the manifest file to the outgoing directory

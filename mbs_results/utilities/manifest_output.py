@@ -93,8 +93,8 @@ class Manifest:
     def add_file(
         self,
         relative_file_path: str,
-        column_header: str,
-        validate_col_name_length: bool = True,
+        column_header: str = "",
+        validate_col_name_length: bool = False,
         sep: str = ",",
     ):
         """
@@ -121,42 +121,46 @@ class Manifest:
                 f"""Cannot add file to manifest, file does not exist:
                     {absolute_file_path}"""
             )
-        # Get the col headers from the file
-        file_header_string = self.read_header(absolute_file_path)
+        # By default write an empty string in manifest
+        # Otherwise check columns
 
-        # Cleanup file_header_list because \n is appearing in it
-        file_header_string = file_header_string.replace("\n", "")
+        if column_header != "":
+            # Get the col headers from the file
+            file_header_string = self.read_header(absolute_file_path)
 
-        file_header_list = file_header_string.split(sep)
-        column_header_list = column_header.split(sep)
-        if file_header_list != column_header_list:
-            # Column headers in file do not match expected column headers
+            # Cleanup file_header_list because \n is appearing in it
+            file_header_string = file_header_string.replace("\n", "")
 
-            # Compare strings `true_header_string` and `column_header`
-            # Generate a report of the differences between them.
-            self.invalid_headers.append(
-                f"File:{absolute_file_path}\n"
-                f"Expected:     {column_header}\n"
-                f"Got:          {file_header_string}\n"
-                f"Missing from file: {set(column_header_list) - set(file_header_list)}\n"  # noqa
-                f"Missing from schema: {set(file_header_list) - set(column_header_list)}\n"  # noqa
-            )
+            file_header_list = file_header_string.split(sep)
+            column_header_list = column_header.split(sep)
+            if file_header_list != column_header_list:
+                # Column headers in file do not match expected column headers
 
-        else:
-            # Column headers in file match expected column headers
-            ManifestLogger.info(
-                f"Column headers match for {relative_file_path} and its schema."
-            )
+                # Compare strings `true_header_string` and `column_header`
+                # Generate a report of the differences between them.
+                self.invalid_headers.append(
+                    f"File:{absolute_file_path}\n"
+                    f"Expected:     {column_header}\n"
+                    f"Got:          {file_header_string}\n"
+                    f"Missing from file: {set(column_header_list) - set(file_header_list)}\n"  # noqa
+                    f"Missing from schema: {set(file_header_list) - set(column_header_list)}\n"  # noqa
+                )
 
-        # check for empty column headers
-        any_empty_strings = bool([n.strip() for n in file_header_list if n == ""])
-        if (
-            column_header.strip() == ""
-            or file_header_string.strip() == ""
-            or any_empty_strings
-        ):
-            # Raise error if headers are an empty string
-            raise ManifestError("Column headers cannot be an empty string.")
+            else:
+                # Column headers in file match expected column headers
+                ManifestLogger.info(
+                    f"Column headers match for {relative_file_path} and its schema."
+                )
+
+            # check for empty column headers
+            any_empty_strings = bool([n.strip() for n in file_header_list if n == ""])
+            if (
+                column_header.strip() == ""
+                or file_header_string.strip() == ""
+                or any_empty_strings
+            ):
+                # Raise error if headers are an empty string
+                raise ManifestError("Column headers cannot be an empty string.")
 
         # Checks that column names are not more than 32 chars
         if validate_col_name_length:
