@@ -114,7 +114,9 @@ class Manifest:
         #             {relative_file_path}"""
         #     )
 
-        absolute_file_path = os.path.join(self.outgoing_directory, relative_file_path)
+        absolute_file_path = os.path.join(
+            self.outgoing_directory, os.path.basename(relative_file_path)
+        )
 
         if not self.isfile(absolute_file_path):
             raise ManifestError(
@@ -188,7 +190,7 @@ class Manifest:
 
         file_manifest = {
             "file": os.path.basename(relative_file_path),
-            "subfolder": relative_dir_str,
+            "subfolder": self.export_directory,
             "sizeBytes": file_size_bytes,
             "md5sum": self.md5sum(absolute_file_path),
             "header": column_header,
