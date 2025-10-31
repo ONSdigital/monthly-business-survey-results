@@ -18,7 +18,6 @@ Package logger bootstrap.
 from __future__ import annotations
 
 import atexit
-import importlib
 import logging
 import os
 import sys
@@ -32,14 +31,11 @@ from uuid import uuid4
 # Optional clients will be imported lazily
 _boto3 = None
 _raz_client = None
+_s3_client = None
 
 # Determine package / project name from package directory
 _package_dir = Path(__file__).resolve().parent
 _project_name = _package_dir.name  # 'mbs_results' or 'cons_results'.
-
-pkg = importlib.import_module(_project_name)
-print(f"pkg=: {pkg}")
-
 _LOGGER_NAME = _project_name
 
 logger = logging.getLogger(_LOGGER_NAME)
@@ -84,35 +80,28 @@ logger.addHandler(_memory_handler)
 logger.addHandler(_console_handler)
 
 
-def _ensure_optional_clients():
-    """Lazy import boto3 and raz_client when needed."""
-    global _boto3, _raz_client
+def _ensure_s3_client(config: Dict) -> Optional[object]:
+    """
+    Create and configure an S3 client now (not in atexit). Return client or None.
+    """
+    global _s3_client, _boto3, _raz_client
+    import boto3 as _boto3
+    import raz_client as _raz_client
+
     if _boto3 is None:
-        try:
-            import boto3 as _boto3_mod  # type: ignore
-
-            _boto3 = _boto3_mod
-        except Exception:
-            _boto3 = None
-    if _raz_client is None:
-        try:
-            import raz_client as _raz_mod  # type: ignore
-
-            _raz_client = _raz_mod
-        except Exception:
-            _raz_client = None
-
-
-def configure_s3_client(config: Dict):
-    """Configure and return an S3 client with RAZ authentication."""
-    import boto3
-    import raz_client
-
-    s3_client = boto3.client("s3")
-    ssl_file = config.get("ssl_file", "/etc/pki/tls/certs/ca-bundle.crt")
-    raz_client.configure_ranger_raz(s3_client, ssl_file=ssl_file)
-
-    return s3_client
+        logger.warning("boto3 not available; skipping S3 client creation")
+        return None
+    try:
+        s3_client = _boto3.client("s3")
+        ssl_file = config.get("ssl_file", "/etc/pki/tls/certs/ca-bundle.crt")
+        if _raz_client:
+            _raz_client.configure_ranger_raz(s3_client, ssl_file=ssl_file)
+        _s3_client = s3_client
+        return _s3_client
+    except Exception:
+        logger.exception("Failed to create S3 client during logger configuration")
+        _s3_client = None
+        return _s3_client
 
 
 def _clean_root_logger_handlers():
@@ -130,10 +119,17 @@ def _clean_root_logger_handlers():
                 seen_types.add(handler_type)
 
 
-def _setup_log_paths(
-    platform: str, output_path: str, s3_bucket: Optional[str], run_id: str
-) -> tuple[str, Optional[Dict[str, str]]]:
-    """Set up log file paths and S3 target."""
+def _setup_log_paths(config) -> tuple[str, Optional[Dict[str, str]]]:
+    """Set up log file paths and S3 target.
+
+    - For S3: use s3_bucket param.
+    - For network: write directly into output_path or package ../logs.
+    """
+    platform = str(config.get("platform", "network")).lower()
+    output_path = str(config.get("output_path", ""))
+    s3_bucket = config.get("bucket")
+    run_id = config.get("run_id")
+
     log_base_name = f"{_project_name}_{run_id}.log"
 
     if platform == "s3":
@@ -150,11 +146,12 @@ def _setup_log_paths(
 
 
 def _upload_log_to_s3(config: Dict) -> None:
-    """Upload log file to S3."""
+    """Upload log file to S3 (synchronous,
+    use put_object to avoid thread-pools at shutdown).
+    """
     if not LOG_FILE_PATH or not _S3_TARGET:
         return
 
-    _ensure_optional_clients()
     bucket = _S3_TARGET.get("bucket")
     key = _S3_TARGET.get("key")
     ssl_file = config.get("ssl_file")
@@ -164,17 +161,18 @@ def _upload_log_to_s3(config: Dict) -> None:
     if _boto3 is None:
         logger.warning("boto3 not available; cannot upload log to S3.")
         return
+
     try:
+        # create client now (or use pre-created one if you added caching)
         s3_client = _boto3.client("s3")
-        try:
-            if _raz_client and ssl_file:
-                _raz_client.configure_ranger_raz(s3_client, ssl_file=ssl_file)
-        except Exception:
-            logger.debug(
-                "RAZ configuration skipped/failed; proceeding with boto3 client."
-            )
+        # configure RAZ if available
+        _raz_client.configure_ranger_raz(s3_client, ssl_file=ssl_file)
+
         logger.info(f"Uploading log {LOG_FILE_PATH} -> s3://{bucket}/{key}")
-        s3_client.upload_file(LOG_FILE_PATH, bucket, key)
+        # Use put_object (synchronous, no thread-pool)
+        # to avoid interpreter-shutdown threading issues
+        with open(LOG_FILE_PATH, "rb") as fh:
+            s3_client.put_object(Bucket=bucket, Key=key, Body=fh)
         logger.info("Log upload to S3 complete")
     except Exception:
         logger.exception(f"Failed to upload log to s3://{bucket}/{key}")
@@ -274,6 +272,10 @@ def configure_logger_with_run_id(config: Dict) -> logging.Logger:
     logger.info(f"Logger configured for run_id={run_id}; file={LOG_FILE_PATH}")
 
     if _S3_TARGET:
+
+        # create and cache the S3 client now
+        # so upload handler does not import during shutdown
+        _ensure_s3_client(config)
 
         def upload_func():
             return _upload_log_to_s3(config)
