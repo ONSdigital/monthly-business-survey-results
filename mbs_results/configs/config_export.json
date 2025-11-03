@@ -11,8 +11,16 @@
         "copy_or_move_files": "copy"
     },
     "files": {
-        "export_estimation_output": "estimation_output_v0.1.5_test_snaphot.csv",
-        "export_outlier_output": "outlier_output_v0.1.5_test_snaphot.csv",
-        "export_imputation": "None"
+        "export_methods_output": "None",
+        "export_growth_rates_output": "None",
+        "export_create_csdb_output": "None",
+        "export_create_imputation_link_output": "None",
+        "export_population_counts": "None",
+        "export_produce_ocea_srs_outputs": "None",
+        "export_produce_qa_output": "None",
+        "export_scotland_generate_devolved_outputs": "None",
+        "export_turnover_output": "None",
+        "export_wales_generate_devolved_outputs": "None"
     }
 }
+
