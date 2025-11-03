@@ -36,6 +36,18 @@ _s3_client = None
 # Determine package / project name from package directory
 _package_dir = Path(__file__).resolve().parent
 _project_name = _package_dir.name  # 'mbs_results' or 'cons_results'.
+
+# Hack to ensure logger name reflect external caller, e.g. cons_results
+# Get logger nmae based on the entry point script's directory
+entry_file = sys.modules["__main__"].__file__ if "__main__" in sys.modules else __file__
+# logger_name = os.path.basename(os.path.dirname(os.path.abspath(entry_file)))
+
+try:
+    if "cons" in entry_file.lower() or "construction" in entry_file.lower():
+        _project_name = "cons_results"
+except Exception:
+    _project_name = _project_name
+
 _LOGGER_NAME = _project_name
 
 logger = logging.getLogger(_LOGGER_NAME)
@@ -129,7 +141,7 @@ def _setup_log_paths(config) -> tuple[str, Optional[Dict[str, str]]]:
     platform = str(config.get("platform", "network")).lower()
     output_path = str(config.get("output_path", ""))
     s3_bucket = config.get("bucket")
-    run_id = config.get("run_id")
+    run_id = str(config.get("run_id"))
 
     log_base_name = f"{_project_name}_{run_id}.log"
 
@@ -249,10 +261,10 @@ def configure_logger_with_run_id(config: Dict) -> logging.Logger:
     logging.Logger
         The configured package logger.
     """
-    global run_id, LOG_FILE_PATH, _S3_TARGET, _active_config  # Changed from config to _active_config
-    
+    global run_id, LOG_FILE_PATH, _S3_TARGET, _active_config
+
     # Store config for handlers to use
-    _active_config = config.copy()  # Make a copy to avoid mutations
+    _active_config = config.copy()
 
     if not _active_config.get("run_id"):
         _active_config["run_id"] = f"{datetime.now():%Y%m%d%H%M%S}-{uuid4().hex[:8]}"
@@ -260,7 +272,7 @@ def configure_logger_with_run_id(config: Dict) -> logging.Logger:
 
     _clean_root_logger_handlers()
 
-    local_log_path, s3_target = _setup_log_paths( _active_config)
+    local_log_path, s3_target = _setup_log_paths(_active_config)
 
     file_handler = logging.FileHandler(local_log_path, mode="a")
     file_handler.setFormatter(_formatter)
@@ -284,7 +296,7 @@ def configure_logger_with_run_id(config: Dict) -> logging.Logger:
 
     LOG_FILE_PATH = str(local_log_path) if local_log_path else None
     _S3_TARGET = s3_target
-    
+
     # Always register exit handlers - not just for S3
     atexit.register(_flush_and_upload)
     sys.excepthook = _handle_uncaught_exception

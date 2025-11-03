@@ -26,6 +26,7 @@ def run_mbs_main(config_user_dict=None):
     logger.info("Starting MBS pipeline...")
 
     config = load_config("config_user.json", config_user_dict)
+
     # Now configure full logging with run_id and file handler
     configure_logger_with_run_id(config)
     logger.info("Config loaded, logger configured with run_id")
