@@ -69,7 +69,7 @@ def create_turnover_output(
 
     turnover_dict = {}
     for period in turnover_df["period"].unique():
-        turnover_dict[str(period)] = (
+        turnover_dict[str(int(period))] = (
             turnover_df[turnover_df["period"] == period]
             .drop("period", axis=1)
             .reset_index(drop=True)
