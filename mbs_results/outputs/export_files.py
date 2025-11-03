@@ -13,8 +13,6 @@ import tomli
 import mbs_results.utilities.merge_two_config_files as utils
 from mbs_results.utilities.manifest_output import Manifest
 
-# from src.utils.config import config_setup
-
 # Set up logging
 
 OutgoingLogger = logging.getLogger(__name__)
@@ -23,13 +21,6 @@ OutgoingLogger = logging.getLogger(__name__)
 warning_only = ["raz_client_logger", "requests_kerberos.kerberos_", "spnego._gss"]
 for module in warning_only:
     logging.getLogger(module).setLevel(logging.WARNING)
-
-# Set up default config
-config_default = {
-    "platform": "s3",
-    "bucket": "onscdp-dev-data01-5320d6ca",
-    "ssl_file": "/etc/pki/tls/certs/ca-bundle.crt",
-}
 
 
 def get_schema_headers(config: dict, file_select_dict: dict):
@@ -324,7 +315,3 @@ def run_export(export_config_path: str):
         )
 
     OutgoingLogger.info("Exporting files finished.")
-
-
-if __name__ == "__main__":
-    run_export(config=config_default)

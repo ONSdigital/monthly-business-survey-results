@@ -9,7 +9,5 @@ logging.basicConfig(level=logging.INFO)
 
 reload(export_files)
 
-export_config_path = "mbs_results/configs/config_export.json"
-
 if __name__ == "__main__":
-    export_files.run_export(export_config_path)
+    export_files.run_export("config_export.json")
