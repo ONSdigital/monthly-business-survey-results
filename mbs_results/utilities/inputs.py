@@ -8,7 +8,7 @@ import pandas as pd
 import raz_client
 from rdsa_utils.cdp.helpers.s3_utils import load_csv
 
-from mbs_results import configure_logger_with_run_id, logger
+from mbs_results import logger
 from mbs_results.utilities.merge_two_config_files import merge_two_config_files
 from mbs_results.utilities.utils import get_datetime_now_as_int
 
@@ -40,7 +40,6 @@ def load_config(config_user_path, config_user_dict=None):
     )
     # set run id as YYYYMMDDHHMM
     config["run_id"] = get_datetime_now_as_int()
-    configure_logger_with_run_id(config)
 
     if config_user_dict is not None:
         config.update(config_user_dict)

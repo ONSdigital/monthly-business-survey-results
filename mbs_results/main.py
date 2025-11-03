@@ -1,3 +1,4 @@
+from mbs_results import configure_logger_with_run_id, logger
 from mbs_results.estimation.estimate import estimate
 from mbs_results.imputation.impute import impute
 from mbs_results.outlier_detection.detect_outlier import detect_outlier
@@ -21,7 +22,14 @@ from mbs_results.utilities.validation_checks import (
 def run_mbs_main(config_user_dict=None):
     """Main function to run MBS methods pipeline"""
 
+    # Early logging uses MemoryHandler (buffers until config ready)
+    logger.info("Starting MBS pipeline...")
+
     config = load_config("config_user.json", config_user_dict)
+    # Now configure full logging with run_id and file handler
+    configure_logger_with_run_id(config)
+    logger.info("Config loaded, logger configured with run_id")
+
     validate_config(config)
 
     df, unprocessed_data, manual_constructions, filter_df = stage_dataframe(config)
