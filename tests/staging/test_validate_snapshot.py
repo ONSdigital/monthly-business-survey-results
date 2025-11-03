@@ -4,10 +4,34 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+from mbs_results import configure_logger_with_run_id, logger
 from mbs_results.staging.validate_snapshot import (
     check_for_null_target,
     non_response_in_responses,
 )
+
+
+@pytest.fixture(autouse=True)
+def setup_test_logger():
+    """Configure logger for testing to work with caplog."""
+    # Store original state
+    original_handlers = logger.handlers.copy()
+    original_propagate = logger.propagate
+
+    # Setup for testing
+    logger.handlers.clear()
+    logger.propagate = True
+
+    # Configure with test settings
+    test_config = {"run_id": "test-run", "platform": "network", "output_path": None}
+    configure_logger_with_run_id(test_config)
+
+    yield
+
+    # Restore original state
+    logger.handlers.clear()
+    logger.handlers.extend(original_handlers)
+    logger.propagate = original_propagate
 
 
 @pytest.fixture(scope="class")
@@ -55,28 +79,40 @@ class TestCheckForNullTarget:
     def test_check_for_null_target_nulls(
         self, caplog, check_for_null_target_responses, config
     ):
-        with caplog.at_level(logging.WARN):
-            check_for_null_target(
-                config=config,
-                responses=check_for_null_target_responses,
-                target="target",
-                question_no="questioncode",
-            )
-        assert "There are 4 rows with nulls" in caplog.text
+        # Set log level without context manager
+        caplog.set_level(logging.WARNING)
+
+        check_for_null_target(
+            config=config,
+            responses=check_for_null_target_responses,
+            target="target",
+            question_no="questioncode",
+        )
+        # Check log records directly
+        assert any(
+            "There are 4 rows with nulls" in record.message for record in caplog.records
+        )
 
     def test_check_for_null_target_empty_strings(
         self, caplog, check_for_null_target_responses, config
     ):
         responses = check_for_null_target_responses.copy()
         responses["target"] = responses["target"].fillna("")
-        with caplog.at_level(logging.WARN):
-            check_for_null_target(
-                config=config,
-                responses=responses,
-                target="target",
-                question_no="questioncode",
-            )
-        assert "There are 6 rows with empty strings" in caplog.text
+
+        # Set log level without context manager
+        caplog.set_level(logging.WARNING)
+
+        check_for_null_target(
+            config=config,
+            responses=responses,
+            target="target",
+            question_no="questioncode",
+        )
+        # Check log records directly
+        assert any(
+            "There are 6 rows with empty strings" in record.message
+            for record in caplog.records
+        )
 
 
 @pytest.fixture(scope="class")

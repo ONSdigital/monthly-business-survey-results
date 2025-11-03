@@ -8,10 +8,34 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
+from mbs_results import configure_logger_with_run_id, logger
 from mbs_results.staging.stage_dataframe import (
     drop_derived_questions,
     exclude_from_results,
 )
+
+
+@pytest.fixture(autouse=True)
+def setup_test_logger():
+    """Configure logger for testing to work with caplog."""
+    # Store original state
+    original_handlers = logger.handlers.copy()
+    original_propagate = logger.propagate
+
+    # Setup for testing
+    logger.handlers.clear()
+    logger.propagate = True
+
+    # Configure with test settings
+    test_config = {"run_id": "test-run", "platform": "network", "output_path": None}
+    configure_logger_with_run_id(test_config)
+
+    yield
+
+    # Restore original state
+    logger.handlers.clear()
+    logger.handlers.extend(original_handlers)
+    logger.propagate = original_propagate
 
 
 @pytest.fixture(scope="class")
@@ -93,23 +117,26 @@ def test_exclude_from_results_csv(responses, contributors, expected_output_csv):
 
 @patch("pandas.DataFrame.to_csv")  # mock pandas export to csv function
 def test_warning_and_csv(mock_to_csv, caplog, responses, contributors):
-    with caplog.at_level(logging.INFO):
-        exclude_from_results(
-            responses=responses,
-            contributors=contributors,
-            non_response_statuses=["Excluded from Results", "Form sent out"],
-            reference="reference",
-            period="period",
-            status="status",
-            target="adjustedresponse",
-            question_no="question_no",
-            output_path="test_outputs/",
-            run_id="1",
-            platform="network",
-            bucket="",
-        )
 
-        assert """9 rows have been dropped from responses,""" in caplog.text
+    caplog.set_level(logging.INFO)
+
+    exclude_from_results(
+        responses=responses,
+        contributors=contributors,
+        non_response_statuses=["Excluded from Results", "Form sent out"],
+        reference="reference",
+        period="period",
+        status="status",
+        target="adjustedresponse",
+        question_no="question_no",
+        output_path="test_outputs/",
+        run_id="1",
+        platform="network",
+        bucket="",
+    )
+
+    expected_msg = "9 rows have been dropped from responses,"
+    assert any(expected_msg in record.message for record in caplog.records)
 
 
 @patch("pandas.DataFrame.to_csv")  # mock pandas export to csv function

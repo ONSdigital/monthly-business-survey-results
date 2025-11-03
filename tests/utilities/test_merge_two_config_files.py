@@ -1,6 +1,28 @@
 import logging
 
+import pytest
+
+from mbs_results import logger
 from mbs_results.utilities.merge_two_config_files import merge_two_config_files
+
+
+@pytest.fixture(autouse=True)
+def setup_test_logger():
+    """Configure logger for testing to work with caplog."""
+    # Store original handlers and propagate setting
+    original_handlers = logger.handlers.copy()
+    original_propagate = logger.propagate
+
+    # Clear handlers and enable propagation for caplog
+    logger.handlers.clear()
+    logger.propagate = True
+
+    yield
+
+    # Restore original logger state
+    logger.handlers.clear()
+    logger.handlers.extend(original_handlers)
+    logger.propagate = original_propagate
 
 
 def test_merge_two_config_files(monkeypatch):
@@ -36,6 +58,9 @@ def test_merge_two_config_files_error_handling(monkeypatch, caplog):
     monkeypatch.setattr(
         "mbs_results.utilities.merge_two_config_files.load_config", mock_load_config
     )
+
+    # Set log level and ensure propagation
+    caplog.set_level(logging.ERROR)
 
     with caplog.at_level(logging.ERROR):
         config = merge_two_config_files(
