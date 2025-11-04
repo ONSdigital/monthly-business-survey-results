@@ -192,35 +192,42 @@ def _upload_log_to_s3(config: Dict) -> None:
         logger.exception(f"Failed to upload log to s3://{bucket}/{key}")
 
 
-def _flush_and_upload():
-    """Flush handlers and upload to S3 if configured."""
-    # Always flush handlers
-    for h in logger.handlers:
-        try:
-            if hasattr(h, "flush"):
-                h.flush()
-                if isinstance(h, logging.FileHandler):
-                    # Force file handler to write to disk
-                    h.close()
-                    h.stream = open(h.baseFilename, h.mode)
-        except Exception:
-            logger.exception("Failed to flush/reopen handler")
+def _flush_handler(h):
+    """Flush a single logging handler."""
+    try:
+        if isinstance(h, logging.FileHandler):
+            stream = getattr(h, "stream", None)
+            if stream and not getattr(stream, "closed", True):
+                stream.flush()
+        else:
+            h.flush()
+    except (ValueError, IOError) as e:
+        print(f"Skipping closed/invalid stream in handler {h}: {e}", file=sys.stderr)
 
-    # Upload to S3 if configured
+
+def _flush_handlers():
+    """Flush all logging handlers."""
+    for h in logger.handlers:
+        if hasattr(h, "flush"):
+            _flush_handler(h)
+
+
+def _upload_logs_if_configured():
+    """Upload logs to S3 if configured."""
     if _S3_TARGET and _active_config:
         try:
             _upload_log_to_s3(_active_config)
-        except Exception:
-            logger.exception("Failed to upload log to S3 during shutdown")
+        except Exception as e:
+            print(f"Failed to upload log to S3: {e}", file=sys.stderr)
 
 
-def _try_upload_logs(upload_func):
-    """Attempt to upload logs if S3 target is configured."""
-    try:
-        if _S3_TARGET:
-            upload_func()
-    except Exception:
-        logger.exception("Failed during upload-on-exception")
+def _flush_and_upload():
+    """
+    Flush handlers and upload to S3 if configured.
+    Safely handles closed streams and temporary files.
+    """
+    _flush_handlers()
+    _upload_logs_if_configured()
 
 
 def _handle_uncaught_exception(exc_type, exc_value, exc_tb):
