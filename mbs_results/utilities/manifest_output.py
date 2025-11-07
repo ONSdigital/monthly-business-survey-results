@@ -184,13 +184,13 @@ class Manifest:
             )
 
         # Remove leading slashes from the relative directory path
-        relative_dir_str = str(os.path.dirname(relative_file_path))
+        relative_dir_str = str(os.path.dirname(self.export_directory))
         while relative_dir_str.startswith("/"):
             relative_dir_str = relative_dir_str[1:]
 
         file_manifest = {
             "file": os.path.basename(relative_file_path),
-            "subfolder": self.export_directory,
+            "subfolder": relative_dir_str,
             "sizeBytes": file_size_bytes,
             "md5sum": self.md5sum(absolute_file_path),
             "header": column_header,
