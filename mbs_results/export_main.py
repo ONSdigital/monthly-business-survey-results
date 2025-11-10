@@ -9,7 +9,18 @@ logging.basicConfig(level=logging.INFO)
 
 reload(export_files)
 
-export_config_path = "mbs_results/configs/config_export.json"
+
+def run_export_wrapper():
+    """
+    Wrapper function for run export
+
+    This will allow it to run via console script or as an executable script.
+
+    Requires a filled config_export.json file in the working directory.
+    """
+    export_files.run_export("config_export.json")
+
 
 if __name__ == "__main__":
-    export_files.run_export(export_config_path)
+
+    run_export_wrapper()
