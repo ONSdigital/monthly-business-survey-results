@@ -39,7 +39,7 @@ def load_config(config_user_path, config_user_dict=None):
         f"and {config_dev_path}"
     )
     # set run id as YYYYMMDDHHMM or if already present in config use this value
-    config["run_id"] = config.get("run_id", get_datetime_now_as_int())
+    config["run_id"] = config.get("run_id") or get_datetime_now_as_int()
 
     if config_user_dict is not None:
         config.update(config_user_dict)
