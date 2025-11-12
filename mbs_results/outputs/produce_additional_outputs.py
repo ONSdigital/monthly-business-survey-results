@@ -159,16 +159,11 @@ def produce_additional_outputs(
             "create_csdb_output": create_csdb_output,
             "generate_devolved_outputs": generate_devolved_outputs,
             "produce_qa_output": produce_qa_output,
+            "mbs_format_population_counts": format_population_counts_mbs,
         },
         additional_outputs_df,
         qa_outputs,
         optional_outputs,
-    )
-
-    # The formatted population counts output is always produced for MBS, but does not
-    # Require the additional_output_df and loads the full population counts from file
-    additional_outputs["mbs_format_population_counts"] = format_population_counts_mbs(
-        **config
     )
 
     # Stop function if no additional_outputs are listed in config.
