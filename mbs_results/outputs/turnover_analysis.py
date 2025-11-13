@@ -76,7 +76,7 @@ def create_turnover_output(
             "reference",
             "runame1",
             "adjustedresponse",
-            "imputed_and_derived_flag",
+            "type",
             "curr_grossed_value",
             "outlier_weight",
             "status",
