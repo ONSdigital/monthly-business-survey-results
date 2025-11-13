@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 
 
@@ -54,7 +53,7 @@ def create_turnover_output(
     turnover_df["response"] = turnover_df["response"] / 1000
 
     turnover_df = turnover_df.merge(aux_info_df, how="left", on=["reference", "period"])
-    turnover_df["frotover"] = turnover_df["frotover"].astype(int) 
+    turnover_df["frotover"] = turnover_df["frotover"].astype(int)
 
     turnover_df = turnover_df[
         [
