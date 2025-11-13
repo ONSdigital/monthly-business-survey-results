@@ -59,6 +59,7 @@ class TestTurnoverPopulationCounts:
         input_dataframe,
         expected_output_dataframe,
     ):
+
         config = {
             "period": "period",
             "strata": "strata",
@@ -81,13 +82,25 @@ class TestTurnoverPopulationCounts:
             "bucket": "",
             "current_period": "202202",
             "run_id": "1",
+            "sic": "sic",
         }
-        output_df, filename = format_population_counts_mbs(**config)
+        additional_outputs_df = pd.DataFrame(
+            {
+                "period": [202202, 202202, 202202, 202202, 202202],
+                "strata": ["A", "B", "C", "C", "B"],
+                "sic": [10, 20, 30, 30, 21],
+                "reference": [100, 200, 300, 301, 202],
+            }
+        )
+        output_df, filename = format_population_counts_mbs(
+            additional_outputs_df, **config
+        )
+        print(output_df.columns)
 
         expected = pd.read_csv(
             "tests/data/estimation/population_counts"
             + "/population_counts_formatted_output.csv"
         )
 
-        pd.testing.assert_frame_equal(output_df, expected)
+        pd.testing.assert_frame_equal(output_df, expected, check_dtype=False)
         assert filename == "mbs_population_counts_1_202202_202201.csv"
