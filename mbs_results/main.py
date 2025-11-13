@@ -6,6 +6,8 @@ from mbs_results.outputs.produce_additional_outputs import (
     produce_additional_outputs,
 )
 from mbs_results.staging.stage_dataframe import stage_dataframe
+from mbs_results.utilities.utils import get_datetime_now_as_int
+from mbs_results.utilities.setup_logger import setup_logger
 from mbs_results.utilities.inputs import load_config, read_csv_wrapper
 from mbs_results.utilities.outputs import save_df
 from mbs_results.utilities.utils import export_run_id, generate_schemas, read_run_id
@@ -21,7 +23,17 @@ from mbs_results.utilities.validation_checks import (
 def run_mbs_main(config_user_dict=None):
     """Main function to run MBS methods pipeline"""
 
+    # Setup run id as YYYYMMDDHHMM
+    run_id = get_datetime_now_as_int()
+
+    # Initialise the logger at the sart of the pipeline
+    logger_name = "mbs_results"
+    logger_file_path = f"{logger_name}_{run_id}.log"
+    logger = setup_logger(logger_name=logger_name, logger_file_path=logger_file_path)
+    logger.info(f"MBS Pipeline Started: Log file: {logger_file_path}")
+
     config = load_config("config_user.json", config_user_dict)
+    config["run_id"] = run_id
     validate_config(config)
 
     df, unprocessed_data, manual_constructions, filter_df = stage_dataframe(config)
