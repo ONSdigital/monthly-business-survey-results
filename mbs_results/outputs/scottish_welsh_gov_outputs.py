@@ -1,9 +1,12 @@
 import numpy as np
 import pandas as pd
-
-from mbs_results import logger
+import logging
 from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.inputs import read_colon_separated_file
+
+
+logger = logging.getLogger(__name__)
+
 
 # Missing reporting unit RU and name
 # Should SIC be frozenSIC or SIC)5_digit

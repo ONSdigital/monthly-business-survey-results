@@ -1,6 +1,5 @@
 import pandas as pd
-
-from mbs_results import logger
+import logging
 from mbs_results.estimation.create_population_counts import format_population_counts_mbs
 from mbs_results.outputs.csdb_output import create_csdb_output
 from mbs_results.outputs.get_additional_outputs import get_additional_outputs
@@ -19,6 +18,9 @@ from mbs_results.outputs.turnover_analysis import create_turnover_output
 from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.pounds_thousands import create_pounds_thousands_column
 from mbs_results.utilities.utils import get_versioned_filename
+
+
+logger = logging.getLogger(__name__)
 
 
 def get_additional_outputs_df(

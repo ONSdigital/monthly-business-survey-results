@@ -1,6 +1,8 @@
 import json
+import logging
 
-from mbs_results import logger
+
+logger = logging.getLogger(__name__)
 
 
 def load_config(config_file_path):
