@@ -278,15 +278,6 @@ def config():
 
 
 @pytest.fixture
-def mock_metadata():
-    with patch(
-        "mbs_results.outputs.selective_editing_validations.metadata.metadata"
-    ) as mock_metadata:
-        mock_metadata.return_value = {"version": "1.0"}
-        yield mock_metadata
-
-
-@pytest.fixture
 def mock_logger():
     with patch(
         "mbs_results.outputs.selective_editing_validations.logger"
@@ -328,7 +319,6 @@ def mock_read_and_combine_colon_sep_files():
 
 def test_qa_selective_editing_outputs(
     config,
-    mock_metadata,
     mock_logger,
     mock_read_csv,
     mock_read_and_combine_colon_sep_files,

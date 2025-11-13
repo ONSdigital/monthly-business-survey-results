@@ -49,6 +49,14 @@ task and to copy runnable project files into a working folder.
         ```bash
         additional_outputs
         ```
+- `export_files`
+    - **Purpose:** Export desired files as specified in configs_export.json for the NiFi.
+    - **Examples:**
+        ```bash
+        export_files
+        ```
+
+
 
 ## Notes & tips
 - Ensure you run the console scripts from the directory where you want the output files and where `config_user.json` will be located.

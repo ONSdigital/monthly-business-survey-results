@@ -3,16 +3,23 @@
         "platform": "s3",
         "bucket": "onscdp-dev-data01-5320d6ca",
         "ssl_file": "/etc/pki/tls/certs/ca-bundle.crt",
-        "output_dir": "/ons/mbs/testing_dummy_data/out/",
-        "export_dir": "/ons/mbs/outgoing_export/",
-        "schemas_dir": "/home/cdsw/monthly-business-survey-results/mbs_results/schemas/"
+        "output_dir": "",
+        "export_dir": "",
+        "schemas_dir": ""
     },
     "options":{
         "copy_or_move_files": "copy"
     },
     "files": {
-        "export_estimation_output": "estimation_output_v0.1.5_test_snaphot.csv",
-        "export_outlier_output": "outlier_output_v0.1.5_test_snaphot.csv",
-        "export_imputation": "None"
+        "export_methods_output": "None",
+        "export_growth_rates_output": "None",
+        "export_create_csdb_output": "None",
+        "export_create_imputation_link_output": "None",
+        "export_population_counts": "None",
+        "export_produce_ocea_srs_outputs": "None",
+        "export_produce_qa_output": "None",
+        "export_scotland_generate_devolved_outputs": "None",
+        "export_turnover_output": "None",
+        "export_wales_generate_devolved_outputs": "None"
     }
 }
