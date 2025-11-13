@@ -103,6 +103,7 @@ def create_population_count_output(
 
 
 def format_population_counts_mbs(
+    additional_outputs_df: pd.DataFrame,
     period: str,
     strata: str,
     output_path: str,
@@ -110,6 +111,7 @@ def format_population_counts_mbs(
     platform: str,
     bucket: str,
     current_period: str,
+    sic: str,
     **config: dict,
 ):
     """
@@ -139,6 +141,10 @@ def format_population_counts_mbs(
         returns the formatted dataframe and the filename including current and previous
         period in filename
     """
+    df_cell_no_sic = additional_outputs_df.copy()[
+        [period, strata, sic]
+    ].drop_duplicates()
+    df_cell_no_sic[period] = df_cell_no_sic[period].astype(int)
 
     df = read_csv_wrapper(
         filepath=output_path + f"population_counts_{run_id}.csv",
@@ -155,6 +161,11 @@ def format_population_counts_mbs(
     df_curr = df[df[period] == current_period]
 
     df_prev = df_prev.drop(columns=[period])
+    df_curr = pd.merge(df_curr, df_cell_no_sic, on=[strata, period], how="left")
+    df_curr = df_curr[
+        [period, strata, sic]
+        + [col for col in df_curr.columns if col not in [period, strata, sic]]
+    ]
     df_curr = df_curr.drop(columns=[period])
 
     prev = df_prev.rename(
