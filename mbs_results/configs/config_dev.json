@@ -70,7 +70,8 @@
         "froempment",
         "frotover",
         "reference",
-        "entname1"
+        "entname1",
+        "runame1"
     ],
 
     "temporarily_remove_cols": [],
@@ -146,7 +147,8 @@
 
     "mandatory_outputs": ["produce_qa_output",
                         "turnover_output",
-                        "growth_rates_output"],
+                        "growth_rates_output",
+                        "mbs_format_population_counts"],
 
 
 

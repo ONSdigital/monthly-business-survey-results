@@ -55,6 +55,38 @@ As an end user, you will only need to change the user config (named `config_user
 ## Guidance for additional outputs
 As an end user, you will only need to change the outputs config (named `config_outputs.json`) - you just need to update the filepaths and period information in the output config. Note: for ONS users, you can find example filepaths in the Confluence documentation.
 
+
+# Export Config
+
+| Parameter | Description | Data Type | Acceptable Values |
+|---|---|---|---|
+| platform | Specifies whether you're running the pipeline locally or on DAP. | string | `"network"`, `"s3"` |
+| bucket | The path to the bucket. | string | Any filepath. |
+| ssl_file | The path to the ssl certificate. | string | Any filepath. |
+| output_dir | The path to the folder containing the files to be exported from. | string | Any filepath. |
+| export_dir | The path to the folder containing the files to be exported to. | string | Any filepath. |
+| schemas_dir | The path to the folder containing the schema toml data, if empty the export headers in manifest will be set to empty string. | string | Any filepath. |
+| copy_or_move_files | Whether to copy or move the listed files. | string | `"copy"`, `"move"` |
+| files | The filnames for the files to be exported use `None` if you don't want to export the relevant files. | dictionary of strings | Any filename. |
+
+e.g the example below will export only the file `cons_results_202511071451.csv`:
+```
+ "files": {
+        "export_methods_output": "cons_results_202511071451.csv",
+        "export_growth_rates_output": "None",
+        "export_create_csdb_output": "None",
+        "export_create_imputation_link_output": "None",
+        "export_population_counts": "None",
+        "export_produce_ocea_srs_outputs": "None",
+        "export_produce_qa_output": "None",
+        "export_scotland_generate_devolved_outputs": "None",
+        "export_turnover_output": "None",
+        "export_wales_generate_devolved_outputs": "None"
+    }
+```
+## Guidance for additional outputs
+As an end user, you will only need to change the export config (named `config_export.json`). The process will copy (or move) the files listed in the `files` section from the defined `output_dir` to `export_dir`, and will create a manifest json file for the NiFi.
+
 # Dev Config
 | Parameter | Description | Default | Data Type | Acceptable Values |
 |---|---|---|---|---|

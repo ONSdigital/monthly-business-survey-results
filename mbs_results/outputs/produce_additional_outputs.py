@@ -1,5 +1,3 @@
-from importlib import metadata
-
 import pandas as pd
 
 from mbs_results import logger
@@ -83,6 +81,7 @@ def get_additional_outputs_df(
         "status",
         "winsorised_value",
         config["pound_thousand_col"],
+        "runame1",
     ]
     if not config["filter"]:
         count_variables = [f"b_match_{target}_count", f"f_match_{target}_count"]
@@ -160,16 +159,11 @@ def produce_additional_outputs(
             "create_csdb_output": create_csdb_output,
             "generate_devolved_outputs": generate_devolved_outputs,
             "produce_qa_output": produce_qa_output,
+            "mbs_format_population_counts": format_population_counts_mbs,
         },
         additional_outputs_df,
         qa_outputs,
         optional_outputs,
-    )
-
-    # The formatted population counts output is always produced for MBS, but does not
-    # Require the additional_output_df and loads the full population counts from file
-    additional_outputs["mbs_format_population_counts"] = format_population_counts_mbs(
-        **config
     )
 
     # Stop function if no additional_outputs are listed in config.
@@ -244,8 +238,6 @@ def produce_selective_editing_outputs(
     if additional_outputs is None:
         return
 
-    file_version_mbs = metadata.metadata("monthly-business-survey-results")["version"]
-
     # Stop function if no additional_outputs are listed in config.
     if additional_outputs is None:
         return
@@ -256,7 +248,7 @@ def produce_selective_editing_outputs(
         else:
             file = output.split("_")[-1]
             period = df["period"].unique()[0].astype(int)
-            filename = f"se{file}009_{period}_v{file_version_mbs}.csv"
+            filename = f"se{file}009_{period}.csv"
         # output_value = additional_outputs[output]
         if isinstance(df, dict):
             # if the output is a dictionary (e.g. from generate_devolved_outputs),
