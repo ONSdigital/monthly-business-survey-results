@@ -24,9 +24,15 @@ def create_turnover_output(
     """
 
     aux_info_df = (
-        additional_outputs_df[["reference", "period", "runame1", "frotover", "status"]]
+        additional_outputs_df[["reference", "period", "runame1", "frotover"]]
         .drop_duplicates()
         .dropna(how="any")
+        .merge(
+            additional_outputs_df[["reference", "period", "status"]].dropna(how="any"),
+            how="left",
+            on=["reference", "period"],
+        )
+        .drop_duplicates()
     )
 
     turnover_df = (
@@ -70,7 +76,7 @@ def create_turnover_output(
             "reference",
             "runame1",
             "adjustedresponse",
-            "type",
+            "imputed_and_derived_flag",
             "curr_grossed_value",
             "outlier_weight",
             "status",
