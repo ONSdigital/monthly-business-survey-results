@@ -53,21 +53,8 @@ def create_turnover_output(
     turnover_df["adjustedresponse"] = turnover_df["adjustedresponse"] / 1000
     turnover_df["response"] = turnover_df["response"] / 1000
 
-    # Convert imp_marker to type
-    # Type 1: Return, Type 2: Construction, Type 3: Imputation
-    type_conditions = [
-        turnover_df["imputation_flags_adjustedresponse"] == "r",
-        turnover_df["imputation_flags_adjustedresponse"].isin(["c", "mc"]),
-        turnover_df["imputation_flags_adjustedresponse"].isin(
-            ["fir", "bir", "fic", "fimc"]
-        ),
-    ]
-
-    type_values = [1, 2, 3]
-
-    turnover_df["type"] = np.select(type_conditions, type_values)
-
     turnover_df = turnover_df.merge(aux_info_df, how="left", on=["reference", "period"])
+    turnover_df["frotover"] = turnover_df["frotover"].astype(int) 
 
     turnover_df = turnover_df[
         [
@@ -76,7 +63,7 @@ def create_turnover_output(
             "reference",
             "runame1",
             "adjustedresponse",
-            "type",
+            "imputed_and_derived_flag",
             "curr_grossed_value",
             "outlier_weight",
             "status",
