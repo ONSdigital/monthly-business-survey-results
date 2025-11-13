@@ -1,4 +1,4 @@
 frosic2007,cell_no,reference,runame1,adjustedresponse,type,curr_grossed_value,outlier_weight,status,frotover,response
-1,32,101,NAME 1,4205.4,1,4625.94,1,O,594,5940
-2,6,102,NAME 2,448,2,448,1,C,43,448
-2,19,103,NAME 3,84205.9,3,378926.55,1.5,E,509,75940
+1,32,101,NAME 1,4.2054,1,4.62594,1,O,594,5.94
+2,6,102,NAME 2,0.448,2,0.448,1,C,43,0.448
+2,19,103,NAME 3,84.2059,3,378.92655,1.5,E,509,75.94

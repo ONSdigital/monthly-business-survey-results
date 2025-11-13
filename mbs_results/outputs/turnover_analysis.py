@@ -23,14 +23,29 @@ def create_turnover_output(
         dataframe in correct format for populating turnover analysis tool.
     """
 
-    turnover_df = additional_outputs_df.copy().query("questioncode == 40")
+    aux_info_df = (
+        additional_outputs_df[["reference", "period", "runame1", "frotover", "status"]]
+        .drop_duplicates()
+        .dropna(how="any")
+    )
+
+    turnover_df = (
+        additional_outputs_df.copy()
+        .query("questioncode == 40")
+        .drop(columns=["runame1", "frotover", "status"])
+    )
 
     turnover_df["curr_grossed_value"] = (
         turnover_df["adjustedresponse"]
         * turnover_df["design_weight"]
         * turnover_df["outlier_weight"]
         * turnover_df["calibration_factor"]
+        / 1000
     )
+
+    # Also converting adjustedresponse and response to pounds thousands
+    turnover_df["adjustedresponse"] = turnover_df["adjustedresponse"] / 1000
+    turnover_df["response"] = turnover_df["response"] / 1000
 
     # Convert imp_marker to type
     # Type 1: Return, Type 2: Construction, Type 3: Imputation
@@ -46,9 +61,7 @@ def create_turnover_output(
 
     turnover_df["type"] = np.select(type_conditions, type_values)
 
-    # Check if referencename in data
-    if "runame1" not in turnover_df.columns:
-        turnover_df["runame1"] = ""
+    turnover_df = turnover_df.merge(aux_info_df, how="left", on=["reference", "period"])
 
     turnover_df = turnover_df[
         [
