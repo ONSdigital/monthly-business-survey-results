@@ -50,7 +50,7 @@ def create_turnover_output(
 
     # Also converting adjustedresponse and response to pounds thousands
     turnover_df["adjustedresponse"] = turnover_df["adjustedresponse"] / 1000
-    turnover_df["response"] = turnover_df["response"] / 1000
+    turnover_df["response"] = turnover_df["response"].astype(float) / 1000
 
     turnover_df = turnover_df.merge(aux_info_df, how="left", on=["reference", "period"])
     turnover_df["frotover"] = turnover_df["frotover"].astype(int)
