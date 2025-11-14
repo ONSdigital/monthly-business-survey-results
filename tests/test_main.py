@@ -106,7 +106,7 @@ def test_produce_additional_outputs_wrapper():
         "bucket": "",
         "idbr_folder_path": input_path,
         "snapshot_file_path": input_path + "test_snaphot.json",
-        "main_mbs_output_folder": "tests/data/test_main/output/",
+        "main_mbs_output_folder_path": "tests/data/test_main/output/",
         "mbs_output_prefix": "mbs_results",
         "population_counts_prefix": "population_counts",
         "cdid_data_path": "tests/data/outputs/csdb_output/cdid_mapping.csv",

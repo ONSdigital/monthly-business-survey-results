@@ -69,7 +69,7 @@ def produce_additional_outputs_wrapper(config_user_dict=None):
         config["run_id"],
     )
 
-    output_path = f"{config['main_mbs_output_folder']}{output_file_name}"
+    output_path = f"{config['main_mbs_output_folder_path']}{output_file_name}"
 
     df = read_csv_wrapper(
         filepath=output_path,

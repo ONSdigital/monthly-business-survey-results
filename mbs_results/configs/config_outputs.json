@@ -3,7 +3,7 @@
     "ssl_file" : "",
     "idbr_folder_path": "",
     "snapshot_file_path": "",
-    "main_mbs_output_folder": "",
+    "main_mbs_output_folder_path": "",
     "mbs_output_prefix": "mbs_results",
     "population_counts_prefix": "population_counts",
     "cdid_data_path": "",
