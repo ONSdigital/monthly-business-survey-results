@@ -81,6 +81,7 @@ class TestTurnoverPopulationCounts:
             "bucket": "",
             "current_period": "202202",
             "run_id": "1",
+            "population_counts_prefix": "population_counts",
         }
         output_df, filename = format_population_counts_mbs(**config)
 
