@@ -81,7 +81,7 @@ def save_df(df: pd.DataFrame, base_filename: str, config: dict, on_demand=True):
     # export on demand
     if on_demand:
 
-        filename = get_versioned_filename(base_filename, config)
+        filename = get_versioned_filename(base_filename, config["run_id"])
 
         write_csv_wrapper(
             df,

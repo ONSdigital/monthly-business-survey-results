@@ -25,9 +25,7 @@ def convert_column_to_datetime(dates):
     return pd.to_datetime(dates, format="%Y%m")
 
 
-def get_versioned_filename(prefix, config):
-
-    run_id = config["run_id"]
+def get_versioned_filename(prefix, run_id):
 
     filename = f"{prefix}_{run_id}.csv"
 
