@@ -8,8 +8,8 @@
             "sic92": 45310,
             "error_mkr": "O",
             "response_type": 1,
-            "status": "test",
-            "statusencoded": 1
+            "status": "Check needed",
+            "statusencoded": 201
         }
     ],
     "responses": [

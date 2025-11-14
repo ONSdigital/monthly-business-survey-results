@@ -170,6 +170,14 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         contributors, on=[reference, period], suffixes=["_res", "_con"], how="left"
     )
 
+    df = run_live_or_frozen(
+        df,
+        config["target"],
+        status=config["status"],
+        state=config["state"],
+        error_values=[201],
+    )
+
     df = append_back_data(df, config)
 
     df, unprocessed_data = filter_out_questions(
@@ -183,15 +191,6 @@ def stage_dataframe(config: dict) -> pd.DataFrame:
         config["question_no"],
         config["form_id_spp"],
         config["form_to_derived_map"],
-    )
-
-    warnings.warn("add live or frozen after fixing error marker column in config")
-    df = run_live_or_frozen(
-        df,
-        config["target"],
-        status=config["status"],
-        state=config["state"],
-        error_values=[201],
     )
 
     df = convert_annual_thousands(
