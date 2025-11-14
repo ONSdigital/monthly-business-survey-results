@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 from pandas.testing import assert_frame_equal
 
+from mbs_results import configure_logger_with_run_id, logger
 from mbs_results.utilities.constrains import (
     calculate_derived_outlier_weights,
     constrain,
@@ -14,6 +15,29 @@ from mbs_results.utilities.constrains import (
     sum_sub_df,
     update_derived_weight_and_winsorised_value,
 )
+
+
+@pytest.fixture(autouse=True)
+def setup_test_logger():
+    """Configure logger for testing to work with caplog."""
+    # Store original state
+    original_handlers = logger.handlers.copy()
+    original_propagate = logger.propagate
+
+    # Setup for testing
+    logger.handlers.clear()
+    logger.propagate = True
+
+    # Configure with test settings
+    test_config = {"run_id": "test-run", "platform": "network", "output_path": None}
+    configure_logger_with_run_id(test_config)
+
+    yield
+
+    # Restore original state
+    logger.handlers.clear()
+    logger.handlers.extend(original_handlers)
+    logger.propagate = original_propagate
 
 
 @pytest.fixture(scope="class")
@@ -326,14 +350,19 @@ class TestManualOutliers:
             "bucket": "",
         }
 
-        with caplog.at_level(logging.WARN):
-            replace_with_manual_outlier_weights(
-                df_in,
-                "reference",
-                "period",
-                "question_no",
-                "outlier_weight",
-                test_config,
-            )
+        # Set log level without context manager
+        caplog.set_level(logging.WARNING)
+        replace_with_manual_outlier_weights(
+            df_in,
+            "reference",
+            "period",
+            "question_no",
+            "outlier_weight",
+            test_config,
+        )
 
-        assert "There are 1 unmatched references" in caplog.text
+        # Check log records directly
+        assert any(
+            "There are 1 unmatched references" in record.message
+            for record in caplog.records
+        )

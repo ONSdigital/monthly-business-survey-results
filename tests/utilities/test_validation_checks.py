@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from mbs_results import configure_logger_with_run_id, logger
 from mbs_results.outputs.selective_editing_validations import (
     qa_selective_editing_outputs,
 )
@@ -20,6 +21,29 @@ from mbs_results.utilities.validation_checks import (
     validate_manual_outlier_df,
     validate_outlier_detection,
 )
+
+
+@pytest.fixture(autouse=True)
+def setup_test_logger():
+    """Configure logger for testing to work with caplog."""
+    # Store original state
+    original_handlers = logger.handlers.copy()
+    original_propagate = logger.propagate
+
+    # Setup for testing
+    logger.handlers.clear()
+    logger.propagate = True
+
+    # Configure with test settings
+    test_config = {"run_id": "test-run", "platform": "network", "output_path": None}
+    configure_logger_with_run_id(test_config)
+
+    yield
+
+    # Restore original state
+    logger.handlers.clear()
+    logger.handlers.extend(original_handlers)
+    logger.propagate = original_propagate
 
 
 def test_colnames_clash():
@@ -249,16 +273,18 @@ def test_validate_outlier_weight_error(caplog):
 
         test_data = pd.DataFrame(data=test_data_dict)
 
-        with caplog.at_level(logging.ERROR):
-            validate_outlier_detection(df=test_data, config=test_config)
+        # Set log level without context manager
+        caplog.set_level(logging.ERROR)
+
+        validate_outlier_detection(df=test_data, config=test_config)
 
         expected_message = (
             "There are instances where the design weight = 1 and outlier_weight != 1."
             f"References: {[1]}"
         )
 
-        # Assert that the expected message is in the captured logs
-        assert expected_message in caplog.text
+        # Check log records directly
+        assert any(expected_message in record.message for record in caplog.records)
 
 
 @pytest.fixture
