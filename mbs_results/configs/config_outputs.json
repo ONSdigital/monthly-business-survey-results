@@ -3,11 +3,14 @@
     "ssl_file" : "",
     "idbr_folder_path": "",
     "snapshot_file_path": "",
-    "mbs_output_path": "",
+    "main_mbs_output_folder_path": "",
+    "mbs_output_prefix": "mbs_results",
+    "population_counts_prefix": "population_counts",
     "cdid_data_path": "",
     "output_path": "",
     "ludets_prefix": "",
     "current_period": 202303,
     "revision_window": 15,
-    "devolved_nations": ["Scotland", "Wales"]
+    "devolved_nations": ["Scotland", "Wales"],
+    "run_id": ""
 }

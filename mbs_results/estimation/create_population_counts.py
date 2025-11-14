@@ -2,6 +2,7 @@ import pandas as pd
 
 from mbs_results.utilities.inputs import read_csv_wrapper
 from mbs_results.utilities.outputs import write_csv_wrapper
+from mbs_results.utilities.utils import get_versioned_filename
 
 
 def calculate_turnover_sum_count(
@@ -141,13 +142,18 @@ def format_population_counts_mbs(
         returns the formatted dataframe and the filename including current and previous
         period in filename
     """
+    population_counts_filename = get_versioned_filename(
+        config["population_counts_prefix"], run_id
+    )
+    population_counts_path = f"{output_path}{population_counts_filename}"
+
     df_cell_no_sic = additional_outputs_df.copy()[
         [period, strata, sic]
     ].drop_duplicates()
     df_cell_no_sic[period] = df_cell_no_sic[period].astype(int)
 
     df = read_csv_wrapper(
-        filepath=output_path + f"population_counts_{run_id}.csv",
+        filepath=population_counts_path,
         import_platform=platform,
         bucket_name=bucket,
     )
