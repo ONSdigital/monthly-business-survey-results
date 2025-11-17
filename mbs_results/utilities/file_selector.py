@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import List
 
@@ -5,7 +6,6 @@ import boto3
 import pandas as pd
 import raz_client
 from rdsa_utils.cdp.helpers.s3_utils import list_files
-import logging
 
 logger = logging.getLogger(__name__)
 

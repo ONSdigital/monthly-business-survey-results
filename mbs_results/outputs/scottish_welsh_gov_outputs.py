@@ -1,9 +1,10 @@
+import logging
+
 import numpy as np
 import pandas as pd
-import logging
+
 from mbs_results.utilities.file_selector import find_files
 from mbs_results.utilities.inputs import read_colon_separated_file
-
 
 logger = logging.getLogger(__name__)
 

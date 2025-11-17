@@ -1,6 +1,8 @@
-import warnings
-import pandas as pd
 import logging
+import warnings
+
+import pandas as pd
+
 from mbs_results.staging.data_cleaning import (
     create_form_type_spp_column,
     enforce_datatypes,
@@ -8,7 +10,6 @@ from mbs_results.staging.data_cleaning import (
 from mbs_results.staging.dfs_from_spp import get_dfs_from_spp
 from mbs_results.utilities.inputs import read_colon_separated_file, read_csv_wrapper
 from mbs_results.utilities.utils import convert_column_to_datetime
-
 
 logger = logging.getLogger(__name__)
 

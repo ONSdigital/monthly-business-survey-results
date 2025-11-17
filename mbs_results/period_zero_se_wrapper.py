@@ -15,6 +15,7 @@ from mbs_results.staging.data_cleaning import (
 from mbs_results.staging.stage_dataframe import drop_derived_questions
 from mbs_results.utilities.inputs import load_config
 from mbs_results.utilities.outputs import save_df
+from mbs_results.utilities.utils import read_run_id
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -40,6 +41,7 @@ def period_zero_se_wrapper(config_user_dict=None):
     # for construction links.
 
     config = load_config("config_user.json", config_user_dict)
+    config["run_id"] = read_run_id()
     # Read in back data
     back_data = read_and_process_back_data(config)
 

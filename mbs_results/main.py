@@ -6,11 +6,15 @@ from mbs_results.outputs.produce_additional_outputs import (
     produce_additional_outputs,
 )
 from mbs_results.staging.stage_dataframe import stage_dataframe
-from mbs_results.utilities.utils import get_datetime_now_as_int
-from mbs_results.utilities.setup_logger import setup_logger
 from mbs_results.utilities.inputs import load_config, read_csv_wrapper
 from mbs_results.utilities.outputs import save_df
-from mbs_results.utilities.utils import export_run_id, generate_schemas, read_run_id
+from mbs_results.utilities.setup_logger import setup_logger, upload_logger_file_to_s3
+from mbs_results.utilities.utils import (
+    export_run_id,
+    generate_schemas,
+    get_datetime_now_as_int,
+    read_run_id,
+)
 from mbs_results.utilities.validation_checks import (
     validate_config,
     validate_estimation,
@@ -28,13 +32,15 @@ def run_mbs_main(config_user_dict=None):
 
     # Initialise the logger at the sart of the pipeline
     logger_name = "mbs_results"
-    logger_file_path = f"{logger_name}_{run_id}.log"
+    logger_file_path = f"{logger_name}_{str(run_id)}.log"
     logger = setup_logger(logger_name=logger_name, logger_file_path=logger_file_path)
     logger.info(f"MBS Pipeline Started: Log file: {logger_file_path}")
 
     config = load_config("config_user.json", config_user_dict)
     config["run_id"] = run_id
     validate_config(config)
+
+    logger.info(f"Get the run id from config: {config.get('run_id')}")
 
     df, unprocessed_data, manual_constructions, filter_df = stage_dataframe(config)
     validate_staging(df, config)
@@ -63,6 +69,8 @@ def run_mbs_main(config_user_dict=None):
     generate_schemas(config)
 
     export_run_id(config["run_id"])
+
+    upload_logger_file_to_s3(config, logger_file_path)
 
 
 def produce_additional_outputs_wrapper(config_user_dict=None):
