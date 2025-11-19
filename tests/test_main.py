@@ -42,7 +42,7 @@ test_config = {
     "generate_schemas": True,
     "schema_path": "tests/data/test_main/schemas/",
     "debug_mode": True,
-    "run_id": "1",
+    "run_id": 1,
 }
 
 
