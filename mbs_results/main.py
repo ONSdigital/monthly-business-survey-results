@@ -11,8 +11,9 @@ from mbs_results.utilities.outputs import save_df
 from mbs_results.utilities.utils import (
     export_run_id,
     generate_schemas,
+    get_or_create_run_id,
+    get_or_read_run_id,
     get_versioned_filename,
-    read_run_id,
 )
 from mbs_results.utilities.validation_checks import (
     validate_config,
@@ -27,6 +28,7 @@ def run_mbs_main(config_user_dict=None):
     """Main function to run MBS methods pipeline"""
 
     config = load_config("config_user.json", config_user_dict)
+    config["run_id"] = get_or_create_run_id(config)
     validate_config(config)
 
     df, unprocessed_data, manual_constructions, filter_df = stage_dataframe(config)
@@ -62,7 +64,7 @@ def produce_additional_outputs_wrapper(config_user_dict=None):
     """Produces any additional outputs based on MBS methods output"""
 
     config = load_config("config_outputs.json", config_user_dict)
-    config["run_id"] = config.get("run_id") or read_run_id()
+    config["run_id"] = get_or_read_run_id(config)
 
     output_file_name = get_versioned_filename(
         config["mbs_output_prefix"],

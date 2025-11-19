@@ -310,3 +310,41 @@ def read_run_id() -> str:
         raise ValueError(".RUN_ID must be one line")
 
     return file[0]
+
+
+def get_or_create_run_id(config: dict) -> int:
+    """
+    gets run id from config or creates a new one based on current datatime
+
+    Parameters
+    ----------
+    config : dict
+        dictionary containing configuration parameters, run_id does not need to be
+        present.
+
+    Returns
+    -------
+    int
+        The run ID.
+    """
+    run_id = config.get("run_id") or get_datetime_now_as_int()
+    return run_id
+
+
+def get_or_read_run_id(config: dict) -> int:
+    """
+    Gets run ID from config or reads it from .RUN_ID file.
+
+    Parameters
+    ----------
+    config : dict
+        Dictionary containing configuration parameters, run_id does not need to be
+        present.
+
+    Returns
+    -------
+    int
+        The run ID.
+    """
+    run_id = config.get("run_id") or read_run_id()
+    return run_id

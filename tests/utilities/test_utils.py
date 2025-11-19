@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -15,6 +17,8 @@ from mbs_results.utilities.utils import (
     check_unique_per_cell_period,
     compare_two_dataframes,
     generate_schemas,
+    get_or_create_run_id,
+    get_or_read_run_id,
 )
 
 
@@ -196,3 +200,21 @@ class TestGenerateSchemas:
         schema = toml.load(config["schema_path"] + "versioned_name_schema.toml")
 
         assert schema
+
+
+class TestRunIDFunctions:
+    def test_get_or_create_run_id(self):
+        with patch(
+            "mbs_results.utilities.utils.get_datetime_now_as_int", return_value=1234
+        ):
+            result_empty = get_or_create_run_id({"run_id": ""})
+            result_populated = get_or_create_run_id({"run_id": 5678})
+        assert result_empty == 1234
+        assert result_populated == 5678
+
+    def test_get_or_read_run_id(self, config):
+        with patch("mbs_results.utilities.utils.read_run_id", return_value=4321):
+            result_empty = get_or_read_run_id({"run_id": ""})
+            result_populated = get_or_read_run_id({"run_id": 5678})
+        assert result_empty == 4321
+        assert result_populated == 5678
