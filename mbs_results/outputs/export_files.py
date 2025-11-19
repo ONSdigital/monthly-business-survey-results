@@ -105,7 +105,7 @@ def get_file_choice(paths, config: dict):
 
     # Use dictionary comprehension to create the selection list dict
     selection_dict = {
-        dir[7:]: Path(f"{root_output}/{file}").with_suffix(".csv")
+        dir[7:]: Path(f"{root_output}/{file}")
         for dir, file in output_paths.items()
         if file != "None"
     }
