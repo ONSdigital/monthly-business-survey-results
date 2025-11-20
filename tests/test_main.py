@@ -26,6 +26,7 @@ test_config = {
     "output_path": "tests/data/test_main/output/",
     "population_prefix": "test_universe009",
     "sample_prefix": "test_finalsel009",
+    "population_counts_prefix": "population_counts",
     "back_data_qv_path": input_path + "test_qv_009_202112.csv",
     "back_data_cp_path": input_path + "test_cp_009_202112.csv",
     "back_data_qv_cp_json_path": input_path + "test_json_backdata.json",
@@ -41,7 +42,7 @@ test_config = {
     "generate_schemas": True,
     "schema_path": "tests/data/test_main/schemas/",
     "debug_mode": True,
-    "run_id": "1",
+    "run_id": 1,
 }
 
 
@@ -105,12 +106,15 @@ def test_produce_additional_outputs_wrapper():
         "bucket": "",
         "idbr_folder_path": input_path,
         "snapshot_file_path": input_path + "test_snaphot.json",
-        "mbs_output_path": "tests/data/test_main/output/expected_from_mbs_main.csv",
+        "main_mbs_output_folder_path": "tests/data/test_main/output/",
+        "mbs_output_prefix": "mbs_results",
+        "population_counts_prefix": "population_counts",
         "cdid_data_path": "tests/data/outputs/csdb_output/cdid_mapping.csv",
         "output_path": "tests/data/test_main/output/",
         "ludets_prefix": "ludets009_",
         "current_period": 202206,
         "revision_window": 6,
         "devolved_nations": ["Scotland", "Wales"],
+        "run_id": "1",
     }
     produce_additional_outputs_wrapper(config_user_dict=test_outputs_config)

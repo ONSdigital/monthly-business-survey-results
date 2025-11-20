@@ -82,6 +82,7 @@ class TestTurnoverPopulationCounts:
             "bucket": "",
             "current_period": "202202",
             "run_id": "1",
+            "population_counts_prefix": "population_counts",
             "sic": "sic",
         }
         additional_outputs_df = pd.DataFrame(

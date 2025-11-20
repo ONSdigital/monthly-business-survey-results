@@ -32,7 +32,7 @@ def load_main_output(config: dict) -> pd.DataFrame:
         A DataFrame containing the imputation output data.
     """
     output_path = config["output_path"]
-    imputation_filename = get_versioned_filename("mbs_results", config)
+    imputation_filename = get_versioned_filename("mbs_results", config["run_id"])
 
     imputation_output = read_csv_wrapper(
         output_path + imputation_filename, config["platform"], config["bucket"]

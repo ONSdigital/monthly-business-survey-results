@@ -8,7 +8,13 @@ from mbs_results.outputs.produce_additional_outputs import (
 from mbs_results.staging.stage_dataframe import stage_dataframe
 from mbs_results.utilities.inputs import load_config, read_csv_wrapper
 from mbs_results.utilities.outputs import save_df
-from mbs_results.utilities.utils import export_run_id, generate_schemas, read_run_id
+from mbs_results.utilities.utils import (
+    export_run_id,
+    generate_schemas,
+    get_or_create_run_id,
+    get_or_read_run_id,
+    get_versioned_filename,
+)
 from mbs_results.utilities.validation_checks import (
     validate_config,
     validate_estimation,
@@ -22,6 +28,7 @@ def run_mbs_main(config_user_dict=None):
     """Main function to run MBS methods pipeline"""
 
     config = load_config("config_user.json", config_user_dict)
+    config["run_id"] = get_or_create_run_id(config)
     validate_config(config)
 
     df, unprocessed_data, manual_constructions, filter_df = stage_dataframe(config)
@@ -57,10 +64,17 @@ def produce_additional_outputs_wrapper(config_user_dict=None):
     """Produces any additional outputs based on MBS methods output"""
 
     config = load_config("config_outputs.json", config_user_dict)
-    config["run_id"] = read_run_id()
+    config["run_id"] = get_or_read_run_id(config)
+
+    output_file_name = get_versioned_filename(
+        config["mbs_output_prefix"],
+        config["run_id"],
+    )
+
+    output_path = f"{config['main_mbs_output_folder_path']}{output_file_name}"
 
     df = read_csv_wrapper(
-        filepath=config["mbs_output_path"],
+        filepath=output_path,
         import_platform=config["platform"],
         bucket_name=config["bucket"],
     )
