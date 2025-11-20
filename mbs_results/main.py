@@ -40,8 +40,6 @@ def run_mbs_main(config_user_dict=None):
     config["run_id"] = run_id
     validate_config(config)
 
-    logger.info(f"Get the run id from config: {config.get('run_id')}")
-
     df, unprocessed_data, manual_constructions, filter_df = stage_dataframe(config)
     validate_staging(df, config)
 
