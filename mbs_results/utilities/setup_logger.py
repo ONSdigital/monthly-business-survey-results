@@ -6,20 +6,19 @@ import raz_client
 from rdsa_utils.cdp.helpers.s3_utils import upload_file
 
 
-def setup_logger(logger_name: str, logger_file_path: str) -> logging.Logger:
+def setup_logger(logger_file_path: str) -> logging.Logger:
     """
-    Sets up a logger with the specified name and file path.
+    Sets up a logger with the specified file path.
     Call this function once at the start of the pipeline.
 
     Parameters:
-        logger_name (str): The name of the logger.
         logger_file_path (str): The file path where the log file will be stored. If
                                 None, logs will only be printed to the console.
 
     Returns:
         logging.Logger: Configured logger instance.
     """
-    logger = logging.getLogger(logger_name)
+    logger = logging.getLogger("root")
     logger.setLevel(logging.DEBUG)
     logger.propagate = True
 
