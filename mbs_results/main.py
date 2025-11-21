@@ -29,7 +29,7 @@ def run_mbs_main(config_user_dict=None):
     """Main function to run MBS methods pipeline"""
 
     # Setup run id
-    run_id = get_datetime_now_as_int()
+    run_id = config_user_dict.get("run_id") or get_datetime_now_as_int()
 
     # Initialise the logger at the sart of the pipeline
     logger_name = "mbs_results"
