@@ -13,7 +13,8 @@ from mbs_results.utilities.utils import (
     export_run_id,
     generate_schemas,
     get_datetime_now_as_int,
-    read_run_id,
+    get_or_read_run_id,
+    get_versioned_filename,
 )
 from mbs_results.utilities.validation_checks import (
     validate_config,
@@ -27,7 +28,7 @@ from mbs_results.utilities.validation_checks import (
 def run_mbs_main(config_user_dict=None):
     """Main function to run MBS methods pipeline"""
 
-    # Setup run id as YYYYMMDDHHMM
+    # Setup run id
     run_id = get_datetime_now_as_int()
 
     # Initialise the logger at the sart of the pipeline
@@ -39,8 +40,6 @@ def run_mbs_main(config_user_dict=None):
     config = load_config("config_user.json", config_user_dict)
     config["run_id"] = run_id
     validate_config(config)
-
-    logger.info(f"Get the run id from config: {config.get('run_id')}")
 
     df, unprocessed_data, manual_constructions, filter_df = stage_dataframe(config)
     validate_staging(df, config)
@@ -77,10 +76,17 @@ def produce_additional_outputs_wrapper(config_user_dict=None):
     """Produces any additional outputs based on MBS methods output"""
 
     config = load_config("config_outputs.json", config_user_dict)
-    config["run_id"] = read_run_id()
+    config["run_id"] = get_or_read_run_id(config)
+
+    output_file_name = get_versioned_filename(
+        config["mbs_output_prefix"],
+        config["run_id"],
+    )
+
+    output_path = f"{config['main_mbs_output_folder_path']}{output_file_name}"
 
     df = read_csv_wrapper(
-        filepath=config["mbs_output_path"],
+        filepath=output_path,
         import_platform=config["platform"],
         bucket_name=config["bucket"],
     )

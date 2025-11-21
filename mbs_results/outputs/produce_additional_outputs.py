@@ -177,7 +177,7 @@ def produce_additional_outputs(
         if name:
             filename = name
         else:
-            filename = get_versioned_filename(output, config)
+            filename = get_versioned_filename(output, config["run_id"])
         # output_value = additional_outputs[output]
         if isinstance(df, dict):
             # if the output is a dictionary (e.g. from generate_devolved_outputs),
