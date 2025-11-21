@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import List
 
@@ -6,7 +7,7 @@ import pandas as pd
 import raz_client
 from rdsa_utils.cdp.helpers.s3_utils import list_files
 
-from mbs_results import logger
+logger = logging.getLogger(__name__)
 
 
 def generate_expected_periods(current_period: int, revision_window: int) -> List[str]:

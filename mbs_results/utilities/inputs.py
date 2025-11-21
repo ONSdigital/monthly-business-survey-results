@@ -1,4 +1,5 @@
 import inspect
+import logging
 import os
 import re
 from typing import List
@@ -8,8 +9,9 @@ import pandas as pd
 import raz_client
 from rdsa_utils.cdp.helpers.s3_utils import load_csv
 
-from mbs_results import logger
 from mbs_results.utilities.merge_two_config_files import merge_two_config_files
+
+logger = logging.getLogger(__name__)
 
 
 def load_config(config_user_path, config_user_dict=None):

@@ -1,9 +1,10 @@
 import importlib
+import logging
 import os
 import shutil
 from typing import Optional
 
-from mbs_results import logger
+logger = logging.getLogger(__name__)
 
 
 def copy_script_and_config(

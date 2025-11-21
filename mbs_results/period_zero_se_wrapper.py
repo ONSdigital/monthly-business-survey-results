@@ -18,6 +18,7 @@ from mbs_results.utilities.outputs import save_df
 from mbs_results.utilities.utils import get_or_create_run_id
 
 logger = logging.getLogger(__name__)
+
 logging.basicConfig(
     filename="period_zero_se_wrapper.txt",
     level=logging.DEBUG,
