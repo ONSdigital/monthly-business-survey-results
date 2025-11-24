@@ -30,9 +30,7 @@ def run_mbs_main(config_user_dict=None):
 
     # Setup run id
     run_id = (
-        config_user_dict.get("run_id")
-        if config_user_dict
-        else get_datetime_now_as_int()
+        config_user_dict["run_id"] if config_user_dict else get_datetime_now_as_int()
     )
 
     # Initialise the logger at the sart of the pipeline

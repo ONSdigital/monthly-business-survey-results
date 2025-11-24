@@ -43,7 +43,8 @@ def setup_logger(logger_file_path: str) -> logging.Logger:
 
 
 def upload_logger_file_to_s3(config: dict, local_path: str) -> bool:
-    """Uploads a local file/logger file to S3 using Raz for authentication.
+    """
+    Uploads a local file/logger file to S3 using Raz for authentication.
     Parameters:
         config (dict): Configuration dictionary containing
                        - S3 Bucket
@@ -52,18 +53,15 @@ def upload_logger_file_to_s3(config: dict, local_path: str) -> bool:
         local_path (str): Path to the local file to be uploaded.
 
     Returns:
-        bool: True if upload is successful, False otherwise.
+        None
     """
-    if config.get("platform") != "s3":
-        return False
-    client = boto3.client("s3")
-    ssl_file = config.get("ssl_file", "/etc/pki/tls/certs/ca-bundle.crt")
-    raz_client.configure_ranger_raz(client, ssl_file=ssl_file)
-    bucket_name = config.get("bucket")
-    object_name = os.path.join(config.get("output_path"), local_path)
 
-    upload_status = upload_file(
-        client, bucket_name, local_path, object_name, overwrite=True
-    )
+    if config["platform"] == "s3":
+        client = boto3.client("s3")
+        raz_client.configure_ranger_raz(
+            client, ssl_file="/etc/pki/tls/certs/ca-bundle.crt"
+        )
 
-    return upload_status
+        object_name = os.path.join(config["output_path"], local_path)
+
+        upload_file(client, config["bucket"], local_path, object_name, overwrite=True)
