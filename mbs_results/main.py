@@ -8,10 +8,11 @@ from mbs_results.outputs.produce_additional_outputs import (
 from mbs_results.staging.stage_dataframe import stage_dataframe
 from mbs_results.utilities.inputs import load_config, read_csv_wrapper
 from mbs_results.utilities.outputs import save_df
+from mbs_results.utilities.setup_logger import setup_logger, upload_logger_file_to_s3
 from mbs_results.utilities.utils import (
     export_run_id,
     generate_schemas,
-    get_or_create_run_id,
+    get_datetime_now_as_int,
     get_or_read_run_id,
     get_versioned_filename,
 )
@@ -27,8 +28,18 @@ from mbs_results.utilities.validation_checks import (
 def run_mbs_main(config_user_dict=None):
     """Main function to run MBS methods pipeline"""
 
+    # Setup run id
+    run_id = (
+        config_user_dict["run_id"] if config_user_dict else get_datetime_now_as_int()
+    )
+
+    # Initialise the logger at the sart of the pipeline
+    logger_file_path = f"mbs_results_{str(run_id)}.log"
+    logger = setup_logger(logger_file_path=logger_file_path)
+    logger.info(f"MBS Pipeline Started: Log file: {logger_file_path}")
+
     config = load_config("config_user.json", config_user_dict)
-    config["run_id"] = get_or_create_run_id(config)
+    config["run_id"] = run_id
     validate_config(config)
 
     df, unprocessed_data, manual_constructions, filter_df = stage_dataframe(config)
@@ -38,6 +49,7 @@ def run_mbs_main(config_user_dict=None):
     df = impute(df, manual_constructions, config, filter_df)
     validate_imputation(df, config)
     save_df(df, "imputation", config, config["debug_mode"])
+
     # Estimation Wrap
     df = estimate(df=df, method="combined", convert_NI_GB_cells=True, config=config)
     validate_estimation(df, config)
@@ -58,6 +70,8 @@ def run_mbs_main(config_user_dict=None):
     generate_schemas(config)
 
     export_run_id(config["run_id"])
+
+    upload_logger_file_to_s3(config, logger_file_path)
 
 
 def produce_additional_outputs_wrapper(config_user_dict=None):

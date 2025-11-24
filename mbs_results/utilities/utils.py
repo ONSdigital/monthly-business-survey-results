@@ -1,13 +1,15 @@
 import datetime
 import glob
+import logging
 import re
 
 import numpy as np
 import pandas as pd
 import toml
 
-from mbs_results import logger
 from mbs_results.utilities.singleton_boto import SingletonBoto
+
+logger = logging.getLogger(__name__)
 
 
 def convert_column_to_datetime(dates):
