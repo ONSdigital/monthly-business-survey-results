@@ -1,0 +1,55 @@
+{
+    "snapshot_id": "test1_202201_backdata",
+    "contributors": {
+        "reference": [
+            1
+        ],
+        "period": [
+            202201
+        ],
+        "statusencoded": [
+            210
+        ],
+        "status": [
+            "Clear"
+        ]
+    },
+    "responses": {
+        "reference": [
+            1,
+            1,
+            1,
+            1
+        ],
+        "period": [
+            202201,
+            202201,
+            202201,
+            202201
+        ],
+        "questioncode": [
+            40,
+            46,
+            49,
+            110
+        ],
+        "response": [
+            8888.0,
+            9999.0,
+            9999.0,
+            9999.0
+        ],
+        "adjustedresponse": [
+            8888.0,
+            9999.0,
+            8888.0,
+            9999.0
+        ],
+        "imputationmarker": [
+            "r",
+            "fir",
+            "c",
+            "fimc"
+        ]
+    }
+}

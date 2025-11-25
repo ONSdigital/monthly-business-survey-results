@@ -3,7 +3,7 @@ import pandas as pd
 from mbs_results.utilities.outputs import write_json_wrapper
 
 
-def get_backdata_from_period(df: pd.Dataframe, backdata_period: int, config):
+def get_backdata_from_period(df: pd.DataFrame, backdata_period: int, config):
     """
         Filters df based on backdata_period and creates a dictionary with
     contributors and responses data. This format aims to replicate the SPP backdata
@@ -72,7 +72,9 @@ def get_backdata_from_period(df: pd.Dataframe, backdata_period: int, config):
     )
 
     output = {
-        "snapshot_id": "{}_{}_backdata".format(config["run_id"], backdata_period),
+        "snapshot_id": "{id}_{period}_backdata".format(
+            id=config["run_id"], period=backdata_period
+        ),
         "contributors": backdata_contributors.to_dict("list"),
         "responses": backdata_responses.to_dict("list"),
     }
@@ -80,12 +82,12 @@ def get_backdata_from_period(df: pd.Dataframe, backdata_period: int, config):
     return output
 
 
-def export_backdata(df, config):
+def export_backdata(df: pd.DataFrame, config: dict):
     """A wrapper function to produce new back data.
 
     Parameters
     ----------
-    df : pd.Dataframe
+    df : pd.DataFrame
         Original dataframe in which the backdata will be generated.
         It should be any dataframe which contains the variables generated
         from the imputation method.

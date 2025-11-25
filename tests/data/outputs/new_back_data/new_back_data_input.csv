@@ -1,0 +1,17 @@
+reference,period,frosic2007,classification,cell_no,frotover,froempment,formtype,imputed_and_derived_flag,questioncode,statusencoded,design_weight,calibration_factor,outlier_weight,imputation_flags_adjustedresponse,imputation_class,f_link_adjustedresponse,default_link_f_match_adjustedresponse,b_link_adjustedresponse,default_link_b_match_adjustedresponse,construction_link,flag_construction_matches_count,default_link_flag_construction_matches,constrain_marker,adjustedresponse,response,region,status,winsorised_value,adjustedresponse_pounds_thousands,runame1,b_match_filtered_adjustedresponse_count,f_match_filtered_adjustedresponse_count,entname1,form_type_spp,live_adjustedresponse
+1,202201,999,99999,999,999,999,9999,r,40,210,1,1,1,r,99,1,TRUE,1,TRUE,0.106762763,1,FALSE,,8888,8888,ZZ,Clear,8888,8.888,ZZZ ZZ                           ,0,0,,,
+1,202201,999,99999,999,999,999,9999,fir,46,210,1,1,1,fir,99,1,TRUE,1,TRUE,1,0,TRUE,,9999,9999,ZZ,Clear,9999,9.999,ZZZ ZZ                           ,0,0,,,
+1,202201,999,99999,999,999,999,9999,d,47,210,1,1,1,d,99,1,TRUE,1,TRUE,0.120108108,1,FALSE,,9999,9999,ZZ,Clear,9999,9.999,ZZZ ZZ                           ,0,0,,,
+1,202201,999,99999,999,999,999,9999,c,49,210,1,1,1,c,99,1,TRUE,1,TRUE,0.120108108,1,FALSE,49 > 40,8888,9999,ZZ,Clear,8888,8.888,ZZZ ZZ                           ,0,0,,,
+1,202201,999,99999,999,999,999,9999,fimc,110,210,1,1,1,fimc,99,1,TRUE,1,TRUE,0.120108108,1,FALSE,,9999,9999,ZZ,Clear,9999,9999,ZZZ ZZ                           ,0,0,,,
+1,202201,999,,999,999,999,9999,,146,210,,,,,,,,,,,,,,9999,9999,,Clear,,,ZZZ ZZ                           ,,,ZZZ ZZ                           ,,9999
+1,202201,999,,999,999,999,9999,,11,210,,,,,,,,,,,,,,1,1,,Clear,,,ZZZ ZZ                           ,,,ZZZ ZZ                           ,,1
+1,202201,999,,999,999,999,9999,,12,210,,,,,,,,,,,,,,2,2,,Clear,,,ZZZ ZZ                           ,,,ZZZ ZZ                           ,,2
+2,202202,999,99999,777,777,777,7777,r,40,210,1,1,1,r,77,1,TRUE,1,TRUE,0.106762763,1,FALSE,,9999,9999,,Clear,,,ZZZ ZZ                           ,,,ZZZ ZZ                           ,,9999
+2,202202,999,99999,777,777,777,7777,fir,46,210,1,1,1,fir,77,1,TRUE,1,TRUE,1,0,TRUE,,1,1,,Clear,,,ZZZ ZZ                           ,,,ZZZ ZZ                           ,,1
+2,202202,999,99999,777,777,777,7777,fic,47,210,1,1,1,fic,77,1,TRUE,1,TRUE,0.120108108,1,FALSE,,2,2,,Clear,,,ZZZ ZZ                           ,,,ZZZ ZZ                           ,,2
+2,202202,999,99999,777,777,777,7777,c,49,210,1,1,1,c,77,1,TRUE,1,TRUE,0.120108108,1,FALSE,,,,,,,,,,,,,
+2,202202,999,99999,777,777,777,7777,fimc,110,210,1,1,1,fimc,77,1,TRUE,1,TRUE,0.120108108,1,FALSE,,,,,,,,,,,,,
+2,202202,999,,777,777,777,7777,,146,210,,,,,,,,,,,,,,,,,,,,,,,,,
+2,202202,999,,777,777,777,7777,,11,210,,,,,,,,,,,,,,,,,,,,,,,,,
+2,202202,999,,777,777,777,7777,,12,210,,,,,,,,,,,,,,,,,,,,,,,,,
