@@ -98,6 +98,9 @@ def export_backdata(df: pd.DataFrame, config: dict):
     None.
 
     """
+    # period is float here so will create YYYYMM.0 enforcing int
+
+    df[config["period"]] = df[config["period"]].astype(int)
 
     min_period = min(df[config["period"]])
 

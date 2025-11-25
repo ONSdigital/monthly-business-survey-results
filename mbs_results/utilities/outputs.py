@@ -1,3 +1,4 @@
+import io
 import json
 import os
 
@@ -136,9 +137,16 @@ def write_json_wrapper(
         raz_client.configure_ranger_raz(
             client, ssl_file="/etc/pki/tls/certs/ca-bundle.crt"
         )
+        jsonData = json.dumps(json_data).encode("UTF-8")
+        json_bytes = io.BytesIO(jsonData)
 
-        s3object = client.Object(bucket_name, full_path)
-        s3object.put(Body=(bytes(json.dumps(json_data).encode("UTF-8"))))
+        json_bytes.seek(0)
+
+        client.put_object(
+            Bucket=bucket_name,
+            Body=json_bytes.getvalue(),
+            Key=full_path,
+        )
 
         return True
 
