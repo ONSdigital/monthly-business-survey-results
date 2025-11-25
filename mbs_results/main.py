@@ -1,6 +1,7 @@
 from mbs_results.estimation.estimate import estimate
 from mbs_results.imputation.impute import impute
 from mbs_results.outlier_detection.detect_outlier import detect_outlier
+from mbs_results.outputs.new_back_data import export_backdata
 from mbs_results.outputs.produce_additional_outputs import (
     get_additional_outputs_df,
     produce_additional_outputs,
@@ -68,6 +69,8 @@ def produce_additional_outputs_wrapper(config_user_dict=None):
     produce_additional_outputs(
         additional_outputs_df=df, qa_outputs=False, optional_outputs=True, config=config
     )
+
+    export_backdata(df=df, config=config)
 
 
 if __name__ == "__main__":

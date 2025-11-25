@@ -105,13 +105,13 @@ def export_backdata(df: pd.DataFrame, config: dict):
 
     json_backdata = get_backdata_from_period(df, min_period, config)
 
-    filename = "back_data_{min_period}_{run_id}.csv".format(
+    filename = "back_data_{min_period}_{run_id}.json".format(
         min_period=min_period, run_id=run_id
     )
 
     write_json_wrapper(
         json_data=json_backdata,
-        filename=filename,
+        file_name=filename,
         save_path=config["output_path"],
         import_platform=config["platform"],
         bucket_name=config["bucket"],
