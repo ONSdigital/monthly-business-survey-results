@@ -19,18 +19,47 @@ def produce_qa_output(
 
     target = config["target"]
 
+    reformat_questions = config["filter_out_questions"]
+    question_no_plaintext = config["question_no_plaintext"]
+
+    date_comments_df = additional_outputs_df.copy().loc[
+        additional_outputs_df["questioncode"].isin(reformat_questions),
+        [
+            config["period"],
+            config["reference"],
+            config["question_no"],
+            target,
+        ],
+    ]
+    # Convrting questions 11, 12, 146 to columns renaming to text based on config
+    date_comments_df = (
+        date_comments_df.pivot_table(
+            index=["period", "reference"],
+            columns="questioncode",
+            values=target,
+            aggfunc="first",
+        )
+        .reset_index()
+        .rename(columns=question_no_plaintext)
+    )
+
+    additional_outputs_df = additional_outputs_df.loc[
+        ~additional_outputs_df["questioncode"].isin(reformat_questions)
+    ]
+    additional_outputs_df[target] = additional_outputs_df[target].astype(float)
+
     requested_columns = [
-        "reference",
-        "period",
-        "sic",
+        config["reference"],
+        config["period"],
+        config["sic"],
         "classification",
-        "cell_number",
-        "auxiliary",
+        config["cell_number"],
+        config["auxiliary"],
         "froempment",
         "formtype",
         "imputed_and_derived_flag",  # response_type
-        "question_no",
-        "target",
+        config["question_no"],
+        f"{target}",
         "status",  # error_mkr
         "design_weight",
         "calibration_factor",
@@ -52,6 +81,9 @@ def produce_qa_output(
         f"f_match_{target}_count",
         f"b_match_filtered_{target}_count",
         f"f_match_filtered_{target}_count",
+        "runame1",
+        f"{target}_pounds_thousands",
+        "entref",
     ]
 
     # Check if column names specified in config, if not, use above as default
@@ -73,4 +105,13 @@ def produce_qa_output(
     additional_outputs_df = additional_outputs_df[
         additional_outputs_df.columns.intersection(cols_from_config)
     ]
+
+    additional_outputs_df = pd.merge(
+        additional_outputs_df,
+        date_comments_df,
+        on=["period", "reference"],
+        how="left",
+        suffixes=("", "_y"),
+    )
+
     return additional_outputs_df
