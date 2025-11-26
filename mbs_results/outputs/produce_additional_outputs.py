@@ -194,15 +194,30 @@ def produce_additional_outputs(
 
                 logger.info(nation_filename + " saved")
         else:
+            if output == "produce_qa_output":
+                for period in df["period"].unique():
+                    period_df = df[df["period"] == period]
+                    period_filename = get_versioned_filename(
+                        output + f"_{int(period)}", config["run_id"]
+                    )
+                    write_csv_wrapper(
+                        period_df,
+                        period_filename,
+                        config["platform"],
+                        config["bucket"],
+                        index=False,
+                    )
+                    logger.info(period_filename + " saved")
             # if the output is a DataFrame, save it directly
-            write_csv_wrapper(
-                df,
-                config["output_path"] + filename,
-                config["platform"],
-                config["bucket"],
-                index=False,
-            )
-            logger.info(config["output_path"] + filename + " saved")
+            else:
+                write_csv_wrapper(
+                    df,
+                    config["output_path"] + filename,
+                    config["platform"],
+                    config["bucket"],
+                    index=False,
+                )
+                logger.info(config["output_path"] + filename + " saved")
 
 
 def produce_selective_editing_outputs(
