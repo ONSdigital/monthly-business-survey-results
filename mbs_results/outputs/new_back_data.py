@@ -3,7 +3,9 @@ import pandas as pd
 from mbs_results.utilities.outputs import write_json_wrapper
 
 
-def get_backdata_from_period(df: pd.DataFrame, backdata_period: int, config: dict) -> dict:
+def get_backdata_from_period(
+    df: pd.DataFrame, backdata_period: int, config: dict
+) -> dict:
     """
         Filters df based on backdata_period and creates a dictionary with
     contributors and responses data. This format aims to replicate the SPP backdata
