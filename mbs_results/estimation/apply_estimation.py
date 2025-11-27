@@ -103,7 +103,6 @@ def apply_estimation(method: str, convert_NI_GB_cells: bool, config: dict):
 
         census_df["design_weight"] = 1
         census_df["calibration_factor"] = 1
-        census_df["is_sampled"] = True
         census_df["is_census"] = True
         # is_census: bool, to distinguish fully sampled (i.e. census) strata from
         # non-census strata. Used in outlier detection so census strata are
