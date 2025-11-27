@@ -46,9 +46,9 @@ def test_config():
         "mandatory_outputs": ["produce_qa_output"],
         "filter_out_questions": [11, 12, 146],
         "question_no_plaintext": {
-            11: "start_date",
-            12: "end_date",
-            146: "comments",
+            "11": "start_date",
+            "12": "end_date",
+            "146": "comments",
         },
     }
 
