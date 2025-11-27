@@ -351,9 +351,8 @@ def get_or_read_run_id(config: dict) -> int:
     run_id = config.get("run_id") or read_run_id()
     return run_id
 
-def multi_filter_list(
-    master_list:list,
-    *args:str)->list:
+
+def multi_filter_list(master_list: list, *args: str) -> list:
     """Search for keywords in all list of values. Numbers are evaluated as strings.
 
     Parameters
@@ -367,7 +366,7 @@ def multi_filter_list(
     -------
     list
         A list with values which contain the keywords.
-        
+
     Examples
     --------
     >>> example_list = ["test123","test456","but not this"]
@@ -380,23 +379,19 @@ def multi_filter_list(
     >>> find_not_there = multi_filter_list(one_list,"test","759")
     []
     """
-    
-  
-    
+
     if not args:
-      print("Nothing to search returning an empty list")
-      
-      return []
-    
-    
+        print("Nothing to search returning an empty list")
+
+        return []
+
     # Filtering via a loop with arbitrary number of arguments
     # so initiliasing the results with original list
-    
-    result = master_list.copy()
-    
-    for arg in args:
-          
-      result = [list_value for list_value in result if arg in list_value]
 
+    result = master_list.copy()
+
+    for arg in args:
+
+        result = [list_value for list_value in result if arg in list_value]
 
     return result

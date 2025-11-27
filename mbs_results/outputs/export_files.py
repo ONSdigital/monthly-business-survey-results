@@ -2,20 +2,22 @@
 the output folder to the outgoing folder, along with their manifest file."""
 
 import getpass
+import itertools
 import logging
 import os
 from datetime import datetime
 from pathlib import Path
 from typing import List
+
 import boto3
 import raz_client
 import tomli
 from rdsa_utils.cdp.helpers.s3_utils import list_files
-import itertools
 
 import mbs_results.utilities.merge_two_config_files as utils
 from mbs_results.utilities.manifest_output import Manifest
-from mbs_results.utilities.utils import multi_filter_list,get_or_read_run_id
+from mbs_results.utilities.utils import get_or_read_run_id, multi_filter_list
+
 # Set up logging
 
 OutgoingLogger = logging.getLogger(__name__)
@@ -71,25 +73,25 @@ def get_schema_headers(config: dict, file_select_dict: dict):
 pipeline_run_datetime = datetime.now()
 
 
-def get_file_choice(config:dict)->dict:
+def get_file_choice(config: dict) -> dict:
     """
     Creates a list of files found based on user's choices from the configuration.
-    
+
     User must supply a dictionary ('files_to_export' field in config) with bool
     values (true if they want to export). And a dictionary with basenames (
     'files_basename' field in exports).
-    
-    This function will list of the files which were found in the config 
+
+    This function will list of the files which were found in the config
     `output_dir` which satisfies the criteria.
-    
+
     Parameters
     ----------
     config : dict
-        The configuration. More particularly 
-        `output_dir`: folder path to data 
+        The configuration. More particularly
+        `output_dir`: folder path to data
         `platform`: the platform (s3 for AWS)
         `bucket`: the s3 bucket if s3 platform is selected
-        `files_to_export`: a dictionary with bool values indicationg which 
+        `files_to_export`: a dictionary with bool values indicationg which
         files should be found
         `files_basename`: a dictionary with mapping between files and their
         base names.
@@ -105,32 +107,39 @@ def get_file_choice(config:dict)->dict:
        A dictionary with all files found in respect with the
        relevant key.
     """
-    
+
     # Use rdsa utils for s3 otherwise use default os
-    
-    if config["platform"]=="s3":
+
+    if config["platform"] == "s3":
         client = boto3.client("s3")
         raz_client.configure_ranger_raz(
             client, ssl_file="/etc/pki/tls/certs/ca-bundle.crt"
         )
-        
-        
-        all_files = list_files(client,  config["bucket"], config["output_dir"])
-      
+
+        all_files = list_files(client, config["bucket"], config["output_dir"])
+
     else:
         all_files = os.listdir()
-                
+
     run_id = get_or_read_run_id(config)
 
     if config["files_to_export"].keys() != config["files_basename"].keys():
-      
-      raise ValueError("""
-      Keys in config field 'files_to_export' must be the same with 'files_basename'""")
+
+        raise ValueError(
+            """
+      Keys in config field 'files_to_export' must be the same with 'files_basename'"""
+        )
 
     user_choice = {
-      k : v for k,v in config["files_basename"].items() if config["files_to_export"].get(k)}
-            
-    for_export = {k: multi_filter_list(all_files,basename,run_id) for k,basename in user_choice.items()}
+        k: v
+        for k, v in config["files_basename"].items()
+        if config["files_to_export"].get(k)
+    }
+
+    for_export = {
+        k: multi_filter_list(all_files, basename, run_id)
+        for k, basename in user_choice.items()
+    }
 
     # Log the files being exported
     logging.info(f"These are the files being exported: {for_export}")
@@ -266,7 +275,7 @@ def run_export(export_config_path: str):
 
     # Get list of files to transfer from user
     file_select_dict = get_file_choice(config)
-    
+
     files_found = list(itertools.chain(*file_select_dict.values()))
 
     # Check that files exist
@@ -300,14 +309,14 @@ def run_export(export_config_path: str):
 
     # Add all output files to the manifest object
     # file_select_dict has a list of relevant paths
-    for file_name, list_files in file_select_dict.items():
-      for file_path in list_files:
-        manifest.add_file(
-            file_path,
-            column_header=schemas_header_dict[f"{file_name}"],
-            validate_col_name_length=validate_col_name_length_bool,
-            sep=",",
-        )
+    for file_name, sublist in file_select_dict.items():
+        for file_path in sublist:
+            manifest.add_file(
+                file_path,
+                column_header=schemas_header_dict[f"{file_name}"],
+                validate_col_name_length=validate_col_name_length_bool,
+                sep=",",
+            )
     # Write the manifest file to the outgoing directory
     manifest.write_manifest()
 
