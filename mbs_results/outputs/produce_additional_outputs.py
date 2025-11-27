@@ -202,12 +202,12 @@ def produce_additional_outputs(
                     )
                     write_csv_wrapper(
                         period_df,
-                        period_filename,
+                        config["output_path"] + period_filename,
                         config["platform"],
                         config["bucket"],
                         index=False,
                     )
-                    logger.info(period_filename + " saved")
+                    logger.info(config["output_path"] + period_filename + " saved")
             # if the output is a DataFrame, save it directly
             else:
                 write_csv_wrapper(
