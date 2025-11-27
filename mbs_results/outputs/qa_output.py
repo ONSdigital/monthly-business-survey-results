@@ -1,5 +1,7 @@
 import pandas as pd
 
+from mbs_results.utilities.utils import unpack_dates_and_comments
+
 
 def produce_qa_output(
     additional_outputs_df: pd.DataFrame,
@@ -19,38 +21,7 @@ def produce_qa_output(
 
     target = config["target"]
 
-    reformat_questions = config["filter_out_questions"]
-    question_no_plaintext = config["question_no_plaintext"]
-
-    date_comments_df = additional_outputs_df.copy().loc[
-        additional_outputs_df[config["question_no"]].isin(reformat_questions),
-        [
-            config["period"],
-            config["reference"],
-            config["question_no"],
-            target,
-        ],
-    ]
-    # Converting to string ready for this to become column names
-    date_comments_df[config["question_no"]] = date_comments_df[
-        config["question_no"]
-    ].astype(str)
-    # Converting questions 11, 12, 146 to columns renaming to text based on config
-    date_comments_df = (
-        date_comments_df.pivot_table(
-            index=[config["period"], config["reference"]],
-            columns=config["question_no"],
-            values=target,
-            aggfunc="first",
-        )
-        .reset_index()
-        .rename(columns=question_no_plaintext)
-    )
-
-    additional_outputs_df = additional_outputs_df.loc[
-        ~additional_outputs_df[config["question_no"]].isin(reformat_questions)
-    ]
-    additional_outputs_df[target] = additional_outputs_df[target].astype(float)
+    additional_outputs_df = unpack_dates_and_comments(additional_outputs_df, config)
 
     requested_columns = [
         config["reference"],
@@ -88,6 +59,9 @@ def produce_qa_output(
         "runame1",
         f"{target}_pounds_thousands",
         "entref",
+        "start_date",
+        "end_date",
+        "comments",
     ]
 
     # Check if column names specified in config, if not, use above as default
@@ -109,13 +83,5 @@ def produce_qa_output(
     additional_outputs_df = additional_outputs_df[
         additional_outputs_df.columns.intersection(cols_from_config)
     ]
-
-    additional_outputs_df = pd.merge(
-        additional_outputs_df,
-        date_comments_df,
-        on=[config["period"], config["reference"]],
-        how="left",
-        suffixes=("", "_y"),
-    )
 
     return additional_outputs_df

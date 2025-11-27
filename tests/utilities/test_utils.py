@@ -19,6 +19,7 @@ from mbs_results.utilities.utils import (
     generate_schemas,
     get_or_create_run_id,
     get_or_read_run_id,
+    unpack_dates_and_comments,
 )
 
 
@@ -218,3 +219,36 @@ class TestRunIDFunctions:
             result_populated = get_or_read_run_id({"run_id": 5678})
         assert result_empty == 4321
         assert result_populated == 5678
+
+
+def test_unpack_dates_and_comments():
+    df = pd.DataFrame(
+        {
+            "period": [2023, 2023, 2023, 2023],
+            "reference": [1, 1, 1, 1],
+            "question_no": [11, 12, 146, 40],
+            "target": ["2023-01-01", "2023-01-02", "This is a comment", 200],
+        }
+    )
+    config = {
+        "filter_out_questions": [11, 12, 146],
+        "question_no_plaintext": {"11": "start", "12": "end", "146": "comments"},
+        "period": "period",
+        "reference": "reference",
+        "question_no": "question_no",
+        "target": "target",
+    }
+
+    result = unpack_dates_and_comments(df, config)
+    expected = pd.DataFrame(
+        {
+            "period": [2023],
+            "reference": [1],
+            "question_no": [40],
+            "target": [200.0],
+            "start": ["2023-01-01"],
+            "end": ["2023-01-02"],
+            "comments": ["This is a comment"],
+        }
+    )
+    assert_frame_equal(result, expected)
