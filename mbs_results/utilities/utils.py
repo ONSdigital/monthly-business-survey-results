@@ -352,7 +352,7 @@ def get_or_read_run_id(config: dict) -> int:
     return run_id
 
 
-def unpack_dates_and_comments(df: pd.DataFrame, config) -> pd.DataFrame:
+def unpack_dates_and_comments(df: pd.DataFrame, config: dict) -> pd.DataFrame:
     """
     Unpacks date and comments from questions 11, 12 and 146 into separate columns. The
     returned df also has these question rows removed.
@@ -361,7 +361,7 @@ def unpack_dates_and_comments(df: pd.DataFrame, config) -> pd.DataFrame:
     ----------
     df : pd.DataFrame
         main dataframe
-    config : _type_
+    config : dict
         main pipeline configuration.
 
     Returns
