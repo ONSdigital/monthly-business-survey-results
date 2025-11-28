@@ -8,16 +8,16 @@
 "run_id": "",
 "copy_or_move_files": "copy",
 "files_to_export": {
-    "export_methods_output": false,
-    "export_growth_rates_output": false,
-    "export_create_csdb_output": false,
-    "export_create_imputation_link_output": false,
-    "export_population_counts": false,
-    "export_produce_ocea_srs_outputs": false,
-    "export_produce_qa_output": false,
-    "export_scotland_generate_devolved_outputs": false,
-    "export_turnover_output": false,
-    "export_wales_generate_devolved_outputs": false
+    "methods_output": false,
+    "growth_rates_output": false,
+    "create_csdb_output": false,
+    "create_imputation_link_output": false,
+    "population_counts": false,
+    "produce_ocea_srs_outputs": false,
+    "produce_qa_output": false,
+    "scotland_generate_devolved_outputs": false,
+    "turnover_output": false,
+    "wales_generate_devolved_outputs": false
 },
 "files_basename": {
     "methods_output": "mbs_results",
