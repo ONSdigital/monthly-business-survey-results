@@ -227,7 +227,8 @@ def test_unpack_dates_and_comments():
             "period": [2023, 2023, 2023, 2023],
             "reference": [1, 1, 1, 1],
             "question_no": [11, 12, 146, 40],
-            "target": ["2023-01-01", "2023-01-02", "This is a comment", 200],
+            "adjustedresponse": [None, None, None, 200.0],
+            "response": ["2023-01-01", "2023-01-02", "This is a comment", "210.0"],
         }
     )
     config = {
@@ -236,7 +237,7 @@ def test_unpack_dates_and_comments():
         "period": "period",
         "reference": "reference",
         "question_no": "question_no",
-        "target": "target",
+        "target": "adjustedresponse",
     }
 
     result = unpack_dates_and_comments(df, config)
@@ -245,7 +246,8 @@ def test_unpack_dates_and_comments():
             "period": [2023],
             "reference": [1],
             "question_no": [40],
-            "target": [200.0],
+            "adjustedresponse": [200.0],
+            "response": ["210.0"],
             "start": ["2023-01-01"],
             "end": ["2023-01-02"],
             "comments": ["This is a comment"],

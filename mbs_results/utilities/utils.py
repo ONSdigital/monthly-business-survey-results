@@ -378,7 +378,7 @@ def unpack_dates_and_comments(df: pd.DataFrame, config) -> pd.DataFrame:
             config["period"],
             config["reference"],
             config["question_no"],
-            config["target"],
+            "response",
         ],
     ]
     # Converting to string ready for this to become column names
@@ -390,7 +390,7 @@ def unpack_dates_and_comments(df: pd.DataFrame, config) -> pd.DataFrame:
         date_comments_df.pivot_table(
             index=[config["period"], config["reference"]],
             columns=config["question_no"],
-            values=config["target"],
+            values="response",
             aggfunc="first",
         )
         .reset_index()
@@ -398,7 +398,6 @@ def unpack_dates_and_comments(df: pd.DataFrame, config) -> pd.DataFrame:
     )
     df = df.copy().loc[~df[config["question_no"]].isin(reformat_questions)]
     # ensure target is float now we have removed 11, 12 and 146
-    df[config["target"]] = df[config["target"]].astype(float)
 
     formatted_df = pd.merge(
         df,
