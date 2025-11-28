@@ -67,23 +67,40 @@ As an end user, you will only need to change the outputs config (named `config_o
 | export_dir | The path to the folder containing the files to be exported to. | string | Any filepath. |
 | schemas_dir | The path to the folder containing the schema toml data, if empty the export headers in manifest will be set to empty string. | string | Any filepath. |
 | copy_or_move_files | Whether to copy or move the listed files. | string | `"copy"`, `"move"` |
-| files | The filnames for the files to be exported use `None` if you don't want to export the relevant files. | dictionary of strings | Any filename. |
-
-e.g the example below will export only the file `cons_results_202511071451.csv`:
+| files_to_export | The filnames for the files to be exported use `None` if you don't want to export the relevant files. | dictionary of strings | Any filename. |
+| files_basename | The base name for a file. | dictionary of strings | Any base file name. |
+e.g the example below has run_id `202511071451` , methods_output set to `true` and methods_output basename `mbs_results`, thus will export only the file `mbs_results_202511071451.csv` and create the relevant manifest file:
 ```
- "files": {
-        "export_methods_output": "cons_results_202511071451.csv",
-        "export_growth_rates_output": "None",
-        "export_create_csdb_output": "None",
-        "export_create_imputation_link_output": "None",
-        "export_population_counts": "None",
-        "export_produce_ocea_srs_outputs": "None",
-        "export_produce_qa_output": "None",
-        "export_scotland_generate_devolved_outputs": "None",
-        "export_turnover_output": "None",
-        "export_wales_generate_devolved_outputs": "None"
+"run_id": "202511071451",
+
+"files_to_export": {
+    "methods_output": true,
+    "growth_rates_output": false,
+    "create_csdb_output": false,
+    "create_imputation_link_output": false,
+    "population_counts": false,
+    "produce_ocea_srs_outputs": false,
+    "produce_qa_output": false,
+    "scotland_generate_devolved_outputs": false,
+    "turnover_output": false,
+    "wales_generate_devolved_outputs": false
+},
+"files_basename": {
+    "methods_output": "mbs_results",
+    "growth_rates_output": "growth_rates_output",
+    "create_csdb_output": "create_csdb_output",
+    "create_imputation_link_output": "create_imputation_link_output",
+    "population_counts": "mbs_population_counts",
+    "produce_ocea_srs_outputs": "produce_ocea_srs_outputs",
+    "produce_qa_output": "produce_qa_output",
+    "scotland_generate_devolved_outputs": "scotland_generate_devolved_outputs",
+    "turnover_output": "turnover_output",
+    "wales_generate_devolved_outputs": "wales_generate_devolved_outputs"
     }
 ```
+
+You may extend the `files_to_export` and `files_basename` dictionaries with more outputs if required.
+
 ## Guidance for additional outputs
 As an end user, you will only need to change the export config (named `config_export.json`). The process will copy (or move) the files listed in the `files` section from the defined `output_dir` to `export_dir`, and will create a manifest json file for the NiFi.
 

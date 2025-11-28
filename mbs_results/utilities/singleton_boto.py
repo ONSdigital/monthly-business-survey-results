@@ -27,10 +27,8 @@ class SingletonBoto:
         """
         if cls._instance is None:
             client = boto3.client("s3")
-            raz_client.configure_ranger_raz(
-                client, ssl_file=config["general"]["ssl_file"]
-            )
-            cls._bucket = config["general"]["bucket"]
+            raz_client.configure_ranger_raz(client, ssl_file=config["ssl_file"])
+            cls._bucket = config["bucket"]
             cls._instance = client
         return cls._instance
 
