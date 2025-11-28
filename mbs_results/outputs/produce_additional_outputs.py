@@ -193,8 +193,8 @@ def produce_additional_outputs(
                 )
 
                 logger.info(nation_filename + " saved")
-
         else:
+            # if the output is a DataFrame, save it directly
             write_csv_wrapper(
                 df,
                 config["output_path"] + filename,
