@@ -19,6 +19,7 @@ from mbs_results.utilities.utils import (
     generate_schemas,
     get_or_create_run_id,
     get_or_read_run_id,
+    multi_filter_list,
 )
 
 
@@ -218,3 +219,34 @@ class TestRunIDFunctions:
             result_populated = get_or_read_run_id({"run_id": 5678})
         assert result_empty == 4321
         assert result_populated == 5678
+
+
+@pytest.fixture(scope="class")
+def input_list():
+    return ["test123", "test456", "not789"]
+
+
+class TestMultiFilterList:
+    def test_no_args(self, input_list):
+
+        result = multi_filter_list(input_list)
+
+        assert result == []
+
+    def test_one_args(self, input_list):
+
+        result = multi_filter_list(input_list, "test")
+
+        assert result == ["test123", "test456"]
+
+    def test_two_args(self, input_list):
+
+        result = multi_filter_list(input_list, "test", "123")
+
+        assert result == ["test123"]
+
+    def test_no_matches(self, input_list):
+
+        result = multi_filter_list(input_list, "test", "759")
+
+        assert result == []
