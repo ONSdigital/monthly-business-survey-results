@@ -352,7 +352,12 @@ def get_or_read_run_id(config: dict) -> int:
     return run_id
 
 
-def unpack_dates_and_comments(df: pd.DataFrame, config: dict) -> pd.DataFrame:
+def unpack_dates_and_comments(
+    df: pd.DataFrame,
+    reformat_questions: list,
+    question_no_plaintext: list,
+    config: dict,
+) -> pd.DataFrame:
     """
     Unpacks date and comments from questions 11, 12 and 146 into separate columns. The
     returned df also has these question rows removed.
@@ -369,8 +374,6 @@ def unpack_dates_and_comments(df: pd.DataFrame, config: dict) -> pd.DataFrame:
     pd.DataFrame
         dataframe with unpacked date and comments
     """
-    reformat_questions = config["filter_out_questions"]
-    question_no_plaintext = config["question_no_plaintext"]
 
     date_comments_df = df.copy().loc[
         df[config["question_no"]].isin(reformat_questions),

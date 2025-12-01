@@ -240,7 +240,12 @@ def test_unpack_dates_and_comments():
         "target": "adjustedresponse",
     }
 
-    result = unpack_dates_and_comments(df, config)
+    result = unpack_dates_and_comments(
+        df=df,
+        reformat_questions=config["filter_out_questions"],
+        question_no_plaintext=config["question_no_plaintext"],
+        config=config,
+    )
     expected = pd.DataFrame(
         {
             "period": [2023],

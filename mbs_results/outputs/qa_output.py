@@ -21,7 +21,12 @@ def produce_qa_output(
 
     target = config["target"]
 
-    additional_outputs_df = unpack_dates_and_comments(additional_outputs_df, config)
+    additional_outputs_df = unpack_dates_and_comments(
+        df=additional_outputs_df,
+        reformat_questions=config["filter_out_questions"],
+        question_no_plaintext=config["question_no_plaintext"],
+        config=config,
+    )
 
     requested_columns = [
         config["reference"],

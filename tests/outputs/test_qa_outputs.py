@@ -50,6 +50,7 @@ def test_config():
             "12": "end_date",
             "146": "comments",
         },
+        "pound_thousand_col": "adjustedresponse_pounds_thousands",
     }
 
 
