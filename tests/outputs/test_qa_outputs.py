@@ -44,6 +44,7 @@ def test_config():
         "l_value_question_no": "question_no",
         "filter": None,
         "mandatory_outputs": ["produce_qa_output"],
+        "split_qa_by_period": False,
     }
 
 

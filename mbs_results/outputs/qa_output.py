@@ -3,8 +3,9 @@ import pandas as pd
 
 def produce_qa_output(
     additional_outputs_df: pd.DataFrame,
+    split_qa_by_period: bool,
     **config,
-) -> pd.DataFrame:
+) -> pd.DataFrame | dict:
     """Produces an output with required columns, and with total weight and
     weighted adjusted value calculated.
 
@@ -73,4 +74,11 @@ def produce_qa_output(
     additional_outputs_df = additional_outputs_df[
         additional_outputs_df.columns.intersection(cols_from_config)
     ]
-    return additional_outputs_df
+
+    if split_qa_by_period:
+        output = {}
+        for period, df_period in additional_outputs_df.groupby(config["period"]):
+            output[str(int(period))] = df_period.reset_index(drop=True)
+    else:
+        output = additional_outputs_df
+    return output

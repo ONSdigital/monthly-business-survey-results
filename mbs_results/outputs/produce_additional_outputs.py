@@ -151,6 +151,7 @@ def produce_additional_outputs(
     None.
 
     """
+    # produce_csv_per_period = config["file_per_period"]
 
     additional_outputs = get_additional_outputs(
         config,
@@ -182,19 +183,22 @@ def produce_additional_outputs(
         if isinstance(df, dict):
             # if the output is a dictionary (e.g. from generate_devolved_outputs),
             # we need to save each DataFrame in the dictionary
-            for nation, df in df.items():
-                nation_filename = f"{config['output_path']}{nation.lower()}_{filename}"
+            for name, df in df.items():
+                combined_filename = f"{config['output_path']}{name.lower()}_{filename}"
                 write_csv_wrapper(
                     df,
-                    nation_filename,
+                    combined_filename,
                     config["platform"],
                     config["bucket"],
                     index=False,
                 )
 
-                logger.info(nation_filename + " saved")
+                logger.info(combined_filename + " saved")
         else:
-            # if the output is a DataFrame, save it directly
+            # if (output=="produce_qa_output" and config["split_qa_output"]) or output in config["split_output_by_period"]:
+            #     write_csv_per_period(df, output, config)
+            # # if the output is a DataFrame, save it directly
+            # else:
             write_csv_wrapper(
                 df,
                 config["output_path"] + filename,

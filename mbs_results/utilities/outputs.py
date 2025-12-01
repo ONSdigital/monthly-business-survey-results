@@ -1,5 +1,6 @@
 import io
 import json
+import logging
 import os
 
 import boto3
@@ -8,6 +9,8 @@ import raz_client
 from rdsa_utils.cdp.helpers.s3_utils import write_csv
 
 from mbs_results.utilities.utils import get_versioned_filename
+
+logger = logging.getLogger(__name__)
 
 
 def write_csv_wrapper(
@@ -61,7 +64,13 @@ def write_csv_wrapper(
     raise Exception("platform must either be 's3' or 'network'")
 
 
-def save_df(df: pd.DataFrame, base_filename: str, config: dict, on_demand=True):
+def save_df(
+    df: pd.DataFrame,
+    base_filename: str,
+    config: dict,
+    on_demand: bool = True,
+    split_by_period: bool = False,
+):
     """
     Adds a version tag to the filename and saves the dataframe based on
     settings in the config.
@@ -75,7 +84,9 @@ def save_df(df: pd.DataFrame, base_filename: str, config: dict, on_demand=True):
     config : str, optional
         The pipeline configuration
     on_demand: bool
-        Wether to foce the save, default is True.
+        Whether to force the save, default is True.
+    split_by_period: bool
+        Option to split out the dataframe by period. Default is False.
 
     Returns
     -------
@@ -83,7 +94,7 @@ def save_df(df: pd.DataFrame, base_filename: str, config: dict, on_demand=True):
     """
 
     # export on demand
-    if on_demand:
+    if on_demand and (not split_by_period):
 
         filename = get_versioned_filename(base_filename, config["run_id"])
 
@@ -94,6 +105,8 @@ def save_df(df: pd.DataFrame, base_filename: str, config: dict, on_demand=True):
             config["bucket"],
             index=False,
         )
+    elif on_demand and split_by_period:
+        write_csv_per_period(df, base_filename, config)
 
 
 def write_json_wrapper(
@@ -157,3 +170,18 @@ def write_json_wrapper(
         return True
 
     raise Exception("platform must either be 's3' or 'network'")
+
+
+def write_csv_per_period(df: pd.DataFrame, output_name: str, config: dict):
+    for p in df["period"].unique():
+        period_df = df[df["period"] == p]
+        file_prefix = f"{output_name}_{p}"
+        filename = get_versioned_filename(file_prefix, config["run_id"])
+        write_csv_wrapper(
+            period_df,
+            config["output_path"] + filename,
+            config["platform"],
+            config["bucket"],
+            index=False,
+        )
+        logger.info(config["output_path"] + filename + " saved")

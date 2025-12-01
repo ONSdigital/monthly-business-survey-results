@@ -47,4 +47,11 @@ def produce_ocea_srs_outputs(
         axis=1,
     )
 
-    return output_df
+    if "produce_ocea_srs_outputs" in config["split_output_by_period"]:
+        output = {}
+        for period, df_period in output_df.groupby("Period"):
+            output[str(int(period))] = df_period
+    else:
+        output = output_df
+
+    return output

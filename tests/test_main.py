@@ -43,6 +43,9 @@ test_config = {
     "schema_path": "tests/data/test_main/schemas/",
     "debug_mode": True,
     "run_id": 1,
+    "split_debug_outputs_by_period": False,
+    "split_qa_by_period": True,
+    "split_main_output_by_period": False,
 }
 
 
@@ -116,5 +119,6 @@ def test_produce_additional_outputs_wrapper():
         "revision_window": 6,
         "devolved_nations": ["Scotland", "Wales"],
         "run_id": "1",
+        "split_output_by_period": ["produce_ocea_srs_outputs"],
     }
     produce_additional_outputs_wrapper(config_user_dict=test_outputs_config)

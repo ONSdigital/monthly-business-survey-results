@@ -49,20 +49,40 @@ def run_mbs_main(config_user_dict=None):
     # imputation: RoM wrapper -> Rename wrapper to apply_imputation
     df = impute(df, manual_constructions, config, filter_df)
     validate_imputation(df, config)
-    save_df(df, "imputation", config, config["debug_mode"])
+    save_df(
+        df,
+        "imputation",
+        config,
+        config["debug_mode"],
+        config["split_debug_outputs_by_period"],
+    )
 
     # Estimation Wrap
     df = estimate(df=df, method="combined", convert_NI_GB_cells=True, config=config)
     validate_estimation(df, config)
-    save_df(df, "estimation_output", config, config["debug_mode"])
+    save_df(
+        df,
+        "estimation_output",
+        config,
+        config["debug_mode"],
+        config["split_debug_outputs_by_period"],
+    )
 
     # Outlier Wrapper
     df = detect_outlier(df, config)
     validate_outlier_detection(df, config)
-    save_df(df, "outlier_output", config, config["debug_mode"])
+    save_df(
+        df,
+        "outlier_output",
+        config,
+        config["debug_mode"],
+        config["split_debug_outputs_by_period"],
+    )
 
     df = get_additional_outputs_df(df, unprocessed_data, config)
-    save_df(df, "mbs_results", config)  # main methods output
+    save_df(
+        df, "mbs_results", config, split_by_period=config["split_main_output_by_period"]
+    )  # main methods output
 
     produce_additional_outputs(
         additional_outputs_df=df, qa_outputs=True, optional_outputs=False, config=config
