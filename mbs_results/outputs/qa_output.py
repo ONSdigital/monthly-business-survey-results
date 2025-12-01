@@ -57,7 +57,7 @@ def produce_qa_output(
         f"b_match_filtered_{target}_count",
         f"f_match_filtered_{target}_count",
         "runame1",
-        f"{target}_pounds_thousands",
+        config["pound_thousand_col"],
         "entref",
         "start_date",
         "end_date",
