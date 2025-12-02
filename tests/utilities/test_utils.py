@@ -19,8 +19,8 @@ from mbs_results.utilities.utils import (
     generate_schemas,
     get_or_create_run_id,
     get_or_read_run_id,
-    unpack_dates_and_comments,
     multi_filter_list,
+    unpack_dates_and_comments,
 )
 
 
@@ -260,6 +260,7 @@ def test_unpack_dates_and_comments():
         }
     )
     assert_frame_equal(result, expected)
+
 
 @pytest.fixture(scope="class")
 def input_list():

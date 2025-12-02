@@ -412,6 +412,7 @@ def unpack_dates_and_comments(
 
     return formatted_df
 
+
 def multi_filter_list(master_list: list, *args: str) -> list:
     """Search for keywords in all list of values. Numbers are evaluated as strings.
 
