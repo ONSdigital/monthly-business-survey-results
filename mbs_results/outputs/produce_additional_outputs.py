@@ -160,7 +160,7 @@ def produce_additional_outputs(
             "growth_rates_output": get_growth_rates_output,
             "produce_ocea_srs_outputs": produce_ocea_srs_outputs,
             "create_imputation_link_output": create_imputation_link_output,
-            "create_csdb_output": create_csdb_output,
+            "create_csdb_output": create_csdb_output,  # luke H
             "generate_devolved_outputs": generate_devolved_outputs,
             "produce_qa_output": produce_qa_output,
             "mbs_format_population_counts": format_population_counts_mbs,
@@ -195,7 +195,8 @@ def produce_additional_outputs(
 
                 logger.info(combined_filename + " saved")
         else:
-            # if (output=="produce_qa_output" and config["split_qa_output"]) or output in config["split_output_by_period"]:
+            # if (output=="produce_qa_output" and config["split_qa_output"]) or
+            # output in config["split_output_by_period"]:
             #     write_csv_per_period(df, output, config)
             # # if the output is a DataFrame, save it directly
             # else:
