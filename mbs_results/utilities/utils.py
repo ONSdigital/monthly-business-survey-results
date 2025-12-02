@@ -411,3 +411,47 @@ def unpack_dates_and_comments(
     )
 
     return formatted_df
+
+def multi_filter_list(master_list: list, *args: str) -> list:
+    """Search for keywords in all list of values. Numbers are evaluated as strings.
+
+    Parameters
+    ----------
+    master_list : list
+        List of strings to search.
+    *args : str
+        Keywords to look for.
+
+    Returns
+    -------
+    list
+        A list with values which contain the keywords.
+
+    Examples
+    --------
+    >>> example_list = ["test123","test456","but not this"]
+    >>> find_one_arg = multi_filter_list(one_list,"test")
+    >>> find_one_arg
+    ['test123', 'test456']
+    >>> find_more_args = multi_filter_list(one_list,"test","123")
+    >>> find_more_args
+    ['test123']
+    >>> find_not_there = multi_filter_list(one_list,"test","759")
+    []
+    """
+
+    if not args:
+        print("Nothing to search returning an empty list")
+
+        return []
+
+    # Filtering via a loop with arbitrary number of arguments
+    # so initiliasing the results with original list
+
+    result = master_list.copy()
+
+    for arg in args:
+
+        result = [list_value for list_value in result if arg in list_value]
+
+    return result

@@ -20,6 +20,7 @@ from mbs_results.utilities.utils import (
     get_or_create_run_id,
     get_or_read_run_id,
     unpack_dates_and_comments,
+    multi_filter_list,
 )
 
 
@@ -259,3 +260,33 @@ def test_unpack_dates_and_comments():
         }
     )
     assert_frame_equal(result, expected)
+
+@pytest.fixture(scope="class")
+def input_list():
+    return ["test123", "test456", "not789"]
+
+
+class TestMultiFilterList:
+    def test_no_args(self, input_list):
+
+        result = multi_filter_list(input_list)
+
+        assert result == []
+
+    def test_one_args(self, input_list):
+
+        result = multi_filter_list(input_list, "test")
+
+        assert result == ["test123", "test456"]
+
+    def test_two_args(self, input_list):
+
+        result = multi_filter_list(input_list, "test", "123")
+
+        assert result == ["test123"]
+
+    def test_no_matches(self, input_list):
+
+        result = multi_filter_list(input_list, "test", "759")
+
+        assert result == []

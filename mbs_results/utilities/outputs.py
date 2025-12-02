@@ -1,3 +1,7 @@
+import io
+import json
+import os
+
 import boto3
 import pandas as pd
 import raz_client
@@ -90,3 +94,66 @@ def save_df(df: pd.DataFrame, base_filename: str, config: dict, on_demand=True):
             config["bucket"],
             index=False,
         )
+
+
+def write_json_wrapper(
+    json_data: dict,
+    file_name: str,
+    save_path: str,
+    import_platform: str = "network",
+    bucket_name: str = None,
+):
+    """Writes a dictionary as a json file either locally or in S3.
+
+    Parameters
+    ----------
+    json_data : dict
+        Data saved as dictionary data type.
+    file_name : str
+        The file name to save the data as.
+    save_path : str
+        The path to save the data. to
+    import_platform : str, optional
+        Either network or S3 (for AWS). The default is "network".
+    bucket_name : str, optional
+        The S3 bucket to save the data to (when import_platform is S3).
+        The default is None.
+
+    Raises
+    ------
+    Exception
+        When wrong import_platform is selected.
+
+    Returns
+    -------
+    bool
+        True if function is succesful.
+    """
+
+    full_path = os.path.join(save_path, file_name)
+
+    if import_platform == "s3":
+        client = boto3.client("s3")
+        raz_client.configure_ranger_raz(
+            client, ssl_file="/etc/pki/tls/certs/ca-bundle.crt"
+        )
+        jsonData = json.dumps(json_data).encode("UTF-8")
+        json_bytes = io.BytesIO(jsonData)
+
+        json_bytes.seek(0)
+
+        client.put_object(
+            Bucket=bucket_name,
+            Body=json_bytes.getvalue(),
+            Key=full_path,
+        )
+
+        return True
+
+    if import_platform == "network":
+        with open(full_path, "w", encoding="utf-8") as f:
+            json.dump(json_data, f, ensure_ascii=False, indent=4)
+
+        return True
+
+    raise Exception("platform must either be 's3' or 'network'")

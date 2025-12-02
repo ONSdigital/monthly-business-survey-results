@@ -1,25 +1,34 @@
 {
-    "general":{
-        "platform": "s3",
-        "bucket": "onscdp-dev-data01-5320d6ca",
-        "ssl_file": "/etc/pki/tls/certs/ca-bundle.crt",
-        "output_dir": "",
-        "export_dir": "",
-        "schemas_dir": ""
-    },
-    "options":{
-        "copy_or_move_files": "copy"
-    },
-    "files": {
-        "export_methods_output": "None",
-        "export_growth_rates_output": "None",
-        "export_create_csdb_output": "None",
-        "export_create_imputation_link_output": "None",
-        "export_population_counts": "None",
-        "export_produce_ocea_srs_outputs": "None",
-        "export_produce_qa_output": "None",
-        "export_scotland_generate_devolved_outputs": "None",
-        "export_turnover_output": "None",
-        "export_wales_generate_devolved_outputs": "None"
+"platform": "s3",
+"bucket": "",
+"ssl_file": "/etc/pki/tls/certs/ca-bundle.crt",
+"output_dir": "",
+"export_dir": "",
+"schemas_dir": null,
+"run_id": "",
+"copy_or_move_files": "copy",
+"files_to_export": {
+    "methods_output": false,
+    "growth_rates_output": false,
+    "create_csdb_output": false,
+    "create_imputation_link_output": false,
+    "population_counts": false,
+    "produce_ocea_srs_outputs": false,
+    "produce_qa_output": false,
+    "scotland_generate_devolved_outputs": false,
+    "turnover_output": false,
+    "wales_generate_devolved_outputs": false
+},
+"files_basename": {
+    "methods_output": "mbs_results",
+    "growth_rates_output": "growth_rates_output",
+    "create_csdb_output": "create_csdb_output",
+    "create_imputation_link_output": "create_imputation_link_output",
+    "population_counts": "mbs_population_counts",
+    "produce_ocea_srs_outputs": "produce_ocea_srs_outputs",
+    "produce_qa_output": "produce_qa_output",
+    "scotland_generate_devolved_outputs": "scotland_generate_devolved_outputs",
+    "turnover_output": "turnover_output",
+    "wales_generate_devolved_outputs": "wales_generate_devolved_outputs"
     }
 }
