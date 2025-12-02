@@ -170,7 +170,8 @@
         "46": "total_from_invoices",
         "47": "donations",
         "49": "exports",
-        "110": "water"
+        "110": "water",
+        "146": "comments"
     },
 
     "local_unit_columns": ["ruref", "entref", "lu ref", "check letter", "sic03", "sic07",

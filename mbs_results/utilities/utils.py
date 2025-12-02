@@ -352,6 +352,67 @@ def get_or_read_run_id(config: dict) -> int:
     return run_id
 
 
+def unpack_dates_and_comments(
+    df: pd.DataFrame,
+    reformat_questions: list,
+    question_no_plaintext: list,
+    config: dict,
+) -> pd.DataFrame:
+    """
+    Unpacks date and comments from questions 11, 12 and 146 into separate columns. The
+    returned df also has these question rows removed.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        main dataframe
+    config : dict
+        main pipeline configuration.
+
+    Returns
+    -------
+    pd.DataFrame
+        dataframe with unpacked date and comments
+    """
+
+    date_comments_df = df.copy().loc[
+        df[config["question_no"]].isin(reformat_questions),
+        [
+            config["period"],
+            config["reference"],
+            config["question_no"],
+            "response",
+        ],
+    ]
+    # Converting to string ready for this to become column names
+    date_comments_df[config["question_no"]] = date_comments_df[
+        config["question_no"]
+    ].astype(str)
+    # Converting questions 11, 12, 146 to columns renaming to text based on config
+    date_comments_df = (
+        date_comments_df.pivot_table(
+            index=[config["period"], config["reference"]],
+            columns=config["question_no"],
+            values="response",
+            aggfunc="first",
+        )
+        .reset_index()
+        .rename(columns=question_no_plaintext)
+    )
+    df = df.copy().loc[~df[config["question_no"]].isin(reformat_questions)]
+    # ensure target is float now we have removed 11, 12 and 146
+
+    formatted_df = pd.merge(
+        df,
+        date_comments_df,
+        on=[config["period"], config["reference"]],
+        how="left",
+        suffixes=("", "_y"),
+    )
+
+    return formatted_df
+
+
 def multi_filter_list(master_list: list, *args: str) -> list:
     """Search for keywords in all list of values. Numbers are evaluated as strings.
 
