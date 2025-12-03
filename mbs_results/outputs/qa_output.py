@@ -7,7 +7,7 @@ def produce_qa_output(
     additional_outputs_df: pd.DataFrame,
     split_qa_by_period: bool,
     **config,
-) -> pd.DataFrame | dict:
+) -> pd.DataFrame:
     """Produces an output with required columns, and with total weight and
     weighted adjusted value calculated.
 
