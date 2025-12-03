@@ -350,3 +350,109 @@ def get_or_read_run_id(config: dict) -> int:
     """
     run_id = config.get("run_id") or read_run_id()
     return run_id
+
+
+def unpack_dates_and_comments(
+    df: pd.DataFrame,
+    reformat_questions: list,
+    question_no_plaintext: list,
+    config: dict,
+) -> pd.DataFrame:
+    """
+    Unpacks date and comments from questions 11, 12 and 146 into separate columns. The
+    returned df also has these question rows removed.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        main dataframe
+    config : dict
+        main pipeline configuration.
+
+    Returns
+    -------
+    pd.DataFrame
+        dataframe with unpacked date and comments
+    """
+
+    date_comments_df = df.copy().loc[
+        df[config["question_no"]].isin(reformat_questions),
+        [
+            config["period"],
+            config["reference"],
+            config["question_no"],
+            "response",
+        ],
+    ]
+    # Converting to string ready for this to become column names
+    date_comments_df[config["question_no"]] = date_comments_df[
+        config["question_no"]
+    ].astype(str)
+    # Converting questions 11, 12, 146 to columns renaming to text based on config
+    date_comments_df = (
+        date_comments_df.pivot_table(
+            index=[config["period"], config["reference"]],
+            columns=config["question_no"],
+            values="response",
+            aggfunc="first",
+        )
+        .reset_index()
+        .rename(columns=question_no_plaintext)
+    )
+    df = df.copy().loc[~df[config["question_no"]].isin(reformat_questions)]
+    # ensure target is float now we have removed 11, 12 and 146
+
+    formatted_df = pd.merge(
+        df,
+        date_comments_df,
+        on=[config["period"], config["reference"]],
+        how="left",
+        suffixes=("", "_y"),
+    )
+
+    return formatted_df
+
+
+def multi_filter_list(master_list: list, *args: str) -> list:
+    """Search for keywords in all list of values. Numbers are evaluated as strings.
+
+    Parameters
+    ----------
+    master_list : list
+        List of strings to search.
+    *args : str
+        Keywords to look for.
+
+    Returns
+    -------
+    list
+        A list with values which contain the keywords.
+
+    Examples
+    --------
+    >>> example_list = ["test123","test456","but not this"]
+    >>> find_one_arg = multi_filter_list(one_list,"test")
+    >>> find_one_arg
+    ['test123', 'test456']
+    >>> find_more_args = multi_filter_list(one_list,"test","123")
+    >>> find_more_args
+    ['test123']
+    >>> find_not_there = multi_filter_list(one_list,"test","759")
+    []
+    """
+
+    if not args:
+        print("Nothing to search returning an empty list")
+
+        return []
+
+    # Filtering via a loop with arbitrary number of arguments
+    # so initiliasing the results with original list
+
+    result = master_list.copy()
+
+    for arg in args:
+
+        result = [list_value for list_value in result if arg in list_value]
+
+    return result

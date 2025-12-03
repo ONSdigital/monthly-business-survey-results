@@ -1,5 +1,7 @@
 import pandas as pd
 
+from mbs_results.utilities.utils import unpack_dates_and_comments
+
 
 def produce_qa_output(
     additional_outputs_df: pd.DataFrame,
@@ -20,18 +22,25 @@ def produce_qa_output(
 
     target = config["target"]
 
+    additional_outputs_df = unpack_dates_and_comments(
+        df=additional_outputs_df,
+        reformat_questions=config["filter_out_questions"],
+        question_no_plaintext=config["question_no_plaintext"],
+        config=config,
+    )
+
     requested_columns = [
-        "reference",
-        "period",
-        "sic",
+        config["reference"],
+        config["period"],
+        config["sic"],
         "classification",
-        "cell_number",
-        "auxiliary",
+        config["cell_number"],
+        config["auxiliary"],
         "froempment",
         "formtype",
         "imputed_and_derived_flag",  # response_type
-        "question_no",
-        "target",
+        config["question_no"],
+        f"{target}",
         "status",  # error_mkr
         "design_weight",
         "calibration_factor",
@@ -53,6 +62,12 @@ def produce_qa_output(
         f"f_match_{target}_count",
         f"b_match_filtered_{target}_count",
         f"f_match_filtered_{target}_count",
+        "runame1",
+        config["pound_thousand_col"],
+        "entref",
+        "start_date",
+        "end_date",
+        "comments",
     ]
 
     # Check if column names specified in config, if not, use above as default

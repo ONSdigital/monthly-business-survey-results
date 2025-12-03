@@ -189,6 +189,7 @@ def get_question_no_plaintext(config: dict) -> dict:
         47: "donations",
         49: "exports",
         110: "water",
+        146: "comments",
     }
 
 

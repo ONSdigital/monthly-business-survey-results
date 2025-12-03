@@ -19,6 +19,8 @@ from mbs_results.utilities.utils import (
     generate_schemas,
     get_or_create_run_id,
     get_or_read_run_id,
+    multi_filter_list,
+    unpack_dates_and_comments,
 )
 
 
@@ -218,3 +220,74 @@ class TestRunIDFunctions:
             result_populated = get_or_read_run_id({"run_id": 5678})
         assert result_empty == 4321
         assert result_populated == 5678
+
+
+def test_unpack_dates_and_comments():
+    df = pd.DataFrame(
+        {
+            "period": [2023, 2023, 2023, 2023],
+            "reference": [1, 1, 1, 1],
+            "question_no": [11, 12, 146, 40],
+            "adjustedresponse": [None, None, None, 200.0],
+            "response": ["2023-01-01", "2023-01-02", "This is a comment", "210.0"],
+        }
+    )
+    config = {
+        "filter_out_questions": [11, 12, 146],
+        "question_no_plaintext": {"11": "start", "12": "end", "146": "comments"},
+        "period": "period",
+        "reference": "reference",
+        "question_no": "question_no",
+        "target": "adjustedresponse",
+    }
+
+    result = unpack_dates_and_comments(
+        df=df,
+        reformat_questions=config["filter_out_questions"],
+        question_no_plaintext=config["question_no_plaintext"],
+        config=config,
+    )
+    expected = pd.DataFrame(
+        {
+            "period": [2023],
+            "reference": [1],
+            "question_no": [40],
+            "adjustedresponse": [200.0],
+            "response": ["210.0"],
+            "start": ["2023-01-01"],
+            "end": ["2023-01-02"],
+            "comments": ["This is a comment"],
+        }
+    )
+    assert_frame_equal(result, expected)
+
+
+@pytest.fixture(scope="class")
+def input_list():
+    return ["test123", "test456", "not789"]
+
+
+class TestMultiFilterList:
+    def test_no_args(self, input_list):
+
+        result = multi_filter_list(input_list)
+
+        assert result == []
+
+    def test_one_args(self, input_list):
+
+        result = multi_filter_list(input_list, "test")
+
+        assert result == ["test123", "test456"]
+
+    def test_two_args(self, input_list):
+
+        result = multi_filter_list(input_list, "test", "123")
+
+        assert result == ["test123"]
+
+    def test_no_matches(self, input_list):
+
+        result = multi_filter_list(input_list, "test", "759")
+
+        assert result == []
