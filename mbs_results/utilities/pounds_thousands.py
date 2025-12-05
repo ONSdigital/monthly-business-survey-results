@@ -54,7 +54,22 @@ def create_pounds_thousands_column(
     mask_146 = df[question_col].astype(str) == "146"
     df.loc[mask_146, dest_col] = df.loc[mask_146, source_col]
 
+    # Reorder the position of the dest_col if required
+    cols = [c for c in df.columns if c != dest_col]
+
     if ensure_at_end:
-        cols = [col for col in df.columns if col != dest_col] + [dest_col]
-        df = df.reindex(columns=cols)
+        # Move dest_col to the end
+        cols.append(dest_col)
+    else:
+        try:
+            # Move dest_col to be immediately after source_col
+            source_col_index = cols.index(source_col)
+            cols.insert(source_col_index + 1, dest_col)
+        except ValueError:
+            # source_col not found, just append dest_col at the end, although
+            # this should not happen as source_col should be in df.columns
+            cols.append(dest_col)
+
+    df = df.reindex(columns=cols)
+
     return df
