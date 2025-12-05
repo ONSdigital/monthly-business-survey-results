@@ -79,11 +79,11 @@ def get_additional_outputs_df(
         "default_link_flag_construction_matches",
         "constrain_marker",
         target,
+        config["pound_thousand_col"],
         "response",
         "region",
         "status",
         "winsorised_value",
-        config["pound_thousand_col"],
         "runame1",
     ]
     if not config["filter"]:
@@ -102,7 +102,7 @@ def get_additional_outputs_df(
         source_col=target,
         dest_col=dest_col,
         questions_to_apply=questions_to_apply,
-        ensure_at_end=True,
+        ensure_at_end=False,
     )
 
     # converting cell_number to int
