@@ -72,14 +72,12 @@ def create_turnover_output(
         ]
     ]
 
-    if "turnover_output" in config["split_output_by_period"]:
+    if "turnover_output" in config.get("split_output_by_period", []):
         turnover_return = {}
-        for period in turnover_df["period"].unique():
-            turnover_return[str(int(period))] = (
-                turnover_df[turnover_df["period"] == period]
-                .drop("period", axis=1)
-                .reset_index(drop=True)
-            )
+        for period, df_period in turnover_df.groupby("period"):
+            turnover_return[str(int(period))] = df_period.drop(
+                "period", axis=1
+            ).reset_index(drop=True)
     else:
         turnover_return = turnover_df
 

@@ -46,7 +46,6 @@ test_config = {
     "split_debug_outputs_by_period": False,
     "split_qa_by_period": True,
     "split_main_output_by_period": False,
-    "split_output_by_period": [],
 }
 
 

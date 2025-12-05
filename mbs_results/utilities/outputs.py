@@ -173,15 +173,54 @@ def write_json_wrapper(
 
 
 def write_csv_per_period(df: pd.DataFrame, output_name: str, config: dict):
-    for p in df["period"].unique():
-        period_df = df[df["period"] == p]
-        file_prefix = f"{output_name}_{p}"
+    """
+    function to split main and debug outputs per period and save as separate csv files.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The dataframe to split and save.
+    output_name : str
+        The base name for the output files.
+    config : dict
+        The configuration dictionary containing relevant settings.
+    """
+    for period, df_period in df.groupby(config["period"]):
+        file_prefix = f"{output_name}_{period}"
         filename = get_versioned_filename(file_prefix, config["run_id"])
         write_csv_wrapper(
-            period_df,
+            df_period,
             config["output_path"] + filename,
             config["platform"],
             config["bucket"],
             index=False,
         )
         logger.info(config["output_path"] + filename + " saved")
+
+
+def split_by_period(df: pd.DataFrame, period_col: str, split: bool) -> dict:
+    """Splits a DataFrame into a dictionary of DataFrames by unique values in a
+    specified column.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to be split.
+    period_col : str
+        The name of the column containing the period values.
+    split: bool
+        Whether to split the DataFrame by period.
+
+    Returns
+    -------
+    dict
+        A dictionary where keys are unique period values and values are corresponding
+        DataFrames.
+    """
+    if split:
+        output = {}
+        for period, df_period in df.groupby(period_col):
+            output[str(int(period))] = df_period.reset_index(drop=True)
+        return output
+    else:
+        return df

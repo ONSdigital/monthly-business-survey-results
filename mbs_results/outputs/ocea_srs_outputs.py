@@ -1,5 +1,7 @@
 import pandas as pd
 
+from mbs_results.utilities.outputs import split_by_period
+
 
 def produce_ocea_srs_outputs(
     additional_outputs_df: pd.DataFrame, **config: dict
@@ -47,11 +49,7 @@ def produce_ocea_srs_outputs(
         axis=1,
     )
 
-    if "produce_ocea_srs_outputs" in config["split_output_by_period"]:
-        output = {}
-        for period, df_period in output_df.groupby("Period"):
-            output[str(int(period))] = df_period
-    else:
-        output = output_df
+    condition = "produce_ocea_srs_outputs" in config.get("split_output_by_period", [])
+    output = split_by_period(output_df, "Period", condition)
 
     return output

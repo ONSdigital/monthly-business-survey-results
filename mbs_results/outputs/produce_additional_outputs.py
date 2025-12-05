@@ -151,10 +151,23 @@ def produce_additional_outputs(
     None.
 
     """
+
+    outputs_split = set(config.get("split_output_by_period", []))
+    outputs_built_to_be_split = {
+        "turnover_output",
+        "produce_ocea_srs_outputs",
+        "produce_qa_output",
+    }
+    if outputs_split - outputs_built_to_be_split:
+        logger.warning(
+            "Some outputs requested to be split by period are not built to be split. "
+            "These include: {} ".format(outputs_split - outputs_built_to_be_split)
+        )
+
     # produce_csv_per_period = config["file_per_period"]
     # valid options for splitting: "turnover_output", "produce_ocea_srs_outputs"
     # qa split with additional option
-    # Devolved, growth rates and population counts not split
+    # Devolved, growth rates and population counts and csdb not split
     additional_outputs = get_additional_outputs(
         config,
         {

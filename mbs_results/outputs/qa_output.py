@@ -1,5 +1,6 @@
 import pandas as pd
 
+from mbs_results.utilities.outputs import split_by_period
 from mbs_results.utilities.utils import unpack_dates_and_comments
 
 
@@ -89,11 +90,10 @@ def produce_qa_output(
     additional_outputs_df = additional_outputs_df[
         additional_outputs_df.columns.intersection(cols_from_config)
     ]
-
-    if split_qa_by_period:
-        output = {}
-        for period, df_period in additional_outputs_df.groupby(config["period"]):
-            output[str(int(period))] = df_period.reset_index(drop=True)
-    else:
-        output = additional_outputs_df
+    condition_to_split = split_qa_by_period or (
+        "qa_output" in config.get("split_output_by_period", [])
+    )
+    output = split_by_period(
+        additional_outputs_df, config["period"], condition_to_split
+    )
     return output
