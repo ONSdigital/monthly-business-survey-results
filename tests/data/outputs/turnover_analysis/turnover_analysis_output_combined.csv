@@ -1,0 +1,6 @@
+frosic2007,cell_no,reference,runame1,adjustedresponse,imputed_and_derived_flag,curr_grossed_value,outlier_weight,status,frotover,response,period
+1,32,101,NAME 1,4.2054,r,4.62594,1,O,594,5.94,202301
+1,32,101,NAME 1,0.8493,r,1.324908,1.2,O,960,1,202302
+2,6,102,NAME 2,0.448,c,0.448,1,C,43,0.448,202301
+2,19,103,NAME 3,84.2059,fir,378.92655,1.5,E,509,75.94,202301
+1,32,104,NAME 4,2.4235,d,3.78066,1.2,C,60,,202302
