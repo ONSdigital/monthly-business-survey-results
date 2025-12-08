@@ -28,7 +28,7 @@
     "schema_path": "",
     "debug_mode": false,
     "run_id": "",
-    "split_debug_outputs_by_period": false,
-    "split_qa_by_period": false,
-    "split_main_output_by_period": false
+    "split_methods_outputs_by_period": false,
+    "split_qa_output_by_period": false,
+    "split_results_output_by_period": false
 }
