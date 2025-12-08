@@ -1,3 +1,7 @@
+import os
+
+import pandas as pd
+
 from mbs_results.estimation.estimate import estimate
 from mbs_results.imputation.impute import impute
 from mbs_results.outlier_detection.detect_outlier import detect_outlier
@@ -7,6 +11,10 @@ from mbs_results.outputs.produce_additional_outputs import (
     produce_additional_outputs,
 )
 from mbs_results.staging.stage_dataframe import stage_dataframe
+from mbs_results.utilities.file_selector import (
+    generate_expected_periods,
+    validate_files,
+)
 from mbs_results.utilities.inputs import load_config, read_csv_wrapper
 from mbs_results.utilities.outputs import save_df
 from mbs_results.utilities.setup_logger import setup_logger, upload_logger_file_to_s3
@@ -105,14 +113,40 @@ def produce_additional_outputs_wrapper(config_user_dict=None):
         config["mbs_output_prefix"],
         config["run_id"],
     )
-
     output_path = f"{config['main_mbs_output_folder_path']}{output_file_name}"
 
-    df = read_csv_wrapper(
-        filepath=output_path,
-        import_platform=config["platform"],
-        bucket_name=config["bucket"],
-    )
+    if os.path.exists(output_path):
+        df = read_csv_wrapper(
+            filepath=output_path,
+            import_platform=config["platform"],
+            bucket_name=config["bucket"],
+        )
+    else:
+        expected_dates = generate_expected_periods(
+            config["current_period"], config["revision_window"]
+        )
+        expected_dates_with_run_id = [
+            f"{date}_{config['run_id']}" for date in expected_dates
+        ]
+        valid_files = validate_files(
+            file_path=config["main_mbs_output_folder_path"],
+            file_prefix=config["mbs_output_prefix"],
+            expected_periods=expected_dates_with_run_id,
+            config=config,
+        )
+        if not valid_files:
+            raise FileNotFoundError(
+                "No mbs output files found to produce additional outputs."
+            )
+        dataframes = [
+            read_csv_wrapper(
+                filepath=filepath,
+                import_platform=config["platform"],
+                bucket_name=config["bucket"],
+            )
+            for filepath in valid_files
+        ]
+        df = pd.concat(dataframes, ignore_index=True)
 
     produce_additional_outputs(
         additional_outputs_df=df, qa_outputs=False, optional_outputs=True, config=config
