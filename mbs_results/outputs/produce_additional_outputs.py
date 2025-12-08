@@ -160,8 +160,11 @@ def produce_additional_outputs(
     }
     if outputs_split - outputs_built_to_be_split:
         logger.warning(
-            "Some outputs requested to be split by period are not built to be split. "
+            "Some outputs in the split_output_by_period parameter cannot be split. "
             "These include: {} ".format(outputs_split - outputs_built_to_be_split)
+            + "\nThe outputs that you can include here are: {}".format(
+                outputs_built_to_be_split
+            )
         )
 
     # produce_csv_per_period = config["file_per_period"]
