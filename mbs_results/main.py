@@ -1,5 +1,3 @@
-import os
-
 import pandas as pd
 
 from mbs_results.estimation.estimate import estimate
@@ -115,13 +113,13 @@ def produce_additional_outputs_wrapper(config_user_dict=None):
     )
     output_path = f"{config['main_mbs_output_folder_path']}{output_file_name}"
 
-    if os.path.exists(output_path):
+    try:
         df = read_csv_wrapper(
             filepath=output_path,
             import_platform=config["platform"],
             bucket_name=config["bucket"],
         )
-    else:
+    except FileNotFoundError:
         expected_dates = generate_expected_periods(
             config["current_period"], config["revision_window"]
         )
