@@ -6,7 +6,6 @@ from mbs_results.utilities.utils import unpack_dates_and_comments
 
 def produce_qa_output(
     additional_outputs_df: pd.DataFrame,
-    split_qa_by_period: bool,
     **config,
 ) -> pd.DataFrame:
     """Produces an output with required columns, and with total weight and
@@ -90,10 +89,8 @@ def produce_qa_output(
     additional_outputs_df = additional_outputs_df[
         additional_outputs_df.columns.intersection(cols_from_config)
     ]
-    condition_to_split = split_qa_by_period or (
-        "qa_output" in config.get("split_output_by_period", [])
-    )
-    output = split_by_period(
-        additional_outputs_df, config["period"], condition_to_split
-    )
+
+    split = "qa_output" in config.get("split_output_by_period", [])
+
+    output = split_by_period(additional_outputs_df, config["period"], split)
     return output
