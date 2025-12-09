@@ -79,7 +79,7 @@ def create_turnover_output(
     )
 
     turnover_return = split_by_period(
-        additional_outputs_df, config["period"], condition_to_split, drop_period=True
+        turnover_df, "period", condition_to_split, drop_period=True
     )
 
     return turnover_return

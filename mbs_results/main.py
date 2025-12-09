@@ -60,7 +60,7 @@ def run_mbs_main(config_user_dict=None):
         "imputation",
         config,
         config["debug_mode"],
-        config["split_debug_outputs_by_period"],
+        config["split_methods_outputs_by_period"],
     )
 
     # Estimation Wrap
@@ -71,7 +71,7 @@ def run_mbs_main(config_user_dict=None):
         "estimation_output",
         config,
         config["debug_mode"],
-        config["split_debug_outputs_by_period"],
+        config["split_methods_outputs_by_period"],
     )
 
     # Outlier Wrapper
@@ -82,12 +82,15 @@ def run_mbs_main(config_user_dict=None):
         "outlier_output",
         config,
         config["debug_mode"],
-        config["split_debug_outputs_by_period"],
+        config["split_methods_outputs_by_period"],
     )
 
     df = get_additional_outputs_df(df, unprocessed_data, config)
     save_df(
-        df, "mbs_results", config, split_by_period=config["split_main_output_by_period"]
+        df,
+        "mbs_results",
+        config,
+        split_by_period=config["split_results_output_by_period"],
     )  # main methods output
 
     produce_additional_outputs(
