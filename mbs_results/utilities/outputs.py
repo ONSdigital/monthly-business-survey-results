@@ -198,7 +198,9 @@ def write_csv_per_period(df: pd.DataFrame, output_name: str, config: dict):
         logger.info(config["output_path"] + filename + " saved")
 
 
-def split_by_period(df: pd.DataFrame, period_col: str, split: bool) -> dict:
+def split_by_period(
+    df: pd.DataFrame, period_col: str, split: bool, drop_period: bool = False
+) -> dict:
     """Splits a DataFrame into a dictionary of DataFrames by unique values in a
     specified column.
 
@@ -210,6 +212,8 @@ def split_by_period(df: pd.DataFrame, period_col: str, split: bool) -> dict:
         The name of the column containing the period values.
     split: bool
         Whether to split the DataFrame by period.
+    drop_period: bool
+        Whether to drop the period column from the resulting DataFrames.
 
     Returns
     -------
@@ -221,6 +225,8 @@ def split_by_period(df: pd.DataFrame, period_col: str, split: bool) -> dict:
         output = {}
         for period, df_period in df.groupby(period_col):
             output[str(int(period))] = df_period.reset_index(drop=True)
+        if drop_period:
+            output = {k: v.drop(period_col, axis=1) for k, v in output.items()}
         return output
     else:
         return df
