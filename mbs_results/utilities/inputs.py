@@ -141,7 +141,6 @@ def read_csv_wrapper(
         raz_client.configure_ranger_raz(
             client, ssl_file="/etc/pki/tls/certs/ca-bundle.crt"
         )
-        # Check existence
         try:
             client.head_object(Bucket=bucket_name, Key=filepath)
         except client.exceptions.ClientError:

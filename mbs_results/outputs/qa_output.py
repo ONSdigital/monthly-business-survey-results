@@ -90,7 +90,12 @@ def produce_qa_output(
         additional_outputs_df.columns.intersection(cols_from_config)
     ]
 
-    split = "qa_output" in config.get("split_output_by_period", [])
+    condition_to_split = config["split_qa_output_by_period"] or (
+        "qa_output" in config.get("split_output_by_period", [])
+    )
 
-    output = split_by_period(additional_outputs_df, config["period"], split)
+    output = split_by_period(
+        additional_outputs_df, config["period"], condition_to_split
+    )
+
     return output
