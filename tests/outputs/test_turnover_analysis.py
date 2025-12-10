@@ -52,7 +52,7 @@ class TestTurnoverAnalysis:
         }
         config = {
             "sic": "frosic2007",
-            "split_output_by_period": ["turnover_output"],
+            "split_turnover_output_by_period": True,
         }
 
         actual_output = create_turnover_output(
@@ -70,7 +70,7 @@ class TestTurnoverAnalysis:
     ):
         config = {
             "sic": "frosic2007",
-            "split_output_by_period": [],
+            "split_turnover_output_by_period": False,
         }
 
         actual_output = create_turnover_output(

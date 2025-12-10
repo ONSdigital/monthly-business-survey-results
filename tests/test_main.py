@@ -43,9 +43,10 @@ test_config = {
     "schema_path": "tests/data/test_main/schemas/",
     "debug_mode": True,
     "run_id": 1,
-    "split_debug_outputs_by_period": False,
-    "split_qa_by_period": True,
-    "split_main_output_by_period": False,
+    "split_methods_outputs_by_period": False,
+    "split_qa_output_by_period": True,
+    "split_turnover_output_by_period": False,
+    "split_results_output_by_period": False,
 }
 
 
