@@ -301,6 +301,8 @@ def devolved_outputs(
         "frosic2007",
         "formtype",
         "froempment",
+        "start_date",
+        "end_date",
     ]
     if "009" in config["ludets_prefix"]:
         pivot_values = [
@@ -329,23 +331,6 @@ def devolved_outputs(
     ]
 
     dict_agg_funcs = dict(zip(pivot_values, pivot_agg_functions))
-
-    start_end_dates = df[df["questioncode"].isin([11, 12])][
-        ["reference", "period", "questioncode", "adjustedresponse"]
-    ]
-
-    start_end_pivot = (
-        start_end_dates.pivot_table(
-            index=["reference", "period"],
-            columns="questioncode",
-            values="adjustedresponse",
-            aggfunc=agg_function,
-        )
-        .rename(columns={11: "start_date", 12: "end_date"})
-        .reset_index()
-    )
-
-    df = df[~df["questioncode"].isin([11, 12])]
 
     df_pivot = pd.pivot_table(
         df,
@@ -405,11 +390,6 @@ def devolved_outputs(
         how="left",
         suffixes=("", "_extra"),
     )
-
-    df_pivot = pd.merge(
-        df_pivot, start_end_pivot, on=["reference", "period"], how="left"
-    )
-
     # Drop the percentage column with the '_extra' suffix if it exists
     extra_col = f"{percent_devolved_nation_col}_extra"
     if extra_col in df_pivot.columns:
