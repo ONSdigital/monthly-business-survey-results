@@ -30,18 +30,15 @@ def run_mbs_main(config_user_dict=None):
     """Main function to run MBS methods pipeline"""
 
     config = load_config("config_user.json", config_user_dict)
+    validate_config(config)
 
     # Set up run id
-    config["run_id"] = (
-        config_user_dict["run_id"] if config_user_dict else get_or_create_run_id(config)
-    )
+    config["run_id"] = get_or_create_run_id(config)
 
     # Initialise the logger at the start of the pipeline
     logger_file_path = f"mbs_results_{config['run_id']}.log"
     logger = setup_logger(logger_file_path=logger_file_path)
     logger.info(f"MBS Pipeline Started: Log file: {logger_file_path}")
-
-    validate_config(config)
 
     df, unprocessed_data, manual_constructions, filter_df = stage_dataframe(config)
     validate_staging(df, config)
