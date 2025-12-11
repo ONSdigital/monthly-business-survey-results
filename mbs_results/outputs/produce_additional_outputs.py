@@ -152,6 +152,25 @@ def produce_additional_outputs(
 
     """
 
+    outputs_split = set(config.get("split_output_by_period", []))
+    outputs_built_to_be_split = {
+        "turnover_output",
+        "produce_ocea_srs_outputs",
+        "produce_qa_output",
+    }
+    if outputs_split - outputs_built_to_be_split:
+        logger.warning(
+            "Some outputs in the split_output_by_period parameter cannot be split. "
+            "These include: {} ".format(outputs_split - outputs_built_to_be_split)
+            + "\nThe outputs that you can include here are: {}".format(
+                outputs_built_to_be_split
+            )
+        )
+
+    # produce_csv_per_period = config["file_per_period"]
+    # valid options for splitting: "turnover_output", "produce_ocea_srs_outputs"
+    # qa split with additional option
+    # Devolved, growth rates and population counts and csdb not split
     additional_outputs = get_additional_outputs(
         config,
         {
@@ -182,19 +201,18 @@ def produce_additional_outputs(
         if isinstance(df, dict):
             # if the output is a dictionary (e.g. from generate_devolved_outputs),
             # we need to save each DataFrame in the dictionary
-            for nation, df in df.items():
-                nation_filename = f"{config['output_path']}{nation.lower()}_{filename}"
+            for name, df in df.items():
+                combined_filename = f"{config['output_path']}{name.lower()}_{filename}"
                 write_csv_wrapper(
                     df,
-                    nation_filename,
+                    combined_filename,
                     config["platform"],
                     config["bucket"],
                     index=False,
                 )
 
-                logger.info(nation_filename + " saved")
+                logger.info(combined_filename + " saved")
         else:
-            # if the output is a DataFrame, save it directly
             write_csv_wrapper(
                 df,
                 config["output_path"] + filename,

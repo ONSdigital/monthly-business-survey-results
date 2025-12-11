@@ -1,5 +1,6 @@
 import io
 import json
+import logging
 import os
 
 import boto3
@@ -8,6 +9,8 @@ import raz_client
 from rdsa_utils.cdp.helpers.s3_utils import write_csv
 
 from mbs_results.utilities.utils import get_versioned_filename
+
+logger = logging.getLogger(__name__)
 
 
 def write_csv_wrapper(
@@ -61,7 +64,13 @@ def write_csv_wrapper(
     raise Exception("platform must either be 's3' or 'network'")
 
 
-def save_df(df: pd.DataFrame, base_filename: str, config: dict, on_demand=True):
+def save_df(
+    df: pd.DataFrame,
+    base_filename: str,
+    config: dict,
+    on_demand: bool = True,
+    split_by_period: bool = False,
+):
     """
     Adds a version tag to the filename and saves the dataframe based on
     settings in the config.
@@ -75,7 +84,9 @@ def save_df(df: pd.DataFrame, base_filename: str, config: dict, on_demand=True):
     config : str, optional
         The pipeline configuration
     on_demand: bool
-        Wether to foce the save, default is True.
+        Whether to force the save, default is True.
+    split_by_period: bool
+        Option to split out the dataframe by period. Default is False.
 
     Returns
     -------
@@ -83,7 +94,7 @@ def save_df(df: pd.DataFrame, base_filename: str, config: dict, on_demand=True):
     """
 
     # export on demand
-    if on_demand:
+    if on_demand and (not split_by_period):
 
         filename = get_versioned_filename(base_filename, config["run_id"])
 
@@ -94,6 +105,8 @@ def save_df(df: pd.DataFrame, base_filename: str, config: dict, on_demand=True):
             config["bucket"],
             index=False,
         )
+    elif on_demand and split_by_period:
+        write_csv_per_period(df, base_filename, config)
 
 
 def write_json_wrapper(
@@ -157,3 +170,63 @@ def write_json_wrapper(
         return True
 
     raise Exception("platform must either be 's3' or 'network'")
+
+
+def write_csv_per_period(df: pd.DataFrame, output_name: str, config: dict):
+    """
+    function to split main and debug outputs per period and save as separate csv files.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The dataframe to split and save.
+    output_name : str
+        The base name for the output files.
+    config : dict
+        The configuration dictionary containing relevant settings.
+    """
+    for period, df_period in df.groupby(config["period"]):
+        file_prefix = f"{output_name}_{period}"
+        filename = get_versioned_filename(file_prefix, config["run_id"])
+        write_csv_wrapper(
+            df_period,
+            config["output_path"] + filename,
+            config["platform"],
+            config["bucket"],
+            index=False,
+        )
+        logger.info(config["output_path"] + filename + " saved")
+
+
+def split_by_period(
+    df: pd.DataFrame, period_col: str, split: bool, drop_period: bool = False
+) -> dict:
+    """Splits a DataFrame into a dictionary of DataFrames by unique values in a
+    specified column.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The DataFrame to be split.
+    period_col : str
+        The name of the column containing the period values.
+    split: bool
+        Whether to split the DataFrame by period.
+    drop_period: bool
+        Whether to drop the period column from the resulting DataFrames.
+
+    Returns
+    -------
+    dict
+        A dictionary where keys are unique period values and values are corresponding
+        DataFrames.
+    """
+    if split:
+        output = {}
+        for period, df_period in df.groupby(period_col):
+            output[str(int(period))] = df_period.reset_index(drop=True)
+        if drop_period:
+            output = {k: v.drop(period_col, axis=1) for k, v in output.items()}
+        return output
+    else:
+        return df

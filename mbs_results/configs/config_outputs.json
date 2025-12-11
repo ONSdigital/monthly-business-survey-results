@@ -12,5 +12,6 @@
     "current_period": 202303,
     "revision_window": 15,
     "devolved_nations": ["Scotland", "Wales"],
-    "run_id": ""
+    "run_id": "",
+    "split_output_by_period": []
 }

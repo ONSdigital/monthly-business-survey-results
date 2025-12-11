@@ -109,7 +109,7 @@ def read_csv_wrapper(
 ) -> pd.DataFrame:
     """
     Load a CSV file from an S3 bucket or from a network path into a Pandas
-    DataFrame.
+    DataFrame. Checks if the file exists before reading.
 
     Parameters
     ----------
@@ -131,21 +131,28 @@ def read_csv_wrapper(
 
     Raises
     ------
+    FileNotFoundError
+        If the file does not exist.
     Exception
-        If import_platform is not either be 's3' or 'network'.
+        If import_platform is not either 's3' or 'network'.
     """
     if import_platform == "s3":
         client = boto3.client("s3")
         raz_client.configure_ranger_raz(
             client, ssl_file="/etc/pki/tls/certs/ca-bundle.crt"
         )
+        try:
+            client.head_object(Bucket=bucket_name, Key=filepath)
+        except client.exceptions.ClientError:
+            raise FileNotFoundError(f"S3 file not found: {bucket_name}/{filepath}")
         df = load_csv(
             client=client, bucket_name=bucket_name, filepath=filepath, **kwargs
         )
-
         return df
 
     if import_platform == "network":
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"Network file not found: {filepath}")
         df = pd.read_csv(filepath, **kwargs)
         return df
 

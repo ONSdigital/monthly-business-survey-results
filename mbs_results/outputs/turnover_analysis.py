@@ -1,5 +1,7 @@
 import pandas as pd
 
+from mbs_results.utilities.outputs import split_by_period
+
 
 def create_turnover_output(
     additional_outputs_df: pd.DataFrame, sic, **config
@@ -72,12 +74,12 @@ def create_turnover_output(
         ]
     ]
 
-    turnover_dict = {}
-    for period in turnover_df["period"].unique():
-        turnover_dict[str(int(period))] = (
-            turnover_df[turnover_df["period"] == period]
-            .drop("period", axis=1)
-            .reset_index(drop=True)
-        )
+    condition_to_split = config["split_turnover_output_by_period"] or (
+        "turnover_output" in config.get("split_output_by_period", [])
+    )
 
-    return turnover_dict
+    turnover_return = split_by_period(
+        turnover_df, "period", condition_to_split, drop_period=True
+    )
+
+    return turnover_return

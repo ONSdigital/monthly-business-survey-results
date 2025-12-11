@@ -27,5 +27,9 @@
     "generate_schemas": false,
     "schema_path": "",
     "debug_mode": false,
-    "run_id": ""
+    "run_id": "",
+    "split_methods_outputs_by_period": false,
+    "split_qa_output_by_period": false,
+    "split_turnover_output_by_period": false,
+    "split_results_output_by_period": false
 }
