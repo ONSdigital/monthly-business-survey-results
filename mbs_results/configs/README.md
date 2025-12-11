@@ -55,7 +55,7 @@ As an end user, you will only need to change the user config (named `config_user
 | current_period | The most recent period to include in the outputs (same as above). | int | Any int in the form `yyyymm`. |
 | revision_window | The number of months to use as a revision window. | int | Any int in the form `mm` or `m` (does not need to be zero-padded). |
 | devolved_nations | Nations to create outputs for choose between `Scotland`, `Wales`. | List of string | List of nations. |
-| split_output_by_period | Any additional output named in this list will be split into multiple outputs based on period | List of string | List of additional outputs |
+| split_output_by_period | Any additional output named in this list will be split into multiple outputs based on period | List of string | List of additional outputs. Currently will only work with `"produce_ocea_srs_outputs"` (config_user.json is used for the turnover output and the qa output).|
 
 ## Guidance for additional outputs
 As an end user, you will only need to change the outputs config (named `config_outputs.json`) - you just need to update the filepaths and period information in the output config. Note: for ONS users, you can find example filepaths in the Confluence documentation.
