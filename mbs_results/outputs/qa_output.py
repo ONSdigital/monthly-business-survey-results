@@ -1,7 +1,6 @@
 import pandas as pd
 
 from mbs_results.utilities.outputs import split_by_period
-from mbs_results.utilities.utils import unpack_dates_and_comments
 
 
 def produce_qa_output(
