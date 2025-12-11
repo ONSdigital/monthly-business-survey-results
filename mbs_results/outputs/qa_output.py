@@ -1,5 +1,8 @@
 import pandas as pd
 
+from mbs_results.utilities.outputs import split_by_period
+from mbs_results.utilities.utils import unpack_dates_and_comments
+
 
 def produce_qa_output(
     additional_outputs_df: pd.DataFrame,
@@ -70,4 +73,12 @@ def produce_qa_output(
         additional_outputs_df.columns.intersection(cols_from_config)
     ]
 
-    return additional_outputs_df
+    condition_to_split = config["split_qa_output_by_period"] or (
+        "qa_output" in config.get("split_output_by_period", [])
+    )
+
+    output = split_by_period(
+        additional_outputs_df, config["period"], condition_to_split
+    )
+
+    return output
