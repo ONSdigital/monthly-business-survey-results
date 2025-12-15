@@ -332,6 +332,10 @@ def devolved_outputs(
 
     start_end_pivot = df[["reference", "period", "start_date", "end_date"]]
 
+    # Dropping duplicates since source df had a dimension qcode with same
+    # start end dates
+    start_end_pivot = start_end_pivot.drop_duplicates()
+
     df_pivot = pd.pivot_table(
         df,
         values=pivot_values,
