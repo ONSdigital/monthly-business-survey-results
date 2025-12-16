@@ -23,6 +23,7 @@ def get_growth_rates_output(
         Dataframe containing classification, question number, and cell number, pivoted
         wider on period with adjusted values.
     """
+    additional_outputs_df = additional_outputs_df.copy()
 
     additional_outputs_df = additional_outputs_df[
         ~additional_outputs_df[config["question_no"]].isin(
