@@ -19,12 +19,12 @@ def setup_logger(logger_file_path: str) -> logging.Logger:
         logging.Logger: Configured logger instance.
     """
     logger = logging.getLogger("root")
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.INFO)
     logger.propagate = True
 
     # Console handler
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)
+    console_handler.setLevel(logging.INFO)
     formatter = logging.Formatter(
         "[%(asctime)s: %(name)s: %(levelname)s: %(module)s: "
         "%(funcName)s: %(lineno)d] %(message)s"
@@ -35,7 +35,7 @@ def setup_logger(logger_file_path: str) -> logging.Logger:
     # File handler
     if logger_file_path:
         file_handler = logging.FileHandler(logger_file_path)
-        file_handler.setLevel(logging.DEBUG)
+        file_handler.setLevel(logging.INFO)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
