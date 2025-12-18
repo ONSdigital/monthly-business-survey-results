@@ -219,6 +219,7 @@ def read_colon_separated_file(
         sep=":",
         names=column_names,
         usecols=usecols,
+        encoding_errors="replace",
     )
 
     # Esure the filepath is a string
