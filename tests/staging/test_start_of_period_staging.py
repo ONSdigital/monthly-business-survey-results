@@ -215,6 +215,9 @@ class TestStartPeriodStaging:
         expected_output["period"] = (
             expected_output["period"].dt.strftime("%Y%m").astype(int)
         )
+        expected_output["imputed_and_derived_flag"] = expected_output[
+            "imputed_and_derived_flag"
+        ].astype(str)
 
         config["selective_editing_period"] = (
             pd.to_datetime(config["current_period"], format="%Y%m")

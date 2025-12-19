@@ -512,13 +512,14 @@ def filter_out_questions(
         Original dataframes with and without questions_to_filter questions.
 
     """
-
     filter_out_questions_df = df[df[column].isin(questions_to_filter)]
 
     keep_questions_df = df[~df[column].isin(questions_to_filter)]
 
     keep_questions_df.reset_index(drop=True, inplace=True)
     filter_out_questions_df.reset_index(drop=True, inplace=True)
+
+    filter_out_questions_df = filter_out_questions_df.copy()
 
     filter_out_questions_df["period"] = (
         filter_out_questions_df["period"].dt.strftime("%Y%m").astype("int")
