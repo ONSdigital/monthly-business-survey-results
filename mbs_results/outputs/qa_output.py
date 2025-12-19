@@ -1,7 +1,6 @@
 import pandas as pd
 
 from mbs_results.utilities.outputs import split_by_period
-from mbs_results.utilities.utils import unpack_dates_and_comments
 
 
 def produce_qa_output(
@@ -21,13 +20,6 @@ def produce_qa_output(
     """
 
     target = config["target"]
-
-    additional_outputs_df = unpack_dates_and_comments(
-        df=additional_outputs_df,
-        reformat_questions=config["filter_out_questions"],
-        question_no_plaintext=config["question_no_plaintext"],
-        config=config,
-    )
 
     requested_columns = [
         config["reference"],
@@ -76,16 +68,6 @@ def produce_qa_output(
     for col in requested_columns:
         cols_from_config.append(config.get(col, col))
 
-    additional_outputs_df["total weight (A*G*O)"] = (
-        additional_outputs_df[config["design_weight"]]
-        * additional_outputs_df[config["calibration_factor"]]
-        * additional_outputs_df["outlier_weight"]
-    )
-
-    additional_outputs_df["weighted adjusted value"] = (
-        additional_outputs_df[config["target"]]
-        * additional_outputs_df["total weight (A*G*O)"]
-    )
     additional_outputs_df = additional_outputs_df[
         additional_outputs_df.columns.intersection(cols_from_config)
     ]

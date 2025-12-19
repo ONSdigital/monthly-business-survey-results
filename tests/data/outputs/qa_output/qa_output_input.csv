@@ -1,10 +1,4 @@
-reference,period,frosic2007,classification,cell_no,frotover,froempment,formtype,imputed_and_derived_flag,questioncode,adjustedresponse,statusencoded,design_weight,calibration_factor,outlier_weight,imputation_flags_adjustedresponse,imputation_class,f_link_adjustedresponse,f_match_adjustedresponse_count,default_link_f_match_adjustedresponse,b_link_adjustedresponse,b_match_adjustedresponse_count,default_link_b_match_adjustedresponse,construction_link,flag_construction_matches_count,default_link_flag_construction_matches,constrain_marker, not_a_col,response
-1,2022-01,1,5,101,1000.0,50,1,1,1,200.0,0,1.5,1.2,0.8,1,"r",0.5,10,0.3,0.4,8,0.2,1,5,0.1,0,,200.0
-1,2022-01,1,5,101,1000.0,50,1,1,11,,0,1.5,1.2,0.8,1,"r",0.5,10,0.3,0.4,8,0.2,1,5,0.1,0,,"date1"
-1,2022-01,1,5,101,1000.0,50,1,1,12,,0,1.5,1.2,0.8,1,"r",0.5,10,0.3,0.4,8,0.2,1,5,0.1,0,,"date2"
-1,2022-01,1,5,101,1000.0,50,1,1,146,,0,1.5,1.2,0.8,1,"r",0.5,10,0.3,0.4,8,0.2,1,5,0.1,0,,"comment one"
-2,2022-02,2,5,102,2000.0,60,2,2,2,300.0,0,2.0,1.1,0.9,1,"r",0.6,12,0.4,0.5,9,0.3,1,6,0.2,0,,
-2,2022-02,2,5,102,2000.0,60,2,2,11,,0,2.0,1.1,0.9,1,"r",0.6,12,0.4,0.5,9,0.3,1,6,0.2,0,,"date1"
-2,2022-02,2,5,102,2000.0,60,2,2,12,,0,2.0,1.1,0.9,1,"r",0.6,12,0.4,0.5,9,0.3,1,6,0.2,0,,"date2"
-2,2022-02,2,5,102,2000.0,60,2,2,146,,0,2.0,1.1,0.9,1,"r",0.6,12,0.4,0.5,9,0.3,1,6,0.2,0,,"comment two"
-2,2022-02,2,5,102,2000.0,60,2,2,3,300.0,0,2.0,1.1,0.9,1,"r",0.6,12,0.4,0.5,9,0.3,1,6,0.2,0,,
+reference,period,frosic2007,classification,cell_no,frotover,froempment,formtype,imputed_and_derived_flag,questioncode,adjustedresponse,statusencoded,design_weight,calibration_factor,outlier_weight,imputation_flags_adjustedresponse,imputation_class,f_link_adjustedresponse,f_match_adjustedresponse_count,default_link_f_match_adjustedresponse,b_link_adjustedresponse,b_match_adjustedresponse_count,default_link_b_match_adjustedresponse,construction_link,flag_construction_matches_count,default_link_flag_construction_matches,constrain_marker, not_a_col,response,total weight (A*G*O),weighted adjusted value,start_date,end_date,comments
+1,2022-01,1,5,101,1000,50,1,1,1,200,0,1.5,1.2,0.8,1,r,0.5,10,0.3,0.4,8,0.2,1,5,0.1,0,,200,1.44,288,date1,date2,comment one
+2,2022-02,2,5,102,2000,60,2,2,2,300,0,2,1.1,0.9,1,r,0.6,12,0.4,0.5,9,0.3,1,6,0.2,0,,,1.98,594,date1,date2,comment two
+2,2022-02,2,5,102,2000,60,2,2,3,300,0,2,1.1,0.9,1,r,0.6,12,0.4,0.5,9,0.3,1,6,0.2,0,,,1.98,594,date1,date2,comment two

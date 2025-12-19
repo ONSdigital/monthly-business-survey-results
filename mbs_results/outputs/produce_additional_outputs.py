@@ -19,7 +19,10 @@ from mbs_results.outputs.selective_editing_question_output import (
 from mbs_results.outputs.turnover_analysis import create_turnover_output
 from mbs_results.utilities.outputs import write_csv_wrapper
 from mbs_results.utilities.pounds_thousands import create_pounds_thousands_column
-from mbs_results.utilities.utils import get_versioned_filename
+from mbs_results.utilities.utils import (
+    get_versioned_filename,
+    unpack_dates_and_comments,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +99,10 @@ def get_additional_outputs_df(
 
     final_cols += count_variables
 
+    # include live_adjustedresponses for frozen runs
+    if config["state"] == "frozen":
+        final_cols += [f"live_{target}"]
+
     df = create_pounds_thousands_column(
         df,
         question_col=question_col,
@@ -112,9 +119,24 @@ def get_additional_outputs_df(
 
     df = df[final_cols]
 
+    df["total weight (A*G*O)"] = (
+        df[config["design_weight"]]
+        * df[config["calibration_factor"]]
+        * df["outlier_weight"]
+    )
+
+    df["weighted adjusted value"] = df[config["target"]] * df["total weight (A*G*O)"]
+
     df = pd.concat([df, unprocessed_data])
 
     df.reset_index(drop=True, inplace=True)
+
+    df = unpack_dates_and_comments(
+        df=df,
+        reformat_questions=config["filter_out_questions"],
+        question_no_plaintext=config["question_no_plaintext"],
+        config=config,
+    )
 
     return df
 

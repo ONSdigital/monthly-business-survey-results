@@ -330,22 +330,11 @@ def devolved_outputs(
 
     dict_agg_funcs = dict(zip(pivot_values, pivot_agg_functions))
 
-    start_end_dates = df[df["questioncode"].isin([11, 12])][
-        ["reference", "period", "questioncode", "adjustedresponse"]
-    ]
+    start_end_pivot = df[["reference", "period", "start_date", "end_date"]]
 
-    start_end_pivot = (
-        start_end_dates.pivot_table(
-            index=["reference", "period"],
-            columns="questioncode",
-            values="adjustedresponse",
-            aggfunc=agg_function,
-        )
-        .rename(columns={11: "start_date", 12: "end_date"})
-        .reset_index()
-    )
-
-    df = df[~df["questioncode"].isin([11, 12])]
+    # Dropping duplicates since source df had a dimension qcode with same
+    # start end dates
+    start_end_pivot = start_end_pivot.drop_duplicates()
 
     df_pivot = pd.pivot_table(
         df,
