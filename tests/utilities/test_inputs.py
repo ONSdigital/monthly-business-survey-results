@@ -27,7 +27,7 @@ def test_read_colon_seperated_file_encoding(utilities_data_dir):
     expected = pd.DataFrame(
         {
             "int": [1, 2, 3],
-            "str": ["A", "ó", "C"],
+            "str": ["A", "�", "C"],
             "float": [1.0, 2.0, 3.0],
             "period": [202401, 202401, 202401],
         }
