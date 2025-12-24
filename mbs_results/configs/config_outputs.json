@@ -9,8 +9,8 @@
     "cdid_data_path": "",
     "output_path": "",
     "ludets_prefix": "",
-    "current_period": 202303,
-    "revision_window": 15,
+    "current_period": 202510,
+    "revision_window": 1,
     "devolved_nations": ["Scotland", "Wales"],
     "run_id": "",
     "split_output_by_period": []
