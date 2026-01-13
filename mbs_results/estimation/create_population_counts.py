@@ -6,7 +6,12 @@ from mbs_results.utilities.utils import get_versioned_filename
 
 
 def calculate_turnover_sum_count(
-    df: pd.DataFrame, period: str, strata: str, colname: str, **config
+    df: pd.DataFrame,
+    period: str,
+    strata: str,
+    colname: str,
+    additional_column_groupby: str = None,
+    **config,
 ) -> pd.DataFrame:
     """
     Calculates turnover sum and count and returns an aggregated dataframe
@@ -29,8 +34,12 @@ def calculate_turnover_sum_count(
         A grouped dataframe with the sum and count columns prefixed with colname
     """
 
+    groupby_columns = [period, strata]
+    if additional_column_groupby is not None:
+        groupby_columns.append(additional_column_groupby)
+
     df_pop_count = (
-        df.groupby([period, strata])
+        df.groupby(groupby_columns)
         .agg(summing=("frotover", "sum"), count=("reference", "size"))
         .reset_index()
     )
@@ -47,6 +56,7 @@ def create_population_count_output(
     df: pd.DataFrame,
     period: str,
     strata: str,
+    sic: str,
     output_path: str,
     run_id: int,
     platform: str,
@@ -64,6 +74,8 @@ def create_population_count_output(
         period column name
     strata : str
         strata column name
+    sic : str
+        sic column name
     output_path : str, optional
         Output path to save dataframe
     run_id : int
@@ -95,6 +107,32 @@ def create_population_count_output(
     write_csv_wrapper(
         full_combined,
         output_path + f"population_counts_{run_id}.csv",
+        platform,
+        bucket,
+        index=False,
+    )
+
+    population_sic = calculate_turnover_sum_count(
+        df, period, strata, "population", additional_column_groupby=sic, **config
+    )
+    sample_sic = calculate_turnover_sum_count(
+        df[df["is_sampled"]],
+        period,
+        strata,
+        "sample",
+        additional_column_groupby=sic,
+        **config,
+    )
+
+    # outer join and filling na to keep cases when population is is non-zero,
+    # and nothing is in sample (i.e. cell has not been sampled)
+    full_combined_sic = pd.merge(
+        population_sic, sample_sic, on=[period, strata, sic], how="outer"
+    ).fillna(0)
+
+    write_csv_wrapper(
+        full_combined_sic,
+        output_path + f"population_counts_sic_{run_id}.csv",
         platform,
         bucket,
         index=False,
@@ -142,15 +180,11 @@ def format_population_counts_mbs(
         returns the formatted dataframe and the filename including current and previous
         period in filename
     """
+    # Want this to pickup popcounts grouped by sic not cell_no
     population_counts_filename = get_versioned_filename(
-        config["population_counts_prefix"], run_id
+        config["population_counts_prefix"] + "_sic", run_id
     )
     population_counts_path = f"{output_path}{population_counts_filename}"
-
-    df_cell_no_sic = additional_outputs_df.copy()[
-        [period, strata, sic]
-    ].drop_duplicates()
-    df_cell_no_sic[period] = df_cell_no_sic[period].astype(int)
 
     df = read_csv_wrapper(
         filepath=population_counts_path,
@@ -167,7 +201,7 @@ def format_population_counts_mbs(
     df_curr = df[df[period] == current_period]
 
     df_prev = df_prev.drop(columns=[period])
-    df_curr = pd.merge(df_curr, df_cell_no_sic, on=[strata, period], how="left")
+    # df_curr = pd.merge(df_curr, df_cell_no_sic, on=[sic, period], how="left")
     df_curr = df_curr[
         [period, strata, sic]
         + [col for col in df_curr.columns if col not in [period, strata, sic]]
@@ -192,7 +226,7 @@ def format_population_counts_mbs(
         }
     )
 
-    combined = pd.merge(curr, prev, on=strata, how="outer").fillna(0)
+    combined = pd.merge(curr, prev, on=[strata, sic], how="outer").fillna(0)
 
     combined["population_turnover_difference"] = (
         combined["population_turnover_sum_current"]

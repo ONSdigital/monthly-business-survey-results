@@ -18,6 +18,7 @@ def input_dataframe():
             "reference": [1, 1, 2, 2, 3],
             "period": [1, 1, 1, 1, 1],
             "strata": ["A", "A", "B", "B", "C"],
+            "sic": [10, 11, 20, 21, 30],
             "is_sampled": [True, False, True, False, True],
         }
     )
@@ -67,6 +68,7 @@ class TestTurnoverPopulationCounts:
             "platform": "network",
             "bucket": "",
             "run_id": "1",
+            "sic": "sic",
         }
         # producing output
         output = create_population_count_output(input_dataframe, **config)
@@ -96,8 +98,6 @@ class TestTurnoverPopulationCounts:
         output_df, filename = format_population_counts_mbs(
             additional_outputs_df, **config
         )
-        print(output_df.columns)
-
         expected = pd.read_csv(
             "tests/data/estimation/population_counts"
             + "/population_counts_formatted_output.csv"
