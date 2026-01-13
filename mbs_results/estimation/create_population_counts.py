@@ -91,6 +91,8 @@ def create_population_count_output(
         Returns none if save_output is True
     """
 
+    # This produced the population counts grouped by strata for both mbs and cons
+    # estimation pipelines. The saved output is also used for Regenesees
     population = calculate_turnover_sum_count(
         df, period, strata, "population", **config
     )
@@ -112,6 +114,8 @@ def create_population_count_output(
         index=False,
     )
 
+    # This is calculating the population counts grouped by sic for mbs pipeline.
+    # Output will also be produced for the cons pipeline but not used.
     population_sic = calculate_turnover_sum_count(
         df, period, strata, "population", additional_column_groupby=sic, **config
     )
@@ -155,10 +159,13 @@ def format_population_counts_mbs(
 ):
     """
     produces the formatted population counts for mbs pipeline.
-    Loads the full
+    Loads the population counts grouped by sic and strata from output_path,
+    compares the current and previous period and produces the differences.
 
     Parameters
     ----------
+    additional_outputs_df : pd.DataFrame
+        DataFrame containing additional outputs to be formatted
     period : str
         period column name
     strata : str
@@ -173,6 +180,8 @@ def format_population_counts_mbs(
         bucket name when loading from "s3"
     current_period : str
         current period in "YYYYMM" format
+    sic : str
+        sic column name
 
     Returns
     -------
@@ -180,7 +189,6 @@ def format_population_counts_mbs(
         returns the formatted dataframe and the filename including current and previous
         period in filename
     """
-    # Want this to pickup popcounts grouped by sic not cell_no
     population_counts_filename = get_versioned_filename(
         config["population_counts_prefix"] + "_sic", run_id
     )
@@ -192,7 +200,6 @@ def format_population_counts_mbs(
         bucket_name=bucket,
     )
 
-    # Better way to do this?
     current_period = pd.to_datetime(current_period, format="%Y%m")
     previous_period = int((current_period - pd.DateOffset(months=1)).strftime("%Y%m"))
     current_period = int(current_period.strftime("%Y%m"))
@@ -201,7 +208,6 @@ def format_population_counts_mbs(
     df_curr = df[df[period] == current_period]
 
     df_prev = df_prev.drop(columns=[period])
-    # df_curr = pd.merge(df_curr, df_cell_no_sic, on=[sic, period], how="left")
     df_curr = df_curr[
         [period, strata, sic]
         + [col for col in df_curr.columns if col not in [period, strata, sic]]
