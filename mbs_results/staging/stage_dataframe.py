@@ -318,6 +318,7 @@ def start_of_period_staging(
         The staged imputation output DataFrame with missing questions created and
         merged with final selection.
     """
+    imputation_output = imputation_output.copy()
 
     # Derive period_selected as next month of current period
     input_dataframe = imputation_output.copy()
@@ -503,6 +504,8 @@ def replace_derived_with_previous_period(
         original dataframe with some derived values updated and replaced with previous
         periods value. Logger will output references which have been updated
     """
+    df = df.copy()
+
     selected_columns = [
         config["reference"],
         config["period"],
@@ -538,6 +541,12 @@ def replace_derived_with_previous_period(
     combined_dataframes.loc[condition, config["target"]] = combined_dataframes.loc[
         condition, f"prev_{config['target']}"
     ]
+
+    # Setting this to str since loc in 550 sets values to a string
+    combined_dataframes["imputed_and_derived_flag"] = combined_dataframes[
+        "imputed_and_derived_flag"
+    ].astype(str)
+
     # Updating imputation flag to be unique to this process
     combined_dataframes.loc[condition, "imputed_and_derived_flag"] = (
         "manual copy previous period value"
@@ -631,6 +640,9 @@ def new_questions_construction_link(df, config):
 
     df = convert_cell_number(df, cell_no)
     df = create_imputation_class(df, cell_no, current_period_imp_class)
+
+    # Setting same dtypes as prev_period_imp_class to deprecate warning
+    df[current_period_imp_class] = df[current_period_imp_class].astype(float)
 
     df[prev_period_imp_class] = df[prev_period_imp_class].combine_first(
         df[current_period_imp_class]
