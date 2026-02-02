@@ -104,11 +104,9 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
     # Run apply_imputation_link function to get construction links
     back_data_cons_matches = (
         back_data.groupby(config["question_no"])
-        .apply(lambda df: flag_construction_matches(df, **config), include_groups=False)
-        .reset_index(level=config["question_no"])
+        .apply(lambda df: flag_construction_matches(df, **config))
+        .reset_index(drop=True)
     )
-    # Remove deprecation warning in groupby
-    # Source - https://stackoverflow.com/questions/77969964/
 
     back_data_cons_matches = (
         back_data_cons_matches.groupby(config["question_no"])
@@ -118,10 +116,9 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
                 flag="flag_construction_matches",
                 period=config["period"],
                 strata="imputation_class",
-            ),
-            include_groups=False,
+            )
         )
-        .reset_index(level=config["question_no"])
+        .reset_index(drop=True)
     )
 
     # group by question number then apply this function
@@ -136,10 +133,9 @@ def imputation_processing(back_data: pd.DataFrame, config: dict) -> pd.DataFrame
                 strata="imputation_class",
                 target=config["target"],
                 period=config["period"],
-            ),
-            include_groups=False,
+            )
         )
-        .reset_index(level=config["question_no"])
+        .reset_index(drop=True)
     )
 
     # Changing period back into int. Read_colon_sep_file should be updated to enforce
