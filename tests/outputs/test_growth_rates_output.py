@@ -31,8 +31,6 @@ class TestGrowthRatesOutput:
             "filter_out_questions": [11, 12, 146],
         }
 
-        expected_output = output_df
-
         actual_output = get_growth_rates_output(input_df, **config)
 
-        assert_frame_equal(actual_output, expected_output)
+        assert_frame_equal(actual_output, output_df)
