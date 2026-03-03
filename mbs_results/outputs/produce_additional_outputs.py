@@ -88,16 +88,31 @@ def get_additional_outputs_df(
         "status",
         "winsorised_value",
         "runame1",
+        "converted_frotover",
+        "ni_gb_cell_number",
+        "backdata_adjustedresponse",
+        "backdata_flags_adjustedresponse",
+        "adjustedresponse_man",
+        "pre_constrained_adjustedresponse",
+        "calibration_group",
+        "l_value",
+        "is_sampled",
+        "is_census",
+        "nw_ag_flag",
+        "predicted_unit_value",
+        "ratio_estimation_treshold",
+        "post_winsorised",
     ]
-    if not config["filter"]:
-        count_variables = [f"b_match_{target}_count", f"f_match_{target}_count"]
-    else:
-        count_variables = [
-            f"b_match_filtered_{target}_count",
-            f"f_match_filtered_{target}_count",
-        ]
-
-    final_cols += count_variables
+    
+    possible_match_cols = [
+        f"f_match_{target}",
+        f"b_match_{target}",
+        f"f_match_filtered_{target}",
+        f"b_match_filtered_{target}"],
+    
+    match_columns_to_add = [c for c in possible_match_cols if c in df.columns]
+    
+    final_cols += match_columns_to_add
 
     # include live_adjustedresponses for frozen runs
     if config["state"] == "frozen":
