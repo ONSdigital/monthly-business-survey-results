@@ -1,6 +1,6 @@
 # MBS CLI Quick Reference
 
-This repository for MBS (Monthly Business Suvery) Results provides console entry point (installed as scripts) to run pipeline
+This repository for MBS (Monthly Business Survey) Results provides console entry point (installed as scripts) to run pipeline
 task and to copy runnable project files into a working folder.
 
 ## Install
@@ -13,8 +13,8 @@ task and to copy runnable project files into a working folder.
 ## Available Console Script
 - `setup_mbs`
     - **Purpose:** Copy runnable files into your current working directory so you can run the pipeline without editing package sources.
-    - **What is Copies:** `main.py`, `configs/config_user.json`, and the package `README.md` (if present).
-    - **When to use:** First time you want local copies of the scripts/config tp adapt or run the pipeline.
+    - **What is Copied:** `main.py`, `configs/config_user.json`, and the package `README.md` (if present).
+    - **When to use:** First time you want local copies of the scripts/config to adapt or run the pipeline.
     - **Example:**
         ```bash
         setup_mbs
