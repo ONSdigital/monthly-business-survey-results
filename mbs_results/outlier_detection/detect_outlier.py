@@ -51,7 +51,28 @@ def join_l_values(df, l_values_path, classification_values_path, config):
 
 def detect_outlier(df, config):
     """
-    # Todo: docstrings
+    Detect and winsorise outliers in survey data.
+
+    Performs outlier detection and winsorisation by joining L-values and
+    classification data, applying winsorisation per question, replacing manual
+    outlier weights, and enforcing export weight constraints.
+
+    Args:
+        df: DataFrame containing survey response data
+        config: Configuration dictionary with keys:
+            - l_values_path: Path to L-values CSV
+            - classification_values_path: Path to classification values CSV
+            - question_no: Question number column name
+            - sic: SIC code column name
+            - period: Survey period identifier
+            - auxiliary: Auxiliary variable name
+            - census: Census variable name
+            - target: Target variable name
+            - reference: Reference data path
+            - form_id_spp: Form ID SPP identifier
+
+    Returns:
+        DataFrame with outliers winsorised and weights updated
     """
     pre_win = join_l_values(
         df, config["l_values_path"], config["classification_values_path"], config

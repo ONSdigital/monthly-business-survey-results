@@ -16,15 +16,7 @@ To start contributing, open your terminal, and install the required Python packa
 and [pre-commit hooks][pre-commit] using:
 
 ```shell
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
-pre-commit install
-```
-
-or the `make` command:
-
-```shell
-make requirements
+pip install .[dev]
 ```
 
 The pre-commit hooks are a security feature to ensure, for example, no secrets[^1],
@@ -41,7 +33,7 @@ Code written for this project should follow [PEP 8 coding conventions][pep8], [p
 
 ### Git and GitHub
 
-We use Git to version control the source code and out source code is stored on
+We use Git to version control the source code and our source code is stored on
 GitHub.
 
 We follow the [GitHub flow][github-flow] workflow. This means that we create
@@ -105,12 +97,6 @@ your terminal:
 ```shell
 coverage run -m pytest
 coverage html
-```
-
-or use the `make` command:
-
-```shell
-make coverage_html
 ```
 
 The HTML report can be accessed at `htmlcov/index.html`.
